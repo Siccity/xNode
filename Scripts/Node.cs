@@ -2,18 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace UNEC {
-    /// <summary> Base class for all nodes </summary>
-    public abstract class Node : MonoBehaviour {
-
-        // Use this for initialization
-        void Start() {
-
-        }
-
-        // Update is called once per frame
-        void Update() {
-
-        }
-    }
+/// <summary> Base class for all nodes </summary>
+public abstract class Node {
+    public Rect position = new Rect(0,0,200,200);
 }

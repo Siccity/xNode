@@ -10,10 +10,10 @@ namespace UNEC {
         private static Texture2D _crossTexture;
 
 
-        private static Color backgroundColor = new Color(0.15f, 0.15f, 0.15f);
-        private static Color veinColor = new Color(0.2f, 0.2f, 0.2f);
-        private static Color arteryColor = new Color(0.28f, 0.28f, 0.28f);
-        private static Color crossColor = new Color(0.4f, 0.4f, 0.4f);
+        private static Color backgroundColor = new Color(0.18f, 0.18f, 0.18f);
+        private static Color veinColor = new Color(0.25f, 0.25f, 0.25f);
+        private static Color arteryColor = new Color(0.34f, 0.34f, 0.34f);
+        private static Color crossColor = new Color(0.45f, 0.45f, 0.45f);
 
         public static Texture2D GenerateGridTexture() {
             Texture2D tex = new Texture2D(64,64);

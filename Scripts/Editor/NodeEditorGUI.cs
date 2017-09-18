@@ -8,6 +8,10 @@ namespace UNEC {
     /// <summary> Contains GUI methods </summary>
     public static class NodeEditorGUI {
 
+        public static void DrawConnection(Vector2 from, Vector2 to, Color col) {
+            Handles.DrawBezier(from, to, from, to, col, new Texture2D(2, 2), 2);
+        }
+
         public static void BeginZoomed(Rect rect, float zoom) {
             GUI.EndClip();
             

@@ -6,10 +6,14 @@ using UNEC;
 
 public class NodeEditorWindow : EditorWindow {
 
+    private Dictionary<NodePort, Vector2> portConnectionPoints = new Dictionary<NodePort, Vector2>();
+
     public NodeGraph graph { get { return _graph != null ? _graph : _graph = new NodeGraph(); } }
     public NodeGraph _graph;
     public Node hoveredNode;
     public Node activeNode { get; private set; }
+    public NodePort hoveredPort;
+    public NodeConnection? tempConnection;
 
     public Vector2 panOffset { get { return _panOffset; } set { _panOffset = value; Repaint(); } }
     private Vector2 _panOffset;
@@ -28,36 +32,92 @@ public class NodeEditorWindow : EditorWindow {
         Matrix4x4 m = GUI.matrix;
         NodeEditorAction.Controls(this);
 
-
         NodeEditorGUI.DrawGrid(position, zoom, panOffset);
         DrawNodes();
+        DrawTempConnection();
         NodeEditorGUI.DrawToolbar(this);
 
         GUI.matrix = m;
     }
 
+    /// <summary> Draw a connection as we are dragging it </summary>
+    private void DrawTempConnection() {
+        if (tempConnection.HasValue) {
+            Node inputNode = graph.GetNode(tempConnection.Value.inputNodeId);
+            if (inputNode != null) {
+                NodePort outputPort =  inputNode.GetOutput(tempConnection.Value.outputPortId);
+                Vector2 startPoint = GridToWindowPosition( portConnectionPoints[outputPort]);
+                Vector2 endPoint = Event.current.mousePosition;
+                Vector2 startTangent = startPoint;
+                startTangent.x = Mathf.Lerp(startPoint.x,endPoint.x,0.7f);
+                Vector2 endTangent = endPoint;
+                endTangent.x = Mathf.Lerp(endPoint.x, startPoint.x, 0.7f);
+                Handles.DrawBezier(startPoint, endPoint, startTangent, endTangent, Color.gray, null, 4);
+                Handles.DrawBezier(startPoint, endPoint, startTangent, endTangent, Color.white, null, 2);
+                Repaint();
+            }
+        }
+    }
     private void DrawNodes() {
+        portConnectionPoints.Clear();
+        Event e = Event.current;
+
         BeginWindows();
         NodeEditorGUI.BeginZoomed(position, zoom);
-        Event e = Event.current;
+        if (e.type == EventType.repaint) {
+            hoveredPort = null;
+        }
         hoveredNode = null;
         foreach (KeyValuePair<int, Node> kvp in graph.nodes) {
             Node node = kvp.Value;
             int id = kvp.Key;
 
             //Get node position
-            Vector2 windowPos = GridToWindowPositionNoClipped(node.position.position);
+            Vector2 nodePos = GridToWindowPositionNoClipped(node.position.position);
 
-            Rect windowRect = new Rect(windowPos, new Vector2(200, 200));
+            Rect windowRect = new Rect(nodePos, new Vector2(200, 200));
             if (windowRect.Contains(e.mousePosition)) hoveredNode = node;
 
             GUIStyle style = (node == activeNode) ? (GUIStyle)"flow node 0 on" : (GUIStyle)"flow node 0";
-            GUI.Box(windowRect, node.ToString(), style);
+            GUILayout.BeginArea(windowRect, node.ToString(), style);
+            GUILayout.BeginHorizontal();
+            
+            //Inputs
+            GUILayout.BeginVertical();
+            for (int i = 0; i < node.InputCount; i++) {
+                NodePort input = node.GetInput(i);
+                Rect r = GUILayoutUtility.GetRect(new GUIContent(input.name), NodeEditorResources.styles.GetInputStyle(input.type));
+                GUI.Label(r, input.name, NodeEditorResources.styles.GetInputStyle(input.type));
+                if (e.type == EventType.repaint) {
+                    if (r.Contains(e.mousePosition)) hoveredPort = input;
+                }
+                portConnectionPoints.Add(input, new Vector2(r.xMin, r.yMin + (r.height * 0.5f)) + node.position.position);
+            }
+            GUILayout.EndVertical();
 
+            //Outputs
+            GUILayout.BeginVertical();
+            for (int i = 0; i < node.OutputCount; i++) {
+                NodePort output = node.GetOutput(i);
+                Rect r = GUILayoutUtility.GetRect(new GUIContent(output.name), NodeEditorResources.styles.GetOutputStyle(output.type));
+                GUI.Label(r, output.name, NodeEditorResources.styles.GetOutputStyle(output.type));
+                if (e.type == EventType.repaint) {
+                    if (r.Contains(e.mousePosition)) hoveredPort = output;
+                }
+                portConnectionPoints.Add(output, new Vector2(r.xMax, r.yMin + (r.height * 0.5f)) + node.position.position);
+            }
+            GUILayout.EndVertical();
 
-            if (windowRect.position != windowPos) {
-                windowPos = windowRect.position;
-                node.position.position = WindowToGridPosition(windowPos);
+            GUILayout.EndHorizontal();
+
+            GUILayout.Label("More stuff");
+            EditorGUILayout.Toggle("aDF",false);
+
+            GUILayout.EndArea();
+
+            if (windowRect.position != nodePos) {
+                nodePos = windowRect.position;
+                node.position.position = WindowToGridPosition(nodePos);
             //Vector2 newPos = windowRect =
             }
 
@@ -78,7 +138,8 @@ public class NodeEditorWindow : EditorWindow {
     }
 
     public Vector2 GridToWindowPosition(Vector2 gridPosition) {
-        return (position.size * 0.5f) + (panOffset / zoom) + gridPosition;
+        //Vector2 center = position.size * 0.5f;
+        return (position.size * 0.5f) + (panOffset / zoom) + (gridPosition/zoom);
     }
 
     public Vector2 GridToWindowPositionNoClipped(Vector2 gridPosition) {
@@ -91,4 +152,5 @@ public class NodeEditorWindow : EditorWindow {
     public void SelectNode(Node node) {
         activeNode = node;
     }
+
 }

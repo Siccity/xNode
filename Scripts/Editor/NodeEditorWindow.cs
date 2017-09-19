@@ -7,13 +7,17 @@ using UNEC;
 public class NodeEditorWindow : EditorWindow {
 
     private Dictionary<NodePort, Vector2> portConnectionPoints = new Dictionary<NodePort, Vector2>();
-
+    public bool IsDraggingConnection { get { return draggedConnection.enabled; } }
+    public bool IsHoveringPort { get { return hoveredPort != null; } }
+    public bool IsHoveringNode { get { return hoveredNode != null; } }
+    public bool HasSelectedNode { get { return selectedNode != null; } }
     public NodeGraph graph { get { return _graph != null ? _graph : _graph = new NodeGraph(); } }
     public NodeGraph _graph;
     public Node hoveredNode;
-    public Node activeNode { get; private set; }
+    /// <summary> Currently selected node </summary>
+    public Node selectedNode { get; private set; }
     public NodePort hoveredPort;
-    public NodeConnection? tempConnection;
+    public NodeConnection draggedConnection;
 
     public Vector2 panOffset { get { return _panOffset; } set { _panOffset = value; Repaint(); } }
     private Vector2 _panOffset;
@@ -34,20 +38,26 @@ public class NodeEditorWindow : EditorWindow {
 
         NodeEditorGUI.DrawGrid(position, zoom, panOffset);
         DrawNodes();
-        DrawTempConnection();
+        DrawDraggedConnection();
         NodeEditorGUI.DrawToolbar(this);
 
         GUI.matrix = m;
     }
 
     /// <summary> Draw a connection as we are dragging it </summary>
-    private void DrawTempConnection() {
-        if (tempConnection.HasValue) {
-            Node inputNode = graph.GetNode(tempConnection.Value.inputNodeId);
+    private void DrawDraggedConnection() {
+        if (IsDraggingConnection) {
+            Node inputNode = graph.GetNode(draggedConnection.inputNodeId);
+            Node outputNode = graph.GetNode(draggedConnection.outputNodeId);
             if (inputNode != null) {
-                NodePort outputPort =  inputNode.GetOutput(tempConnection.Value.outputPortId);
+                NodePort outputPort =  inputNode.GetOutput(draggedConnection.outputPortId);
                 Vector2 startPoint = GridToWindowPosition( portConnectionPoints[outputPort]);
                 Vector2 endPoint = Event.current.mousePosition;
+                if (outputNode != null) {
+                    NodePort inputPort = outputNode.GetInput(draggedConnection.inputPortId);
+                    if (inputPort != null) endPoint = GridToWindowPosition(portConnectionPoints[inputPort]);
+                }
+
                 Vector2 startTangent = startPoint;
                 startTangent.x = Mathf.Lerp(startPoint.x,endPoint.x,0.7f);
                 Vector2 endTangent = endPoint;
@@ -78,7 +88,7 @@ public class NodeEditorWindow : EditorWindow {
             Rect windowRect = new Rect(nodePos, new Vector2(200, 200));
             if (windowRect.Contains(e.mousePosition)) hoveredNode = node;
 
-            GUIStyle style = (node == activeNode) ? (GUIStyle)"flow node 0 on" : (GUIStyle)"flow node 0";
+            GUIStyle style = (node == selectedNode) ? (GUIStyle)"flow node 0 on" : (GUIStyle)"flow node 0";
             GUILayout.BeginArea(windowRect, node.ToString(), style);
             GUILayout.BeginHorizontal();
             
@@ -150,7 +160,7 @@ public class NodeEditorWindow : EditorWindow {
     }
 
     public void SelectNode(Node node) {
-        activeNode = node;
+        selectedNode = node;
     }
 
 }

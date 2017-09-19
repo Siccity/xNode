@@ -20,25 +20,34 @@ public static class NodeEditorAction {
                 break;
             case EventType.MouseDrag:
                 if (e.button == 0) {
-                    if (window.activeNode != null) {
-                        if (window.hoveredPort != null || window.tempConnection != null) {
-                            if (window.tempConnection == null) {
-                                if (window.hoveredPort.direction == NodePort.IO.Output) {
-                                    dragging = true;
-                                    int inputNodeId = window.graph.GetNodeId(window.activeNode);
-                                    int outputPortId = window.activeNode.GetOutputPortId(window.hoveredPort);
-                                    window.tempConnection = new NodeConnection(inputNodeId, outputPortId, -1,-1);
-                                }
-                                else {
-                                    Debug.Log("input");
-                                    /*int outputNodeId = window.graph.GetNodeId(window.activeNode);
-                                    int outputPortId = window.activeNode.GetInputPortId(window.hoveredPort);
-                                    window.tempConnection = new NodeConnection(-1,-1,outputNodeId,outputPortId);*/
-                                }
+                    if (window.HasSelectedNode) {
+                        //If we are currently dragging a connection, check if we are hovering any matching port to connect to
+                        if (window.IsDraggingConnection) {
+                            if (window.IsHoveringPort && window.IsHoveringNode && window.hoveredPort.IsInput) {
+                                window.draggedConnection.outputNodeId = window.graph.GetNodeId(window.hoveredNode);
+                                window.draggedConnection.inputPortId = window.hoveredNode.GetInputPortId(window.hoveredPort);
+                            } else {
+                                window.draggedConnection.outputNodeId = -1;
+                                window.draggedConnection.inputPortId = -1;
+                            }
+                        }
+                        //If we just started dragging from a port, grab connection
+                        else if (window.IsHoveringPort) {
+                            if (window.hoveredPort.direction == NodePort.IO.Output) {
+                                dragging = true;
+                                int inputNodeId = window.graph.GetNodeId(window.selectedNode);
+                                int outputPortId = window.selectedNode.GetOutputPortId(window.hoveredPort);
+                                window.draggedConnection = new NodeConnection(inputNodeId, outputPortId, -1, -1);
+                            }
+                            else {
+                                Debug.Log("input");
+                                /*int outputNodeId = window.graph.GetNodeId(window.activeNode);
+                                int outputPortId = window.activeNode.GetInputPortId(window.hoveredPort);
+                                window.tempConnection = new NodeConnection(-1,-1,outputNodeId,outputPortId);*/
                             }
                         }
                         else {
-                            window.activeNode.position.position = window.WindowToGridPosition(e.mousePosition) + dragOffset;
+                            window.selectedNode.position.position = window.WindowToGridPosition(e.mousePosition) + dragOffset;
                             window.Repaint();
                         }
                     }
@@ -61,7 +70,7 @@ public static class NodeEditorAction {
                 window.Repaint();
                 break;
             case EventType.MouseUp:
-                window.tempConnection = null;
+                window.draggedConnection.enabled = false;
                 if (dragging) return;
 
                 if (e.button == 1) {

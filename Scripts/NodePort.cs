@@ -17,6 +17,10 @@ public class NodePort {
             return IO.None;
         }
     }
+
+    public bool IsInput { get { return direction == IO.Input; } }
+    public bool IsOutput { get { return direction == IO.Output; } }
+
     public Node node { get; private set; }
     public string name { get { return _name; } set { _name = value; } }
     [SerializeField]

@@ -74,27 +74,6 @@ public partial class NodeEditorWindow {
         GUI.DrawTextureWithTexCoords(rect, crossTex, new Rect(tileOffset + new Vector2(0.5f,0.5f), tileAmount));
     }
 
-    public void DrawToolbar() {
-        EditorGUILayout.BeginHorizontal("Toolbar");
-
-        if (DropdownButton("File", 50)) FileContextMenu();
-        if (DropdownButton("Edit", 50)) EditContextMenu();
-        if (DropdownButton("View", 50)) { }
-        if (DropdownButton("Settings", 70)) { }
-        if (DropdownButton("Tools", 50)) { }
-        if (IsHoveringNode) {
-            GUILayout.Space(20);
-            string hoverInfo = hoveredNode.GetType().ToString();
-            if (IsHoveringPort) hoverInfo += " > "+hoveredPort.name;
-            GUILayout.Label(hoverInfo);
-        }
-
-        // Make the toolbar extend all throughout the window extension.
-        GUILayout.FlexibleSpace();
-
-        EditorGUILayout.EndHorizontal();
-    }
-
     public static bool DropdownButton(string name, float width) {
         return GUILayout.Button(name, EditorStyles.toolbarDropDown, GUILayout.Width(width));
     }
@@ -118,25 +97,6 @@ public partial class NodeEditorWindow {
         contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
     }
 
-    public static void FileContextMenu() {
-        GenericMenu contextMenu = new GenericMenu();
-        contextMenu.AddItem(new GUIContent("Create New"), false, null);
-        contextMenu.AddItem(new GUIContent("Load"), false, null);
-
-        contextMenu.AddSeparator("");
-        contextMenu.AddItem(new GUIContent("Save"), false, null);
-        contextMenu.AddItem(new GUIContent("Save As"), false, null);
-
-        contextMenu.DropDown(new Rect(5f, 17f, 0f, 0f));
-    }
-
-    public void EditContextMenu() {
-        GenericMenu contextMenu = new GenericMenu();
-        contextMenu.AddItem(new GUIContent("Clear"), false, () => graph.Clear());
-
-        contextMenu.DropDown(new Rect(5f, 17f, 0f, 0f));
-    }
-
     public  void DrawConnection(Vector2 startPoint, Vector2 endPoint) {
         startPoint = GridToWindowPosition(startPoint);
         endPoint = GridToWindowPosition(endPoint);
@@ -151,5 +111,75 @@ public partial class NodeEditorWindow {
 
         Handles.DrawBezier(startPoint, endPoint, startTangent, endTangent, Color.gray, null, 4);
         Handles.DrawBezier(startPoint, endPoint, startTangent, endTangent, Color.white, null, 2);
+    }
+
+    public void DrawConnections() {
+        foreach (Node node in graph.nodes) {
+            for (int i = 0; i < node.OutputCount; i++) {
+                NodePort output = node.GetOutput(i);
+                Vector2 from = _portConnectionPoints[output];
+                for (int k = 0; k < output.ConnectionCount; k++) {
+                    NodePort input = output.GetConnection(k);
+                    Vector2 to = _portConnectionPoints[input];
+                    DrawConnection(from, to);
+                }
+            }
+        }
+    }
+
+    private void DrawNodes() {
+        portConnectionPoints.Clear();
+        Event e = Event.current;
+
+        BeginWindows();
+        BeginZoomed(position, zoom);
+        if (e.type == EventType.Repaint) portRects.Clear();
+        foreach (Node node in graph.nodes) {
+            //Get node position
+            Vector2 nodePos = GridToWindowPositionNoClipped(node.position.position);
+
+            Rect windowRect = new Rect(nodePos, node.position.size);
+
+            GUIStyle style = (node == selectedNode) ? (GUIStyle)"flow node 0 on" : (GUIStyle)"flow node 0";
+            GUILayout.BeginArea(windowRect, node.ToString(), style);
+            GUILayout.BeginHorizontal();
+
+            //Inputs
+            GUILayout.BeginVertical();
+            for (int i = 0; i < node.InputCount; i++) {
+                NodePort input = node.GetInput(i);
+                Rect r = GUILayoutUtility.GetRect(new GUIContent(input.name), styles.GetInputStyle(input.type));
+                GUI.Label(r, input.name, styles.GetInputStyle(input.type));
+                if (e.type == EventType.Repaint) portRects.Add(input, r);
+                portConnectionPoints.Add(input, new Vector2(r.xMin, r.yMin + (r.height * 0.5f)) + node.position.position);
+            }
+            GUILayout.EndVertical();
+
+            //Outputs
+            GUILayout.BeginVertical();
+            for (int i = 0; i < node.OutputCount; i++) {
+                NodePort output = node.GetOutput(i);
+                Rect r = GUILayoutUtility.GetRect(new GUIContent(output.name), styles.GetOutputStyle(output.type));
+                GUI.Label(r, output.name, styles.GetOutputStyle(output.type));
+                if (e.type == EventType.Repaint) portRects.Add(output, r);
+                portConnectionPoints.Add(output, new Vector2(r.xMax, r.yMin + (r.height * 0.5f)) + node.position.position);
+            }
+            GUILayout.EndVertical();
+
+            GUILayout.EndHorizontal();
+
+            // GUI
+
+            GUILayout.EndArea();
+
+            if (windowRect.position != nodePos) {
+                nodePos = windowRect.position;
+                node.position.position = WindowToGridPosition(nodePos);
+                //Vector2 newPos = windowRect =
+            }
+
+        }
+        EndZoomed(position, zoom);
+        EndWindows();
     }
 }

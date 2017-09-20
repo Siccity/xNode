@@ -4,7 +4,12 @@ using UnityEngine;
 using System;
 
 /// <summary> Base class for all nodes </summary>
+[Serializable]
 public abstract class Node {
+
+    public string NodeType { get { return nodeType; } }
+    [SerializeField] private string nodeType;
+
     public Rect position = new Rect(0,0,200,200);
     protected NodePort[] inputs = new NodePort[0];
     protected NodePort[] outputs = new NodePort[0];
@@ -13,6 +18,7 @@ public abstract class Node {
     public int OutputCount { get { return outputs.Length; } }
 
     protected Node() {
+        nodeType = GetType().ToString();
         Init();
     }
 

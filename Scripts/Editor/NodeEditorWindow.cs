@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System.IO;
 
 [InitializeOnLoad]
-public partial class  NodeEditorWindow : EditorWindow {
+public partial class NodeEditorWindow : EditorWindow {
 
+    string saved;
+    
     public Dictionary<NodePort, Vector2> portConnectionPoints { get { return _portConnectionPoints; } }
     private Dictionary<NodePort, Vector2> _portConnectionPoints = new Dictionary<NodePort, Vector2>();
     private Dictionary<NodePort, Rect> portRects = new Dictionary<NodePort, Rect>();
@@ -26,78 +29,23 @@ public partial class  NodeEditorWindow : EditorWindow {
         w.Show();
     }
 
-    public void DrawConnections() {
-        foreach(Node node in graph.nodes) {
-            for (int i = 0; i < node.OutputCount; i++) {
-                NodePort output = node.GetOutput(i);
-                Vector2 from = _portConnectionPoints[output];
-                for (int k = 0; k < output.ConnectionCount; k++) {
-                    NodePort input = output.GetConnection(k);
-                    Vector2 to = _portConnectionPoints[input];
-                    DrawConnection(from, to);
-                }
-            }
-        }
+    public void Save() {
+        saved = graph.Serialize();
     }
 
-    private void DrawNodes() {
-        portConnectionPoints.Clear();
-        Event e = Event.current;
-
-        BeginWindows();
-        BeginZoomed(position, zoom);
-        if (e.type == EventType.Repaint) portRects.Clear();
-        foreach (Node node in graph.nodes) {
-            //Get node position
-            Vector2 nodePos = GridToWindowPositionNoClipped(node.position.position);
-
-            Rect windowRect = new Rect(nodePos, node.position.size);
-
-            GUIStyle style = (node == selectedNode) ? (GUIStyle)"flow node 0 on" : (GUIStyle)"flow node 0";
-            GUILayout.BeginArea(windowRect, node.ToString(), style);
-            GUILayout.BeginHorizontal();
-            
-            //Inputs
-            GUILayout.BeginVertical();
-            for (int i = 0; i < node.InputCount; i++) {
-                NodePort input = node.GetInput(i);
-                Rect r = GUILayoutUtility.GetRect(new GUIContent(input.name), styles.GetInputStyle(input.type));
-                GUI.Label(r, input.name, styles.GetInputStyle(input.type));
-                if (e.type == EventType.Repaint) portRects.Add(input, r);
-                portConnectionPoints.Add(input, new Vector2(r.xMin, r.yMin + (r.height * 0.5f)) + node.position.position);
-            }
-            GUILayout.EndVertical();
-
-            //Outputs
-            GUILayout.BeginVertical();
-            for (int i = 0; i < node.OutputCount; i++) {
-                NodePort output = node.GetOutput(i);
-                Rect r = GUILayoutUtility.GetRect(new GUIContent(output.name), styles.GetOutputStyle(output.type));
-                GUI.Label(r, output.name, styles.GetOutputStyle(output.type));
-                if (e.type == EventType.Repaint) portRects.Add(output, r);
-                portConnectionPoints.Add(output, new Vector2(r.xMax, r.yMin + (r.height * 0.5f)) + node.position.position);
-            }
-            GUILayout.EndVertical();
-
-            GUILayout.EndHorizontal();
-
-            // GUI
-
-            GUILayout.EndArea();
-
-            if (windowRect.position != nodePos) {
-                nodePos = windowRect.position;
-                node.position.position = WindowToGridPosition(nodePos);
-            //Vector2 newPos = windowRect =
-            }
-
-        }
-        EndZoomed(position, zoom);
-        EndWindows();
+    public void Load() {
+        _graph = NodeGraph.Deserialize(saved);
     }
 
     private void DraggableWindow(int windowID) {
         GUI.DragWindow();
+    }
+
+    public byte[] ProtoSerialize<T>(T value) {
+        using (var ms = new MemoryStream()) {
+            ProtoBuf.Serializer.Serialize(ms, value);
+            return ms.ToArray();
+        }
     }
 
     public Vector2 WindowToGridPosition(Vector2 windowPosition) {

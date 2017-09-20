@@ -1,6 +1,9 @@
-﻿public class BaseNode : Node {
+﻿using UnityEngine;
 
-    public string asdf;
+[System.Serializable]
+public class BaseNode : Node {
+
+    public string thisIsBaseNode = "ASDF";
 
     protected override void Init() {
         inputs = new NodePort[2];

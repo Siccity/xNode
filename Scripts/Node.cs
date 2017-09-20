@@ -41,11 +41,11 @@ public abstract class Node {
         return outputs[portId];
     }
 
-    public NodePort CreateNodeInput(string name, Type type, bool enabled = true) {
-        return new NodePort(name, type, this, enabled, NodePort.IO.Input);
+    public NodePort CreateNodeInput(string name, Type type) {
+        return new NodePort(name, type, this, NodePort.IO.Input);
     }
-    public NodePort CreateNodeOutput(string name, Type type, bool enabled = true) {
-        return new NodePort(name, type, this, enabled, NodePort.IO.Output);
+    public NodePort CreateNodeOutput(string name, Type type) {
+        return new NodePort(name, type, this, NodePort.IO.Output);
     }
 
     public void ClearConnections() {

@@ -26,20 +26,6 @@ public partial class  NodeEditorWindow : EditorWindow {
         w.Show();
     }
 
-    private void OnGUI() {
-        Event e = Event.current;
-        Matrix4x4 m = GUI.matrix;
-        Controls();
-
-        DrawGrid(position, zoom, panOffset);
-        DrawNodes();
-        DrawConnections();
-        DrawDraggedConnection();
-        if (e.type == EventType.Repaint || e.type == EventType.Layout) DrawToolbar();
-
-        GUI.matrix = m;
-    }
-
     public void DrawConnections() {
         foreach(Node node in graph.nodes) {
             for (int i = 0; i < node.OutputCount; i++) {
@@ -95,8 +81,7 @@ public partial class  NodeEditorWindow : EditorWindow {
 
             GUILayout.EndHorizontal();
 
-            GUILayout.Label("More stuff");
-            EditorGUILayout.Toggle("aDF",false);
+            // GUI
 
             GUILayout.EndArea();
 
@@ -113,9 +98,6 @@ public partial class  NodeEditorWindow : EditorWindow {
 
     private void DraggableWindow(int windowID) {
         GUI.DragWindow();
-
-        if (GUILayout.Button("ASDF")) Debug.Log("ASDF");
-        if (GUI.Button(new Rect(20,20,200,200),"ASDF")) Debug.Log("ASDF");
     }
 
     public Vector2 WindowToGridPosition(Vector2 windowPosition) {

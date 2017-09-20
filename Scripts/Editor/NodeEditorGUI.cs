@@ -7,6 +7,22 @@ using System;
 /// <summary> Contains GUI methods </summary>
 public partial class NodeEditorWindow {
 
+    private void OnGUI() {
+        Event e = Event.current;
+        Matrix4x4 m = GUI.matrix;
+        Controls();
+
+        if (e.type != EventType.MouseMove && e.type != EventType.MouseDrag) {
+            DrawGrid(position, zoom, panOffset);
+            DrawNodes();
+            DrawConnections();
+            DrawDraggedConnection();
+            DrawToolbar();
+        }
+
+        GUI.matrix = m;
+    }
+
     public static void DrawConnection(Vector2 from, Vector2 to, Color col) {
         Handles.DrawBezier(from, to, from, to, col, new Texture2D(2, 2), 2);
     }

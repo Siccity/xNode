@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿public class BaseNode : Node {
 
-public class BaseNode : Node {
+    public string asdf;
 
     protected override void Init() {
         inputs = new NodePort[2];

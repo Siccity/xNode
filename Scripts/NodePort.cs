@@ -27,12 +27,11 @@ public class NodePort {
     private List<NodePort> connections = new List<NodePort>();
 
     [SerializeField] private string _name;
-    [SerializeField] private bool _enabled;
+    [SerializeField] private bool _enabled = true;
     [SerializeField] private IO _direction;
 
-    public NodePort(string name, Type type, Node node, bool enabled, IO direction) {
+    public NodePort(string name, Type type, Node node, IO direction) {
         _name = name;
-        _enabled = enabled;
         _type = type;
         this.node = node;
         _direction = direction;

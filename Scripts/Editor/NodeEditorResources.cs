@@ -23,6 +23,7 @@ public partial class NodeEditorWindow {
         GUIStyle outputInt, outputString, outputFloat, outputObject, outputTexture, outputColor;
 
         public Styles() {
+            
             inputObject = new GUIStyle((GUIStyle)"flow shader in 0");
             inputString = new GUIStyle((GUIStyle)"flow shader in 1");
             inputInt = new GUIStyle((GUIStyle)"flow shader in 2");
@@ -45,6 +46,7 @@ public partial class NodeEditorWindow {
         }
 
         public GUIStyle GetInputStyle(Type type) {
+
             if (type == typeof(int)) return inputInt;
             else if (type == typeof(string)) return inputString;
             else if (type == typeof(Texture2D)) return inputTexture;

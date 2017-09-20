@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using UNEC;
 
 /// <summary> Base class for all nodes </summary>
 public abstract class Node {
@@ -19,14 +18,14 @@ public abstract class Node {
 
     abstract protected void Init();
 
-    public int GetInputPortId(NodePort input) {
+    public int GetInputId(NodePort input) {
         for (int i = 0; i < inputs.Length; i++) {
             if (input == inputs[i]) return i;
 
         }
         return -1;
     }
-    public int GetOutputPortId(NodePort output) {
+    public int GetOutputId(NodePort output) {
         for (int i = 0; i < outputs.Length; i++) {
             if (output == outputs[i]) return i;
 
@@ -43,9 +42,18 @@ public abstract class Node {
     }
 
     public NodePort CreateNodeInput(string name, Type type, bool enabled = true) {
-        return new NodePort(name, type, this, enabled);
+        return new NodePort(name, type, this, enabled, NodePort.IO.Input);
     }
     public NodePort CreateNodeOutput(string name, Type type, bool enabled = true) {
-        return new NodePort(name, type, this, enabled);
+        return new NodePort(name, type, this, enabled, NodePort.IO.Output);
+    }
+
+    public void ClearConnections() {
+        for (int i = 0; i < inputs.Length; i++) {
+            inputs[i].ClearConnections();
+        }
+        for (int i = 0; i < outputs.Length; i++) {
+            outputs[i].ClearConnections();
+        }
     }
 }

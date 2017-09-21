@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 
 [Serializable]
-public class NodePort :ISerializationCallbackReceiver{
+public class NodePort : ISerializationCallbackReceiver{
     public enum IO { Input, Output}
 
     public int ConnectionCount { get { return connections.Count; } }

@@ -13,11 +13,15 @@ public partial class NodeEditorWindow {
         if (DropdownButton("View", 50)) { }
         if (DropdownButton("Settings", 70)) { }
         if (DropdownButton("Tools", 50)) ToolsContextMenu();
-        if (IsHoveringNode) {
-            GUILayout.Space(20);
-            string hoverInfo = hoveredNode.GetType().ToString();
-            if (IsHoveringPort) hoverInfo += " > " + hoveredPort.name;
-            GUILayout.Label(hoverInfo);
+
+        //Draw hover info
+        if (Event.current.type == EventType.Layout || Event.current.type == EventType.Repaint) {
+            if (IsHoveringNode) {
+                    GUILayout.Space(20);
+                    string hoverInfo = hoveredNode.GetType().ToString();
+                    if (IsHoveringPort) hoverInfo += " > " + hoveredPort.name;
+                    GUILayout.Label(hoverInfo);
+            }
         }
 
         // Make the toolbar extend all throughout the window extension.

@@ -12,13 +12,11 @@ public partial class NodeEditorWindow {
         Matrix4x4 m = GUI.matrix;
         Controls();
 
-        if (e.type != EventType.MouseMove && e.type != EventType.MouseDrag) {
-            DrawGrid(position, zoom, panOffset);
-            DrawNodes();
-            DrawConnections();
-            DrawDraggedConnection();
-            DrawToolbar();
-        }
+        DrawGrid(position, zoom, panOffset);
+        DrawNodes();
+        DrawConnections();
+        DrawDraggedConnection();
+        DrawToolbar();
 
         GUI.matrix = m;
     }
@@ -135,6 +133,7 @@ public partial class NodeEditorWindow {
         BeginZoomed(position, zoom);
         if (e.type == EventType.Repaint) portRects.Clear();
         foreach (Node node in graph.nodes) {
+
             //Get node position
             Vector2 nodePos = GridToWindowPositionNoClipped(node.position.position);
 
@@ -173,13 +172,6 @@ public partial class NodeEditorWindow {
             nodeEditor.OnNodeGUI();
 
             GUILayout.EndArea();
-
-            if (windowRect.position != nodePos) {
-                nodePos = windowRect.position;
-                node.position.position = WindowToGridPosition(nodePos);
-                //Vector2 newPos = windowRect =
-            }
-
         }
         EndZoomed(position, zoom);
         EndWindows();

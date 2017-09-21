@@ -7,6 +7,5 @@ public class AddNodeEditor : NodeEditor {
 
     public override void OnNodeGUI() {
         GUILayout.Label("YEAH CUSTOM");
-        base.OnNodeGUI();
     }
 }

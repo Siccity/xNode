@@ -37,10 +37,17 @@ public partial class NodeEditorWindow {
             outputColor = new GUIStyle((GUIStyle)"flow shader out 4");
             outputTexture = new GUIStyle((GUIStyle)"flow shader out 5");
 
-            foreach (GUIStyle style in new GUIStyle[] { inputInt, inputString, inputFloat, inputObject, inputTexture, inputColor, outputInt, outputString, outputFloat, outputObject, outputTexture, outputColor }) {
+            foreach (GUIStyle style in new GUIStyle[] { inputInt, inputString, inputFloat, inputObject, inputTexture, inputColor }) {
                 style.normal.textColor = Color.black;
                 style.fixedHeight = 18;
                 style.alignment = TextAnchor.MiddleLeft;
+                style.onHover.textColor = Color.red;
+            }
+
+            foreach (GUIStyle style in new GUIStyle[] { outputInt, outputString, outputFloat, outputObject, outputTexture, outputColor }) {
+                style.normal.textColor = Color.black;
+                style.fixedHeight = 18;
+                style.alignment = TextAnchor.MiddleRight;
                 style.onHover.textColor = Color.red;
             }
         }

@@ -16,16 +16,17 @@ public partial class NodeEditorWindow {
     private bool IsHoveringNode { get { return hoveredNode != null; } }
     private bool HasSelectedNode { get { return selectedNode != null; } }
 
-    private Node hoveredNode;
-    private Node selectedNode;
-    private Node draggedNode;
-    private NodePort hoveredPort;
-    private NodePort draggedOutput;
-    private NodePort draggedOutputTarget;
+    private Node hoveredNode = null;
+
+    [NonSerialized] private Node selectedNode = null;
+    [NonSerialized] private Node draggedNode = null;
+    [NonSerialized] private NodePort hoveredPort = null;
+    [NonSerialized] private NodePort draggedOutput = null;
+    [NonSerialized] private NodePort draggedOutputTarget = null;
 
     private Rect nodeRects;
 
-    public void Controls() {
+    public void Controls() { 
         wantsMouseMove = true;
 
         Event e = Event.current;
@@ -81,7 +82,7 @@ public partial class NodeEditorWindow {
                         }
                     }
                 }
-                else if (IsHoveringNode) {
+                else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
                     draggedNode = hoveredNode;
                     dragOffset = hoveredNode.position.position - WindowToGridPosition(e.mousePosition);
                 }
@@ -108,9 +109,6 @@ public partial class NodeEditorWindow {
                     isPanning = false;
                 }
                 UpdateHovered();
-                break;
-            case EventType.repaint:
-
                 break;
         }
     }
@@ -171,9 +169,16 @@ public partial class NodeEditorWindow {
             }
             if (newHoverPort != hoveredPort) {
                 hoveredPort = newHoverPort;
-                Repaint();
             }
         }
         else hoveredPort = null;
+    }
+
+    bool IsHoveringTitle(Node node) {
+        Vector2 mousePos = Event.current.mousePosition;
+        //Get node position
+        Vector2 nodePos = GridToWindowPosition(node.position.position);
+        Rect windowRect = new Rect(nodePos, new Vector2(node.position.size.x / zoom, 30 / zoom));
+        return windowRect.Contains(mousePos);
     }
 }

@@ -16,7 +16,8 @@ public class NodeEditor {
         DrawDefaultNodeGUI();
     }
 
-    public void DrawDefaultNodeGUI() {
+    /// <summary> Draws standard field editors for all public fields </summary>
+    protected void DrawDefaultNodeGUI() {
         FieldInfo[] fields = GetInspectorFields(target);
         for (int i = 0; i < fields.Length; i++) {
             Type fieldType = fields[i].FieldType;
@@ -58,16 +59,18 @@ public class NodeEditor {
                 fieldValue = EditorGUILayout.Vector2Field(fieldName, (Vector2)fieldValue);
             }
             else if (fieldType == typeof(Vector3)) {
-                fieldValue = EditorGUILayout.Vector2Field(fieldName, (Vector3)fieldValue);
+                fieldValue = EditorGUILayout.Vector3Field(new GUIContent(fieldName), (Vector3)fieldValue);
             }
             else if (fieldType == typeof(Vector4)) {
-                fieldValue = EditorGUILayout.Vector2Field(fieldName, (Vector4)fieldValue);
+                fieldValue = EditorGUILayout.Vector4Field(fieldName, (Vector4)fieldValue);
             }
             else if (fieldType == typeof(Color)) {
                 fieldValue = EditorGUILayout.ColorField(fieldName, (Color)fieldValue);
             }
             else if (fieldType == typeof(AnimationCurve)) {
-                fieldValue = EditorGUILayout.CurveField(fieldName, fieldValue != null ? (AnimationCurve)fieldValue : new AnimationCurve());
+                AnimationCurve curve = fieldValue != null ? (AnimationCurve)fieldValue : new AnimationCurve();
+                curve = EditorGUILayout.CurveField(fieldName, curve);
+                if (fieldValue != curve) fields[i].SetValue(target, curve);
             }
             else if (fieldType.IsSubclassOf(typeof(UnityEngine.Object)) || fieldType == typeof(UnityEngine.Object)) {
                 fieldValue = EditorGUILayout.ObjectField(fieldName, (UnityEngine.Object)fieldValue, fieldType, true);
@@ -78,8 +81,9 @@ public class NodeEditor {
             }
         }
     }
+
     private static FieldInfo[] GetInspectorFields(Node node) {
-        return node.GetType().GetFields().Where(f => f.IsPublic).ToArray();
+        return node.GetType().GetFields().Where(f => f.IsPublic || f.GetCustomAttributes(typeof(SerializeField),false) != null).ToArray();
     }
 
     private static bool GetAttrib<T>(object[] attribs, out T attribOut) where T : Attribute {

@@ -32,12 +32,11 @@ public partial class NodeEditorWindow {
 
     public void FileContextMenu() {
         GenericMenu contextMenu = new GenericMenu();
-        contextMenu.AddItem(new GUIContent("Create New"), false, null);
-        contextMenu.AddItem(new GUIContent("Load"), false, Load);
+        contextMenu.AddItem(new GUIContent("Create New"), false, New);
 
         contextMenu.AddSeparator("");
         contextMenu.AddItem(new GUIContent("Save"), false, Save);
-        contextMenu.AddItem(new GUIContent("Save As"), false, null);
+        contextMenu.AddItem(new GUIContent("Save As"), false, SaveAs);
 
         contextMenu.DropDown(new Rect(5f, 17f, 0f, 0f));
     }

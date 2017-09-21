@@ -87,7 +87,7 @@ public class NodeGraph {
     }
 
     private class NodeTyper {
-        public string nodeType;
+        public string nodeType = "Node";
     }
 }
 

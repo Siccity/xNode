@@ -12,7 +12,7 @@ public partial class NodeEditorWindow {
         if (DropdownButton("Edit", 50)) EditContextMenu();
         if (DropdownButton("View", 50)) { }
         if (DropdownButton("Settings", 70)) { }
-        if (DropdownButton("Tools", 50)) { }
+        if (DropdownButton("Tools", 50)) ToolsContextMenu();
         if (IsHoveringNode) {
             GUILayout.Space(20);
             string hoverInfo = hoveredNode.GetType().ToString();
@@ -41,6 +41,13 @@ public partial class NodeEditorWindow {
     public void EditContextMenu() {
         GenericMenu contextMenu = new GenericMenu();
         contextMenu.AddItem(new GUIContent("Clear"), false, () => graph.Clear());
+
+        contextMenu.DropDown(new Rect(5f, 17f, 0f, 0f));
+    }
+
+    public void ToolsContextMenu() {
+        GenericMenu contextMenu = new GenericMenu();
+        contextMenu.AddItem(new GUIContent("Debug Custom Node Editors"), false, () => CacheCustomNodeEditors());
 
         contextMenu.DropDown(new Rect(5f, 17f, 0f, 0f));
     }

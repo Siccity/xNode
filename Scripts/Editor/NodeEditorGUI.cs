@@ -168,7 +168,9 @@ public partial class NodeEditorWindow {
 
             GUILayout.EndHorizontal();
 
-            // GUI
+            NodeEditor nodeEditor = GetNodeEditor(node.GetType());
+            nodeEditor.target = node;
+            nodeEditor.OnNodeGUI();
 
             GUILayout.EndArea();
 

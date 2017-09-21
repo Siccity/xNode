@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
 
 [System.Serializable]
-public class AddNode : Node {
+public class MathNode : Node {
 
     public int someValue;
+    public enum MathType { Add, Subtract, Multiply, Divide}
+    public MathType mathType = MathType.Add;
 
     protected override void Init() {
         inputs = new NodePort[2];

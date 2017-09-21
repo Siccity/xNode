@@ -41,8 +41,10 @@ public class NodePort :ISerializationCallbackReceiver{
     }
 
     public void Connect(NodePort port) {
+        if (connections == null) connections = new List<NodePort>();
+        if (port == null) { Debug.LogWarning("Cannot connect to null port"); return; }
         if (port == this) { Debug.LogWarning("Attempting to connect port to self."); return; }
-        if (connections.Contains(port)) { Debug.LogWarning("Port already connected."); return; }
+        if (connections.Contains(port)) { Debug.LogWarning("Port already connected. "); return; }
         if (direction == port.direction) { Debug.LogWarning("Cannot connect two " + (direction == IO.Input ? "input" : "output") + " connections"); return; }
         connections.Add(port);
         port.connections.Add(this);

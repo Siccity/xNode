@@ -43,13 +43,6 @@ public partial class NodeEditorWindow : EditorWindow {
         GUI.DragWindow();
     }
 
-    /*public byte[] ProtoSerialize<T>(T value) {
-        using (var ms = new MemoryStream()) {
-            ProtoBuf.Serializer.Serialize(ms, value);
-            return ms.ToArray();
-        }
-    }*/
-
     public Vector2 WindowToGridPosition(Vector2 windowPosition) {
         return (windowPosition - (position.size * 0.5f) - (panOffset / zoom)) * zoom;
     }

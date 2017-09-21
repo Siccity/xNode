@@ -3,7 +3,7 @@
 [System.Serializable]
 public class AddNode : Node {
 
-    public string thisIsAddNode = "Add";
+    public int someValue;
 
     protected override void Init() {
         inputs = new NodePort[2];

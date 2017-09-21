@@ -92,7 +92,7 @@ public partial class NodeEditorWindow {
                     if (IsDraggingPort) {
                         //If connection is valid, save it
                         if (draggedOutputTarget != null) {
-                            draggedOutput.Connect(draggedOutputTarget);
+                            if (graph.nodes.Count != 0) draggedOutput.Connect(draggedOutputTarget);
                         }
                         //Release dragged connection
                         draggedOutput = null;
@@ -129,6 +129,7 @@ public partial class NodeEditorWindow {
     /// <summary> Draw a connection as we are dragging it </summary>
     public void DrawDraggedConnection() {
         if (IsDraggingPort) {
+            if (!_portConnectionPoints.ContainsKey(draggedOutput)) return;
             Vector2 from = _portConnectionPoints[draggedOutput];
             Vector2 to = draggedOutputTarget != null ? portConnectionPoints[draggedOutputTarget] : WindowToGridPosition(Event.current.mousePosition);
             DrawConnection(from, to);

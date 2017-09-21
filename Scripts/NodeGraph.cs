@@ -12,30 +12,29 @@ public class NodeGraph {
     /// <summary> Serialized nodes. </summary>
     [SerializeField] public string[] s_nodes;
 
-    public List<string> strings = new List<string>() { "ASDF", "3523" };
     public T AddNode<T>() where T : Node {
         T node = default(T);
-        nodes.Add(node);
-        return node;
+        return AddNode(node) as T;
     }
 
     public Node AddNode(Type type) {
         Node node = (Node)Activator.CreateInstance(type);
-        if (node == null) {
-            Debug.LogError("Node could node be instanced");
-            return null;
-        }
-        nodes.Add(node);
-        return node;
+        return AddNode(node);
     }
 
     public Node AddNode(string type) {
+        Debug.Log(type);
         Node node = (Node)Activator.CreateInstance(null,type).Unwrap();
+        return AddNode(node);
+    }
+
+    public Node AddNode(Node node) {
         if (node == null) {
             Debug.LogError("Node could node be instanced");
             return null;
         }
         nodes.Add(node);
+        node.graph = this;
         return node;
     }
 
@@ -76,8 +75,13 @@ public class NodeGraph {
         for (int i = 0; i < nodeGraph.s_nodes.Length; i++) {
             NodeTyper tempNode = new NodeTyper();
             JsonUtility.FromJsonOverwrite(nodeGraph.s_nodes[i],tempNode);
-            Node node = nodeGraph.AddNode(tempNode.nodeType);
-            JsonUtility.FromJsonOverwrite(nodeGraph.s_nodes[i], node);
+            //Node node = nodeGraph.AddNode(tempNode.nodeType);
+            Type type = Type.GetType(tempNode.nodeType);
+            Node node = JsonUtility.FromJson(nodeGraph.s_nodes[i], type) as Node;
+            nodeGraph.AddNode(node);
+        }
+        for (int i = 0; i < nodeGraph.nodes.Count; i++) {
+            nodeGraph.nodes[i].FinalizeDeserialization();
         }
         return nodeGraph;
     }

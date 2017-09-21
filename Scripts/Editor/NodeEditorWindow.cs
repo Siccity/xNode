@@ -31,9 +31,11 @@ public partial class NodeEditorWindow : EditorWindow {
 
     public void Save() {
         saved = graph.Serialize();
+        Debug.Log(saved);
     }
 
     public void Load() {
+        Debug.Log(saved);
         _graph = NodeGraph.Deserialize(saved);
     }
 
@@ -41,12 +43,12 @@ public partial class NodeEditorWindow : EditorWindow {
         GUI.DragWindow();
     }
 
-    public byte[] ProtoSerialize<T>(T value) {
+    /*public byte[] ProtoSerialize<T>(T value) {
         using (var ms = new MemoryStream()) {
             ProtoBuf.Serializer.Serialize(ms, value);
             return ms.ToArray();
         }
-    }
+    }*/
 
     public Vector2 WindowToGridPosition(Vector2 windowPosition) {
         return (windowPosition - (position.size * 0.5f) - (panOffset / zoom)) * zoom;

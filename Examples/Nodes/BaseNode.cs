@@ -3,7 +3,7 @@
 [System.Serializable]
 public class BaseNode : Node {
 
-    public string thisIsBaseNode = "ASDF";
+    public bool concat;
 
     protected override void Init() {
         inputs = new NodePort[2];

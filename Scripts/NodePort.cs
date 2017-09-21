@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class NodePort {
+[Serializable]
+public class NodePort :ISerializationCallbackReceiver{
     public enum IO { Input, Output}
 
     public int ConnectionCount { get { return connections.Count; } }
@@ -23,12 +24,14 @@ public class NodePort {
     public string name { get { return _name; } set { _name = value; } }
     public bool enabled { get { return _enabled; } set { _enabled = value; } }
 
-    private Type _type;
-    private List<NodePort> connections = new List<NodePort>();
+    [NonSerialized] private List<NodePort> connections = new List<NodePort>();
 
+    [SerializeField] private Type _type;
     [SerializeField] private string _name;
     [SerializeField] private bool _enabled = true;
     [SerializeField] private IO _direction;
+
+    [SerializeField] private PortID[] connectionIDs;
 
     public NodePort(string name, Type type, Node node, IO direction) {
         _name = name;
@@ -63,5 +66,39 @@ public class NodePort {
             connections[i].connections.Remove(this);
         }
         connections.Clear();
+    }
+
+    public void OnBeforeSerialize() {
+        if (direction == IO.Output) {
+            connectionIDs = new PortID[connections.Count];
+            for (int i = 0; i < connections.Count; i++) {
+                connectionIDs[i] = new PortID();
+                connectionIDs[i].nodeID = node.graph.nodes.IndexOf(connections[i].node);
+                connectionIDs[i].portID = connections[i].node.GetInputId(connections[i]);
+            }
+        }
+    }
+
+    public void OnAfterDeserialize() {
+
+    }
+
+    public void FinalizeDeserialization() {
+        //Reconnect
+        if (direction == IO.Output) {
+            connections = new List<NodePort>();
+            for (int i = 0; i < connectionIDs.Length; i++) {
+                Node node = this.node.graph.nodes[connectionIDs[i].nodeID];
+                NodePort port = node.GetInput(connectionIDs[i].portID);
+                Connect(port);
+            }
+        }
+    }
+
+
+    [Serializable]
+    private class PortID {
+        public int nodeID;
+        public int portID;
     }
 }

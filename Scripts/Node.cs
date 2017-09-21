@@ -7,12 +7,13 @@ using System;
 [Serializable]
 public abstract class Node {
 
+    [NonSerialized] public NodeGraph graph;
     public string NodeType { get { return nodeType; } }
     [SerializeField] private string nodeType;
 
-    public Rect position = new Rect(0,0,200,200);
-    protected NodePort[] inputs = new NodePort[0];
-    protected NodePort[] outputs = new NodePort[0];
+    [SerializeField] public Rect position = new Rect(0,0,200,200);
+    [SerializeField] protected NodePort[] inputs = new NodePort[0];
+    [SerializeField] protected NodePort[] outputs = new NodePort[0];
 
     public int InputCount { get { return inputs.Length; } }
     public int OutputCount { get { return outputs.Length; } }
@@ -53,6 +54,13 @@ public abstract class Node {
     public NodePort CreateNodeOutput(string name, Type type) {
         return new NodePort(name, type, this, NodePort.IO.Output);
     }
+
+    public void FinalizeDeserialization() {
+        for (int i = 0; i < outputs.Length; i++) {
+            outputs[i].FinalizeDeserialization();
+        }
+    }
+
 
     public void ClearConnections() {
         for (int i = 0; i < inputs.Length; i++) {

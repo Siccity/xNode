@@ -31,11 +31,9 @@ public partial class NodeEditorWindow : EditorWindow {
 
     public void Save() {
         saved = graph.Serialize();
-        Debug.Log(saved);
     }
 
     public void Load() {
-        Debug.Log(saved);
         _graph = NodeGraph.Deserialize(saved);
     }
 
@@ -48,7 +46,6 @@ public partial class NodeEditorWindow : EditorWindow {
     }
 
     public Vector2 GridToWindowPosition(Vector2 gridPosition) {
-        //Vector2 center = position.size * 0.5f;
         return (position.size * 0.5f) + (panOffset / zoom) + (gridPosition/zoom);
     }
 

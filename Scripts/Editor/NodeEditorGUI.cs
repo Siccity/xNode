@@ -137,10 +137,9 @@ public partial class NodeEditorWindow {
             //Get node position
             Vector2 nodePos = GridToWindowPositionNoClipped(node.position.position);
 
-            Rect windowRect = new Rect(nodePos, node.position.size);
-
             GUIStyle style = (node == selectedNode) ? (GUIStyle)"flow node 0 on" : (GUIStyle)"flow node 0";
-            GUILayout.BeginArea(windowRect, node.ToString(), style);
+            GUILayout.BeginArea(new Rect(nodePos,new Vector2(200,4000)));
+            GUILayout.BeginVertical(node.ToString(), style);
             GUILayout.BeginHorizontal();
 
             //Inputs
@@ -170,7 +169,9 @@ public partial class NodeEditorWindow {
             NodeEditor nodeEditor = GetNodeEditor(node.GetType());
             nodeEditor.target = node;
             nodeEditor.OnNodeGUI();
+            GUILayout.EndVertical();
 
+            if (e.type == EventType.Repaint) node.position.size = GUILayoutUtility.GetLastRect().size;
             GUILayout.EndArea();
         }
         EndZoomed(position, zoom);

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 /// <summary> Base class for all node graphs </summary>
-[Serializable]
-public class NodeGraph {
+[Serializable, CreateAssetMenu(fileName = "NewNodeGraph", menuName = "Node Graph")]
+public class NodeGraph : ScriptableObject {
     /// <summary> All nodes in the graph. <para/>
     /// See: <see cref="AddNode{T}"/> </summary>
     [NonSerialized] public List<Node> nodes = new List<Node>();

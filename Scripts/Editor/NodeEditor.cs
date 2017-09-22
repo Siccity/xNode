@@ -74,6 +74,7 @@ public class NodeEditor {
                 if (fieldValue != curve) fields[i].SetValue(target, curve);
             }
             else if (fieldType.IsSubclassOf(typeof(UnityEngine.Object)) || fieldType == typeof(UnityEngine.Object)) {
+                if (fieldName == "graph") continue; //Ignore 'graph'
                 fieldValue = EditorGUILayout.ObjectField(fieldName, (UnityEngine.Object)fieldValue, fieldType, true);
             }
 

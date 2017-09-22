@@ -11,8 +11,7 @@ public partial class NodeEditorWindow : EditorWindow {
     public Dictionary<NodePort, Vector2> portConnectionPoints { get { return _portConnectionPoints; } }
     private Dictionary<NodePort, Vector2> _portConnectionPoints = new Dictionary<NodePort, Vector2>();
     private Dictionary<NodePort, Rect> portRects = new Dictionary<NodePort, Rect>();
-    public NodeGraphAsset graphAsset;
-    public NodeGraph graph { get { return _graph != null ? _graph : _graph = new NodeGraph(); } }
+    public NodeGraph graph { get { return _graph != null ? _graph : _graph = CreateInstance<NodeGraph>(); } }
     public NodeGraph _graph; 
     public Vector2 panOffset { get { return _panOffset; } set { _panOffset = value; Repaint(); } }
     private Vector2 _panOffset; 
@@ -31,10 +30,8 @@ public partial class NodeEditorWindow : EditorWindow {
     }
 
     public void Save() {
-        if (graphAsset == null) SaveAs();
-        else if (AssetDatabase.Contains(graphAsset)) {
-            graphAsset.json = graph.Serialize();
-            EditorUtility.SetDirty(graphAsset);
+        if (AssetDatabase.Contains(_graph)) {
+            EditorUtility.SetDirty(_graph);
             AssetDatabase.SaveAssets();
         }
         else SaveAs();
@@ -44,14 +41,10 @@ public partial class NodeEditorWindow : EditorWindow {
         string path = EditorUtility.SaveFilePanelInProject("Save NodeGraph", "NewNodeGraph", "asset", "");
         if (string.IsNullOrEmpty(path)) return;
         else {
-            NodeGraphAsset existingGraphAsset = AssetDatabase.LoadAssetAtPath<NodeGraphAsset>(path);
-            if (existingGraphAsset != null) graphAsset = existingGraphAsset;
-            else {
-                graphAsset = new NodeGraphAsset();
-                AssetDatabase.CreateAsset(graphAsset, path);
-            }
-            graphAsset.json = graph.Serialize();
-            EditorUtility.SetDirty(graphAsset);
+            NodeGraph existingGraph = AssetDatabase.LoadAssetAtPath<NodeGraph>(path);
+            if (existingGraph != null) AssetDatabase.DeleteAsset(path);
+            AssetDatabase.CreateAsset(_graph, path);
+            EditorUtility.SetDirty(_graph);
             AssetDatabase.SaveAssets();
         }
     }
@@ -85,11 +78,10 @@ public partial class NodeEditorWindow : EditorWindow {
 
     [OnOpenAsset(0)]
     public static bool OnOpen(int instanceID, int line) {
-        NodeGraphAsset nodeGraphAsset = EditorUtility.InstanceIDToObject(instanceID) as NodeGraphAsset;
-        if (nodeGraphAsset != null) {
+        NodeGraph nodeGraph = EditorUtility.InstanceIDToObject(instanceID) as NodeGraph;
+        if (nodeGraph != null) {
             NodeEditorWindow w = Init();
-            w.graphAsset = nodeGraphAsset;
-            w._graph = nodeGraphAsset.nodeGraph;
+            w._graph = nodeGraph;
             return true;
         }
         return false;

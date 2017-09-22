@@ -7,6 +7,8 @@ using System;
 [Serializable]
 public abstract class Node {
 
+    /// <summary> Name of the node </summary>
+    public string name = "";
     [NonSerialized] public NodeGraph graph;
     public string NodeType { get { return nodeType; } }
     [SerializeField] private string nodeType;

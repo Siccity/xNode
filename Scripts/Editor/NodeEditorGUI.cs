@@ -139,7 +139,8 @@ public partial class NodeEditorWindow {
 
             GUIStyle style = (node == selectedNode) ? (GUIStyle)"flow node 0 on" : (GUIStyle)"flow node 0";
             GUILayout.BeginArea(new Rect(nodePos,new Vector2(200,4000)));
-            GUILayout.BeginVertical(node.ToString(), style);
+            string nodeName = string.IsNullOrEmpty(node.name) ? node.ToString() : node.name;
+            GUILayout.BeginVertical(nodeName, style);
             GUILayout.BeginHorizontal();
 
             //Inputs

@@ -176,8 +176,19 @@ public partial class NodeEditorWindow {
             GUILayout.EndHorizontal();
 
             NodeEditor nodeEditor = GetNodeEditor(node.GetType());
+
             nodeEditor.target = node;
+
+            //Node is hashed before and after node GUI to detect changes
+            int nodeHash = 0;
+            var onValidate = node.GetType().GetMethod("OnValidate");
+            if (onValidate != null) nodeHash = node.GetHashCode();
+
             nodeEditor.OnNodeGUI();
+
+            //If a change in hash is detected, call OnValidate method. This is done through reflection because OnValidate is only relevant in editor, and thus, the code should not be included in build.
+            if (onValidate != null && nodeHash != node.GetHashCode()) onValidate.Invoke(node, null);
+
             GUILayout.EndVertical();
 
             if (e.type == EventType.Repaint) node.position.size = GUILayoutUtility.GetLastRect().size;

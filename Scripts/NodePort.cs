@@ -19,14 +19,13 @@ public class NodePort : ISerializationCallbackReceiver{
     public bool IsInput { get { return direction == IO.Input; } }
     public bool IsOutput { get { return direction == IO.Output; } }
 
-    public Type type { get { return _type; } }
     public Node node { get; private set; }
     public string name { get { return _name; } set { _name = value; } }
     public bool enabled { get { return _enabled; } set { _enabled = value; } }
 
     [NonSerialized] private List<NodePort> connections = new List<NodePort>();
 
-    [SerializeField] private Type _type;
+    [SerializeField] public Type type;
     [SerializeField] private string _name;
     [SerializeField] private bool _enabled = true;
     [SerializeField] private IO _direction;
@@ -35,7 +34,7 @@ public class NodePort : ISerializationCallbackReceiver{
 
     public NodePort(string name, Type type, Node node, IO direction) {
         _name = name;
-        _type = type;
+        this.type = type;
         this.node = node;
         _direction = direction;
     }

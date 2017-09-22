@@ -25,7 +25,7 @@ public abstract class Node {
         Init();
     }
 
-    abstract protected void Init();
+    protected abstract void Init();
 
     public int GetInputId(NodePort input) {
         for (int i = 0; i < inputs.Length; i++) {
@@ -63,7 +63,6 @@ public abstract class Node {
         }
     }
 
-
     public void ClearConnections() {
         for (int i = 0; i < inputs.Length; i++) {
             inputs[i].ClearConnections();
@@ -71,5 +70,9 @@ public abstract class Node {
         for (int i = 0; i < outputs.Length; i++) {
             outputs[i].ClearConnections();
         }
+    }
+
+    public override int GetHashCode() {
+        return JsonUtility.ToJson(this).GetHashCode();
     }
 }

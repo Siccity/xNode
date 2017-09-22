@@ -8,9 +8,8 @@ using System;
 
 [InitializeOnLoad]
 public partial class NodeEditorWindow : EditorWindow { 
-    public Dictionary<NodePort, Vector2> portConnectionPoints { get { return _portConnectionPoints; } }
-    private Dictionary<NodePort, Vector2> _portConnectionPoints = new Dictionary<NodePort, Vector2>();
-    private Dictionary<NodePort, Rect> portRects = new Dictionary<NodePort, Rect>();
+    public Dictionary<NodePort, Rect> portConnectionPoints { get { return _portConnectionPoints; } }
+    private Dictionary<NodePort, Rect> _portConnectionPoints = new Dictionary<NodePort, Rect>();
     public NodeGraph graph { get { return _graph != null ? _graph : _graph = CreateInstance<NodeGraph>(); } }
     public NodeGraph _graph; 
     public Vector2 panOffset { get { return _panOffset; } set { _panOffset = value; Repaint(); } }

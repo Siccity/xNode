@@ -122,18 +122,20 @@ public partial class NodeEditorWindow {
     public void CreateNode(Type type, Vector2 position) {
         Node node = graph.AddNode(type);
         node.position.position = position;
+        Repaint();
     }
 
     /// <summary> Draw a connection as we are dragging it </summary>
     public void DrawDraggedConnection() {
         if (IsDraggingPort) {
             if (!_portConnectionPoints.ContainsKey(draggedOutput)) return;
-            Vector2 from = _portConnectionPoints[draggedOutput];
-            Vector2 to = draggedOutputTarget != null ? portConnectionPoints[draggedOutputTarget] : WindowToGridPosition(Event.current.mousePosition);
+            Vector2 from = draggedOutput.node.position.position + _portConnectionPoints[draggedOutput].center;
+            Vector2 to = draggedOutputTarget != null ? draggedOutputTarget.node.position.position + portConnectionPoints[draggedOutputTarget].center : WindowToGridPosition(Event.current.mousePosition);
             DrawConnection(from, to);
         }
     }
 
+    /// <summary> Updates <see cref="hoveredNode"/> and <see cref="hoveredPort"/> </summary>
     void UpdateHovered() {
         Vector2 mousePos = Event.current.mousePosition;
         Node newHoverNode = null;
@@ -149,20 +151,25 @@ public partial class NodeEditorWindow {
             hoveredNode = newHoverNode;
             Repaint();
         }
+        //If we are hovering a node, check if we are also hovering a port
         if (IsHoveringNode) {
             NodePort newHoverPort = null;
+            //Check all input ports
             for (int i = 0; i < hoveredNode.InputCount; i++) {
                 NodePort port = hoveredNode.GetInput(i);
-                if (!portRects.ContainsKey(port)) continue;
-                Rect r = portRects[port];
+                //Check if port rect is available
+                if (!portConnectionPoints.ContainsKey(port)) continue;
+                Rect r = portConnectionPoints[port];
                 r.position = GridToWindowPosition(r.position + hoveredNode.position.position);
                 r.size /= zoom;
                 if (r.Contains(mousePos)) newHoverPort = port;
             }
+            //Check all output ports
             for (int i = 0; i < hoveredNode.OutputCount; i++) {
                 NodePort port = hoveredNode.GetOutput(i);
-                if (!portRects.ContainsKey(port)) continue;
-                Rect r = portRects[port];
+                //Check if port rect is available
+                if (!portConnectionPoints.ContainsKey(port)) continue;
+                Rect r = portConnectionPoints[port];
                 r.position = GridToWindowPosition(r.position + hoveredNode.position.position);
                 r.size /= zoom;
                 if (r.Contains(mousePos)) newHoverPort = port;

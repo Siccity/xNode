@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using System;
 
@@ -52,8 +50,8 @@ public partial class NodeEditorWindow {
         rect.position = Vector2.zero;
 
         Vector2 center = rect.size / 2f;
-        Texture2D gridTex = gridTexture;
-        Texture2D crossTex = crossTexture;
+        Texture2D gridTex = NodeEditorResources.gridTexture;
+        Texture2D crossTex = NodeEditorResources.crossTexture;
             
         // Offset from origin in tile units
         float xOffset = -(center.x * zoom + panOffset.x) / gridTex.width;
@@ -103,7 +101,7 @@ public partial class NodeEditorWindow {
         contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
     }
 
-    public  void DrawConnection(Vector2 startPoint, Vector2 endPoint) {
+    public void DrawConnection(Vector2 startPoint, Vector2 endPoint) {
         startPoint = GridToWindowPosition(startPoint);
         endPoint = GridToWindowPosition(endPoint);
 
@@ -123,10 +121,13 @@ public partial class NodeEditorWindow {
         foreach (Node node in graph.nodes) {
             for (int i = 0; i < node.OutputCount; i++) {
                 NodePort output = node.GetOutput(i);
-                Vector2 from = _portConnectionPoints[output];
+
+                //Needs cleanup. Null checks are ugly
+                if (!portConnectionPoints.ContainsKey(output)) continue;
+                Vector2 from = _portConnectionPoints[output].center + node.position.position;
                 for (int k = 0; k < output.ConnectionCount; k++) {
                     NodePort input = output.GetConnection(k);
-                    Vector2 to = _portConnectionPoints[input];
+                    Vector2 to = input.node.position.position + _portConnectionPoints[input].center;
                     DrawConnection(from, to);
                 }
             }
@@ -134,46 +135,23 @@ public partial class NodeEditorWindow {
     }
 
     private void DrawNodes() {
-        portConnectionPoints.Clear();
         Event e = Event.current;
+        if (e.type == EventType.Repaint) portConnectionPoints.Clear();
 
         BeginWindows();
         BeginZoomed(position, zoom);
-        if (e.type == EventType.Repaint) portRects.Clear();
+        //if (e.type == EventType.Repaint) portRects.Clear();
         foreach (Node node in graph.nodes) {
 
             //Get node position
             Vector2 nodePos = GridToWindowPositionNoClipped(node.position.position);
 
             GUIStyle style = (node == selectedNode) ? (GUIStyle)"flow node 0 on" : (GUIStyle)"flow node 0";
-            GUILayout.BeginArea(new Rect(nodePos,new Vector2(200,4000)));
+            GUILayout.BeginArea(new Rect(nodePos,new Vector2(240,4000)));
             string nodeName = string.IsNullOrEmpty(node.name) ? node.ToString() : node.name;
-            GUILayout.BeginVertical(nodeName, style);
             GUILayout.BeginHorizontal();
-
-            //Inputs
-            GUILayout.BeginVertical();
-            for (int i = 0; i < node.InputCount; i++) {
-                NodePort input = node.GetInput(i);
-                Rect r = GUILayoutUtility.GetRect(new GUIContent(input.name), styles.GetInputStyle(input.type));
-                GUI.Label(r, input.name, styles.GetInputStyle(input.type));
-                if (e.type == EventType.Repaint) portRects.Add(input, r);
-                portConnectionPoints.Add(input, new Vector2(r.xMin, r.yMin + (r.height * 0.5f)) + node.position.position);
-            }
-            GUILayout.EndVertical();
-
-            //Outputs
-            GUILayout.BeginVertical();
-            for (int i = 0; i < node.OutputCount; i++) {
-                NodePort output = node.GetOutput(i);
-                Rect r = GUILayoutUtility.GetRect(new GUIContent(output.name), styles.GetOutputStyle(output.type));
-                GUI.Label(r, output.name, styles.GetOutputStyle(output.type));
-                if (e.type == EventType.Repaint) portRects.Add(output, r);
-                portConnectionPoints.Add(output, new Vector2(r.xMax, r.yMin + (r.height * 0.5f)) + node.position.position);
-            }
-            GUILayout.EndVertical();
-
-            GUILayout.EndHorizontal();
+            GUILayout.FlexibleSpace();
+            GUILayout.BeginVertical(nodeName, style, GUILayout.Width(200));
 
             NodeEditor nodeEditor = GetNodeEditor(node.GetType());
 
@@ -185,12 +163,20 @@ public partial class NodeEditorWindow {
             if (onValidate != null) nodeHash = node.GetHashCode();
 
             nodeEditor.OnNodeGUI();
+            if (e.type == EventType.Repaint) {
+                foreach (var kvp in nodeEditor.portRects) {
+                    portConnectionPoints.Add(kvp.Key, kvp.Value);
+                }
+            }
 
             //If a change in hash is detected, call OnValidate method. This is done through reflection because OnValidate is only relevant in editor, and thus, the code should not be included in build.
             if (onValidate != null && nodeHash != node.GetHashCode()) onValidate.Invoke(node, null);
 
             GUILayout.EndVertical();
 
+            GUILayout.FlexibleSpace();
+
+            GUILayout.EndHorizontal();
             if (e.type == EventType.Repaint) node.position.size = GUILayoutUtility.GetLastRect().size;
             GUILayout.EndArea();
         }

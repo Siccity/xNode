@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.Reflection;
@@ -9,9 +8,12 @@ using System;
 /// <summary> Base class to derive custom Node editors from. Use this to create your own custom inspectors and editors for your nodes. </summary>
 public class NodeEditor {
 
+    public Dictionary<NodePort, Rect> portRects = new Dictionary<NodePort, Rect>();
     public Node target;
 
     public virtual void OnNodeGUI() {
+        portRects.Clear();
+        DrawNodePortsGUI();
         DrawDefaultNodeGUI();
     }
 
@@ -83,6 +85,66 @@ public class NodeEditor {
             }
         }
         EditorGUILayout.Space();
+    }
+
+    protected void DrawNodePortsGUI() {
+
+        Event e = Event.current;
+
+        GUILayout.BeginHorizontal();
+
+        //Inputs
+        GUILayout.BeginVertical();
+        for (int i = 0; i < target.InputCount; i++) {
+            DrawNodePortGUI(target.GetInput(i));
+            //NodePort input = target.GetInput(i);
+            //Rect r = GUILayoutUtility.GetRect(new GUIContent(input.name), NodeEditorResources.styles.GetInputStyle(input.type));
+            //GUI.Label(r, input.name, NodeEditorResources.styles.GetInputStyle(input.type));
+            //if (e.type == EventType.Repaint) portRects.Add(input, r);
+            //portConnectionPoints.Add(input, new Vector2(r.xMin, r.yMin + (r.height * 0.5f)) + target.position.position);
+        }
+        GUILayout.EndVertical();
+
+        //Outputs
+        GUILayout.BeginVertical();
+        for (int i = 0; i < target.OutputCount; i++) {
+            DrawNodePortGUI(target.GetOutput(i));
+            //NodePort output = target.GetOutput(i);
+            //Rect r = GUILayoutUtility.GetRect(new GUIContent(output.name), NodeEditorResources.styles.GetOutputStyle(output.type));
+            //GUI.Label(r, output.name, NodeEditorResources.styles.GetOutputStyle(output.type));
+            //if (e.type == EventType.Repaint) portRects.Add(output, r);
+            //portConnectionPoints.Add(output, new Vector2(r.xMax, r.yMin + (r.height * 0.5f)) + target.position.position);
+        }
+        GUILayout.EndVertical();
+
+        GUILayout.EndHorizontal();
+    }
+
+    protected void DrawNodePortGUI(NodePort port) {
+        GUIStyle style = port.direction == NodePort.IO.Input ? NodeEditorResources.styles.inputStyle : NodeEditorResources.styles.outputStyle;
+        Rect rect = GUILayoutUtility.GetRect(new GUIContent(port.name), style);
+        DrawNodePortGUI(rect, port);
+    }
+
+    protected void DrawNodePortGUI(Rect rect, NodePort port) {
+        GUIStyle style = port.direction == NodePort.IO.Input ? NodeEditorResources.styles.inputStyle : NodeEditorResources.styles.outputStyle;
+        GUI.Label(rect, new GUIContent(port.name), style);
+        Rect handleRect = new Rect(0, 0, 16, 16);
+        switch (port.direction) {
+            case NodePort.IO.Input:
+                handleRect.position = new Vector2(rect.xMin - 8, rect.position.y + (rect.height * 0.5f) - 8);
+                break;
+            case NodePort.IO.Output:
+                handleRect.position = new Vector2(rect.xMax - 8, rect.position.y + (rect.height * 0.5f) - 8);
+                break;
+        }
+        portRects.Add(port, handleRect);
+        Color col = GUI.color;
+        GUI.color = NodeEditorUtilities.GetTypeColor(port.type);
+        GUI.DrawTexture(handleRect, NodeEditorResources.dot);
+        GUI.color = Color.black;
+        GUI.DrawTexture(handleRect, NodeEditorResources.dotOuter);
+        GUI.color = col;
     }
 
     private static FieldInfo[] GetInspectorFields(Node node) {

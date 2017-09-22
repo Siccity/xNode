@@ -2,13 +2,16 @@
 using UnityEditor;
 using System;
 
-public partial class NodeEditorWindow {
+public static class NodeEditorResources {
 
     public static Texture2D gridTexture { get { return _gridTexture != null ? _gridTexture : _gridTexture = GenerateGridTexture(); } }
     private static Texture2D _gridTexture;
     public static Texture2D crossTexture { get { return _crossTexture != null ? _crossTexture : _crossTexture = GenerateCrossTexture(); } }
     private static Texture2D _crossTexture;
-
+    public static Texture2D dot { get { return _dot != null ? _dot : _dot = Resources.Load<Texture2D>("dot"); } }
+    private static Texture2D _dot;
+    public static Texture2D dotOuter { get { return _dotOuter != null ? _dotOuter : _dotOuter = Resources.Load<Texture2D>("dot_outer"); } }
+    private static Texture2D _dotOuter;
 
     private static Color backgroundColor = new Color(0.18f, 0.18f, 0.18f);
     private static Color veinColor = new Color(0.25f, 0.25f, 0.25f);
@@ -19,56 +22,21 @@ public partial class NodeEditorWindow {
     public static Styles _styles = null;
 
     public class Styles {
-        GUIStyle inputInt, inputString, inputFloat, inputObject, inputTexture, inputColor;
-        GUIStyle outputInt, outputString, outputFloat, outputObject, outputTexture, outputColor;
+        public GUIStyle inputStyle, outputStyle;
 
         public Styles() {
-            
-            inputObject = new GUIStyle((GUIStyle)"flow shader in 0");
-            inputString = new GUIStyle((GUIStyle)"flow shader in 1");
-            inputInt = new GUIStyle((GUIStyle)"flow shader in 2");
-            inputFloat = new GUIStyle((GUIStyle)"flow shader in 3");
-            inputColor = new GUIStyle((GUIStyle)"flow shader in 4");
-            inputTexture = new GUIStyle((GUIStyle)"flow shader in 5");
-            outputObject = new GUIStyle((GUIStyle)"flow shader out 0");
-            outputString = new GUIStyle((GUIStyle)"flow shader out 1");
-            outputInt = new GUIStyle((GUIStyle)"flow shader out 2");
-            outputFloat = new GUIStyle((GUIStyle)"flow shader out 3");
-            outputColor = new GUIStyle((GUIStyle)"flow shader out 4");
-            outputTexture = new GUIStyle((GUIStyle)"flow shader out 5");
+            GUIStyle baseStyle = new GUIStyle();
+            baseStyle.normal.textColor = Color.black;
+            baseStyle.onHover.textColor = Color.red;
+            baseStyle.fixedHeight = 18;
 
-            foreach (GUIStyle style in new GUIStyle[] { inputInt, inputString, inputFloat, inputObject, inputTexture, inputColor }) {
-                style.normal.textColor = Color.black;
-                style.fixedHeight = 18;
-                style.alignment = TextAnchor.MiddleLeft;
-                style.onHover.textColor = Color.red;
-            }
+            inputStyle = new GUIStyle(baseStyle);
+            inputStyle.alignment = TextAnchor.UpperLeft;
+            inputStyle.padding.left = 10;
 
-            foreach (GUIStyle style in new GUIStyle[] { outputInt, outputString, outputFloat, outputObject, outputTexture, outputColor }) {
-                style.normal.textColor = Color.black;
-                style.fixedHeight = 18;
-                style.alignment = TextAnchor.MiddleRight;
-                style.onHover.textColor = Color.red;
-            }
-        }
-
-        public GUIStyle GetInputStyle(Type type) {
-
-            if (type == typeof(int)) return inputInt;
-            else if (type == typeof(string)) return inputString;
-            else if (type == typeof(Texture2D)) return inputTexture;
-            else if (type == typeof(float)) return inputFloat;
-            else if (type == typeof(Color)) return inputColor;
-            else return inputObject;
-        }
-
-        public GUIStyle GetOutputStyle(Type type) {
-            if (type == typeof(int)) return outputInt;
-            else if (type == typeof(string)) return outputString;
-            else if (type == typeof(Texture2D)) return outputTexture;
-            else if (type == typeof(float)) return outputFloat;
-            else if (type == typeof(Color)) return outputColor;
-            else return outputObject;
+            outputStyle = new GUIStyle(baseStyle);
+            outputStyle.alignment = TextAnchor.UpperRight;
+            outputStyle.padding.right = 10;
         }
     }
 

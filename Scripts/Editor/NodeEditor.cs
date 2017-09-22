@@ -7,7 +7,6 @@ using System.Linq;
 using System;
 
 /// <summary> Base class to derive custom Node editors from. Use this to create your own custom inspectors and editors for your nodes. </summary>
-[CustomNodeEditor(typeof(Node))]
 public class NodeEditor {
 
     public Node target;
@@ -26,7 +25,7 @@ public class NodeEditor {
             object[] fieldAttribs = fields[i].GetCustomAttributes(false);
 
             HeaderAttribute headerAttrib;
-            if (GetAttrib(fieldAttribs, out headerAttrib)) {
+            if (NodeEditorUtilities.GetAttrib(fieldAttribs, out headerAttrib)) {
                 EditorGUILayout.LabelField(headerAttrib.header);
             }
 
@@ -41,15 +40,17 @@ public class NodeEditor {
                 fieldValue = EditorGUILayout.EnumPopup(fieldName, (Enum)fieldValue);
             }
             else if (fieldType == typeof(string)) {
+                
+                if (fieldName == "name") continue; //Ignore 'name'
                 TextAreaAttribute textAreaAttrib;
-                if (GetAttrib(fieldAttribs, out textAreaAttrib)) {
+                if (NodeEditorUtilities.GetAttrib(fieldAttribs, out textAreaAttrib)) {
                     fieldValue = EditorGUILayout.TextArea(fieldValue != null ? (string)fieldValue : "");
                 }
                 else
                     fieldValue = EditorGUILayout.TextField(fieldName, fieldValue != null ? (string)fieldValue : "");
             }
             else if (fieldType == typeof(Rect)) {
-                if (fieldName == "position") continue;
+                if (fieldName == "position") continue; //Ignore 'position'
                 fieldValue = EditorGUILayout.RectField(fieldName, (Rect)fieldValue);
             }
             else if (fieldType == typeof(float)) {
@@ -80,28 +81,25 @@ public class NodeEditor {
                 fields[i].SetValue(target, fieldValue);
             }
         }
+        EditorGUILayout.Space();
     }
 
     private static FieldInfo[] GetInspectorFields(Node node) {
         return node.GetType().GetFields().Where(f => f.IsPublic || f.GetCustomAttributes(typeof(SerializeField),false) != null).ToArray();
     }
-
-    private static bool GetAttrib<T>(object[] attribs, out T attribOut) where T : Attribute {
-        for (int i = 0; i < attribs.Length; i++) {
-            if (attribs[i].GetType() == typeof(T)) {
-                attribOut = attribs[i] as T;
-                return true;
-            }
-        }
-        attribOut = null;
-        return false;
-    }
 }
 
 [AttributeUsage(AttributeTargets.Class)]
 public class CustomNodeEditorAttribute : Attribute {
-    public Type inspectedType;
-    public CustomNodeEditorAttribute(Type inspectedType) {
-        this.inspectedType = inspectedType;
+    public Type inspectedType { get { return _inspectedType; } }
+    private Type _inspectedType;
+    public string contextMenuName { get { return _contextMenuName; } }
+    private string _contextMenuName;
+    /// <summary> Tells a NodeEditor which Node type it is an editor for </summary>
+    /// <param name="inspectedType">Type that this editor can edit</param>
+    /// <param name="contextMenuName">Path to the node</param>
+    public CustomNodeEditorAttribute(Type inspectedType, string contextMenuName) {
+        _inspectedType = inspectedType;
+        _contextMenuName = contextMenuName;
     }
 }

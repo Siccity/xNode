@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using System.IO; 
 using UnityEditor.Callbacks;
+using System;
 
 [InitializeOnLoad]
 public partial class NodeEditorWindow : EditorWindow { 

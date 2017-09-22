@@ -1,15 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
-using System.Linq;
+using System.Linq; 
 using System;
 using UnityEngine;
 
 /// <summary> Contains reflection-related info </summary>
 public partial class NodeEditorWindow {
-    
-    private static Dictionary<Type, NodeEditor> customNodeEditor;
+    [NonSerialized] private static Dictionary<Type, NodeEditor> customNodeEditor;
     public static Type[] nodeTypes { get { return _nodeTypes != null ? _nodeTypes : _nodeTypes = GetNodeTypes(); } }
-    private static Type[] _nodeTypes;
+    [NonSerialized] private static Type[] _nodeTypes = null;
 
     public static NodeEditor GetNodeEditor(Type node) {
         if (customNodeEditor == null) CacheCustomNodeEditors();
@@ -30,6 +29,7 @@ public partial class NodeEditorWindow {
         for (int i = 0; i < nodeEditors.Length; i++) {
             var attribs = nodeEditors[i].GetCustomAttributes(typeof(CustomNodeEditorAttribute), false);
             if (attribs == null || attribs.Length == 0) continue;
+            if (nodeEditors[i].IsAbstract) continue;
             CustomNodeEditorAttribute attrib = attribs[0] as CustomNodeEditorAttribute;
             customNodeEditor.Add(attrib.inspectedType, Activator.CreateInstance(nodeEditors[i]) as NodeEditor);
         }
@@ -39,7 +39,7 @@ public partial class NodeEditorWindow {
         //Get all classes deriving from baseType via reflection
         Assembly assembly = Assembly.GetAssembly(baseType);
         return assembly.GetTypes().Where(t =>
-            t != baseType &&
+            !t.IsAbstract &&
             baseType.IsAssignableFrom(t)
             ).ToArray();
     }

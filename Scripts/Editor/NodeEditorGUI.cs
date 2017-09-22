@@ -76,18 +76,26 @@ public partial class NodeEditorWindow {
         return GUILayout.Button(name, EditorStyles.toolbarDropDown, GUILayout.Width(width));
     }
 
-    public void RightClickContextMenu() {
+    /// <summary> Show right-click context menu </summary>
+    public void ShowContextMenu() {
         GenericMenu contextMenu = new GenericMenu();
+        Vector2 pos = WindowToGridPosition(Event.current.mousePosition);
 
         if (hoveredNode != null) {
             Node node = hoveredNode;
             contextMenu.AddItem(new GUIContent("Remove"), false, () => graph.RemoveNode(node));
         }
         else {
-            Vector2 pos = WindowToGridPosition(Event.current.mousePosition);
             for (int i = 0; i < nodeTypes.Length; i++) {
                 Type type = nodeTypes[i];
-                contextMenu.AddItem(new GUIContent(nodeTypes[i].ToString()), false, () => {
+                Type editorType = GetNodeEditor(type).GetType();
+
+                string name = nodeTypes[i].ToString().Replace('.', '/');
+                CustomNodeEditorAttribute attrib;
+                if (NodeEditorUtilities.GetAttrib(editorType, out attrib)) {
+                    name = attrib.contextMenuName;
+                }
+                contextMenu.AddItem(new GUIContent(name), false, () => {
                     CreateNode(type, pos);
                 });
             }

@@ -105,7 +105,7 @@ public partial class NodeEditorWindow {
                     }
                 }
                 else if (e.button == 1) {
-                    if (!isPanning) RightClickContextMenu();
+                    if (!isPanning) ShowContextMenu();
                     isPanning = false;
                 }
                 UpdateHovered();

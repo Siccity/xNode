@@ -138,7 +138,14 @@ public partial class NodeEditorWindow {
         Event e = Event.current;
         if (e.type == EventType.Repaint) portConnectionPoints.Clear();
 
-        BeginWindows();
+        //Selected node is hashed before and after node GUI to detect changes
+        int nodeHash = 0;
+        System.Reflection.MethodInfo onValidate = null;
+        if (selectedNode != null) {
+            onValidate = selectedNode.GetType().GetMethod("OnValidate");
+            if (onValidate != null) nodeHash = selectedNode.GetHashCode();
+        }
+
         BeginZoomed(position, zoom);
         //if (e.type == EventType.Repaint) portRects.Clear();
         foreach (Node node in graph.nodes) {
@@ -157,20 +164,12 @@ public partial class NodeEditorWindow {
 
             nodeEditor.target = node;
 
-            //Node is hashed before and after node GUI to detect changes
-            int nodeHash = 0;
-            var onValidate = node.GetType().GetMethod("OnValidate");
-            if (onValidate != null) nodeHash = node.GetHashCode();
-
             nodeEditor.OnNodeGUI();
             if (e.type == EventType.Repaint) {
                 foreach (var kvp in nodeEditor.portRects) {
                     portConnectionPoints.Add(kvp.Key, kvp.Value);
                 }
             }
-
-            //If a change in hash is detected, call OnValidate method. This is done through reflection because OnValidate is only relevant in editor, and thus, the code should not be included in build.
-            if (onValidate != null && nodeHash != node.GetHashCode()) onValidate.Invoke(node, null);
 
             GUILayout.EndVertical();
 
@@ -181,6 +180,12 @@ public partial class NodeEditorWindow {
             GUILayout.EndArea();
         }
         EndZoomed(position, zoom);
-        EndWindows();
+
+        //If a change in hash is detected in the selected node, call OnValidate method. 
+        //This is done through reflection because OnValidate is only relevant in editor, 
+        //and thus, the code should not be included in build.
+        if (selectedNode != null) {
+            if (onValidate != null && nodeHash != selectedNode.GetHashCode()) onValidate.Invoke(selectedNode, null);
+        }
     }
 }

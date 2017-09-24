@@ -23,6 +23,15 @@ public static class NodeEditorUtilities {
         return false;
     }
 
+    public static bool HasAttrib<T>(object[] attribs) where T : Attribute {
+        for (int i = 0; i < attribs.Length; i++) {
+            if (attribs[i].GetType() == typeof(T)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /// <summary> Return color based on type </summary>
     public static Color GetTypeColor(Type type) {
         UnityEngine.Random.InitState(type.Name.GetHashCode());

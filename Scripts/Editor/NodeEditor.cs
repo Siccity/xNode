@@ -14,11 +14,11 @@ public class NodeEditor {
     public virtual void OnNodeGUI() {
         portRects.Clear();
         DrawNodePortsGUI();
-        DrawDefaultNodeGUI();
+        DrawDefaultNodeBody();
     }
 
     /// <summary> Draws standard field editors for all public fields </summary>
-    protected void DrawDefaultNodeGUI() {
+    protected void DrawDefaultNodeBody() {
         FieldInfo[] fields = GetInspectorFields(target);
         for (int i = 0; i < fields.Length; i++) {
             Type fieldType = fields[i].FieldType;
@@ -30,6 +30,9 @@ public class NodeEditor {
             if (NodeEditorUtilities.GetAttrib(fieldAttribs, out headerAttrib)) {
                 EditorGUILayout.LabelField(headerAttrib.header);
             }
+
+            //Skip if field has input or output attribute
+            if (NodeEditorUtilities.HasAttrib<Node.InputAttribute>(fieldAttribs) || NodeEditorUtilities.HasAttrib<Node.OutputAttribute>(fieldAttribs)) continue;
 
             EditorGUI.BeginChangeCheck();
             if (fieldType == typeof(int)) {

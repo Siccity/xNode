@@ -14,18 +14,21 @@ public abstract class Node {
     [SerializeField] private string nodeType;
 
     [SerializeField] public Rect position = new Rect(0,0,200,200);
-    [SerializeField] protected NodePort[] inputs = new NodePort[0];
-    [SerializeField] protected NodePort[] outputs = new NodePort[0];
+    [SerializeField] private NodePort[] inputs = new NodePort[0];
+    [SerializeField] private NodePort[] outputs = new NodePort[0];
 
     public int InputCount { get { return inputs.Length; } }
     public int OutputCount { get { return outputs.Length; } }
 
     protected Node() {
         nodeType = GetType().ToString();
+        CachePorts();
         Init();
     }
 
-    protected abstract void Init();
+    protected virtual void Init() {
+
+    }
 
     public int GetInputId(NodePort input) {
         for (int i = 0; i < inputs.Length; i++) {
@@ -74,5 +77,41 @@ public abstract class Node {
 
     public override int GetHashCode() {
         return JsonUtility.ToJson(this).GetHashCode();
+    }
+
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
+    public class InputAttribute : Attribute {
+        public InputAttribute() {
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
+    public class OutputAttribute : Attribute {
+        public OutputAttribute() {
+        }
+    }
+
+    /// <summary> Use reflection to find all fields with <see cref="InputAttribute"/> or <see cref="OutputAttribute"/>, and write to <see cref="inputs"/> and <see cref="outputs"/> </summary>
+    private void CachePorts() {
+        List<NodePort> inputPorts = new List<NodePort>();
+        List<NodePort> outputPorts = new List<NodePort>();
+
+        System.Reflection.FieldInfo[] fieldInfo = GetType().GetFields();
+        for (int i = 0; i < fieldInfo.Length; i++) {
+            //Get InputAttribute and OutputAttribute
+            object[] attribs = fieldInfo[i].GetCustomAttributes(false);
+            InputAttribute inputAttrib =  null;
+            OutputAttribute outputAttrib = null;
+            for (int k = 0; k < attribs.Length; k++) {
+                if (attribs[k] is InputAttribute) inputAttrib = attribs[k] as InputAttribute;
+                else if (attribs[k] is OutputAttribute) outputAttrib = attribs[k] as OutputAttribute;
+            }
+            if (inputAttrib != null && outputAttrib != null) Debug.LogError("Field " + fieldInfo + " cannot be both input and output.");
+            else if (inputAttrib != null) inputPorts.Add(new NodePort(fieldInfo[i].Name, fieldInfo[i].FieldType, this, NodePort.IO.Input));
+            else if (outputAttrib != null) outputPorts.Add(new NodePort(fieldInfo[i].Name, fieldInfo[i].FieldType, this, NodePort.IO.Output));
+        }
+
+        inputs = inputPorts.ToArray();
+        outputs = outputPorts.ToArray();
     }
 }

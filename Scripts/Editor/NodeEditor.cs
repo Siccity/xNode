@@ -13,8 +13,32 @@ public class NodeEditor {
 
     public virtual void OnNodeGUI() {
         portRects.Clear();
-        DrawNodePortsGUI();
+        DrawDefaultNodePortsGUI();
         DrawDefaultNodeBody();
+    }
+
+    /// <summary> Draws standard editors for all fields marked with <see cref="Node.InputAttribute"/> or <see cref="Node.OutputAttribute"/> </summary>
+    protected void DrawDefaultNodePortsGUI() {
+
+        Event e = Event.current;
+
+        GUILayout.BeginHorizontal();
+
+        //Inputs
+        GUILayout.BeginVertical();
+        for (int i = 0; i < target.InputCount; i++) {
+            DrawNodePortGUI(target.GetInput(i));
+        }
+        GUILayout.EndVertical();
+
+        //Outputs
+        GUILayout.BeginVertical();
+        for (int i = 0; i < target.OutputCount; i++) {
+            DrawNodePortGUI(target.GetOutput(i));
+        }
+        GUILayout.EndVertical();
+
+        GUILayout.EndHorizontal();
     }
 
     /// <summary> Draws standard field editors for all public fields </summary>
@@ -22,7 +46,7 @@ public class NodeEditor {
         FieldInfo[] fields = GetInspectorFields(target);
         for (int i = 0; i < fields.Length; i++) {
             Type fieldType = fields[i].FieldType;
-            string fieldName = fields[i].Name;
+            string fieldName = fields[i].Name.PrettifyCamelCase();
             object fieldValue = fields[i].GetValue(target);
             object[] fieldAttribs = fields[i].GetCustomAttributes(false);
 
@@ -90,48 +114,15 @@ public class NodeEditor {
         EditorGUILayout.Space();
     }
 
-    protected void DrawNodePortsGUI() {
-
-        Event e = Event.current;
-
-        GUILayout.BeginHorizontal();
-
-        //Inputs
-        GUILayout.BeginVertical();
-        for (int i = 0; i < target.InputCount; i++) {
-            DrawNodePortGUI(target.GetInput(i));
-            //NodePort input = target.GetInput(i);
-            //Rect r = GUILayoutUtility.GetRect(new GUIContent(input.name), NodeEditorResources.styles.GetInputStyle(input.type));
-            //GUI.Label(r, input.name, NodeEditorResources.styles.GetInputStyle(input.type));
-            //if (e.type == EventType.Repaint) portRects.Add(input, r);
-            //portConnectionPoints.Add(input, new Vector2(r.xMin, r.yMin + (r.height * 0.5f)) + target.position.position);
-        }
-        GUILayout.EndVertical();
-
-        //Outputs
-        GUILayout.BeginVertical();
-        for (int i = 0; i < target.OutputCount; i++) {
-            DrawNodePortGUI(target.GetOutput(i));
-            //NodePort output = target.GetOutput(i);
-            //Rect r = GUILayoutUtility.GetRect(new GUIContent(output.name), NodeEditorResources.styles.GetOutputStyle(output.type));
-            //GUI.Label(r, output.name, NodeEditorResources.styles.GetOutputStyle(output.type));
-            //if (e.type == EventType.Repaint) portRects.Add(output, r);
-            //portConnectionPoints.Add(output, new Vector2(r.xMax, r.yMin + (r.height * 0.5f)) + target.position.position);
-        }
-        GUILayout.EndVertical();
-
-        GUILayout.EndHorizontal();
-    }
-
     protected void DrawNodePortGUI(NodePort port) {
         GUIStyle style = port.direction == NodePort.IO.Input ? NodeEditorResources.styles.inputStyle : NodeEditorResources.styles.outputStyle;
-        Rect rect = GUILayoutUtility.GetRect(new GUIContent(port.name), style);
+        Rect rect = GUILayoutUtility.GetRect(new GUIContent(port.name.PrettifyCamelCase()), style);
         DrawNodePortGUI(rect, port);
     }
 
     protected void DrawNodePortGUI(Rect rect, NodePort port) {
         GUIStyle style = port.direction == NodePort.IO.Input ? NodeEditorResources.styles.inputStyle : NodeEditorResources.styles.outputStyle;
-        GUI.Label(rect, new GUIContent(port.name), style);
+        GUI.Label(rect, new GUIContent(port.name.PrettifyCamelCase()), style);
         Rect handleRect = new Rect(0, 0, 16, 16);
         switch (port.direction) {
             case NodePort.IO.Input:

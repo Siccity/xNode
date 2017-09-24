@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Linq;
 using System;
 
+/// <summary> A set of editor-only utilities and extensions for UnityNodeEditorBase </summary>
 public static class NodeEditorUtilities {
 
     public static bool GetAttrib<T>(Type classType, out T attribOut) where T : Attribute {
@@ -30,6 +31,12 @@ public static class NodeEditorUtilities {
             }
         }
         return false;
+    }
+
+    /// <summary> Turns camelCaseString into Camel Case String </summary>
+    public static string PrettifyCamelCase(this string camelCase) {
+        string s = System.Text.RegularExpressions.Regex.Replace(camelCase, "([A-Z])", " $1", System.Text.RegularExpressions.RegexOptions.Compiled).Trim();
+        return char.ToUpper(s[0]) + s.Substring(1);
     }
 
     /// <summary> Return color based on type </summary>

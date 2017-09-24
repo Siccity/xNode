@@ -46,7 +46,8 @@ public class NodeEditor {
         FieldInfo[] fields = GetInspectorFields(target);
         for (int i = 0; i < fields.Length; i++) {
             Type fieldType = fields[i].FieldType;
-            string fieldName = fields[i].Name.PrettifyCamelCase();
+            string fieldName = fields[i].Name;
+            string fieldPrettyName = fieldName.PrettifyCamelCase();
             object fieldValue = fields[i].GetValue(target);
             object[] fieldAttribs = fields[i].GetCustomAttributes(false);
 
@@ -60,13 +61,13 @@ public class NodeEditor {
 
             EditorGUI.BeginChangeCheck();
             if (fieldType == typeof(int)) {
-                fieldValue = EditorGUILayout.IntField(fieldName, (int)fieldValue);
+                fieldValue = EditorGUILayout.IntField(fieldPrettyName, (int)fieldValue);
             }
             else if (fieldType == typeof(bool)) {
-                fieldValue = EditorGUILayout.Toggle(fieldName, (bool)fieldValue);
+                fieldValue = EditorGUILayout.Toggle(fieldPrettyName, (bool)fieldValue);
             }
             else if (fieldType.IsEnum) {
-                fieldValue = EditorGUILayout.EnumPopup(fieldName, (Enum)fieldValue);
+                fieldValue = EditorGUILayout.EnumPopup(fieldPrettyName, (Enum)fieldValue);
             }
             else if (fieldType == typeof(string)) {
                 
@@ -76,35 +77,35 @@ public class NodeEditor {
                     fieldValue = EditorGUILayout.TextArea(fieldValue != null ? (string)fieldValue : "");
                 }
                 else
-                    fieldValue = EditorGUILayout.TextField(fieldName, fieldValue != null ? (string)fieldValue : "");
+                    fieldValue = EditorGUILayout.TextField(fieldPrettyName, fieldValue != null ? (string)fieldValue : "");
             }
             else if (fieldType == typeof(Rect)) {
                 if (fieldName == "position") continue; //Ignore 'position'
-                fieldValue = EditorGUILayout.RectField(fieldName, (Rect)fieldValue);
+                fieldValue = EditorGUILayout.RectField(fieldPrettyName, (Rect)fieldValue);
             }
             else if (fieldType == typeof(float)) {
-                fieldValue = EditorGUILayout.FloatField(fieldName, (float)fieldValue);
+                fieldValue = EditorGUILayout.FloatField(fieldPrettyName, (float)fieldValue);
             }
             else if (fieldType == typeof(Vector2)) {
-                fieldValue = EditorGUILayout.Vector2Field(fieldName, (Vector2)fieldValue);
+                fieldValue = EditorGUILayout.Vector2Field(fieldPrettyName, (Vector2)fieldValue);
             }
             else if (fieldType == typeof(Vector3)) {
-                fieldValue = EditorGUILayout.Vector3Field(new GUIContent(fieldName), (Vector3)fieldValue);
+                fieldValue = EditorGUILayout.Vector3Field(new GUIContent(fieldPrettyName), (Vector3)fieldValue);
             }
             else if (fieldType == typeof(Vector4)) {
-                fieldValue = EditorGUILayout.Vector4Field(fieldName, (Vector4)fieldValue);
+                fieldValue = EditorGUILayout.Vector4Field(fieldPrettyName, (Vector4)fieldValue);
             }
             else if (fieldType == typeof(Color)) {
-                fieldValue = EditorGUILayout.ColorField(fieldName, (Color)fieldValue);
+                fieldValue = EditorGUILayout.ColorField(fieldPrettyName, (Color)fieldValue);
             }
             else if (fieldType == typeof(AnimationCurve)) {
                 AnimationCurve curve = fieldValue != null ? (AnimationCurve)fieldValue : new AnimationCurve();
-                curve = EditorGUILayout.CurveField(fieldName, curve);
+                curve = EditorGUILayout.CurveField(fieldPrettyName, curve);
                 if (fieldValue != curve) fields[i].SetValue(target, curve);
             }
             else if (fieldType.IsSubclassOf(typeof(UnityEngine.Object)) || fieldType == typeof(UnityEngine.Object)) {
                 if (fieldName == "graph") continue; //Ignore 'graph'
-                fieldValue = EditorGUILayout.ObjectField(fieldName, (UnityEngine.Object)fieldValue, fieldType, true);
+                fieldValue = EditorGUILayout.ObjectField(fieldPrettyName, (UnityEngine.Object)fieldValue, fieldType, true);
             }
 
             if (EditorGUI.EndChangeCheck()) {

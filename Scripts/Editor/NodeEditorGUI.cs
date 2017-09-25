@@ -19,10 +19,6 @@ public partial class NodeEditorWindow {
         GUI.matrix = m;
     }
 
-    public static void DrawConnection(Vector2 from, Vector2 to, Color col) {
-        Handles.DrawBezier(from, to, from, to, col, new Texture2D(2, 2), 2);
-    }
-
     public static void BeginZoomed(Rect rect, float zoom) {
         GUI.EndClip();
             
@@ -101,7 +97,8 @@ public partial class NodeEditorWindow {
         contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
     }
 
-    public void DrawConnection(Vector2 startPoint, Vector2 endPoint) {
+    /// <summary> Draw a bezier from startpoint to endpoint, both in grid coordinates </summary>
+    public void DrawConnection(Vector2 startPoint, Vector2 endPoint, Color col) {
         startPoint = GridToWindowPosition(startPoint);
         endPoint = GridToWindowPosition(endPoint);
 
@@ -113,8 +110,11 @@ public partial class NodeEditorWindow {
         if (startPoint.x > endPoint.x) endTangent.x = Mathf.LerpUnclamped(endPoint.x, startPoint.x, -0.7f);
         else endTangent.x = Mathf.LerpUnclamped(endPoint.x, startPoint.x, 0.7f);
 
-        Handles.DrawBezier(startPoint, endPoint, startTangent, endTangent, Color.gray, null, 4);
-        Handles.DrawBezier(startPoint, endPoint, startTangent, endTangent, Color.white, null, 2);
+        Color prevCol = GUI.color;
+        Color edgeCol = new Color(0.1f, 0.1f, 0.1f, col.a);
+        Handles.DrawBezier(startPoint, endPoint, startTangent, endTangent, edgeCol, null, 4);
+        Handles.DrawBezier(startPoint, endPoint, startTangent, endTangent, col, null, 2);
+        GUI.color = prevCol;
     }
 
     public void DrawConnections() {
@@ -128,7 +128,7 @@ public partial class NodeEditorWindow {
                 for (int k = 0; k < output.ConnectionCount; k++) {
                     NodePort input = output.GetConnection(k);
                     Vector2 to = input.node.position.position + _portConnectionPoints[input].center;
-                    DrawConnection(from, to);
+                    DrawConnection(from, to, NodeEditorUtilities.GetTypeColor(output.type));
                 }
             }
         }

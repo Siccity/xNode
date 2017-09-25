@@ -24,4 +24,4 @@ Join the [Discord](https://discord.gg/qgPrHv4 "Join Discord server") server to l
 Feel free to also leave suggestions/requests in the [issues](https://github.com/Siccity/UnityNodeEditorCore/issues "Go to Issues") page.
 
 Projects using UnityNodeEditorCore:
-* [Graphmesh](https://github.com/Siccity/Graphmesh "Go to github page)
+* [Graphmesh](https://github.com/Siccity/Graphmesh "Go to github page")

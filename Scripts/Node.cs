@@ -10,8 +10,6 @@ public abstract class Node {
     /// <summary> Name of the node </summary>
     public string name = "";
     [NonSerialized] public NodeGraph graph;
-    public string NodeType { get { return nodeType; } }
-    [SerializeField] private string nodeType;
 
     [SerializeField] public Rect position = new Rect(0,0,200,200);
     [SerializeField] private NodePort[] inputs = new NodePort[0];
@@ -21,7 +19,6 @@ public abstract class Node {
     public int OutputCount { get { return outputs.Length; } }
 
     protected Node() {
-        nodeType = GetType().ToString();
         CachePorts();
         Init();
     }
@@ -58,12 +55,6 @@ public abstract class Node {
     }
     public NodePort CreateNodeOutput(string name, Type type) {
         return new NodePort(name, type, this, NodePort.IO.Output);
-    }
-
-    public void FinalizeDeserialization() {
-        for (int i = 0; i < outputs.Length; i++) {
-            outputs[i].FinalizeDeserialization();
-        }
     }
 
     public void ClearConnections() {

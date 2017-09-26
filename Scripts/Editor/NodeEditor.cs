@@ -137,7 +137,7 @@ public class NodeEditor {
         Color col = GUI.color;
         GUI.color = NodeEditorUtilities.GetTypeColor(port.type);
         GUI.DrawTexture(handleRect, NodeEditorResources.dot);
-        GUI.color = Color.black;
+        GUI.color = new Color(0.29f,0.31f,0.32f);
         GUI.DrawTexture(handleRect, NodeEditorResources.dotOuter);
         GUI.color = col;
     }

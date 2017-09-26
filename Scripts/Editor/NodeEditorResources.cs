@@ -25,9 +25,7 @@ public static class NodeEditorResources {
         public GUIStyle inputStyle, outputStyle;
 
         public Styles() {
-            GUIStyle baseStyle = new GUIStyle();
-            baseStyle.normal.textColor = Color.black;
-            baseStyle.onHover.textColor = Color.red;
+            GUIStyle baseStyle = new GUIStyle("Label");
             baseStyle.fixedHeight = 18;
 
             inputStyle = new GUIStyle(baseStyle);

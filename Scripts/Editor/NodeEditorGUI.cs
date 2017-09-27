@@ -124,10 +124,10 @@ public partial class NodeEditorWindow {
 
                 //Needs cleanup. Null checks are ugly
                 if (!portConnectionPoints.ContainsKey(output)) continue;
-                Vector2 from = _portConnectionPoints[output].center + node.position.position;
+                Vector2 from = _portConnectionPoints[output].center + node.rect.position;
                 for (int k = 0; k < output.ConnectionCount; k++) {
                     NodePort input = output.GetConnection(k);
-                    Vector2 to = input.node.position.position + _portConnectionPoints[input].center;
+                    Vector2 to = input.node.rect.position + _portConnectionPoints[input].center;
                     DrawConnection(from, to, NodeEditorUtilities.GetTypeColor(output.type));
                 }
             }
@@ -151,7 +151,7 @@ public partial class NodeEditorWindow {
         foreach (Node node in graph.nodes) {
 
             //Get node position
-            Vector2 nodePos = GridToWindowPositionNoClipped(node.position.position);
+            Vector2 nodePos = GridToWindowPositionNoClipped(node.rect.position);
 
             GUIStyle style = (node == selectedNode) ? (GUIStyle)"flow node 0 on" : (GUIStyle)"flow node 0";
             GUILayout.BeginArea(new Rect(nodePos,new Vector2(240,4000)));
@@ -176,7 +176,7 @@ public partial class NodeEditorWindow {
             GUILayout.FlexibleSpace();
 
             GUILayout.EndHorizontal();
-            if (e.type == EventType.Repaint) node.position.size = GUILayoutUtility.GetLastRect().size;
+            if (e.type == EventType.Repaint) node.rect.size = GUILayoutUtility.GetLastRect().size;
             GUILayout.EndArea();
         }
         EndZoomed(position, zoom);

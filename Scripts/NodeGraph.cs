@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+
 /// <summary> Base class for all node graphs </summary>
-[Serializable, CreateAssetMenu(fileName = "NewNodeGraph", menuName = "Node Graph")]
-public class NodeGraph : ScriptableObject {
+public abstract class NodeGraph : ScriptableObject {
     /// <summary> All nodes in the graph. <para/>
     /// See: <see cref="AddNode{T}"/> </summary>
     [NonSerialized] public List<Node> nodes = new List<Node>();
@@ -48,7 +48,6 @@ public class NodeGraph : ScriptableObject {
     public void Clear() {
         nodes.Clear();
     }
-
 
     private class NodeTyper {
         public string nodeType = "Node";

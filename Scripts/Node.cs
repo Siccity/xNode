@@ -8,21 +8,23 @@ using System;
 public abstract class Node {
 
     /// <summary> Name of the node </summary>
-    public string name = "";
-    [NonSerialized] public NodeGraph graph;
+    [SerializeField] public string name = "";
+    [SerializeField] public NodeGraph graph;
 
-    [SerializeField] public Rect position = new Rect(0,0,200,200);
     [SerializeField] private NodePort[] inputs = new NodePort[0];
     [SerializeField] private NodePort[] outputs = new NodePort[0];
+    [SerializeField] public Rect rect = new Rect(0,0,200,200);
 
     public int InputCount { get { return inputs.Length; } }
     public int OutputCount { get { return outputs.Length; } }
 
+    /// <summary> Constructor </summary>
     protected Node() {
-        CachePorts();
+        CachePorts(); //Cache the ports at creation time so we don't have to use reflection at runtime
         Init();
     }
 
+    /// <summary> Initialize node. Called on creation. </summary>
     protected virtual void Init() {
 
     }

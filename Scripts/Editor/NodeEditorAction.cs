@@ -53,7 +53,7 @@ public partial class NodeEditorWindow {
                         Repaint();
                     }
                     else if (IsDraggingNode) {
-                        draggedNode.position.position = WindowToGridPosition(e.mousePosition) + dragOffset;
+                        draggedNode.rect.position = WindowToGridPosition(e.mousePosition) + dragOffset;
                         Repaint();
                     }
                 }
@@ -84,7 +84,7 @@ public partial class NodeEditorWindow {
                 }
                 else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
                     draggedNode = hoveredNode;
-                    dragOffset = hoveredNode.position.position - WindowToGridPosition(e.mousePosition);
+                    dragOffset = hoveredNode.rect.position - WindowToGridPosition(e.mousePosition);
                 }
                 break;
             case EventType.MouseUp:
@@ -121,7 +121,7 @@ public partial class NodeEditorWindow {
 
     public void CreateNode(Type type, Vector2 position) {
         Node node = graph.AddNode(type);
-        node.position.position = position;
+        node.rect.position = position;
         Repaint();
     }
 
@@ -129,8 +129,8 @@ public partial class NodeEditorWindow {
     public void DrawDraggedConnection() {
         if (IsDraggingPort) {
             if (!_portConnectionPoints.ContainsKey(draggedOutput)) return;
-            Vector2 from = draggedOutput.node.position.position + _portConnectionPoints[draggedOutput].center;
-            Vector2 to = draggedOutputTarget != null ? draggedOutputTarget.node.position.position + portConnectionPoints[draggedOutputTarget].center : WindowToGridPosition(Event.current.mousePosition);
+            Vector2 from = draggedOutput.node.rect.position + _portConnectionPoints[draggedOutput].center;
+            Vector2 to = draggedOutputTarget != null ? draggedOutputTarget.node.rect.position + portConnectionPoints[draggedOutputTarget].center : WindowToGridPosition(Event.current.mousePosition);
             Color col = NodeEditorUtilities.GetTypeColor(draggedOutput.type);
             col.a = 0.6f;
             DrawConnection(from, to, col);
@@ -143,8 +143,8 @@ public partial class NodeEditorWindow {
         Node newHoverNode = null;
         foreach (Node node in graph.nodes) {
             //Get node position
-            Vector2 nodePos = GridToWindowPosition(node.position.position);
-            Rect windowRect = new Rect(nodePos, new Vector2(node.position.size.x / zoom, node.position.size.y / zoom));
+            Vector2 nodePos = GridToWindowPosition(node.rect.position);
+            Rect windowRect = new Rect(nodePos, new Vector2(node.rect.size.x / zoom, node.rect.size.y / zoom));
             if (windowRect.Contains(mousePos)) {
                 newHoverNode = node;
             }
@@ -162,7 +162,7 @@ public partial class NodeEditorWindow {
                 //Check if port rect is available
                 if (!portConnectionPoints.ContainsKey(port)) continue;
                 Rect r = portConnectionPoints[port];
-                r.position = GridToWindowPosition(r.position + hoveredNode.position.position);
+                r.position = GridToWindowPosition(r.position + hoveredNode.rect.position);
                 r.size /= zoom;
                 if (r.Contains(mousePos)) newHoverPort = port;
             }
@@ -172,7 +172,7 @@ public partial class NodeEditorWindow {
                 //Check if port rect is available
                 if (!portConnectionPoints.ContainsKey(port)) continue;
                 Rect r = portConnectionPoints[port];
-                r.position = GridToWindowPosition(r.position + hoveredNode.position.position);
+                r.position = GridToWindowPosition(r.position + hoveredNode.rect.position);
                 r.size /= zoom;
                 if (r.Contains(mousePos)) newHoverPort = port;
             }
@@ -186,8 +186,8 @@ public partial class NodeEditorWindow {
     bool IsHoveringTitle(Node node) {
         Vector2 mousePos = Event.current.mousePosition;
         //Get node position
-        Vector2 nodePos = GridToWindowPosition(node.position.position);
-        Rect windowRect = new Rect(nodePos, new Vector2(node.position.size.x / zoom, 30 / zoom));
+        Vector2 nodePos = GridToWindowPosition(node.rect.position);
+        Rect windowRect = new Rect(nodePos, new Vector2(node.rect.size.x / zoom, 30 / zoom));
         return windowRect.Contains(mousePos);
     }
 }

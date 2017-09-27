@@ -48,10 +48,6 @@ public partial class NodeEditorWindow : EditorWindow {
         }
     }
 
-    public void New() {
-        _graph = new NodeGraph();
-    }
-
     private void DraggableWindow(int windowID) {
         GUI.DragWindow();
     }

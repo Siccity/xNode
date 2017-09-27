@@ -26,9 +26,11 @@ public abstract class Node {
     }
 
     /// <summary> Initialize node. Called on creation. </summary>
-    protected virtual void Init() {
+    protected virtual void Init() { }
 
-    }
+    /// <summary> Called whenever a connection is being made between two <see cref="NodePort"/>s</summary>
+    /// <param name="from">Output</param> <param name="to">Input</param>
+    public virtual void OnCreateConnection(NodePort from, NodePort to) { }
 
     public int GetInputId(NodePort input) {
         for (int i = 0; i < inputs.Length; i++) {

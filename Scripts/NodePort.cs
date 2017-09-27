@@ -37,6 +37,8 @@ public class NodePort {
         _direction = direction;
     }
 
+    /// <summary> Connect this <see cref="NodePort"/> to another </summary>
+    /// <param name="port">The <see cref="NodePort"/> to connect to</param>
     public void Connect(NodePort port) {
         if (connections == null) connections = new List<NodePort>();
         if (port == null) { Debug.LogWarning("Cannot connect to null port"); return; }
@@ -45,6 +47,8 @@ public class NodePort {
         if (direction == port.direction) { Debug.LogWarning("Cannot connect two " + (direction == IO.Input ? "input" : "output") + " connections"); return; }
         connections.Add(port);
         port.connections.Add(this);
+        node.OnCreateConnection(this, port);
+        port.node.OnCreateConnection(this, port);
     }
 
     public NodePort GetConnection(int i) {
@@ -65,11 +69,5 @@ public class NodePort {
             connections[i].connections.Remove(this);
         }
         connections.Clear();
-    }
-
-    [Serializable]
-    private class PortID {
-        public int nodeID;
-        public int portID;
     }
 }

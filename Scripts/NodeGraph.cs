@@ -13,26 +13,11 @@ public abstract class NodeGraph : ScriptableObject {
     [SerializeField] public string[] s_nodes;
 
     public T AddNode<T>() where T : Node {
-        T node = default(T);
-        return AddNode(node) as T;
+        return AddNode(typeof(T)) as T;
     }
 
-    public Node AddNode(Type type) {
+    public virtual Node AddNode(Type type) {
         Node node = (Node)Activator.CreateInstance(type);
-        return AddNode(node);
-    }
-
-    public Node AddNode(string type) {
-        Debug.Log(type);
-        Node node = (Node)Activator.CreateInstance(null,type).Unwrap();
-        return AddNode(node);
-    }
-
-    public Node AddNode(Node node) {
-        if (node == null) {
-            Debug.LogError("Node could node be instanced");
-            return null;
-        }
         nodes.Add(node);
         node.graph = this;
         return node;
@@ -45,12 +30,9 @@ public abstract class NodeGraph : ScriptableObject {
         nodes.Remove(node);
     }
 
+    /// <summary> Remove all nodes and connections from the graph </summary>
     public void Clear() {
         nodes.Clear();
-    }
-
-    private class NodeTyper {
-        public string nodeType = "Node";
     }
 }
 

@@ -18,9 +18,9 @@ public partial class NodeEditorWindow : EditorWindow {
     private float _zoom = 1; 
 
     partial void OnEnable();
-
-    [MenuItem("Window/UNEC")]
-    static NodeEditorWindow Init() {
+    /// <summary> Create editor window </summary>
+    //[MenuItem("Window/UNEC")]
+    public static NodeEditorWindow Init() {
         NodeEditorWindow w = CreateInstance<NodeEditorWindow>();
         w.titleContent = new GUIContent("UNEC");
         w.wantsMouseMove = true;

@@ -27,14 +27,14 @@ public class NodeEditor {
         //Inputs
         GUILayout.BeginVertical();
         for (int i = 0; i < target.InputCount; i++) {
-            DrawNodePortGUI(target.GetInput(i));
+            DrawNodePortGUI(target.inputs[i]);
         }
         GUILayout.EndVertical();
 
         //Outputs
         GUILayout.BeginVertical();
         for (int i = 0; i < target.OutputCount; i++) {
-            DrawNodePortGUI(target.GetOutput(i));
+            DrawNodePortGUI(target.outputs[i]);
         }
         GUILayout.EndVertical();
 

@@ -158,7 +158,7 @@ public partial class NodeEditorWindow {
             NodePort newHoverPort = null;
             //Check all input ports
             for (int i = 0; i < hoveredNode.InputCount; i++) {
-                NodePort port = hoveredNode.GetInput(i);
+                NodePort port = hoveredNode.inputs[i];
                 //Check if port rect is available
                 if (!portConnectionPoints.ContainsKey(port)) continue;
                 Rect r = portConnectionPoints[port];
@@ -168,7 +168,7 @@ public partial class NodeEditorWindow {
             }
             //Check all output ports
             for (int i = 0; i < hoveredNode.OutputCount; i++) {
-                NodePort port = hoveredNode.GetOutput(i);
+                NodePort port = hoveredNode.outputs[i];
                 //Check if port rect is available
                 if (!portConnectionPoints.ContainsKey(port)) continue;
                 Rect r = portConnectionPoints[port];

@@ -10,10 +10,11 @@ public abstract class Node {
     /// <summary> Name of the node </summary>
     [SerializeField] public string name = "";
     [SerializeField] public NodeGraph graph;
-
-    [SerializeField] private NodePort[] inputs = new NodePort[0];
-    [SerializeField] private NodePort[] outputs = new NodePort[0];
     [SerializeField] public Rect rect = new Rect(0,0,200,200);
+    /// <summary> Input <see cref="NodePort"/>s. It is recommended not to modify these at hand. Instead, see <see cref="InputAttribute"/> </summary>
+    [SerializeField] public NodePort[] inputs = new NodePort[0];
+    /// <summary> Output <see cref="NodePort"/>s. It is recommended not to modify these at hand. Instead, see <see cref="InputAttribute"/> </summary>
+    [SerializeField] public NodePort[] outputs = new NodePort[0];
 
     public int InputCount { get { return inputs.Length; } }
     public int OutputCount { get { return outputs.Length; } }
@@ -42,14 +43,6 @@ public abstract class Node {
 
         }
         return -1;
-    }
-
-    public NodePort GetInput(int portId) {
-        return inputs[portId];
-    }
-
-    public NodePort GetOutput(int portId) {
-        return outputs[portId];
     }
 
     public NodePort CreateNodeInput(string name, Type type) {

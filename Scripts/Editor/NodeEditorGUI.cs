@@ -120,7 +120,7 @@ public partial class NodeEditorWindow {
     public void DrawConnections() {
         foreach (Node node in graph.nodes) {
             for (int i = 0; i < node.OutputCount; i++) {
-                NodePort output = node.GetOutput(i);
+                NodePort output = node.outputs[i];
 
                 //Needs cleanup. Null checks are ugly
                 if (!portConnectionPoints.ContainsKey(output)) continue;

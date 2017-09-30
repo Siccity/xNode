@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System;
+using System.Collections.Generic;
 
 /// <summary> Contains GUI methods </summary>
 public partial class NodeEditorWindow {
@@ -14,6 +15,7 @@ public partial class NodeEditorWindow {
         DrawNodes();
         DrawConnections();
         DrawDraggedConnection();
+        DrawPortHandles();
         DrawToolbar();
 
         GUI.matrix = m;
@@ -117,6 +119,7 @@ public partial class NodeEditorWindow {
         GUI.color = prevCol;
     }
 
+    /// <summary> Draws all connections </summary>
     public void DrawConnections() {
         foreach (Node node in graph.nodes) {
             for (int i = 0; i < node.OutputCount; i++) {
@@ -124,14 +127,28 @@ public partial class NodeEditorWindow {
 
                 //Needs cleanup. Null checks are ugly
                 if (!portConnectionPoints.ContainsKey(output)) continue;
-                Vector2 from = _portConnectionPoints[output].center + node.rect.position;
+                Vector2 from = _portConnectionPoints[output].center;
                 for (int k = 0; k < output.ConnectionCount; k++) {
                     NodePort input = output.GetConnection(k);
-                    Vector2 to = input.node.rect.position + _portConnectionPoints[input].center;
+                    Vector2 to = _portConnectionPoints[input].center;
                     DrawConnection(from, to, NodeEditorUtilities.GetTypeColor(output.type));
                 }
             }
         }
+    }
+
+    /// <summary> Draws the draggable circle handles on the ports </summary>
+    public void DrawPortHandles() {
+        Color col = GUI.color;
+        foreach(var kvp in portConnectionPoints) {
+            Rect rect = GridToWindowRect(kvp.Value);
+            GUI.color = new Color(0.29f, 0.31f, 0.32f);
+            GUI.DrawTexture(rect, NodeEditorResources.dotOuter);
+            GUI.color = NodeEditorUtilities.GetTypeColor(kvp.Key.type);
+            GUI.DrawTexture(rect, NodeEditorResources.dot);
+            
+        }
+        GUI.color = col;
     }
 
     private void DrawNodes() {
@@ -164,10 +181,14 @@ public partial class NodeEditorWindow {
 
             nodeEditor.target = node;
 
-            nodeEditor.OnNodeGUI();
+            Dictionary<NodePort, Vector2> portHandlePoints;
+            nodeEditor.OnNodeGUI(out portHandlePoints);
             if (e.type == EventType.Repaint) {
-                foreach (var kvp in nodeEditor.portRects) {
-                    portConnectionPoints.Add(kvp.Key, kvp.Value);
+                foreach (var kvp in portHandlePoints) {
+                    Vector2 portHandlePos = kvp.Value;
+                    portHandlePos += node.rect.position;
+                    Rect rect = new Rect(portHandlePos.x - 8, portHandlePos.y - 8, 16, 16);
+                    portConnectionPoints.Add(kvp.Key, rect);
                 }
             }
 

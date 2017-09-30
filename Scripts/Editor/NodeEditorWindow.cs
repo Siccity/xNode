@@ -7,15 +7,16 @@ using UnityEditor.Callbacks;
 using System;
 
 [InitializeOnLoad]
-public partial class NodeEditorWindow : EditorWindow { 
+public partial class NodeEditorWindow : EditorWindow {
+    /// <summary> Stores node positions for all nodePorts. </summary>
     public Dictionary<NodePort, Rect> portConnectionPoints { get { return _portConnectionPoints; } }
     private Dictionary<NodePort, Rect> _portConnectionPoints = new Dictionary<NodePort, Rect>();
-    public NodeGraph graph { get { return _graph != null ? _graph : _graph = CreateInstance<NodeGraph>(); } }
-    public NodeGraph _graph; 
+    public NodeGraph graph; 
     public Vector2 panOffset { get { return _panOffset; } set { _panOffset = value; Repaint(); } }
     private Vector2 _panOffset; 
     public float zoom { get { return _zoom; } set { _zoom = Mathf.Clamp(value, 1f, 5f); Repaint(); } }
-    private float _zoom = 1; 
+    private float _zoom = 1;
+
 
     partial void OnEnable();
     /// <summary> Create editor window </summary>
@@ -29,8 +30,8 @@ public partial class NodeEditorWindow : EditorWindow {
     }
 
     public void Save() {
-        if (AssetDatabase.Contains(_graph)) {
-            EditorUtility.SetDirty(_graph);
+        if (AssetDatabase.Contains(graph)) {
+            EditorUtility.SetDirty(graph);
             AssetDatabase.SaveAssets();
         }
         else SaveAs();
@@ -42,8 +43,8 @@ public partial class NodeEditorWindow : EditorWindow {
         else {
             NodeGraph existingGraph = AssetDatabase.LoadAssetAtPath<NodeGraph>(path);
             if (existingGraph != null) AssetDatabase.DeleteAsset(path);
-            AssetDatabase.CreateAsset(_graph, path);
-            EditorUtility.SetDirty(_graph);
+            AssetDatabase.CreateAsset(graph, path);
+            EditorUtility.SetDirty(graph);
             AssetDatabase.SaveAssets();
         }
     }
@@ -60,6 +61,12 @@ public partial class NodeEditorWindow : EditorWindow {
         return (position.size * 0.5f) + (panOffset / zoom) + (gridPosition/zoom);
     }
 
+    public Rect GridToWindowRect(Rect gridRect) {
+        gridRect.position = GridToWindowPosition(gridRect.position);
+        gridRect.size /= zoom;
+        return gridRect;
+    }
+
     public Vector2 GridToWindowPositionNoClipped(Vector2 gridPosition) {
         Vector2 center = position.size * 0.5f;
         float xOffset = (center.x * zoom + (panOffset.x + gridPosition.x));
@@ -71,12 +78,13 @@ public partial class NodeEditorWindow : EditorWindow {
         selectedNode = node;
     }
 
+
     [OnOpenAsset(0)]
     public static bool OnOpen(int instanceID, int line) {
         NodeGraph nodeGraph = EditorUtility.InstanceIDToObject(instanceID) as NodeGraph;
         if (nodeGraph != null) {
             NodeEditorWindow w = Init();
-            w._graph = nodeGraph;
+            w.graph = nodeGraph;
             return true;
         }
         return false;

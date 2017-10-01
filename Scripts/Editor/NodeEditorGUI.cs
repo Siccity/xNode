@@ -164,23 +164,21 @@ public partial class NodeEditorWindow {
         }
 
         BeginZoomed(position, zoom);
-        //if (e.type == EventType.Repaint) portRects.Clear();
+        
         foreach (Node node in graph.nodes) {
+            NodeEditor nodeEditor = GetNodeEditor(node.GetType());
+            nodeEditor.target = node;
 
             //Get node position
             Vector2 nodePos = GridToWindowPositionNoClipped(node.rect.position);
 
             GUIStyle style = (node == selectedNode) ? (GUIStyle)"flow node 0 on" : (GUIStyle)"flow node 0";
-            GUILayout.BeginArea(new Rect(nodePos,new Vector2(240,4000)));
-            string nodeName = string.IsNullOrEmpty(node.name) ? node.ToString() : node.name;
-            GUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-            GUILayout.BeginVertical(nodeName, style, GUILayout.Width(200));
+            style = new GUIStyle(style);
+            style.padding.top = 0;
+            GUILayout.BeginArea(new Rect(nodePos,new Vector2(nodeEditor.GetWidth(), 4000)));
+            GUILayout.BeginVertical(style);
 
-            NodeEditor nodeEditor = GetNodeEditor(node.GetType());
-
-            nodeEditor.target = node;
-
+            //Draw node contents
             Dictionary<NodePort, Vector2> portHandlePoints;
             nodeEditor.OnNodeGUI(out portHandlePoints);
             if (e.type == EventType.Repaint) {
@@ -194,10 +192,7 @@ public partial class NodeEditorWindow {
 
             GUILayout.EndVertical();
 
-            GUILayout.FlexibleSpace();
-
-            GUILayout.EndHorizontal();
-            if (e.type == EventType.Repaint) node.rect.size = GUILayoutUtility.GetLastRect().size;
+            //if (e.type == EventType.Repaint) node.rect.size = GUILayoutUtility.GetLastRect().size;
             GUILayout.EndArea();
         }
         EndZoomed(position, zoom);

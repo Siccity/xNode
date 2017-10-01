@@ -22,7 +22,7 @@ public static class NodeEditorResources {
     public static Styles _styles = null;
 
     public class Styles {
-        public GUIStyle inputStyle, outputStyle;
+        public GUIStyle inputStyle, outputStyle, headerStyle;
 
         public Styles() {
             GUIStyle baseStyle = new GUIStyle("Label");
@@ -35,6 +35,10 @@ public static class NodeEditorResources {
             outputStyle = new GUIStyle(baseStyle);
             outputStyle.alignment = TextAnchor.UpperRight;
             outputStyle.padding.right = 10;
+
+            headerStyle = new GUIStyle();
+            headerStyle.alignment = TextAnchor.MiddleCenter;
+            headerStyle.fontStyle = FontStyle.Bold;
         }
     }
 

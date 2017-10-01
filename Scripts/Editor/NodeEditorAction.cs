@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEditor;
 using System;
 
-/// <summary> User input related UNEC functionality </summary>
 public partial class NodeEditorWindow {
 
     public static bool isPanning { get; private set; }

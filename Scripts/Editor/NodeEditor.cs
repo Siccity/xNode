@@ -13,8 +13,14 @@ public class NodeEditor {
     /// <summary> Draws the node GUI.</summary>
     /// <param name="portPositions">Port handle positions need to be returned to the NodeEditorWindow </param>
     public virtual void OnNodeGUI(out Dictionary<NodePort,Vector2> portPositions) {
+        DrawDefaultHeaderGUI();
         DrawDefaultNodePortsGUI(out portPositions);
         DrawDefaultNodeBodyGUI();
+    }
+
+    protected void DrawDefaultHeaderGUI() {
+        
+        GUILayout.Label(target.name, NodeEditorResources.styles.headerStyle, GUILayout.Height(30));
     }
 
     /// <summary> Draws standard editors for all fields marked with <see cref="Node.InputAttribute"/> or <see cref="Node.OutputAttribute"/> </summary>
@@ -144,6 +150,10 @@ public class NodeEditor {
         if (EditorGUI.EndChangeCheck()) {
             fieldInfo.SetValue(target, fieldValue);
         }
+    }
+
+    public virtual int GetWidth() {
+        return 200;
     }
 }
 

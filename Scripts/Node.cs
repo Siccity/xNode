@@ -26,7 +26,7 @@ public abstract class Node {
     }
 
     /// <summary> Initialize node. Called on creation. </summary>
-    protected virtual void Init() { }
+    protected virtual void Init() { name = GetType().Name; }
 
     /// <summary> Called whenever a connection is being made between two <see cref="NodePort"/>s</summary>
     /// <param name="from">Output</param> <param name="to">Input</param>

@@ -3,42 +3,57 @@ using UnityEditor;
 using System;
 
 public static class NodeEditorResources {
-
+    //Unec textures
     public static Texture2D gridTexture { get { return _gridTexture != null ? _gridTexture : _gridTexture = GenerateGridTexture(); } }
     private static Texture2D _gridTexture;
     public static Texture2D crossTexture { get { return _crossTexture != null ? _crossTexture : _crossTexture = GenerateCrossTexture(); } }
     private static Texture2D _crossTexture;
-    public static Texture2D dot { get { return _dot != null ? _dot : _dot = Resources.Load<Texture2D>("dot"); } }
+    public static Texture2D dot { get { return _dot != null ? _dot : _dot = Resources.Load<Texture2D>("unec_dot"); } }
     private static Texture2D _dot;
-    public static Texture2D dotOuter { get { return _dotOuter != null ? _dotOuter : _dotOuter = Resources.Load<Texture2D>("dot_outer"); } }
+    public static Texture2D dotOuter { get { return _dotOuter != null ? _dotOuter : _dotOuter = Resources.Load<Texture2D>("unec_dot_outer"); } }
     private static Texture2D _dotOuter;
+    public static Texture2D nodeFrame { get { return _nodeFrame != null ? _nodeFrame : _nodeFrame = Resources.Load<Texture2D>("unec_nodeframe"); } }
+    private static Texture2D _nodeFrame;
+    public static Texture2D nodeFrameOuter { get { return _nodeFrameOuter != null ? _nodeFrameOuter : _nodeFrameOuter = Resources.Load<Texture2D>("unec_nodeframe_outer"); } }
+    private static Texture2D _nodeFrameOuter;
 
+    //Grid colors
     private static Color backgroundColor = new Color(0.18f, 0.18f, 0.18f);
     private static Color veinColor = new Color(0.25f, 0.25f, 0.25f);
     private static Color arteryColor = new Color(0.34f, 0.34f, 0.34f);
     private static Color crossColor = new Color(0.45f, 0.45f, 0.45f);
 
+    //Unec styles
     public static Styles styles { get { return _styles != null ? _styles : _styles = new Styles(); } }
     public static Styles _styles = null;
 
     public class Styles {
-        public GUIStyle inputStyle, outputStyle, headerStyle;
+        public GUIStyle inputPort, outputPort, nodeHeader, nodeFrame, nodeContent;
 
         public Styles() {
             GUIStyle baseStyle = new GUIStyle("Label");
             baseStyle.fixedHeight = 18;
 
-            inputStyle = new GUIStyle(baseStyle);
-            inputStyle.alignment = TextAnchor.UpperLeft;
-            inputStyle.padding.left = 10;
+            inputPort = new GUIStyle(baseStyle);
+            inputPort.alignment = TextAnchor.UpperLeft;
+            inputPort.padding.left = 10;
 
-            outputStyle = new GUIStyle(baseStyle);
-            outputStyle.alignment = TextAnchor.UpperRight;
-            outputStyle.padding.right = 10;
+            outputPort = new GUIStyle(baseStyle);
+            outputPort.alignment = TextAnchor.UpperRight;
+            outputPort.padding.right = 10;
 
-            headerStyle = new GUIStyle();
-            headerStyle.alignment = TextAnchor.MiddleCenter;
-            headerStyle.fontStyle = FontStyle.Bold;
+            nodeHeader = new GUIStyle();
+            nodeHeader.alignment = TextAnchor.MiddleCenter;
+            nodeHeader.fontStyle = FontStyle.Bold;
+            nodeHeader.normal.textColor = Color.white;
+
+            nodeFrame = new GUIStyle();
+            nodeFrame.normal.background = nodeFrameOuter;
+            nodeFrame.border = new RectOffset(32, 32, 32, 32);
+
+            nodeContent = new GUIStyle();
+            nodeContent.normal.background = NodeEditorResources.nodeFrame;
+            nodeContent.border = new RectOffset(32, 32, 32, 32);
         }
     }
 

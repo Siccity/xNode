@@ -19,8 +19,8 @@ public class NodeEditor {
     }
 
     protected void DrawDefaultHeaderGUI() {
-        
-        GUILayout.Label(target.name, NodeEditorResources.styles.headerStyle, GUILayout.Height(30));
+        GUI.color = Color.white;
+        GUILayout.Label(target.name, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
     }
 
     /// <summary> Draws standard editors for all fields marked with <see cref="Node.InputAttribute"/> or <see cref="Node.OutputAttribute"/> </summary>
@@ -63,14 +63,14 @@ public class NodeEditor {
 
     /// <summary> Draw node port GUI using automatic layouting. Returns port handle position. </summary>
     protected Vector2 DrawNodePortGUI(NodePort port) {
-        GUIStyle style = port.direction == NodePort.IO.Input ? NodeEditorResources.styles.inputStyle : NodeEditorResources.styles.outputStyle;
+        GUIStyle style = port.direction == NodePort.IO.Input ? NodeEditorResources.styles.inputPort : NodeEditorResources.styles.outputPort;
         Rect rect = GUILayoutUtility.GetRect(new GUIContent(port.name.PrettifyCamelCase()), style);
         return DrawNodePortGUI(rect, port);
     }
 
     /// <summary> Draw node port GUI in rect. Returns port handle position. </summary>
     protected Vector2 DrawNodePortGUI(Rect rect, NodePort port) {
-        GUIStyle style = port.direction == NodePort.IO.Input ? NodeEditorResources.styles.inputStyle : NodeEditorResources.styles.outputStyle;
+        GUIStyle style = port.direction == NodePort.IO.Input ? NodeEditorResources.styles.inputPort : NodeEditorResources.styles.outputPort;
         GUI.Label(rect, new GUIContent(port.name.PrettifyCamelCase()), style);
 
         Vector2 handlePoint = rect.center;
@@ -79,6 +79,14 @@ public class NodeEditor {
             case NodePort.IO.Input: handlePoint.x = rect.xMin; break;
             case NodePort.IO.Output: handlePoint.x = rect.xMax; break;
         }
+
+        Color col = GUI.color;
+        Rect handleRect = new Rect(handlePoint.x-8,handlePoint.y-8,16,16);
+        GUI.color = new Color(0.29f, 0.31f, 0.32f);
+        GUI.DrawTexture(handleRect, NodeEditorResources.dotOuter);
+        GUI.color = NodeEditorUtilities.GetTypeColor(port.type);
+        GUI.DrawTexture(handleRect, NodeEditorResources.dot);
+        GUI.color = col;
         return handlePoint;
     }
 

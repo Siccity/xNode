@@ -12,10 +12,9 @@ public partial class NodeEditorWindow {
         Controls();
 
         DrawGrid(position, zoom, panOffset);
-        DrawNodes();
         DrawConnections();
         DrawDraggedConnection();
-        DrawPortHandles();
+        DrawNodes();
         DrawToolbar();
 
         GUI.matrix = m;
@@ -115,7 +114,7 @@ public partial class NodeEditorWindow {
         Color prevCol = GUI.color;
         Color edgeCol = new Color(0.1f, 0.1f, 0.1f, col.a);
         Handles.DrawBezier(startPoint, endPoint, startTangent, endTangent, edgeCol, null, 4);
-        Handles.DrawBezier(startPoint, endPoint, startTangent, endTangent, col, null, 2);
+        Handles.DrawBezier(startPoint, endPoint, startTangent, endTangent, col, null, 4);
         GUI.color = prevCol;
     }
 
@@ -135,20 +134,6 @@ public partial class NodeEditorWindow {
                 }
             }
         }
-    }
-
-    /// <summary> Draws the draggable circle handles on the ports </summary>
-    public void DrawPortHandles() {
-        Color col = GUI.color;
-        foreach(var kvp in portConnectionPoints) {
-            Rect rect = GridToWindowRect(kvp.Value);
-            GUI.color = new Color(0.29f, 0.31f, 0.32f);
-            GUI.DrawTexture(rect, NodeEditorResources.dotOuter);
-            GUI.color = NodeEditorUtilities.GetTypeColor(kvp.Key.type);
-            GUI.DrawTexture(rect, NodeEditorResources.dot);
-            
-        }
-        GUI.color = col;
     }
 
     private void DrawNodes() {
@@ -172,11 +157,12 @@ public partial class NodeEditorWindow {
             //Get node position
             Vector2 nodePos = GridToWindowPositionNoClipped(node.rect.position);
 
-            GUIStyle style = (node == selectedNode) ? (GUIStyle)"flow node 0 on" : (GUIStyle)"flow node 0";
-            style = new GUIStyle(style);
-            style.padding.top = 0;
+            //GUIStyle style = (node == selectedNode) ? (GUIStyle)"flow node 0 on" : (GUIStyle)"flow node 0";
+            
             GUILayout.BeginArea(new Rect(nodePos,new Vector2(nodeEditor.GetWidth(), 4000)));
-            GUILayout.BeginVertical(style);
+
+            GUIStyle style = NodeEditorResources.styles.nodeBody;
+            GUILayout.BeginVertical(new GUIStyle(style));
 
             //Draw node contents
             Dictionary<NodePort, Vector2> portHandlePoints;

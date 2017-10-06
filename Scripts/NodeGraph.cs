@@ -5,7 +5,8 @@ using System;
 
 /// <summary> Base class for all node graphs </summary>
 [Serializable]
-public abstract class NodeGraph : ScriptableObject {
+public abstract class NodeGraph : ScriptableObject, ISerializationCallbackReceiver {
+
     /// <summary> All nodes in the graph. <para/>
     /// See: <see cref="AddNode{T}"/> </summary>
     [SerializeField] public List<Node> nodes = new List<Node>();
@@ -15,7 +16,10 @@ public abstract class NodeGraph : ScriptableObject {
     }
 
     public virtual Node AddNode(Type type) {
-        Node node = (Node)Activator.CreateInstance(type);
+        Node node = ScriptableObject.CreateInstance(type) as Node;
+#if UNITY_EDITOR
+        UnityEditor.AssetDatabase.AddObjectToAsset(node, this);
+#endif
         nodes.Add(node);
         node.graph = this;
         return node;
@@ -31,6 +35,15 @@ public abstract class NodeGraph : ScriptableObject {
     /// <summary> Remove all nodes and connections from the graph </summary>
     public void Clear() {
         nodes.Clear();
+    }
+
+    public void OnBeforeSerialize() {
+    }
+
+    public void OnAfterDeserialize() {
+        for (int i = 0; i < nodes.Count; i++) {
+            nodes[i].graph = this;
+        }
     }
 }
 

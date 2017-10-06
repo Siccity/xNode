@@ -93,6 +93,8 @@ public partial class NodeEditorWindow {
                         //If connection is valid, save it
                         if (draggedOutputTarget != null) {
                             if (graph.nodes.Count != 0) draggedOutput.Connect(draggedOutputTarget);
+                            EditorUtility.SetDirty(graph);
+                            AssetDatabase.SaveAssets();
                         }
                         //Release dragged connection
                         draggedOutput = null;

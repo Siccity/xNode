@@ -5,23 +5,24 @@ using System;
 
 /// <summary> Base class for all nodes </summary>
 [Serializable]
-public abstract class Node {
+public abstract class Node : ScriptableObject {
 
     /// <summary> Name of the node </summary>
-    [SerializeField] public string name = "";
-    [SerializeField] public NodeGraph graph;
+    [NonSerialized] public NodeGraph graph;
     [SerializeField] public Rect rect = new Rect(0,0,200,200);
     /// <summary> Input <see cref="NodePort"/>s. It is recommended not to modify these at hand. Instead, see <see cref="InputAttribute"/> </summary>
-    [SerializeField] public NodePort[] inputs = new NodePort[0];
+    [SerializeField] public List<NodePort> inputs = new List<NodePort>();
     /// <summary> Output <see cref="NodePort"/>s. It is recommended not to modify these at hand. Instead, see <see cref="InputAttribute"/> </summary>
     [SerializeField] public NodePort[] outputs = new NodePort[0];
 
-    public int InputCount { get { return inputs.Length; } }
+    public int InputCount { get { return inputs.Count; } }
     public int OutputCount { get { return outputs.Length; } }
 
-    /// <summary> Constructor </summary>
     protected Node() {
         CachePorts(); //Cache the ports at creation time so we don't have to use reflection at runtime
+    }
+
+    protected void OnEnable() {
         Init();
     }
 
@@ -33,7 +34,7 @@ public abstract class Node {
     public virtual void OnCreateConnection(NodePort from, NodePort to) { }
 
     public int GetInputId(NodePort input) {
-        for (int i = 0; i < inputs.Length; i++) {
+        for (int i = 0; i < inputs.Count; i++) {
             if (input == inputs[i]) return i;
 
         }
@@ -55,7 +56,7 @@ public abstract class Node {
     }
 
     public void ClearConnections() {
-        for (int i = 0; i < inputs.Length; i++) {
+        for (int i = 0; i < inputs.Count; i++) {
             inputs[i].ClearConnections();
         }
         for (int i = 0; i < outputs.Length; i++) {
@@ -99,7 +100,7 @@ public abstract class Node {
             else if (outputAttrib != null) outputPorts.Add(new NodePort(fieldInfo[i].Name, fieldInfo[i].FieldType, this, NodePort.IO.Output));
         }
 
-        inputs = inputPorts.ToArray();
+        inputs = inputPorts;
         outputs = outputPorts.ToArray();
     }
 }

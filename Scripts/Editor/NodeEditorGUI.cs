@@ -161,13 +161,8 @@ public partial class NodeEditorWindow {
             
             GUILayout.BeginArea(new Rect(nodePos,new Vector2(nodeEditor.GetWidth(), 4000)));
 
-            GUI.color = new Color(0.29f, 0.31f, 0.32f,0.8f);
-            GUIStyle style = NodeEditorResources.styles.nodeContent;
+            GUIStyle style = NodeEditorResources.styles.nodeBody;
             GUILayout.BeginVertical(new GUIStyle(style));
-            GUI.color = new Color(0.1f, 0.1f, 0.1f, 0.9f);
-            style = NodeEditorResources.styles.nodeFrame;
-            GUILayout.BeginVertical(new GUIStyle(style));
-            GUI.color = Color.white;
 
             //Draw node contents
             Dictionary<NodePort, Vector2> portHandlePoints;
@@ -181,7 +176,6 @@ public partial class NodeEditorWindow {
                 }
             }
 
-            GUILayout.EndVertical();
             GUILayout.EndVertical();
 
             //if (e.type == EventType.Repaint) node.rect.size = GUILayoutUtility.GetLastRect().size;

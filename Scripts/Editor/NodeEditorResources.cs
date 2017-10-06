@@ -12,10 +12,8 @@ public static class NodeEditorResources {
     private static Texture2D _dot;
     public static Texture2D dotOuter { get { return _dotOuter != null ? _dotOuter : _dotOuter = Resources.Load<Texture2D>("unec_dot_outer"); } }
     private static Texture2D _dotOuter;
-    public static Texture2D nodeFrame { get { return _nodeFrame != null ? _nodeFrame : _nodeFrame = Resources.Load<Texture2D>("unec_nodeframe"); } }
-    private static Texture2D _nodeFrame;
-    public static Texture2D nodeFrameOuter { get { return _nodeFrameOuter != null ? _nodeFrameOuter : _nodeFrameOuter = Resources.Load<Texture2D>("unec_nodeframe_outer"); } }
-    private static Texture2D _nodeFrameOuter;
+    public static Texture2D nodeBody { get { return _nodeBody != null ? _nodeBody : _nodeBody = Resources.Load<Texture2D>("unec_node"); } }
+    private static Texture2D _nodeBody;
 
     //Grid colors
     private static Color backgroundColor = new Color(0.18f, 0.18f, 0.18f);
@@ -28,7 +26,7 @@ public static class NodeEditorResources {
     public static Styles _styles = null;
 
     public class Styles {
-        public GUIStyle inputPort, outputPort, nodeHeader, nodeFrame, nodeContent;
+        public GUIStyle inputPort, outputPort, nodeHeader, nodeBody;
 
         public Styles() {
             GUIStyle baseStyle = new GUIStyle("Label");
@@ -47,13 +45,9 @@ public static class NodeEditorResources {
             nodeHeader.fontStyle = FontStyle.Bold;
             nodeHeader.normal.textColor = Color.white;
 
-            nodeFrame = new GUIStyle();
-            nodeFrame.normal.background = nodeFrameOuter;
-            nodeFrame.border = new RectOffset(32, 32, 32, 32);
-
-            nodeContent = new GUIStyle();
-            nodeContent.normal.background = NodeEditorResources.nodeFrame;
-            nodeContent.border = new RectOffset(32, 32, 32, 32);
+            nodeBody = new GUIStyle();
+            nodeBody.normal.background = NodeEditorResources.nodeBody;
+            nodeBody.border = new RectOffset(32, 32, 32, 32);
         }
     }
 

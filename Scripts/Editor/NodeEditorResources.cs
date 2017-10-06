@@ -48,6 +48,7 @@ public static class NodeEditorResources {
             nodeBody = new GUIStyle();
             nodeBody.normal.background = NodeEditorResources.nodeBody;
             nodeBody.border = new RectOffset(32, 32, 32, 32);
+            nodeBody.padding = new RectOffset(10, 10, 2, 2); 
         }
     }
 

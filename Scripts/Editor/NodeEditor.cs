@@ -114,7 +114,11 @@ public class NodeEditor {
             fieldValue = EditorGUILayout.Toggle(fieldPrettyName, (bool)fieldValue);
         }
         else if (fieldType.IsEnum) {
-            fieldValue = EditorGUILayout.EnumPopup(fieldPrettyName, (Enum)fieldValue);
+            Rect rect = EditorGUILayout.GetControlRect();
+            rect.width *= 0.5f;
+            EditorGUI.LabelField(rect, fieldPrettyName);
+            rect.x += rect.width;
+            fieldValue = EditorGUI.EnumPopup(rect, (Enum)fieldValue);
         }
         else if (fieldType == typeof(string)) {
 

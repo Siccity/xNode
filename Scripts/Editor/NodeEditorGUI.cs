@@ -114,7 +114,7 @@ public partial class NodeEditorWindow {
         Color prevCol = GUI.color;
         Color edgeCol = new Color(0.1f, 0.1f, 0.1f, col.a);
         Handles.DrawBezier(startPoint, endPoint, startTangent, endTangent, edgeCol, null, 4);
-        Handles.DrawBezier(startPoint, endPoint, startTangent, endTangent, col, null, 2);
+        Handles.DrawBezier(startPoint, endPoint, startTangent, endTangent, col, null, 4);
         GUI.color = prevCol;
     }
 

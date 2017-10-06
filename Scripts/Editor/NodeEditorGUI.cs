@@ -12,9 +12,9 @@ public partial class NodeEditorWindow {
         Controls();
 
         DrawGrid(position, zoom, panOffset);
-        DrawNodes();
         DrawConnections();
         DrawDraggedConnection();
+        DrawNodes();
         DrawToolbar();
 
         GUI.matrix = m;

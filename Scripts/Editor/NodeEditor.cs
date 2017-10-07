@@ -131,7 +131,7 @@ public class NodeEditor {
                 fieldValue = EditorGUILayout.TextField(fieldPrettyName, fieldValue != null ? (string)fieldValue : "");
         }
         else if (fieldType == typeof(Rect)) {
-            if (fieldName == "position") return; //Ignore 'position'
+            if (fieldName == "rect") return; //Ignore 'rect'
             fieldValue = EditorGUILayout.RectField(fieldPrettyName, (Rect)fieldValue);
         }
         else if (fieldType == typeof(float)) {

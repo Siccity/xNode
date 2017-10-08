@@ -55,6 +55,10 @@ public class NodePort {
         }
     }
 
+    public object GetValue() {
+        return node.GetValue(this);
+    }
+
     /// <summary> Connect this <see cref="NodePort"/> to another </summary>
     /// <param name="port">The <see cref="NodePort"/> to connect to</param>
     public void Connect(NodePort port) {

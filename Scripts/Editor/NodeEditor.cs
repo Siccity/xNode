@@ -58,7 +58,6 @@ public class NodeEditor {
             if (NodeEditorUtilities.HasAttrib<Node.InputAttribute>(fieldAttribs) || NodeEditorUtilities.HasAttrib<Node.OutputAttribute>(fieldAttribs)) continue;
             DrawFieldInfoDrawerGUI(fields[i]);
         }
-        EditorGUILayout.Space();
     }
 
     /// <summary> Draw node port GUI using automatic layouting. Returns port handle position. </summary>

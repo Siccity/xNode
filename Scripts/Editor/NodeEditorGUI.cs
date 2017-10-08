@@ -167,6 +167,8 @@ public partial class NodeEditorWindow {
             //Draw node contents
             Dictionary<NodePort, Vector2> portHandlePoints;
             nodeEditor.OnNodeGUI(out portHandlePoints);
+            EditorGUILayout.Space();
+
             if (e.type == EventType.Repaint) {
                 foreach (var kvp in portHandlePoints) {
                     Vector2 portHandlePos = kvp.Value;

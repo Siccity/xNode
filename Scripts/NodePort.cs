@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Reflection;
 
 [Serializable]
 public class NodePort {
-    public enum IO { Input, Output}
+    public enum IO { Input, Output }
 
     public int ConnectionCount { get { return connections.Count; } }
     /// <summary> Return the first connection </summary>
@@ -18,24 +19,40 @@ public class NodePort {
     public bool IsOutput { get { return direction == IO.Output; } }
 
     public Node node { get; private set; }
-    public string name { get { return _name; } }
+    [SerializeField] public string name;
     public bool enabled { get { return _enabled; } set { _enabled = value; } }
-    public string id { get { return _id; } }
+    public string fieldName { get { return _fieldName; } }
+
 
     [SerializeField] private List<PortConnection> connections = new List<PortConnection>();
-    [SerializeField] private string asdf;
-    [SerializeField] private string _id;
+    [SerializeField] private string _fieldName;
     [SerializeField] public Type type;
-    [SerializeField] private string _name;
     [SerializeField] private bool _enabled = true;
     [SerializeField] private IO _direction;
 
-    public NodePort(string name, Type type, Node node, IO direction) {
-        _name = name;
-        this.type = type;
+    public NodePort(FieldInfo fieldInfo, Node node) {
+        _fieldName = fieldInfo.Name;
+        name = _fieldName;
+        type = fieldInfo.FieldType;
         this.node = node;
-        _direction = direction;
-        _id = node.GetInstanceID() + _name;
+
+        var attribs = fieldInfo.GetCustomAttributes(false);
+        for (int i = 0; i < attribs.Length; i++) {
+            if (attribs[i] is Node.InputAttribute) _direction = IO.Input;
+            else if (attribs[i] is Node.InputAttribute) _direction = IO.Output;
+        }
+    }
+
+    /// <summary> Checks all connections for invalid references, and removes them. </summary>
+    public void VerifyConnections() {
+        for (int i = 0; i < connections.Count; i++) {
+            if (connections[i].node != null &&
+                !string.IsNullOrEmpty(connections[i].fieldName) &&
+                connections[i].node.GetPortByFieldName(connections[i].fieldName) != null)
+                continue;
+            Debug.LogWarning("Removed invalid connection");
+            connections.RemoveAt(i);
+        }
     }
 
     /// <summary> Connect this <see cref="NodePort"/> to another </summary>
@@ -86,22 +103,22 @@ public class NodePort {
     [Serializable]
     public class PortConnection {
         [SerializeField] public Node node;
-        [SerializeField] public string portID;
+        [SerializeField] public string fieldName;
         public NodePort Port { get { return port != null ? port : port = GetPort(); } }
         [NonSerialized] private NodePort port;
 
         public PortConnection(NodePort port) {
             this.port = port;
             node = port.node;
-            portID = port.id;
+            fieldName = port.fieldName;
         }
 
         private NodePort GetPort() {
             for (int i = 0; i < node.OutputCount; i++) {
-                if (node.outputs[i].id == portID) return node.outputs[i];
+                if (node.outputs[i].fieldName == fieldName) return node.outputs[i];
             }
             for (int i = 0; i < node.InputCount; i++) {
-                if (node.inputs[i].id == portID) return node.inputs[i];
+                if (node.inputs[i].fieldName == fieldName) return node.inputs[i];
             }
             return null;
         }

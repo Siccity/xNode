@@ -26,6 +26,40 @@ public abstract class Node : ScriptableObject {
         Init();
     }
 
+
+    /// <summary> Checks all connections for invalid references, and removes them. </summary>
+    public void VerifyConnections() {
+        for (int i = 0; i < InputCount; i++) {
+            inputs[i].VerifyConnections();
+        }
+        for (int i = 0; i < OutputCount; i++) {
+            outputs[i].VerifyConnections();
+        }
+    }
+
+    /// <summary> Returns input or output port which matches fieldName </summary>
+    public NodePort GetPortByFieldName(string fieldName) {
+        NodePort port = GetOutputByFieldName(fieldName);
+        if (port != null) return port;
+        else return GetInputByFieldName(fieldName);
+    }
+
+    /// <summary> Returns output port which matches fieldName </summary>
+    public NodePort GetOutputByFieldName(string fieldName) {
+        for (int i = 0; i < OutputCount; i++) {
+            if (outputs[i].fieldName == fieldName) return outputs[i];
+        }
+        return null;
+    }
+
+    /// <summary> Returns input port which matches fieldName </summary>
+    public NodePort GetInputByFieldName(string fieldName) {
+        for (int i = 0; i < InputCount; i++) {
+            if (inputs[i].fieldName == fieldName) return inputs[i];
+        }
+        return null;
+    }
+
     /// <summary> Initialize node. Called on creation. </summary>
     protected virtual void Init() { name = GetType().Name; }
 
@@ -46,13 +80,6 @@ public abstract class Node : ScriptableObject {
 
         }
         return -1;
-    }
-
-    public NodePort CreateNodeInput(string name, Type type) {
-        return new NodePort(name, type, this, NodePort.IO.Input);
-    }
-    public NodePort CreateNodeOutput(string name, Type type) {
-        return new NodePort(name, type, this, NodePort.IO.Output);
     }
 
     public void ClearConnections() {
@@ -96,8 +123,8 @@ public abstract class Node : ScriptableObject {
                 else if (attribs[k] is OutputAttribute) outputAttrib = attribs[k] as OutputAttribute;
             }
             if (inputAttrib != null && outputAttrib != null) Debug.LogError("Field " + fieldInfo + " cannot be both input and output.");
-            else if (inputAttrib != null) inputPorts.Add(new NodePort(fieldInfo[i].Name, fieldInfo[i].FieldType, this, NodePort.IO.Input));
-            else if (outputAttrib != null) outputPorts.Add(new NodePort(fieldInfo[i].Name, fieldInfo[i].FieldType, this, NodePort.IO.Output));
+            else if (inputAttrib != null) inputPorts.Add(new NodePort(fieldInfo[i], this));
+            else if (outputAttrib != null) outputPorts.Add(new NodePort(fieldInfo[i], this));
         }
 
         inputs = inputPorts;

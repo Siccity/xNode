@@ -44,6 +44,14 @@ public abstract class NodeGraph : ScriptableObject, ISerializationCallbackReceiv
         for (int i = 0; i < nodes.Count; i++) {
             nodes[i].graph = this;
         }
+        VerifyConnections();
+    }
+
+    /// <summary> Checks all connections for invalid references, and removes them. </summary>
+    public void VerifyConnections() {
+        for (int i = 0; i < nodes.Count; i++) {
+            nodes[i].VerifyConnections();
+        }
     }
 }
 

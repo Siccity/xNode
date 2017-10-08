@@ -3,6 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 /// <summary> Defines an example nodegraph. </summary>
-[Serializable, CreateAssetMenu(fileName = "NodeGraphExample", menuName = "Node Graph/Example")]
-public class NodeGraphExample : NodeGraph {
+[Serializable, CreateAssetMenu(fileName = "ExampleNodeGraph", menuName = "Node Graph/Example")]
+public class ExampleNodeGraph : NodeGraph {
 }

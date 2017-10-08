@@ -107,7 +107,11 @@ public class NodeEditor {
 
         EditorGUI.BeginChangeCheck();
         if (fieldType == typeof(int)) {
-            fieldValue = EditorGUILayout.IntField(fieldPrettyName, (int)fieldValue);
+            Rect rect = EditorGUILayout.GetControlRect();
+            rect.width *= 0.5f;
+            EditorGUI.LabelField(rect, fieldPrettyName);
+            rect.x += rect.width;
+            fieldValue = EditorGUI.IntField(rect, (int)fieldValue);
         }
         else if (fieldType == typeof(bool)) {
             fieldValue = EditorGUILayout.Toggle(fieldPrettyName, (bool)fieldValue);
@@ -134,7 +138,11 @@ public class NodeEditor {
             fieldValue = EditorGUILayout.RectField(fieldPrettyName, (Rect)fieldValue);
         }
         else if (fieldType == typeof(float)) {
-            fieldValue = EditorGUILayout.FloatField(fieldPrettyName, (float)fieldValue);
+            Rect rect = EditorGUILayout.GetControlRect();
+            rect.width *= 0.5f;
+            EditorGUI.LabelField(rect, fieldPrettyName);
+            rect.x += rect.width;
+            fieldValue = EditorGUI.FloatField(rect, (float)fieldValue);
         }
         else if (fieldType == typeof(Vector2)) {
             fieldValue = EditorGUILayout.Vector2Field(fieldPrettyName, (Vector2)fieldValue);

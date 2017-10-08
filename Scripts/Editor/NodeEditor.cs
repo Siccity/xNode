@@ -169,7 +169,7 @@ public class NodeEditor {
         }
         if (EditorGUI.EndChangeCheck()) {
             fieldInfo.SetValue(target, fieldValue);
-            NodeEditorUtilities.SetDirty(target);
+            EditorUtility.SetDirty(target);
         }
     }
 

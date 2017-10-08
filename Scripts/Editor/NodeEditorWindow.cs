@@ -17,6 +17,9 @@ public partial class NodeEditorWindow : EditorWindow {
     public float zoom { get { return _zoom; } set { _zoom = Mathf.Clamp(value, 1f, 5f); Repaint(); } }
     private float _zoom = 1;
 
+    void OnFocus() {
+        AssetDatabase.SaveAssets();
+    }
 
     partial void OnEnable();
     /// <summary> Create editor window </summary>

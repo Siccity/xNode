@@ -147,20 +147,29 @@ public class NodeEditor {
             fieldValue = EditorGUILayout.Vector4Field(fieldPrettyName, (Vector4)fieldValue);
         }
         else if (fieldType == typeof(Color)) {
-            fieldValue = EditorGUILayout.ColorField(fieldPrettyName, (Color)fieldValue);
+            Rect rect = EditorGUILayout.GetControlRect();
+            rect.width *= 0.5f;
+            EditorGUI.LabelField(rect, fieldPrettyName);
+            rect.x += rect.width;
+            fieldValue = EditorGUI.ColorField(rect, (Color)fieldValue);
         }
         else if (fieldType == typeof(AnimationCurve)) {
+            Rect rect = EditorGUILayout.GetControlRect();
+            rect.width *= 0.5f;
+            EditorGUI.LabelField(rect, fieldPrettyName);
+            rect.x += rect.width;
+
             AnimationCurve curve = fieldValue != null ? (AnimationCurve)fieldValue : new AnimationCurve();
-            curve = EditorGUILayout.CurveField(fieldPrettyName, curve);
+            curve = EditorGUI.CurveField(rect, curve);
             if (fieldValue != curve) fieldInfo.SetValue(target, curve);
         }
         else if (fieldType.IsSubclassOf(typeof(UnityEngine.Object)) || fieldType == typeof(UnityEngine.Object)) {
             if (fieldName == "graph") return; //Ignore 'graph'
             fieldValue = EditorGUILayout.ObjectField(fieldPrettyName, (UnityEngine.Object)fieldValue, fieldType, true);
         }
-
         if (EditorGUI.EndChangeCheck()) {
             fieldInfo.SetValue(target, fieldValue);
+            NodeEditorUtilities.SetDirty(target);
         }
     }
 

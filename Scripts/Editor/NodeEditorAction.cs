@@ -94,11 +94,11 @@ public partial class NodeEditorWindow {
                         if (draggedOutputTarget != null) {
                             if (graph.nodes.Count != 0) draggedOutput.Connect(draggedOutputTarget);
                             EditorUtility.SetDirty(graph);
-                            AssetDatabase.SaveAssets();
                         }
                         //Release dragged connection
                         draggedOutput = null;
                         draggedOutputTarget = null;
+                        EditorUtility.SetDirty(graph);
                         Repaint();
                     }
                     else if (IsDraggingNode) {
@@ -110,6 +110,7 @@ public partial class NodeEditorWindow {
                     isPanning = false;
                 }
                 UpdateHovered();
+                AssetDatabase.SaveAssets();
                 break;
         }
     }

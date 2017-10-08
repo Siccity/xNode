@@ -18,7 +18,10 @@ public abstract class NodeGraph : ScriptableObject, ISerializationCallbackReceiv
     public virtual Node AddNode(Type type) {
         Node node = ScriptableObject.CreateInstance(type) as Node;
 #if UNITY_EDITOR
-        UnityEditor.AssetDatabase.AddObjectToAsset(node, this);
+        if (!Application.isPlaying) {
+            UnityEditor.AssetDatabase.AddObjectToAsset(node, this);
+            UnityEditor.AssetDatabase.SaveAssets();
+        }
 #endif
         nodes.Add(node);
         node.graph = this;
@@ -29,6 +32,12 @@ public abstract class NodeGraph : ScriptableObject, ISerializationCallbackReceiv
     /// <param name="node"></param>
     public void RemoveNode(Node node) {
         node.ClearConnections();
+#if UNITY_EDITOR
+        if (!Application.isPlaying) {
+            DestroyImmediate(node, true);
+            UnityEditor.AssetDatabase.SaveAssets();
+        }
+#endif
         nodes.Remove(node);
     }
 

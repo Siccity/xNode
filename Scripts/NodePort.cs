@@ -39,7 +39,7 @@ public class NodePort {
         var attribs = fieldInfo.GetCustomAttributes(false);
         for (int i = 0; i < attribs.Length; i++) {
             if (attribs[i] is Node.InputAttribute) _direction = IO.Input;
-            else if (attribs[i] is Node.InputAttribute) _direction = IO.Output;
+            else if (attribs[i] is Node.OutputAttribute) _direction = IO.Output;
         }
     }
 

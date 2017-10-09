@@ -63,14 +63,14 @@ public class NodeEditor {
     /// <summary> Draw node port GUI using automatic layouting. Returns port handle position. </summary>
     protected Vector2 DrawNodePortGUI(NodePort port) {
         GUIStyle style = port.direction == NodePort.IO.Input ? NodeEditorResources.styles.inputPort : NodeEditorResources.styles.outputPort;
-        Rect rect = GUILayoutUtility.GetRect(new GUIContent(port.name.PrettifyCamelCase()), style);
+        Rect rect = GUILayoutUtility.GetRect(new GUIContent(port.fieldName.PrettifyCamelCase()), style);
         return DrawNodePortGUI(rect, port);
     }
 
     /// <summary> Draw node port GUI in rect. Returns port handle position. </summary>
     protected Vector2 DrawNodePortGUI(Rect rect, NodePort port) {
         GUIStyle style = port.direction == NodePort.IO.Input ? NodeEditorResources.styles.inputPort : NodeEditorResources.styles.outputPort;
-        GUI.Label(rect, new GUIContent(port.name.PrettifyCamelCase()), style);
+        GUI.Label(rect, new GUIContent(port.fieldName.PrettifyCamelCase()), style);
 
         Vector2 handlePoint = rect.center;
 

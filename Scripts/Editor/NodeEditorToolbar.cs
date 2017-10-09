@@ -19,7 +19,7 @@ public partial class NodeEditorWindow {
             if (IsHoveringNode) {
                     GUILayout.Space(20);
                     string hoverInfo = hoveredNode.GetType().ToString();
-                    if (IsHoveringPort) hoverInfo += " > " + hoveredPort.name;
+                    if (IsHoveringPort) hoverInfo += " > " + hoveredPort.fieldName;
                     GUILayout.Label(hoverInfo);
             }
         }

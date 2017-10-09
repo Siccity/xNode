@@ -19,7 +19,6 @@ public class NodePort {
     public bool IsOutput { get { return direction == IO.Output; } }
 
     public Node node { get; private set; }
-    [SerializeField] public string name;
     public bool enabled { get { return _enabled; } set { _enabled = value; } }
     public string fieldName { get { return _fieldName; } }
 
@@ -30,17 +29,22 @@ public class NodePort {
     [SerializeField] private bool _enabled = true;
     [SerializeField] private IO _direction;
 
-    public NodePort(FieldInfo fieldInfo, Node node) {
+    public NodePort(FieldInfo fieldInfo) {
         _fieldName = fieldInfo.Name;
-        name = _fieldName;
         type = fieldInfo.FieldType;
-        this.node = node;
 
         var attribs = fieldInfo.GetCustomAttributes(false);
         for (int i = 0; i < attribs.Length; i++) {
             if (attribs[i] is Node.InputAttribute) _direction = IO.Input;
             else if (attribs[i] is Node.OutputAttribute) _direction = IO.Output;
         }
+    }
+
+    public NodePort(NodePort nodePort, Node node) {
+        _fieldName = nodePort._fieldName;
+        type = nodePort.type;
+        this.node = node;
+        _direction = nodePort.direction;
     }
 
     /// <summary> Checks all connections for invalid references, and removes them. </summary>

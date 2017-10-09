@@ -19,17 +19,10 @@ public abstract class Node : ScriptableObject {
     public int InputCount { get { return inputs.Count; } }
     public int OutputCount { get { return outputs.Count; } }
 
-    protected Node() {
-
-        GetPorts(); //Cache the ports at creation time so we don't have to use reflection at runtime
-    }
-
     protected void OnEnable() {
-        VerifyConnections();
         GetPorts();
         Init();
     }
-
 
     /// <summary> Checks all connections for invalid references, and removes them. </summary>
     public void VerifyConnections() {
@@ -119,6 +112,6 @@ public abstract class Node : ScriptableObject {
     }
 
     private void GetPorts() {
-        NodeDataCache.GetPorts(this, out inputs, out outputs);
+        NodeDataCache.GetPorts(this, ref inputs, ref outputs);
     }
 }

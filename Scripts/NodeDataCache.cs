@@ -6,35 +6,43 @@ using System.Linq;
 
 /// <summary> Precaches reflection data in editor so we won't have to do it runtime </summary>
 public sealed class NodeDataCache : ScriptableObject {
-    public static NodeDataCache instance { get { return _instance; } }
+    public static NodeDataCache instance { get {
+            if (!_instance)
+                _instance = GetInstance();
+                return _instance;
+        } }
     private static NodeDataCache _instance;
 
-    [SerializeField]
+    [SerializeField] 
     private PortDataCache portDataCache = new PortDataCache();
 
-    [RuntimeInitializeOnLoadMethod]
-    private static void InitializeInstance() {
-        Debug.Log("INIT");
+    private static NodeDataCache GetInstance() {
         NodeDataCache[] ndc = Resources.FindObjectsOfTypeAll<NodeDataCache>();
         if (ndc == null || ndc.Length == 0) {
             Debug.LogWarning("No NodeDataCache found. Creating.");
-            _instance = ScriptableObject.CreateInstance<NodeDataCache>();
-            _instance.BuildCache();
+            NodeDataCache n = ScriptableObject.CreateInstance<NodeDataCache>();
+            n.BuildCache();
+            return n;
         }
         else if (ndc.Length > 1) {
             Debug.LogWarning("Multiple NodeDataCaches found.");
         }
-        _instance = ndc[0];
+        return ndc[0];
     }
 
+    private void OnEnable() {
+        _instance = this;
+    }
+
+
     /// <summary> Return port data from cache </summary>
-    public static void GetPorts(Node node, out List<NodePort> inputs, out List<NodePort> outputs) {
-        if (_instance == null) InitializeInstance();
+    public static void GetPorts(Node node, ref List<NodePort> inputs, ref List<NodePort> outputs) {
+        //if (_instance == null) Resources.FindObjectsOfTypeAll<NodeDataCache>()[0];
 
         System.Type nodeType = node.GetType();
         inputs = new List<NodePort>();
         outputs = new List<NodePort>();
-        if (!_instance.portDataCache.ContainsKey(nodeType)) return;
+        if (!instance.portDataCache.ContainsKey(nodeType)) return;
         for (int i = 0; i < _instance.portDataCache[nodeType].Count; i++) {
             if (_instance.portDataCache[nodeType][i].direction == NodePort.IO.Input) inputs.Add(new NodePort(_instance.portDataCache[nodeType][i], node));
             else outputs.Add(new NodePort(_instance.portDataCache[nodeType][i], node));

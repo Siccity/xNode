@@ -2,7 +2,7 @@
 ### UnityNodeEditorCore
 A simple, userfriendly node editor framework for unity. Ideal as a base for custom state machines, dialogue systems, decision makers etc.
 
-![editor](https://user-images.githubusercontent.com/6402525/30787371-1c3ae552-a187-11e7-853a-214914c2ba69.PNG)
+![editor](https://user-images.githubusercontent.com/6402525/31379481-a9c15950-adae-11e7-91c4-387dd020261e.png)
 
 Node example:
 ```csharp

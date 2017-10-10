@@ -3,38 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Reflection;
 using System.Linq;
+using UnityEditor;
 
 /// <summary> Precaches reflection data in editor so we won't have to do it runtime </summary>
 public sealed class NodeDataCache : ScriptableObject {
-    public static NodeDataCache instance { get {
-            if (!_instance)
-                _instance = GetInstance();
-                return _instance;
-        } }
-    private static NodeDataCache _instance;
+    public static NodeDataCache instance { 
+        get {
+            if (_instance == null)  _instance = Resources.FindObjectsOfTypeAll<NodeDataCache>().FirstOrDefault(); 
+            return _instance;
+        }
+    }
+    public static NodeDataCache _instance;
 
     [SerializeField] 
     private PortDataCache portDataCache = new PortDataCache();
-
-    private static NodeDataCache GetInstance() {
-        NodeDataCache[] ndc = Resources.FindObjectsOfTypeAll<NodeDataCache>();
-        if (ndc == null || ndc.Length == 0) {
-            Debug.LogWarning("No NodeDataCache found. Creating.");
-            NodeDataCache n = ScriptableObject.CreateInstance<NodeDataCache>();
-            n.BuildCache();
-            return n;
-        }
-        else if (ndc.Length > 1) {
-            Debug.LogWarning("Multiple NodeDataCaches found.");
-        }
-        return ndc[0];
-    }
-
-    private void OnEnable() {
-        _instance = this;
-    }
-
-
     /// <summary> Return port data from cache </summary>
     public static void GetPorts(Node node, ref List<NodePort> inputs, ref List<NodePort> outputs) {
         //if (_instance == null) Resources.FindObjectsOfTypeAll<NodeDataCache>()[0];
@@ -43,16 +25,17 @@ public sealed class NodeDataCache : ScriptableObject {
         inputs = new List<NodePort>();
         outputs = new List<NodePort>();
         if (!instance.portDataCache.ContainsKey(nodeType)) return;
-        for (int i = 0; i < _instance.portDataCache[nodeType].Count; i++) {
-            if (_instance.portDataCache[nodeType][i].direction == NodePort.IO.Input) inputs.Add(new NodePort(_instance.portDataCache[nodeType][i], node));
-            else outputs.Add(new NodePort(_instance.portDataCache[nodeType][i], node));
+        for (int i = 0; i < instance.portDataCache[nodeType].Count; i++) {
+            if (instance.portDataCache[nodeType][i].direction == NodePort.IO.Input) inputs.Add(new NodePort(instance.portDataCache[nodeType][i], node));
+            else outputs.Add(new NodePort(instance.portDataCache[nodeType][i], node));
         }
     }
-
+ 
 #if UNITY_EDITOR
-    [UnityEditor.InitializeOnLoadMethod]
+    [UnityEditor.InitializeOnLoadMethod( )]
 #endif
     private static void Init() {
+        Debug.Log("Init");
         instance.BuildCache();
     }
 

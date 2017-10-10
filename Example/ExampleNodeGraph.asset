@@ -11,10 +11,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6399826e2c44b447b32a3ed06646162, type: 3}
   m_Name: ExampleNodeGraph
   m_EditorClassIdentifier: 
-  nodes:
-  - {fileID: 114778235353399140}
-  - {fileID: 114295993062301438}
---- !u!114 &114295993062301438
+  nodes: []
+--- !u!114 &114063446055957998
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
@@ -27,33 +25,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rect:
     serializedVersion: 2
-    x: -330.1812
-    y: -108.116974
+    x: 0
+    y: 0
     width: 200
     height: 200
   inputs: []
   outputs: []
-  a: 2.01
-  b: 0.01
+  a: 0
+  b: 0
   result: 0
   mathType: 0
---- !u!114 &114778235353399140
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 98f6f901f0da53142b79277ea3f42518, type: 3}
-  m_Name: DisplayValue
-  m_EditorClassIdentifier: 
-  rect:
-    serializedVersion: 2
-    x: 100.23894
-    y: -132.62592
-    width: 200
-    height: 200
-  inputs: []
-  outputs: []
-  value: 0

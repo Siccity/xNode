@@ -112,6 +112,6 @@ public abstract class Node : ScriptableObject {
     }
 
     private void GetPorts() {
-        NodeDataCache.GetPorts(this, ref inputs, ref outputs);
+        NodeDataCache.UpdatePorts(this, inputs, outputs);
     }
 }

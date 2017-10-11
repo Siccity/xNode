@@ -41,6 +41,7 @@ public static class NodeEditorUtilities {
 
     /// <summary> Return color based on type </summary>
     public static Color GetTypeColor(Type type) {
+        if (type == null) return Color.gray;
         UnityEngine.Random.InitState(type.Name.GetHashCode());
         return new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
     }

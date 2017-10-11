@@ -19,14 +19,12 @@ public class NodePort {
     public bool IsOutput { get { return direction == IO.Output; } }
 
     public Node node { get; private set; }
-    public bool enabled { get { return _enabled; } set { _enabled = value; } }
     public string fieldName { get { return _fieldName; } }
 
 
-    [SerializeField] private List<PortConnection> connections = new List<PortConnection>();
     [SerializeField] private string _fieldName;
     [SerializeField] public Type type;
-    [SerializeField] private bool _enabled = true;
+    [SerializeField] private List<PortConnection> connections = new List<PortConnection>();
     [SerializeField] private IO _direction;
 
     public NodePort(FieldInfo fieldInfo) {
@@ -59,7 +57,7 @@ public class NodePort {
         }
     }
 
-    public object GetValue() {
+    public object GetValue() { 
         return node.GetValue(this);
     }
 

@@ -7,52 +7,46 @@ using UnityEditor;
 
 /// <summary> Precaches reflection data in editor so we won't have to do it runtime </summary>
 public sealed class NodeDataCache : ScriptableObject {
-    public static NodeDataCache instance { 
-        get {
-            if (_instance == null)  _instance = Resources.FindObjectsOfTypeAll<NodeDataCache>().FirstOrDefault(); 
-            return _instance;
+    public static NodeDataCache instance { get; private set;}
+    public static bool Initialized { get { return instance != null; } }
+
+    [SerializeField] private PortDataCache portDataCache;
+
+#if UNITY_EDITOR
+    [UnityEditor.Callbacks.DidReloadScripts]
+#endif
+    public static void Initialize() {
+        if (!Initialized) {
+            instance = Resources.LoadAll<NodeDataCache>("").FirstOrDefault(); 
+#if UNITY_EDITOR
+            instance.BuildCache();
+#endif
         }
     }
-    public static NodeDataCache _instance;
-    public static bool Initialized { get { return _instance != null; } }
-
-    [SerializeField] 
-    private PortDataCache portDataCache = new PortDataCache();
 
     /// <summary> Return port data from cache </summary>
     public static void GetPorts(Node node, ref List<NodePort> inputs, ref List<NodePort> outputs) {
-        if (!Initialized) Initialize();
+        Initialize();
 
         System.Type nodeType = node.GetType();
         inputs = new List<NodePort>();
         outputs = new List<NodePort>();
-        if (!_instance.portDataCache.ContainsKey(nodeType)) return;
-        for (int i = 0; i < _instance.portDataCache[nodeType].Count; i++) {
-            if (_instance.portDataCache[nodeType][i].direction == NodePort.IO.Input) inputs.Add(new NodePort(_instance.portDataCache[nodeType][i], node));
-            else outputs.Add(new NodePort(_instance.portDataCache[nodeType][i], node));
-        }
-    }
-    
-    public static void Initialize() { 
-        _instance = Resources.LoadAll<NodeDataCache>("").FirstOrDefault(); 
+        if (!instance.portDataCache.ContainsKey(nodeType)) return;
+        for (int i = 0; i < instance.portDataCache[nodeType].Count; i++) {
+            if (instance.portDataCache[nodeType][i].direction == NodePort.IO.Input) inputs.Add(new NodePort(instance.portDataCache[nodeType][i], node));
+            else outputs.Add(new NodePort(instance.portDataCache[nodeType][i], node));
+        } 
     }
 
 #if UNITY_EDITOR
-    [UnityEditor.Callbacks.DidReloadScripts]
-    private static void Reload() {
-        Initialize();
-        instance.BuildCache();
-    }
-#endif
-
     private void BuildCache() {
+        portDataCache = new PortDataCache();
         System.Type baseType = typeof(Node);
         Assembly assembly = Assembly.GetAssembly(baseType);
         System.Type[] nodeTypes = assembly.GetTypes().Where(t =>
             !t.IsAbstract &&
             baseType.IsAssignableFrom(t)
             ).ToArray();
-        portDataCache.Clear();
 
         for (int i = 0; i < nodeTypes.Length; i++) {
             CachePorts(nodeTypes[i]);
@@ -60,9 +54,6 @@ public sealed class NodeDataCache : ScriptableObject {
     }
 
     private void CachePorts(System.Type nodeType) {
-        List<NodePort> inputPorts = new List<NodePort>();
-        List<NodePort> outputPorts = new List<NodePort>();
-
         System.Reflection.FieldInfo[] fieldInfo = nodeType.GetFields();
         for (int i = 0; i < fieldInfo.Length; i++) {
 
@@ -80,6 +71,7 @@ public sealed class NodeDataCache : ScriptableObject {
             }
         }
     }
+#endif
 
     [System.Serializable]
     private class PortDataCache : Dictionary<System.Type, List<NodePort>>, ISerializationCallbackReceiver {

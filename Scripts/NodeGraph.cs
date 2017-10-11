@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using System;
 
@@ -16,6 +15,7 @@ public abstract class NodeGraph : ScriptableObject, ISerializationCallbackReceiv
     }
 
     public virtual Node AddNode(Type type) {
+        if (!NodeDataCache.Initialized) NodeDataCache.Initialize();
         Node node = ScriptableObject.CreateInstance(type) as Node;
 #if UNITY_EDITOR
         if (!Application.isPlaying) {

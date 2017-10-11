@@ -14,30 +14,36 @@ public sealed class NodeDataCache : ScriptableObject {
         }
     }
     public static NodeDataCache _instance;
+    public static bool Initialized { get { return _instance != null; } }
 
     [SerializeField] 
     private PortDataCache portDataCache = new PortDataCache();
+
     /// <summary> Return port data from cache </summary>
     public static void GetPorts(Node node, ref List<NodePort> inputs, ref List<NodePort> outputs) {
-        //if (_instance == null) Resources.FindObjectsOfTypeAll<NodeDataCache>()[0];
+        if (!Initialized) Initialize();
 
         System.Type nodeType = node.GetType();
         inputs = new List<NodePort>();
         outputs = new List<NodePort>();
-        if (!instance.portDataCache.ContainsKey(nodeType)) return;
-        for (int i = 0; i < instance.portDataCache[nodeType].Count; i++) {
-            if (instance.portDataCache[nodeType][i].direction == NodePort.IO.Input) inputs.Add(new NodePort(instance.portDataCache[nodeType][i], node));
-            else outputs.Add(new NodePort(instance.portDataCache[nodeType][i], node));
+        if (!_instance.portDataCache.ContainsKey(nodeType)) return;
+        for (int i = 0; i < _instance.portDataCache[nodeType].Count; i++) {
+            if (_instance.portDataCache[nodeType][i].direction == NodePort.IO.Input) inputs.Add(new NodePort(_instance.portDataCache[nodeType][i], node));
+            else outputs.Add(new NodePort(_instance.portDataCache[nodeType][i], node));
         }
     }
- 
+    
+    public static void Initialize() { 
+        _instance = Resources.LoadAll<NodeDataCache>("").FirstOrDefault(); 
+    }
+
 #if UNITY_EDITOR
-    [UnityEditor.InitializeOnLoadMethod( )]
-#endif
-    private static void Init() {
-        Debug.Log("Init");
+    [UnityEditor.Callbacks.DidReloadScripts]
+    private static void Reload() {
+        Initialize();
         instance.BuildCache();
     }
+#endif
 
     private void BuildCache() {
         System.Type baseType = typeof(Node);

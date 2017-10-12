@@ -2,6 +2,8 @@
 ### UnityNodeEditorCore
 A simple, userfriendly node editor framework for unity. Ideal as a base for custom state machines, dialogue systems, decision makers etc.
 
+
+
 ![editor](https://user-images.githubusercontent.com/6402525/31379481-a9c15950-adae-11e7-91c4-387dd020261e.png)
 
 Node example:
@@ -20,6 +22,7 @@ public class MathNode : Node {
 }
 ```
 
+The editor is still under heavy development and recieves updates daily on the development branch. 
 Join the [Discord](https://discord.gg/qgPrHv4 "Join Discord server") server to leave feedback or get support.
 Feel free to also leave suggestions/requests in the [issues](https://github.com/Siccity/UnityNodeEditorCore/issues "Go to Issues") page.
 

@@ -18,10 +18,10 @@ public class NodePort {
     public bool IsInput { get { return direction == IO.Input; } }
     public bool IsOutput { get { return direction == IO.Output; } }
 
-    public Node node { get; private set; }
     public string fieldName { get { return _fieldName; } }
 
 
+    [SerializeField] public Node node;
     [SerializeField] private string _fieldName;
     [SerializeField] public Type type;
     [SerializeField] private List<PortConnection> connections = new List<PortConnection>();
@@ -57,7 +57,7 @@ public class NodePort {
         }
     }
 
-    public object GetValue() { 
+    public object GetValue() {
         return node.GetValue(this);
     }
 
@@ -77,7 +77,8 @@ public class NodePort {
     }
 
     public NodePort GetConnection(int i) {
-        return connections[i].Port;
+        NodePort port = connections[i].node.GetPortByFieldName(connections[i].fieldName);
+        return port;
     }
 
     public bool IsConnectedTo(NodePort port) {
@@ -108,8 +109,8 @@ public class NodePort {
 
     [Serializable]
     public class PortConnection {
-        [SerializeField] public Node node;
         [SerializeField] public string fieldName;
+        [SerializeField] public Node node;
         public NodePort Port { get { return port != null ? port : port = GetPort(); } }
         [NonSerialized] private NodePort port;
 
@@ -120,6 +121,7 @@ public class NodePort {
         }
 
         private NodePort GetPort() {
+            
             for (int i = 0; i < node.OutputCount; i++) {
                 if (node.outputs[i].fieldName == fieldName) return node.outputs[i];
             }

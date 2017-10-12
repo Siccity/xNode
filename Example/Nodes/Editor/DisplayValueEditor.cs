@@ -20,7 +20,6 @@ public class DisplayValueEditor : NodeEditor {
 
             NodePort connection = port.GetConnection(i);
             if (connection == null) continue;
-
             object obj = connection.GetValue();
             if (obj == null) continue;
 

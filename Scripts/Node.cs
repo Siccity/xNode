@@ -41,21 +41,19 @@ public abstract class Node : ScriptableObject {
         else return GetInputByFieldName(fieldName);
     }
 
-    /// <summary> Returns output port which matches fieldName </summary>
+    /// <summary> Returns output port which matches fieldName. Returns null if none found. </summary>
     public NodePort GetOutputByFieldName(string fieldName) {
         for (int i = 0; i < OutputCount; i++) {
             if (outputs[i].fieldName == fieldName) return outputs[i];
         }
-        Debug.LogWarning("No outputs with fieldName '" + fieldName+"'");
         return null;
     }
 
-    /// <summary> Returns input port which matches fieldName </summary>
+    /// <summary> Returns input port which matches. Returns null if none found. </summary>
     public NodePort GetInputByFieldName(string fieldName) {
         for (int i = 0; i < InputCount; i++) {
             if (inputs[i].fieldName == fieldName) return inputs[i];
         }
-        Debug.LogWarning("No inputs with fieldName '" + fieldName+"'");
         return null;
     }
 

@@ -15,7 +15,6 @@ public partial class NodeEditorWindow {
         DrawConnections();
         DrawDraggedConnection();
         DrawNodes();
-        DrawToolbar();
 
         GUI.matrix = m;
     }

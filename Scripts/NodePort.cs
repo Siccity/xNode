@@ -77,7 +77,16 @@ public class NodePort {
     }
 
     public NodePort GetConnection(int i) {
+        //If the connection is broken for some reason, remove it.
+        if (connections[i].node == null || string.IsNullOrEmpty(connections[i].fieldName)) {
+            connections.RemoveAt(i);
+            return null;
+        }
         NodePort port = connections[i].node.GetPortByFieldName(connections[i].fieldName);
+        if (port == null) {
+            connections.RemoveAt(i);
+            return null;
+        }
         return port;
     }
 

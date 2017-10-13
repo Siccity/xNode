@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 
 [System.Serializable]
-public class MathNode : Node {
-    public float a;
-    public float b;
+public class MathNode : ExampleNodeBase {
+    [Input] public float c;
+    [Input] public float b;
     [Output] public float result;
     public enum MathType { Add, Subtract, Multiply, Divide}
     public MathType mathType = MathType.Add;
@@ -13,6 +13,9 @@ public class MathNode : Node {
     }
 
     public override object GetValue(NodePort port) {
+        float a = GetInputFloat("c");
+        float b = GetInputFloat("b");
+        
         switch(port.fieldName) {
             case "result":
                 switch(mathType) {
@@ -24,9 +27,5 @@ public class MathNode : Node {
                 break;
         }
         return 0f;
-    }
-
-    public override void OnCreateConnection(NodePort from, NodePort to) {
-
     }
 }

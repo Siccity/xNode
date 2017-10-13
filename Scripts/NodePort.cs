@@ -102,8 +102,8 @@ public class NodePort {
     }
 
     public void ClearConnections() {
-        for (int i = 0; i < connections.Count; i++) {
-            Disconnect(connections[i].Port);
+        while(connections.Count > 0) {
+            Disconnect(connections[0].Port);
         }
     }
 

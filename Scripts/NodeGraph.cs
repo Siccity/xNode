@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using System;
 
@@ -50,17 +49,17 @@ public abstract class NodeGraph : ScriptableObject, ISerializationCallbackReceiv
     }
 
     public void OnAfterDeserialize() {
-        for (int i = 0; i < nodes.Count; i++) {
+        /*for (int i = 0; i < nodes.Count; i++) {
             nodes[i].graph = this;
-        }
-        VerifyConnections();
+        }*/
+        //VerifyConnections();
     }
 
-    /// <summary> Checks all connections for invalid references, and removes them. </summary>
+    /*/// <summary> Checks all connections for invalid references, and removes them. </summary>
     public void VerifyConnections() {
         for (int i = 0; i < nodes.Count; i++) {
             nodes[i].VerifyConnections();
         }
-    }
+    }*/
 }
 

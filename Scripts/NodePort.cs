@@ -18,29 +18,31 @@ public class NodePort {
     public bool IsInput { get { return direction == IO.Input; } }
     public bool IsOutput { get { return direction == IO.Output; } }
 
-    public Node node { get; private set; }
-    [SerializeField] public string name;
-    public bool enabled { get { return _enabled; } set { _enabled = value; } }
     public string fieldName { get { return _fieldName; } }
 
 
-    [SerializeField] private List<PortConnection> connections = new List<PortConnection>();
+    [SerializeField] public Node node;
     [SerializeField] private string _fieldName;
     [SerializeField] public Type type;
-    [SerializeField] private bool _enabled = true;
+    [SerializeField] private List<PortConnection> connections = new List<PortConnection>();
     [SerializeField] private IO _direction;
 
-    public NodePort(FieldInfo fieldInfo, Node node) {
+    public NodePort(FieldInfo fieldInfo) {
         _fieldName = fieldInfo.Name;
-        name = _fieldName;
         type = fieldInfo.FieldType;
-        this.node = node;
 
         var attribs = fieldInfo.GetCustomAttributes(false);
         for (int i = 0; i < attribs.Length; i++) {
             if (attribs[i] is Node.InputAttribute) _direction = IO.Input;
             else if (attribs[i] is Node.OutputAttribute) _direction = IO.Output;
         }
+    }
+
+    public NodePort(NodePort nodePort, Node node) {
+        _fieldName = nodePort._fieldName;
+        type = nodePort.type;
+        this.node = node;
+        _direction = nodePort.direction;
     }
 
     /// <summary> Checks all connections for invalid references, and removes them. </summary>
@@ -75,7 +77,17 @@ public class NodePort {
     }
 
     public NodePort GetConnection(int i) {
-        return connections[i].Port;
+        //If the connection is broken for some reason, remove it.
+        if (connections[i].node == null || string.IsNullOrEmpty(connections[i].fieldName)) {
+            connections.RemoveAt(i);
+            return null;
+        }
+        NodePort port = connections[i].node.GetPortByFieldName(connections[i].fieldName);
+        if (port == null) {
+            connections.RemoveAt(i);
+            return null;
+        }
+        return port;
     }
 
     public bool IsConnectedTo(NodePort port) {
@@ -99,15 +111,15 @@ public class NodePort {
     }
 
     public void ClearConnections() {
-        for (int i = 0; i < connections.Count; i++) {
-            Disconnect(connections[i].Port);
+        while(connections.Count > 0) {
+            Disconnect(connections[0].Port);
         }
     }
 
     [Serializable]
     public class PortConnection {
-        [SerializeField] public Node node;
         [SerializeField] public string fieldName;
+        [SerializeField] public Node node;
         public NodePort Port { get { return port != null ? port : port = GetPort(); } }
         [NonSerialized] private NodePort port;
 
@@ -118,6 +130,7 @@ public class NodePort {
         }
 
         private NodePort GetPort() {
+            
             for (int i = 0; i < node.OutputCount; i++) {
                 if (node.outputs[i].fieldName == fieldName) return node.outputs[i];
             }

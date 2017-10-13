@@ -12,21 +12,7 @@ public class DisplayValueEditor : NodeEditor {
     }
 
     public float GetResult() {
-        float result = 0f;
-        NodePort port = target.GetInputByFieldName("value");
-        if (port == null) return result;
-        int connectionCount = port.ConnectionCount;
-        for (int i = 0; i < connectionCount; i++) {
-
-            NodePort connection = port.GetConnection(i);
-            if (connection == null) continue;
-
-            object obj = connection.GetValue();
-            if (obj == null) continue;
-
-            if (connection.type == typeof(int)) result += (int)obj;
-            else if (connection.type == typeof(float)) result += (float)obj;
-        }
-        return result;
+        ExampleNodeBase t = target as ExampleNodeBase;
+        return t.GetInputFloat("value");
     }
 }

@@ -11,8 +11,8 @@ public class NodeEditorGUILayout {
 
     private static double tempValue;
 
-    public static object PortField(string label, object value, NodePort port, bool fallback, out Vector2 portPosition) {
-        if (fallback) value = PropertyField(label, value);
+    public static object PortField(string label, object value, System.Type type, NodePort port, bool fallback, out Vector2 portPosition) {
+        if (fallback) value = PropertyField(label, value, type);
         else EditorGUILayout.LabelField(label);
 
         Rect rect = GUILayoutUtility.GetLastRect();
@@ -50,15 +50,15 @@ public class NodeEditorGUILayout {
         if (NodeEditorUtilities.GetAttrib(fieldAttribs, out inputAttrib)) {
             NodePort port = target.GetPortByFieldName(fieldName);
             Vector2 portPos;
-            fieldValue = PortField(fieldPrettyName, fieldValue, port, inputAttrib.fallback, out portPos);
+            fieldValue = PortField(fieldPrettyName, fieldValue, fieldType, port, inputAttrib.fallback, out portPos);
             portPositions.Add(port, portPos);
         } else if (NodeEditorUtilities.GetAttrib(fieldAttribs, out outputAttrib)) {
             NodePort port = target.GetPortByFieldName(fieldName);
             Vector2 portPos;
-            fieldValue = PortField(fieldPrettyName, fieldValue, port, outputAttrib.fallback, out portPos);
+            fieldValue = PortField(fieldPrettyName, fieldValue, fieldType, port, outputAttrib.fallback, out portPos);
             portPositions.Add(port, portPos);
         } else {
-            fieldValue = PropertyField(fieldPrettyName, fieldValue);
+            fieldValue = PropertyField(fieldPrettyName, fieldValue, fieldType);
         }
 
         if (EditorGUI.EndChangeCheck()) {
@@ -68,7 +68,7 @@ public class NodeEditorGUILayout {
         return fieldValue;
     }
 
-    public static object PropertyField(string label, object value) {
+    public static object PropertyField(string label, object value, System.Type type) {
         if (value is int) return IntField(label, (int) value);
         else if (value is float) return FloatField(label, (float) value);
         else if (value is double) return DoubleField(label, (double) value);
@@ -82,7 +82,7 @@ public class NodeEditorGUILayout {
         else if (value is Vector4) return Vector4Field(label, (Vector4) value);
         else if (value is Color) return ColorField(label, (Color) value);
         else if (value is AnimationCurve) return CurveField(label, (AnimationCurve) value);
-        else if (value == null || value.GetType().IsSubclassOf(typeof(UnityEngine.Object)) || value.GetType() == typeof(UnityEngine.Object)) return ObjectField(label, (UnityEngine.Object) value);
+        else if (type.IsSubclassOf(typeof(UnityEngine.Object)) || type == typeof(UnityEngine.Object)) return ObjectField(label, (UnityEngine.Object) value);
         else return value;
     }
     public static Rect GetRect(string label) {

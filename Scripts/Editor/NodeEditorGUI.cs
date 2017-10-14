@@ -15,6 +15,7 @@ public partial class NodeEditorWindow {
         DrawConnections();
         DrawDraggedConnection();
         DrawNodes();
+        DrawTooltip();
 
         GUI.matrix = m;
     }
@@ -191,6 +192,16 @@ public partial class NodeEditorWindow {
         //and thus, the code should not be included in build.
         if (selectedNode != null) {
             if (onValidate != null && nodeHash != selectedNode.GetHashCode()) onValidate.Invoke(selectedNode, null);
+        }
+    }
+
+    private void DrawTooltip() {
+        if (hoveredPort != null) {
+            GUIContent content = new GUIContent(hoveredPort.type.ToString());
+            Vector2 size = NodeEditorResources.styles.tooltip.CalcSize(content);
+            Rect rect = new Rect(Event.current.mousePosition - (size), size);
+            EditorGUI.LabelField(rect, content, NodeEditorResources.styles.tooltip);
+            Repaint();
         }
     }
 }

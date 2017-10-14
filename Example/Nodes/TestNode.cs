@@ -4,16 +4,16 @@ using UnityEngine;
 
 public class TestNode : Node {
 
-	public int i;
-	public float f;
-	public double d;
-	public long l;
-	public bool b;
-	public string s;
-	public Rect r;
-	public Vector2 v2;
-	public Vector3 v3;
-	public Vector4 v4;
-	public Color col;
-	public AnimationCurve a;
+	public int myInt;
+	[Input(false)] public float myFloat;
+	public double myDouble;
+	public long myLong;
+	public bool myBool;
+	[Input(true)] public string myString;
+	public Rect myRect;
+	[Input(true)] public Vector2 myVec2;
+	[Input(true)] public Vector3 myVec3;
+	public Vector4 myVec4;
+	public Color myColor;
+	public AnimationCurve myCurve;
 }

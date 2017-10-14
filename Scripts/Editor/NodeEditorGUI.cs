@@ -131,7 +131,7 @@ public partial class NodeEditorWindow {
                     NodePort input = output.GetConnection(k);
                     if (input == null) return; //If a script has been updated and the port doesn't exist, it is removed and null is returned. If this happens, return.
                     Vector2 to = _portConnectionPoints[input].center;
-                    DrawConnection(from, to, NodeEditorUtilities.GetTypeColor(output.type));
+                    DrawConnection(from, to, NodeEditorPreferences.GetTypeColor(output.type));
                 }
             }
         }

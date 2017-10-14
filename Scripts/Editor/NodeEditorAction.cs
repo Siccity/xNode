@@ -133,7 +133,7 @@ public partial class NodeEditorWindow {
             if (!_portConnectionPoints.ContainsKey(draggedOutput)) return;
             Vector2 from = _portConnectionPoints[draggedOutput].center;
             Vector2 to = draggedOutputTarget != null ? portConnectionPoints[draggedOutputTarget].center : WindowToGridPosition(Event.current.mousePosition);
-            Color col = NodeEditorUtilities.GetTypeColor(draggedOutput.type);
+            Color col = NodeEditorPreferences.GetTypeColor(draggedOutput.type);
             col.a = 0.6f;
             DrawConnection(from, to, col);
         }

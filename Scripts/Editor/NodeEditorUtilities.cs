@@ -39,13 +39,6 @@ public static class NodeEditorUtilities {
         return char.ToUpper(s[0]) + s.Substring(1);
     }
 
-    /// <summary> Return color based on type </summary>
-    public static Color GetTypeColor(Type type) {
-        if (type == null) return Color.gray;
-        UnityEngine.Random.InitState(type.Name.GetHashCode());
-        return new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
-    }
-
     /// <summary> Returns true if this can be casted to <see cref="Type"/></summary>
     public static bool IsCastableTo(this Type from, Type to) {
         if (to.IsAssignableFrom(from)) return true;

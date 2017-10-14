@@ -85,7 +85,7 @@ public class NodeEditor {
 
         Color col = GUI.color;
         Rect handleRect = new Rect(handlePoint.x - 8, handlePoint.y - 8, 16, 16);
-        GUI.color = new Color(0.29f, 0.31f, 0.32f);
+        GUI.color = new Color32(90, 97, 105, 255);
         GUI.DrawTexture(handleRect, NodeEditorResources.dotOuter);
         GUI.color = NodeEditorPreferences.GetTypeColor(port.type);
         GUI.DrawTexture(handleRect, NodeEditorResources.dot);

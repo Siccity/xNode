@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
 using UnityEditor;
-using System;
+using UnityEngine;
 
 public static class NodeEditorResources {
     //Unec textures
@@ -48,12 +48,12 @@ public static class NodeEditorResources {
             nodeBody = new GUIStyle();
             nodeBody.normal.background = NodeEditorResources.nodeBody;
             nodeBody.border = new RectOffset(32, 32, 32, 32);
-            nodeBody.padding = new RectOffset(10, 10, 2, 2); 
+            nodeBody.padding = new RectOffset(10, 10, 2, 2);
         }
     }
 
     public static Texture2D GenerateGridTexture() {
-        Texture2D tex = new Texture2D(64,64);
+        Texture2D tex = new Texture2D(64, 64);
         Color[] cols = new Color[64 * 64];
         for (int y = 0; y < 64; y++) {
             for (int x = 0; x < 64; x++) {

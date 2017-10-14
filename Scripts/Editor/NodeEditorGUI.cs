@@ -1,14 +1,14 @@
-﻿using UnityEngine;
-using UnityEditor;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using UnityEditor;
+using UnityEngine;
 
 /// <summary> Contains GUI methods </summary>
 public partial class NodeEditorWindow {
 
     private void OnGUI() {
         Event e = Event.current;
-        Matrix4x4 m = GUI.matrix;
+        Matrix4x4m = GUI.matrix;
         Controls();
 
         DrawGrid(position, zoom, panOffset);
@@ -21,13 +21,11 @@ public partial class NodeEditorWindow {
 
     public static void BeginZoomed(Rect rect, float zoom) {
         GUI.EndClip();
-            
+
         GUIUtility.ScaleAroundPivot(Vector2.one / zoom, rect.size * 0.5f);
         Vector4 padding = new Vector4(0, 22, 0, 0);
         padding *= zoom;
-        GUI.BeginClip(new Rect(
-            -((rect.width * zoom) - rect.width) * 0.5f,
-            -(((rect.height * zoom) - rect.height) * 0.5f) + (22 * zoom),
+        GUI.BeginClip(new Rect(-((rect.width * zoom) - rect.width) * 0.5f, -(((rect.height * zoom) - rect.height) * 0.5f) + (22 * zoom),
             rect.width * zoom,
             rect.height * zoom));
     }
@@ -36,7 +34,7 @@ public partial class NodeEditorWindow {
         GUIUtility.ScaleAroundPivot(Vector2.one * zoom, rect.size * 0.5f);
         Vector3 offset = new Vector3(
             (((rect.width * zoom) - rect.width) * 0.5f),
-            (((rect.height * zoom) - rect.height) * 0.5f) + (-22 * zoom)+22,
+            (((rect.height * zoom) - rect.height) * 0.5f) + (-22 * zoom) + 22,
             0);
         GUI.matrix = Matrix4x4.TRS(offset, Quaternion.identity, Vector3.one);
     }
@@ -48,7 +46,7 @@ public partial class NodeEditorWindow {
         Vector2 center = rect.size / 2f;
         Texture2D gridTex = NodeEditorResources.gridTexture;
         Texture2D crossTex = NodeEditorResources.crossTexture;
-            
+
         // Offset from origin in tile units
         float xOffset = -(center.x * zoom + panOffset.x) / gridTex.width;
         float yOffset = ((center.y - rect.size.y) * zoom + panOffset.y) / gridTex.height;
@@ -63,7 +61,7 @@ public partial class NodeEditorWindow {
 
         // Draw tiled background
         GUI.DrawTextureWithTexCoords(rect, gridTex, new Rect(tileOffset, tileAmount));
-        GUI.DrawTextureWithTexCoords(rect, crossTex, new Rect(tileOffset + new Vector2(0.5f,0.5f), tileAmount));
+        GUI.DrawTextureWithTexCoords(rect, crossTex, new Rect(tileOffset + new Vector2(0.5f, 0.5f), tileAmount));
     }
 
     public static bool DropdownButton(string name, float width) {
@@ -78,8 +76,7 @@ public partial class NodeEditorWindow {
         if (hoveredNode != null) {
             Node node = hoveredNode;
             contextMenu.AddItem(new GUIContent("Remove"), false, () => graph.RemoveNode(node));
-        }
-        else {
+        } else {
             for (int i = 0; i < nodeTypes.Length; i++) {
                 Type type = nodeTypes[i];
                 Type editorType = GetNodeEditor(type).GetType();
@@ -150,7 +147,7 @@ public partial class NodeEditorWindow {
         }
 
         BeginZoomed(position, zoom);
-        
+
         foreach (Node node in graph.nodes) {
             NodeEditor nodeEditor = GetNodeEditor(node.GetType());
             nodeEditor.target = node;
@@ -159,8 +156,8 @@ public partial class NodeEditorWindow {
             Vector2 nodePos = GridToWindowPositionNoClipped(node.rect.position);
 
             //GUIStyle style = (node == selectedNode) ? (GUIStyle)"flow node 0 on" : (GUIStyle)"flow node 0";
-            
-            GUILayout.BeginArea(new Rect(nodePos,new Vector2(nodeEditor.GetWidth(), 4000)));
+
+            GUILayout.BeginArea(new Rect(nodePos, new Vector2(nodeEditor.GetWidth(), 4000)));
 
             GUIStyle style = NodeEditorResources.styles.nodeBody;
             GUILayout.BeginVertical(new GUIStyle(style));

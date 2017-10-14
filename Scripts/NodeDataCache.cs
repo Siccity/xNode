@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using System.Reflection;
 using System.Linq;
+using System.Reflection;
 using UnityEditor;
+using UnityEngine;
 
 /// <summary> Precaches reflection data in editor so we won't have to do it runtime </summary>
 public static class NodeDataCache {
@@ -28,7 +28,7 @@ public static class NodeDataCache {
             else outputPorts.Add(new NodePort(portDataCache[nodeType][i], node));
         }
 
-        for (int i = inputs.Count-1; i >= 0; i--) {
+        for (int i = inputs.Count - 1; i >= 0; i--) {
             int index = inputPorts.FindIndex(x => inputs[i].fieldName == x.fieldName);
             //If input nodeport does not exist, remove it
             if (index == -1) inputs.RemoveAt(i);
@@ -60,7 +60,7 @@ public static class NodeDataCache {
         System.Type[] nodeTypes = assembly.GetTypes().Where(t =>
             !t.IsAbstract &&
             baseType.IsAssignableFrom(t)
-            ).ToArray();
+        ).ToArray();
 
         for (int i = 0; i < nodeTypes.Length; i++) {
             CachePorts(nodeTypes[i]);

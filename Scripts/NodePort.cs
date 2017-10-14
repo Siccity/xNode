@@ -1,8 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using System;
 using System.Reflection;
+using UnityEngine;
 
 [Serializable]
 public class NodePort {
@@ -19,7 +19,6 @@ public class NodePort {
     public bool IsOutput { get { return direction == IO.Output; } }
 
     public string fieldName { get { return _fieldName; } }
-
 
     [SerializeField] public Node node;
     [SerializeField] private string _fieldName;
@@ -71,7 +70,7 @@ public class NodePort {
         if (direction == port.direction) { Debug.LogWarning("Cannot connect two " + (direction == IO.Input ? "input" : "output") + " connections"); return; }
         connections.Add(new PortConnection(port));
         if (port.connections == null) port.connections = new List<PortConnection>();
-        port.connections.Add(new PortConnection(this)); 
+        port.connections.Add(new PortConnection(this));
         node.OnCreateConnection(this, port);
         port.node.OnCreateConnection(this, port);
     }
@@ -111,7 +110,7 @@ public class NodePort {
     }
 
     public void ClearConnections() {
-        while(connections.Count > 0) {
+        while (connections.Count > 0) {
             Disconnect(connections[0].Port);
         }
     }
@@ -130,7 +129,7 @@ public class NodePort {
         }
 
         private NodePort GetPort() {
-            
+
             for (int i = 0; i < node.OutputCount; i++) {
                 if (node.outputs[i].fieldName == fieldName) return node.outputs[i];
             }

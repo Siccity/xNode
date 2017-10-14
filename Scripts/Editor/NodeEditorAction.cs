@@ -1,8 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEditor;
-using System;
+using UnityEngine;
 
 public partial class NodeEditorWindow {
 
@@ -25,7 +25,7 @@ public partial class NodeEditorWindow {
 
     private Rect nodeRects;
 
-    public void Controls() { 
+    public void Controls() {
         wantsMouseMove = true;
 
         Event e = Event.current;
@@ -45,18 +45,15 @@ public partial class NodeEditorWindow {
                             if (!draggedOutput.IsConnectedTo(hoveredPort)) {
                                 draggedOutputTarget = hoveredPort;
                             }
-                        }
-                        else {
+                        } else {
                             draggedOutputTarget = null;
                         }
                         Repaint();
-                    }
-                    else if (IsDraggingNode) {
+                    } else if (IsDraggingNode) {
                         draggedNode.rect.position = WindowToGridPosition(e.mousePosition) + dragOffset;
                         Repaint();
                     }
-                }
-                else if (e.button == 1) {
+                } else if (e.button == 1) {
                     panOffset += e.delta * zoom;
                     isPanning = true;
                 }
@@ -71,8 +68,7 @@ public partial class NodeEditorWindow {
                 if (IsHoveringPort) {
                     if (hoveredPort.IsOutput) {
                         draggedOutput = hoveredPort;
-                    }
-                    else {
+                    } else {
                         if (hoveredPort.IsConnected) {
                             NodePort output = hoveredPort.Connection;
                             hoveredPort.Disconnect(output);
@@ -80,8 +76,7 @@ public partial class NodeEditorWindow {
                             draggedOutputTarget = hoveredPort;
                         }
                     }
-                }
-                else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
+                } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
                     draggedNode = hoveredNode;
                     dragOffset = hoveredNode.rect.position - WindowToGridPosition(e.mousePosition);
                 }
@@ -100,12 +95,10 @@ public partial class NodeEditorWindow {
                         draggedOutputTarget = null;
                         EditorUtility.SetDirty(graph);
                         Repaint();
-                    }
-                    else if (IsDraggingNode) {
+                    } else if (IsDraggingNode) {
                         draggedNode = null;
                     }
-                }
-                else if (e.button == 1) {
+                } else if (e.button == 1) {
                     if (!isPanning) ShowContextMenu();
                     isPanning = false;
                 }

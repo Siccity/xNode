@@ -1,19 +1,19 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
+using System.IO;
 using UnityEditor;
-using System.IO; 
 using UnityEditor.Callbacks;
-using System;
+using UnityEngine;
 
 [InitializeOnLoad]
 public partial class NodeEditorWindow : EditorWindow {
     /// <summary> Stores node positions for all nodePorts. </summary>
     public Dictionary<NodePort, Rect> portConnectionPoints { get { return _portConnectionPoints; } }
     private Dictionary<NodePort, Rect> _portConnectionPoints = new Dictionary<NodePort, Rect>();
-    public NodeGraph graph; 
+    public NodeGraph graph;
     public Vector2 panOffset { get { return _panOffset; } set { _panOffset = value; Repaint(); } }
-    private Vector2 _panOffset; 
+    private Vector2 _panOffset;
     public float zoom { get { return _zoom; } set { _zoom = Mathf.Clamp(value, 1f, 5f); Repaint(); } }
     private float _zoom = 1;
 
@@ -36,8 +36,7 @@ public partial class NodeEditorWindow : EditorWindow {
         if (AssetDatabase.Contains(graph)) {
             EditorUtility.SetDirty(graph);
             AssetDatabase.SaveAssets();
-        }
-        else SaveAs();
+        } else SaveAs();
     }
 
     public void SaveAs() {
@@ -61,7 +60,7 @@ public partial class NodeEditorWindow : EditorWindow {
     }
 
     public Vector2 GridToWindowPosition(Vector2 gridPosition) {
-        return (position.size * 0.5f) + (panOffset / zoom) + (gridPosition/zoom);
+        return (position.size * 0.5f) + (panOffset / zoom) + (gridPosition / zoom);
     }
 
     public Rect GridToWindowRect(Rect gridRect) {
@@ -80,7 +79,6 @@ public partial class NodeEditorWindow : EditorWindow {
     public void SelectNode(Node node) {
         selectedNode = node;
     }
-
 
     [OnOpenAsset(0)]
     public static bool OnOpen(int instanceID, int line) {

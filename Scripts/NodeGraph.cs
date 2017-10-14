@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 /// <summary> Base class for all node graphs </summary>
 [Serializable]
@@ -45,8 +45,7 @@ public abstract class NodeGraph : ScriptableObject, ISerializationCallbackReceiv
         nodes.Clear();
     }
 
-    public void OnBeforeSerialize() {
-    }
+    public void OnBeforeSerialize() { }
 
     public void OnAfterDeserialize() {
         /*for (int i = 0; i < nodes.Count; i++) {
@@ -62,4 +61,3 @@ public abstract class NodeGraph : ScriptableObject, ISerializationCallbackReceiv
         }
     }*/
 }
-

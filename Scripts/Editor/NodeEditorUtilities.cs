@@ -1,9 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using System.Reflection;
 using System.Linq;
-using System;
+using System.Reflection;
+using UnityEngine;
 
 /// <summary> A set of editor-only utilities and extensions for UnityNodeEditorBase </summary>
 public static class NodeEditorUtilities {
@@ -43,11 +43,11 @@ public static class NodeEditorUtilities {
     public static bool IsCastableTo(this Type from, Type to) {
         if (to.IsAssignableFrom(from)) return true;
         var methods = from.GetMethods(BindingFlags.Public | BindingFlags.Static)
-                          .Where(
-                              m => m.ReturnType == to &&
-                                   (m.Name == "op_Implicit" ||
-                                    m.Name == "op_Explicit")
-                          );
+            .Where(
+                m => m.ReturnType == to &&
+                (m.Name == "op_Implicit" ||
+                    m.Name == "op_Explicit")
+            );
         return methods.Count() > 0;
     }
 }

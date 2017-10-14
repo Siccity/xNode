@@ -1,8 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
-using System;
+using UnityEngine;
 
 /// <summary> Base class for all nodes </summary>
 [Serializable]
@@ -10,7 +10,7 @@ public abstract class Node : ScriptableObject {
 
     /// <summary> Name of the node </summary>
     [NonSerialized] public NodeGraph graph;
-    [SerializeField] public Rect rect = new Rect(0,0,200,200);
+    [SerializeField] public Rect rect = new Rect(0, 0, 200, 200);
     /// <summary> Input <see cref="NodePort"/>s. It is recommended not to modify these at hand. Instead, see <see cref="InputAttribute"/> </summary>
     [SerializeField] public List<NodePort> inputs = new List<NodePort>();
     /// <summary> Output <see cref="NodePort"/>s. It is recommended not to modify these at hand. Instead, see <see cref="InputAttribute"/> </summary>
@@ -99,14 +99,12 @@ public abstract class Node : ScriptableObject {
 
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
     public class InputAttribute : Attribute {
-        public InputAttribute() {
-        }
+        public InputAttribute() { }
     }
 
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
     public class OutputAttribute : Attribute {
-        public OutputAttribute() {
-        }
+        public OutputAttribute() { }
     }
 
     private void GetPorts() {

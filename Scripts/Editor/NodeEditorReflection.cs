@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
-using System.Linq; 
-using System;
 using UnityEngine;
 
 /// <summary> Contains reflection-related info </summary>
 public partial class NodeEditorWindow {
     [NonSerialized] private static Dictionary<Type, NodeEditor> customNodeEditor;
     public static Type[] nodeTypes { get { return _nodeTypes != null ? _nodeTypes : _nodeTypes = GetNodeTypes(); } }
-    [NonSerialized] private static Type[] _nodeTypes = null;
+        [NonSerialized] private static Type[] _nodeTypes = null;
 
     public static NodeEditor GetNodeEditor(Type node) {
         if (customNodeEditor == null) CacheCustomNodeEditors();
@@ -21,7 +21,7 @@ public partial class NodeEditorWindow {
         return GetDerivedTypes(typeof(Node));
     }
 
-    public static void CacheCustomNodeEditors(){
+    public static void CacheCustomNodeEditors() {
         customNodeEditor = new Dictionary<Type, NodeEditor>();
         customNodeEditor.Add(typeof(Node), new NodeEditor());
         //Get all classes deriving from NodeEditor via reflection
@@ -41,7 +41,7 @@ public partial class NodeEditorWindow {
         return assembly.GetTypes().Where(t =>
             !t.IsAbstract &&
             baseType.IsAssignableFrom(t)
-            ).ToArray();
+        ).ToArray();
     }
 
     public static object ObjectFromType(Type type) {

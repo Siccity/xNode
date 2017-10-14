@@ -137,6 +137,7 @@ public partial class NodeEditorWindow {
         Vector2 mousePos = Event.current.mousePosition;
         Node newHoverNode = null;
         foreach (Node node in graph.nodes) {
+            if (node == null) return; 
             //Get node position
             Vector2 nodePos = GridToWindowPosition(node.rect.position);
             Rect windowRect = new Rect(nodePos, new Vector2(node.rect.size.x / zoom, node.rect.size.y / zoom));

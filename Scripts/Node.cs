@@ -9,7 +9,7 @@ using UnityEngine;
 public abstract class Node : ScriptableObject {
 
     /// <summary> Name of the node </summary>
-    [NonSerialized] public NodeGraph graph;
+    [SerializeField] public NodeGraph graph;
     [SerializeField] public Rect rect = new Rect(0, 0, 200, 200);
     /// <summary> Input <see cref="NodePort"/>s. It is recommended not to modify these at hand. Instead, see <see cref="InputAttribute"/> </summary>
     [SerializeField] public List<NodePort> inputs = new List<NodePort>();
@@ -99,12 +99,14 @@ public abstract class Node : ScriptableObject {
 
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
     public class InputAttribute : Attribute {
-        public InputAttribute() { }
+        public bool fallback;
+        public InputAttribute(bool fallback) { this.fallback = fallback; }
     }
 
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
     public class OutputAttribute : Attribute {
-        public OutputAttribute() { }
+        public bool fallback;
+        public OutputAttribute(bool fallback) { this.fallback = fallback; }
     }
 
     private void GetPorts() {

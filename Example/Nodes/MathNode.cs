@@ -2,9 +2,9 @@
 
 [System.Serializable]
 public class MathNode : ExampleNodeBase {
-    [Input] public float c;
-    [Input] public float b;
-    [Output] public float result;
+    [Input(true)] public float a;
+    [Input(true)] public float b;
+    [Output(false)] public float result;
     public enum MathType { Add, Subtract, Multiply, Divide}
     public MathType mathType = MathType.Add;
 
@@ -13,7 +13,7 @@ public class MathNode : ExampleNodeBase {
     }
 
     public override object GetValue(NodePort port) {
-        float a = GetInputFloat("c");
+        float a = GetInputFloat("a");
         float b = GetInputFloat("b");
         
         switch(port.fieldName) {

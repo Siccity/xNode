@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ExampleNodeBase : Node {
+public abstract class ExampleNodeBase : Node {
 
 	public float GetInputFloat(string fieldName) {
 		float result = 0f;

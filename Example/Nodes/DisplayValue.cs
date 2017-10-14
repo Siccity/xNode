@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
 public class DisplayValue : ExampleNodeBase {
-    [Input] public float value;
+    [Input(false)] public float value;
 
 }

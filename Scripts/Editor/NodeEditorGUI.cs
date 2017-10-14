@@ -116,6 +116,8 @@ public partial class NodeEditorWindow {
     /// <summary> Draws all connections </summary>
     public void DrawConnections() {
         foreach (Node node in graph.nodes) {
+            //If a null node is found, return. This can happen if the nodes associated script is deleted. It is currently not possible in Unity to delete a null asset.
+            if (node == null) return;
             for (int i = 0; i < node.OutputCount; i++) {
                 NodePort output = node.outputs[i];
 
@@ -126,6 +128,7 @@ public partial class NodeEditorWindow {
 
                     NodePort input = output.GetConnection(k);
                     if (input == null) return; //If a script has been updated and the port doesn't exist, it is removed and null is returned. If this happens, return.
+                    if (!_portConnectionPoints.ContainsKey(input)) return;
                     Vector2 to = _portConnectionPoints[input].center;
                     DrawConnection(from, to, NodeEditorPreferences.GetTypeColor(output.type));
                 }
@@ -148,6 +151,7 @@ public partial class NodeEditorWindow {
         BeginZoomed(position, zoom);
 
         foreach (Node node in graph.nodes) {
+            if (node == null) return;
             NodeEditor nodeEditor = GetNodeEditor(node.GetType());
             nodeEditor.target = node;
 

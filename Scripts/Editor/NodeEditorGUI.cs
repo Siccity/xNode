@@ -8,7 +8,7 @@ public partial class NodeEditorWindow {
 
     private void OnGUI() {
         Event e = Event.current;
-        Matrix4x4m = GUI.matrix;
+        Matrix4x4 m = GUI.matrix;
         Controls();
 
         DrawGrid(position, zoom, panOffset);

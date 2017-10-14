@@ -111,19 +111,11 @@ public class NodeEditor {
 
         EditorGUI.BeginChangeCheck();
         if (fieldType == typeof(int)) {
-            Rect rect = EditorGUILayout.GetControlRect();
-            rect.width *= 0.5f;
-            EditorGUI.LabelField(rect, fieldPrettyName);
-            rect.x += rect.width;
-            fieldValue = EditorGUI.IntField(rect, (int) fieldValue);
+            fieldValue = NodeEditorGUILayout.IntField(fieldPrettyName, (int) fieldValue);
         } else if (fieldType == typeof(bool)) {
             fieldValue = EditorGUILayout.Toggle(fieldPrettyName, (bool) fieldValue);
         } else if (fieldType.IsEnum) {
-            Rect rect = EditorGUILayout.GetControlRect();
-            rect.width *= 0.5f;
-            EditorGUI.LabelField(rect, fieldPrettyName);
-            rect.x += rect.width;
-            fieldValue = EditorGUI.EnumPopup(rect, (Enum) fieldValue);
+            fieldValue = NodeEditorGUILayout.EnumField(fieldPrettyName, (Enum)fieldValue);
         } else if (fieldType == typeof(string)) {
 
             if (fieldName == "name") return; //Ignore 'name'
@@ -136,11 +128,11 @@ public class NodeEditor {
             if (fieldName == "rect") return; //Ignore 'rect'
             fieldValue = EditorGUILayout.RectField(fieldPrettyName, (Rect) fieldValue);
         } else if (fieldType == typeof(float)) {
-            Rect rect = EditorGUILayout.GetControlRect();
-            rect.width *= 0.5f;
-            EditorGUI.LabelField(rect, fieldPrettyName);
-            rect.x += rect.width;
-            fieldValue = EditorGUI.FloatField(rect, (float) fieldValue);
+            fieldValue = NodeEditorGUILayout.FloatField(fieldPrettyName, (float) fieldValue);
+        } else if (fieldType == typeof(double)) {
+            fieldValue = NodeEditorGUILayout.DoubleField(fieldPrettyName, (double) fieldValue);
+        } else if (fieldType == typeof(long)) {
+            fieldValue = NodeEditorGUILayout.LongField(fieldPrettyName, (long) fieldValue);
         } else if (fieldType == typeof(Vector2)) {
             fieldValue = EditorGUILayout.Vector2Field(fieldPrettyName, (Vector2) fieldValue);
         } else if (fieldType == typeof(Vector3)) {

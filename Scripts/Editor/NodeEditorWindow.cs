@@ -8,6 +8,8 @@ using UnityEngine;
 
 [InitializeOnLoad]
 public partial class NodeEditorWindow : EditorWindow {
+    public static NodeEditorWindow current;
+
     /// <summary> Stores node positions for all nodePorts. </summary>
     public Dictionary<NodePort, Rect> portConnectionPoints { get { return _portConnectionPoints; } }
     private Dictionary<NodePort, Rect> _portConnectionPoints = new Dictionary<NodePort, Rect>();
@@ -19,6 +21,7 @@ public partial class NodeEditorWindow : EditorWindow {
 
     void OnFocus() {
         AssetDatabase.SaveAssets();
+        current = this;
     }
 
     partial void OnEnable();

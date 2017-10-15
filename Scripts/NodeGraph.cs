@@ -4,7 +4,7 @@ using UnityEngine;
 
 /// <summary> Base class for all node graphs </summary>
 [Serializable]
-public abstract class NodeGraph : ScriptableObject, ISerializationCallbackReceiver {
+public abstract class NodeGraph : ScriptableObject {
 
     /// <summary> All nodes in the graph. <para/>
     /// See: <see cref="AddNode{T}"/> </summary>
@@ -44,20 +44,4 @@ public abstract class NodeGraph : ScriptableObject, ISerializationCallbackReceiv
     public void Clear() {
         nodes.Clear();
     }
-
-    public void OnBeforeSerialize() { }
-
-    public void OnAfterDeserialize() {
-        /*for (int i = 0; i < nodes.Count; i++) {
-            nodes[i].graph = this;
-        }*/
-        //VerifyConnections();
-    }
-
-    /*/// <summary> Checks all connections for invalid references, and removes them. </summary>
-    public void VerifyConnections() {
-        for (int i = 0; i < nodes.Count; i++) {
-            nodes[i].VerifyConnections();
-        }
-    }*/
 }

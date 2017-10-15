@@ -1,3 +1,5 @@
+[![GitHub issues](https://img.shields.io/github/issues/Siccity/UnityNodeEditorCore.svg)](https://github.com/Siccity/UnityNodeEditorCore/issues)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/Siccity/UnityNodeEditorCore/master/LICENSE.md)
 
 ### UnityNodeEditorCore
 A simple, userfriendly node editor framework for unity. Ideal as a base for custom state machines, dialogue systems, decision makers etc.

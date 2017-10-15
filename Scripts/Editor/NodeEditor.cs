@@ -7,7 +7,8 @@ using UnityEngine;
 
 /// <summary> Base class to derive custom Node editors from. Use this to create your own custom inspectors and editors for your nodes. </summary>
 public class NodeEditor {
-
+    /// <summary> Fires every whenever a node was modified through the editor </summary>
+    public static Action<Node> onUpdateNode;
     public Node target;
 
     /// <summary> Draws the node GUI.</summary>
@@ -26,45 +27,17 @@ public class NodeEditor {
     protected void DrawDefaultNodeBodyGUI(out Dictionary<NodePort, Vector2> portPositions) {
         portPositions = new Dictionary<NodePort, Vector2>();
 
+        EditorGUI.BeginChangeCheck();
         FieldInfo[] fields = GetInspectorFields(target);
         for (int i = 0; i < fields.Length; i++) {
             object[] fieldAttribs = fields[i].GetCustomAttributes(false);
             if (fields[i].Name == "graph" || fields[i].Name == "rect") continue;
             NodeEditorGUILayout.PropertyField(target, fields[i], portPositions);
         }
-    }
-
-    /// <summary> Draw node port GUI using automatic layouting. Returns port handle position. </summary>
-    protected Vector2 DrawNodePortGUI(NodePort port) {
-        GUIStyle style = port.direction == NodePort.IO.Input ? NodeEditorResources.styles.inputPort : NodeEditorResources.styles.outputPort;
-        Rect rect = GUILayoutUtility.GetRect(new GUIContent(port.fieldName.PrettifyCamelCase()), style);
-        return DrawNodePortGUI(rect, port);
-    }
-
-    /// <summary> Draw node port GUI in rect. Returns port handle position. </summary>
-    protected Vector2 DrawNodePortGUI(Rect rect, NodePort port) {
-        GUIStyle style = port.direction == NodePort.IO.Input ? NodeEditorResources.styles.inputPort : NodeEditorResources.styles.outputPort;
-        GUI.Label(rect, new GUIContent(port.fieldName.PrettifyCamelCase()), style);
-
-        Vector2 handlePoint = rect.center;
-
-        switch (port.direction) {
-            case NodePort.IO.Input:
-                handlePoint.x = rect.xMin;
-                break;
-            case NodePort.IO.Output:
-                handlePoint.x = rect.xMax;
-                break;
+        //If user changed a value, notify other scripts through onUpdateNode
+        if (EditorGUI.EndChangeCheck()) {
+            if (onUpdateNode != null) onUpdateNode(target);
         }
-
-        Color col = GUI.color;
-        Rect handleRect = new Rect(handlePoint.x - 8, handlePoint.y - 8, 16, 16);
-        GUI.color = new Color32(90, 97, 105, 255);
-        GUI.DrawTexture(handleRect, NodeEditorResources.dotOuter);
-        GUI.color = NodeEditorPreferences.GetTypeColor(port.type);
-        GUI.DrawTexture(handleRect, NodeEditorResources.dot);
-        GUI.color = col;
-        return handlePoint;
     }
 
     private static FieldInfo[] GetInspectorFields(Node node) {

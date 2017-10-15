@@ -69,19 +69,19 @@ public class NodeEditorGUILayout {
     }
 
     public static object PropertyField(string label, object value, System.Type type) {
-        if (value is int) return IntField(label, (int) value);
-        else if (value is float) return FloatField(label, (float) value);
-        else if (value is double) return DoubleField(label, (double) value);
-        else if (value is long) return LongField(label, (long) value);
-        else if (value is bool) return Toggle(label, (bool) value);
-        else if (value is Enum) return EnumField(label, (Enum) value);
-        else if (value is string) return TextField(label, (string) value);
-        else if (value is Rect) return RectField(label, (Rect) value);
-        else if (value is Vector2) return Vector2Field(label, (Vector2) value);
-        else if (value is Vector3) return Vector3Field(label, (Vector3) value);
-        else if (value is Vector4) return Vector4Field(label, (Vector4) value);
-        else if (value is Color) return ColorField(label, (Color) value);
-        else if (value is AnimationCurve) return CurveField(label, (AnimationCurve) value);
+        if (type == typeof(int)) return IntField(label, (int) value);
+        else if (type == typeof(float)) return FloatField(label, (float) value);
+        else if (type == typeof(double)) return DoubleField(label, (double) value);
+        else if (type == typeof(long)) return LongField(label, (long) value);
+        else if (type == typeof(bool)) return Toggle(label, (bool) value);
+        else if (type == typeof(Enum)) return EnumField(label, (Enum) value);
+        else if (type == typeof(string)) return TextField(label, (string) value);
+        else if (type == typeof(Rect)) return RectField(label, (Rect) value);
+        else if (type == typeof(Vector2)) return Vector2Field(label, (Vector2) value);
+        else if (type == typeof(Vector3)) return Vector3Field(label, (Vector3) value);
+        else if (type == typeof(Vector4)) return Vector4Field(label, (Vector4) value);
+        else if (type == typeof(Color)) return ColorField(label, (Color) value);
+        else if (type == typeof(AnimationCurve)) return CurveField(label, (AnimationCurve) value);
         else if (type.IsSubclassOf(typeof(UnityEngine.Object)) || type == typeof(UnityEngine.Object)) return ObjectField(label, (UnityEngine.Object) value);
         else return value;
     }

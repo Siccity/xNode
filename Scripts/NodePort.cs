@@ -46,7 +46,7 @@ public class NodePort {
 
     /// <summary> Checks all connections for invalid references, and removes them. </summary>
     public void VerifyConnections() {
-        for (int i = connections.Count-1; i >= 0; i--) {
+        for (int i = connections.Count - 1; i >= 0; i--) {
             if (connections[i].node != null &&
                 !string.IsNullOrEmpty(connections[i].fieldName) &&
                 connections[i].node.GetPortByFieldName(connections[i].fieldName) != null)

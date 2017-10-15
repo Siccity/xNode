@@ -20,7 +20,8 @@ public class NodeEditor {
 
     protected void DrawDefaultHeaderGUI() {
         GUI.color = Color.white;
-        GUILayout.Label(target.name, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
+        string title = NodeEditorUtilities.PrettifyCamelCase(target.name);
+        GUILayout.Label(title, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
     }
 
     /// <summary> Draws standard field editors for all public fields </summary>

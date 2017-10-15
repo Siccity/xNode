@@ -69,6 +69,7 @@ public partial class NodeEditorWindow {
                     if (hoveredPort.IsOutput) {
                         draggedOutput = hoveredPort;
                     } else {
+                        hoveredPort.VerifyConnections();
                         if (hoveredPort.IsConnected) {
                             NodePort output = hoveredPort.Connection;
                             hoveredPort.Disconnect(output);

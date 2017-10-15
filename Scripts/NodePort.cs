@@ -46,12 +46,11 @@ public class NodePort {
 
     /// <summary> Checks all connections for invalid references, and removes them. </summary>
     public void VerifyConnections() {
-        for (int i = 0; i < connections.Count; i++) {
+        for (int i = connections.Count-1; i >= 0; i--) {
             if (connections[i].node != null &&
                 !string.IsNullOrEmpty(connections[i].fieldName) &&
                 connections[i].node.GetPortByFieldName(connections[i].fieldName) != null)
                 continue;
-            Debug.LogWarning("Removed invalid connection");
             connections.RemoveAt(i);
         }
     }
@@ -97,7 +96,8 @@ public class NodePort {
     }
 
     public void Disconnect(NodePort port) {
-        for (int i = 0; i < connections.Count; i++) {
+        for (int i = connections.Count - 1; i >= 0; i--) {
+            //Remove matching ports.
             if (connections[i].Port == port) {
                 connections.RemoveAt(i);
             }
@@ -128,7 +128,9 @@ public class NodePort {
             fieldName = port.fieldName;
         }
 
+        /// <summary> Returns the port that this <see cref="PortConnection"/> points to </summary>
         private NodePort GetPort() {
+            if (node == null || string.IsNullOrEmpty(fieldName)) return null;
 
             for (int i = 0; i < node.OutputCount; i++) {
                 if (node.outputs[i].fieldName == fieldName) return node.outputs[i];

@@ -1,6 +1,7 @@
 [![Discord](https://img.shields.io/discord/361769369404964864.svg)](https://discord.gg/qgPrHv4)
 [![GitHub issues](https://img.shields.io/github/issues/Siccity/UnityNodeEditorCore.svg)](https://github.com/Siccity/UnityNodeEditorCore/issues)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/Siccity/UnityNodeEditorCore/master/LICENSE.md)
+[![GitHub Wiki](https://img.shields.io/badge/wiki-available-brightgreen.svg)](https://github.com/Siccity/UnityNodeEditorCore/wiki)
 
 ### UnityNodeEditorCore
 Thinking of developing a node-based plugin? Then this is for you. You can download it as an archive and unpack to a new unity project, or connect it as git submodule.

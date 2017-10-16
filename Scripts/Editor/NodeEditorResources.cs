@@ -48,13 +48,10 @@ public static class NodeEditorResources {
             nodeBody = new GUIStyle();
             nodeBody.normal.background = NodeEditorResources.nodeBody;
             nodeBody.border = new RectOffset(32, 32, 32, 32);
-            nodeBody.padding = new RectOffset(16, 16, 4, 6);
+            nodeBody.padding = new RectOffset(16, 16, 4, 16);
 
             tooltip = new GUIStyle("helpBox");
             tooltip.alignment = TextAnchor.MiddleCenter;
-            //tooltip.border = new RectOffset(0, 0, 0, 0);
-            //tooltip.normal.background
-            //tooltip.padding = new RectOffset(0, 0, 0, 0);
         }
     }
 

@@ -151,6 +151,9 @@ public partial class NodeEditorWindow {
 
         BeginZoomed(position, zoom);
 
+        Vector2 mousePos = Event.current.mousePosition;
+
+
         foreach (Node node in graph.nodes) {
             if (node == null) return;
             NodeEditor nodeEditor = GetNodeEditor(node.GetType());
@@ -169,7 +172,6 @@ public partial class NodeEditorWindow {
             //Draw node contents
             Dictionary<NodePort, Vector2> portHandlePoints;
             nodeEditor.OnNodeGUI(out portHandlePoints);
-            EditorGUILayout.Space();
 
             if (e.type == EventType.Repaint) {
                 foreach (var kvp in portHandlePoints) {
@@ -182,7 +184,31 @@ public partial class NodeEditorWindow {
 
             GUILayout.EndVertical();
 
-            //if (e.type == EventType.Repaint) node.rect.size = GUILayoutUtility.GetLastRect().size;
+            //Check if we are hovering this node
+            Vector2 nodeSize = GUILayoutUtility.GetLastRect().size / zoom;
+            Rect windowRect = new Rect(nodePos, nodeSize);
+            if (windowRect.Contains(mousePos)) hoveredNode = node;
+
+            //Check if we are hovering any of this nodes ports
+            //Check input ports
+            for (int i = 0; i < node.InputCount; i++)
+            {
+                NodePort port = node.inputs[i];
+                //Check if port rect is available
+                if (!portConnectionPoints.ContainsKey(port)) continue;
+                Rect r = GridToWindowRect(portConnectionPoints[port]);
+                if (r.Contains(mousePos)) hoveredPort = port;
+            }
+            //Check all output ports
+            for (int i = 0; i < node.OutputCount; i++)
+            {
+                NodePort port = node.outputs[i];
+                //Check if port rect is available
+                if (!portConnectionPoints.ContainsKey(port)) continue;
+                Rect r = GridToWindowRect(portConnectionPoints[port]);
+                if (r.Contains(mousePos)) hoveredPort = port;
+            }
+
             GUILayout.EndArea();
         }
         EndZoomed(position, zoom);

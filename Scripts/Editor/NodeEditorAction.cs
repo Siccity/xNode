@@ -31,14 +31,12 @@ public partial class NodeEditorWindow {
         Event e = Event.current;
         switch (e.type) {
             case EventType.MouseMove:
-                UpdateHovered();
                 break;
             case EventType.ScrollWheel:
                 if (e.delta.y > 0) zoom += 0.1f * zoom;
                 else zoom -= 0.1f * zoom;
                 break;
             case EventType.MouseDrag:
-                UpdateHovered();
                 if (e.button == 0) {
                     if (IsDraggingPort) {
                         if (IsHoveringPort && hoveredPort.IsInput) {
@@ -62,7 +60,6 @@ public partial class NodeEditorWindow {
                 if (e.keyCode == KeyCode.F) Home();
                 break;
             case EventType.MouseDown:
-                UpdateHovered();
                 Repaint();
                 SelectNode(hoveredNode);
                 if (IsHoveringPort) {
@@ -103,7 +100,6 @@ public partial class NodeEditorWindow {
                     if (!isPanning) ShowContextMenu();
                     isPanning = false;
                 }
-                UpdateHovered();
                 AssetDatabase.SaveAssets();
                 break;
         }
@@ -130,49 +126,6 @@ public partial class NodeEditorWindow {
             Color col = NodeEditorPreferences.GetTypeColor(draggedOutput.type);
             col.a = 0.6f;
             DrawConnection(from, to, col);
-        }
-    }
-
-    /// <summary> Updates <see cref="hoveredNode"/> and <see cref="hoveredPort"/> </summary>
-    void UpdateHovered() {
-        Vector2 mousePos = Event.current.mousePosition;
-        Node newHoverNode = null;
-        foreach (Node node in graph.nodes) {
-            if (node == null) return; 
-            //Get node position
-            Vector2 nodePos = GridToWindowPosition(node.rect.position);
-            Rect windowRect = new Rect(nodePos, new Vector2(node.rect.size.x / zoom, node.rect.size.y / zoom));
-            if (windowRect.Contains(mousePos)) {
-                newHoverNode = node;
-            }
-        }
-        if (newHoverNode != hoveredNode) {
-            hoveredNode = newHoverNode;
-            Repaint();
-        }
-        //If we are hovering a node, check if we are also hovering a port
-        NodePort newHoverPort = null;
-        //Check all input ports
-        for (int k = 0; k < graph.nodes.Count; k++) {
-
-            for (int i = 0; i < graph.nodes[k].InputCount; i++) {
-                NodePort port = graph.nodes[k].inputs[i];
-                //Check if port rect is available
-                if (!portConnectionPoints.ContainsKey(port)) continue;
-                Rect r = GridToWindowRect(portConnectionPoints[port]);
-                if (r.Contains(mousePos)) newHoverPort = port;
-            }
-            //Check all output ports
-            for (int i = 0; i < graph.nodes[k].OutputCount; i++) {
-                NodePort port = graph.nodes[k].outputs[i];
-                //Check if port rect is available
-                if (!portConnectionPoints.ContainsKey(port)) continue;
-                Rect r = GridToWindowRect(portConnectionPoints[port]);
-                if (r.Contains(mousePos)) newHoverPort = port;
-            }
-        }
-        if (newHoverPort != hoveredPort) {
-            hoveredPort = newHoverPort;
         }
     }
 

@@ -153,6 +153,8 @@ public partial class NodeEditorWindow {
 
         Vector2 mousePos = Event.current.mousePosition;
 
+        hoveredPort = null;
+        hoveredNode = null;
 
         foreach (Node node in graph.nodes) {
             if (node == null) return;
@@ -191,8 +193,7 @@ public partial class NodeEditorWindow {
 
             //Check if we are hovering any of this nodes ports
             //Check input ports
-            for (int i = 0; i < node.InputCount; i++)
-            {
+            for (int i = 0; i < node.InputCount; i++) {
                 NodePort port = node.inputs[i];
                 //Check if port rect is available
                 if (!portConnectionPoints.ContainsKey(port)) continue;
@@ -200,8 +201,7 @@ public partial class NodeEditorWindow {
                 if (r.Contains(mousePos)) hoveredPort = port;
             }
             //Check all output ports
-            for (int i = 0; i < node.OutputCount; i++)
-            {
+            for (int i = 0; i < node.OutputCount; i++) {
                 NodePort port = node.outputs[i];
                 //Check if port rect is available
                 if (!portConnectionPoints.ContainsKey(port)) continue;

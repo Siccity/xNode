@@ -13,19 +13,19 @@ public class NodeEditor {
 
     /// <summary> Draws the node GUI.</summary>
     /// <param name="portPositions">Port handle positions need to be returned to the NodeEditorWindow </param>
-    public virtual void OnNodeGUI(out Dictionary<NodePort, Vector2> portPositions) {
-        DrawDefaultHeaderGUI();
-        DrawDefaultNodeBodyGUI(out portPositions);
+    public void OnNodeGUI(out Dictionary<NodePort, Vector2> portPositions) {
+        OnHeaderGUI();
+        OnBodyGUI(out portPositions);
     }
 
-    protected void DrawDefaultHeaderGUI() {
+    protected virtual void OnHeaderGUI() {
         GUI.color = Color.white;
         string title = NodeEditorUtilities.PrettifyCamelCase(target.name);
         GUILayout.Label(title, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
     }
 
     /// <summary> Draws standard field editors for all public fields </summary>
-    protected void DrawDefaultNodeBodyGUI(out Dictionary<NodePort, Vector2> portPositions) {
+    protected virtual void OnBodyGUI(out Dictionary<NodePort, Vector2> portPositions) {
         portPositions = new Dictionary<NodePort, Vector2>();
 
         EditorGUI.BeginChangeCheck();

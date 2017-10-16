@@ -6,8 +6,8 @@ using UnityEditor;
 [CustomNodeEditor(typeof(DisplayValue), "Display Value")]
 public class DisplayValueEditor : NodeEditor {
 
-    public override void OnNodeGUI(out Dictionary<NodePort, Vector2> portPositions) {
-        base.OnNodeGUI(out portPositions);
+    protected override void OnBodyGUI(out Dictionary<NodePort, Vector2> portPositions) {
+        base.OnBodyGUI(out portPositions);
         EditorGUILayout.LabelField("Value: " + GetResult());
     }
 

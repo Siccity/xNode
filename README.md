@@ -10,7 +10,15 @@ UNEC is ideal as a base for custom state machines, dialogue systems, decision ma
 
 ![editor](https://user-images.githubusercontent.com/6402525/31379481-a9c15950-adae-11e7-91c4-387dd020261e.png)
 
-Node example:
+### Key features of UnityNodeEditorCore:
+* Lightweight in runtime
+* Very little boilerplate code
+* Strong separation of editor and runtime code
+* No runtime reflection (unless you need to edit/build node graphs at runtime. In this case, all reflection is cached.)
+* Does not rely on any 3rd party plugins
+* Custom node inspector code is very similar to regular custom inspector code
+
+### Node example:
 ```csharp
 [System.Serializable]
 public class MathNode : Node {
@@ -19,9 +27,19 @@ public class MathNode : Node {
     [Output] public float result;
     public enum MathType { Add, Subtract, Multiply, Divide}
     public MathType mathType = MathType.Add;
-
-    protected override void Init() {
-        name = "Math";
+    
+    public override object GetValue(NodePort port) {
+        if (port.fieldName == "result") {
+            float a = GetInputFloat("a");
+            float b = GetInputFloat("b");
+            switch(mathType) {
+                case MathType.Add: return a + b;
+                case MathType.Subtract: return a - b;
+                case MathType.Multiply: return a * b;
+                case MathType.Divide: return a / b;
+            }
+        }
+        return 0f;
     }
 }
 ```

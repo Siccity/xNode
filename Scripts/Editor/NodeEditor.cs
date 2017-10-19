@@ -32,7 +32,7 @@ public class NodeEditor {
         FieldInfo[] fields = GetInspectorFields(target);
         for (int i = 0; i < fields.Length; i++) {
             object[] fieldAttribs = fields[i].GetCustomAttributes(false);
-            if (fields[i].Name == "graph" || fields[i].Name == "rect") continue;
+            if (fields[i].Name == "graph" || fields[i].Name == "position") continue;
             NodeEditorGUILayout.PropertyField(target, fields[i], portPositions);
         }
         //If user changed a value, notify other scripts through onUpdateNode

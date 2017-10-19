@@ -10,7 +10,7 @@ public abstract class Node : ScriptableObject {
 
     /// <summary> Name of the node </summary>
     [SerializeField] public NodeGraph graph;
-    [SerializeField] public Rect rect = new Rect(0, 0, 200, 200);
+    [SerializeField] public Vector2 position;
     /// <summary> Input <see cref="NodePort"/>s. It is recommended not to modify these at hand. Instead, see <see cref="InputAttribute"/> </summary>
     [SerializeField] public List<NodePort> inputs = new List<NodePort>();
     /// <summary> Output <see cref="NodePort"/>s. It is recommended not to modify these at hand. Instead, see <see cref="InputAttribute"/> </summary>

@@ -153,8 +153,11 @@ public partial class NodeEditorWindow {
 
         Vector2 mousePos = Event.current.mousePosition;
 
-        hoveredPort = null;
-        hoveredNode = null;
+        
+        if (e.type != EventType.Layout) {
+            hoveredNode = null;
+            hoveredPort = null;
+        }
 
         foreach (Node node in graph.nodes) {
             if (node == null) return;
@@ -162,7 +165,7 @@ public partial class NodeEditorWindow {
             nodeEditor.target = node;
 
             //Get node position
-            Vector2 nodePos = GridToWindowPositionNoClipped(node.rect.position);
+            Vector2 nodePos = GridToWindowPositionNoClipped(node.position);
 
             //GUIStyle style = (node == selectedNode) ? (GUIStyle)"flow node 0 on" : (GUIStyle)"flow node 0";
 
@@ -178,7 +181,7 @@ public partial class NodeEditorWindow {
             if (e.type == EventType.Repaint) {
                 foreach (var kvp in portHandlePoints) {
                     Vector2 portHandlePos = kvp.Value;
-                    portHandlePos += node.rect.position;
+                    portHandlePos += node.position;
                     Rect rect = new Rect(portHandlePos.x - 8, portHandlePos.y - 8, 16, 16);
                     portConnectionPoints.Add(kvp.Key, rect);
                 }
@@ -186,27 +189,29 @@ public partial class NodeEditorWindow {
 
             GUILayout.EndVertical();
 
-            //Check if we are hovering this node
-            Vector2 nodeSize = GUILayoutUtility.GetLastRect().size / zoom;
-            Rect windowRect = new Rect(nodePos, nodeSize);
-            if (windowRect.Contains(mousePos)) hoveredNode = node;
+            if (e.type != EventType.Layout) {
+                //Check if we are hovering this node
+                Vector2 nodeSize = GUILayoutUtility.GetLastRect().size / zoom;
+                Rect windowRect = new Rect(nodePos, nodeSize);
+                if (windowRect.Contains(mousePos)) hoveredNode = node;
 
-            //Check if we are hovering any of this nodes ports
-            //Check input ports
-            for (int i = 0; i < node.InputCount; i++) {
-                NodePort port = node.inputs[i];
-                //Check if port rect is available
-                if (!portConnectionPoints.ContainsKey(port)) continue;
-                Rect r = GridToWindowRect(portConnectionPoints[port]);
-                if (r.Contains(mousePos)) hoveredPort = port;
-            }
-            //Check all output ports
-            for (int i = 0; i < node.OutputCount; i++) {
-                NodePort port = node.outputs[i];
-                //Check if port rect is available
-                if (!portConnectionPoints.ContainsKey(port)) continue;
-                Rect r = GridToWindowRect(portConnectionPoints[port]);
-                if (r.Contains(mousePos)) hoveredPort = port;
+                //Check if we are hovering any of this nodes ports
+                //Check input ports
+                for (int i = 0; i < node.InputCount; i++) {
+                    NodePort port = node.inputs[i];
+                    //Check if port rect is available
+                    if (!portConnectionPoints.ContainsKey(port)) continue;
+                    Rect r = GridToWindowRect(portConnectionPoints[port]);
+                    if (r.Contains(mousePos)) hoveredPort = port;
+                }
+                //Check all output ports
+                for (int i = 0; i < node.OutputCount; i++) {
+                    NodePort port = node.outputs[i];
+                    //Check if port rect is available
+                    if (!portConnectionPoints.ContainsKey(port)) continue;
+                    Rect r = GridToWindowRect(portConnectionPoints[port]);
+                    if (r.Contains(mousePos)) hoveredPort = port;
+                }
             }
 
             GUILayout.EndArea();

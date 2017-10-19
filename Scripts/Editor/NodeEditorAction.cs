@@ -48,7 +48,7 @@ public partial class NodeEditorWindow {
                         }
                         Repaint();
                     } else if (IsDraggingNode) {
-                        draggedNode.rect.position = WindowToGridPosition(e.mousePosition) + dragOffset;
+                        draggedNode.position = WindowToGridPosition(e.mousePosition) + dragOffset;
                         Repaint();
                     }
                 } else if (e.button == 1) {
@@ -76,7 +76,7 @@ public partial class NodeEditorWindow {
                     }
                 } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
                     draggedNode = hoveredNode;
-                    dragOffset = hoveredNode.rect.position - WindowToGridPosition(e.mousePosition);
+                    dragOffset = hoveredNode.position - WindowToGridPosition(e.mousePosition);
                 }
                 break;
             case EventType.MouseUp:
@@ -113,7 +113,7 @@ public partial class NodeEditorWindow {
 
     public void CreateNode(Type type, Vector2 position) {
         Node node = graph.AddNode(type);
-        node.rect.position = position;
+        node.position = position;
         Repaint();
     }
 
@@ -132,8 +132,8 @@ public partial class NodeEditorWindow {
     bool IsHoveringTitle(Node node) {
         Vector2 mousePos = Event.current.mousePosition;
         //Get node position
-        Vector2 nodePos = GridToWindowPosition(node.rect.position);
-        Rect windowRect = new Rect(nodePos, new Vector2(node.rect.size.x / zoom, 30 / zoom));
+        Vector2 nodePos = GridToWindowPosition(node.position);
+        Rect windowRect = new Rect(nodePos, new Vector2(/*Node width*/200 / zoom, 30 / zoom));
         return windowRect.Contains(mousePos);
     }
 }

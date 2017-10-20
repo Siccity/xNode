@@ -55,7 +55,6 @@ public class NodePort {
         }
     }
 
-
     /// <summary> Return the output value of this node through its parent nodes GetValue override method. </summary>
     /// <returns> <see cref="Node.GetValue(NodePort)"/> </returns>
     public object GetOutputValue() {
@@ -103,6 +102,30 @@ public class NodePort {
     public bool TryGetInputValue<T>(out T value) where T : class {
         value = GetInputValue() as T;
         return value != null;
+    }
+
+    /// <summary> Return the sum of all inputs. </summary>
+    /// <returns> <see cref="NodePort.GetOutputValue"/> </returns>
+    public float GetInputSum(float fallback) {
+        object[] objs = GetInputValues();
+        if (objs.Length == 0) return fallback;
+        float result = 0;
+        for (int i = 0; i < objs.Length; i++) {
+            if (objs[i] is float) result += (float)objs[i];
+        }
+        return result;
+    }
+
+    /// <summary> Return the sum of all inputs. </summary>
+    /// <returns> <see cref="NodePort.GetOutputValue"/> </returns>
+    public int GetInputSum(int fallback) {
+        object[] objs = GetInputValues();
+        if (objs.Length == 0) return fallback;
+        int result = 0;
+        for (int i = 0; i < objs.Length; i++) {
+            if (objs[i] is int) result += (int)objs[i];
+        }
+        return result;
     }
 
     /// <summary> Connect this <see cref="NodePort"/> to another </summary>

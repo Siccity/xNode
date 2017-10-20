@@ -7,6 +7,7 @@ using UnityEngine;
 /// <summary> Base class for all nodes </summary>
 [Serializable]
 public abstract class Node : ScriptableObject {
+    public enum ShowBackingValue { Never, Unconnected, Always }
 
     /// <summary> Name of the node </summary>
     [SerializeField] public NodeGraph graph;
@@ -99,8 +100,8 @@ public abstract class Node : ScriptableObject {
 
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
     public class InputAttribute : Attribute {
-        public bool fallback;
-        public InputAttribute(bool fallback) { this.fallback = fallback; }
+        public ShowBackingValue backingValue;
+        public InputAttribute(ShowBackingValue backingValue = ShowBackingValue.Unconnected) { this.backingValue = backingValue; }
     }
 
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]

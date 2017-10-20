@@ -55,8 +55,54 @@ public class NodePort {
         }
     }
 
-    public object GetValue() {
+
+    /// <summary> Return the output value of this node through its parent nodes GetValue override method. </summary>
+    /// <returns> <see cref="Node.GetValue(NodePort)"/> </returns>
+    public object GetOutputValue() {
         return node.GetValue(this);
+    }
+
+    /// <summary> Return the output value of the first connected port. Returns null if none found or invalid.</summary>
+    /// <returns> <see cref="NodePort.GetOutputValue"/> </returns>
+    public object GetInputValue() {
+        NodePort connectedPort = Connection;
+        if (connectedPort == null) return null;
+        return connectedPort.GetOutputValue();
+    }
+
+    /// <summary> Return the output values of all connected ports. </summary>
+    /// <returns> <see cref="NodePort.GetOutputValue"/> </returns>
+    public object[] GetInputValues() {
+        object[] objs = new object[ConnectionCount];
+        for (int i = 0; i < ConnectionCount; i++) {
+            NodePort connectedPort = connections[i].Port;
+            objs[i] = connectedPort.GetOutputValue();
+        }
+        return objs;
+    }
+
+    /// <summary> Return the output value of the first connected port. Returns null if none found or invalid. </summary>
+    /// <returns> <see cref="NodePort.GetOutputValue"/> </returns>
+    public T GetInputValue<T>() where T : class {
+        return GetInputValue() as T;
+    }
+
+    /// <summary> Return the output values of all connected ports. </summary>
+    /// <returns> <see cref="NodePort.GetOutputValue"/> </returns>
+    public T[] GetInputValues<T>() where T : class {
+        object[] objs = GetInputValues();
+        T[] ts = new T[objs.Length];
+        for (int i = 0; i < objs.Length; i++) {
+            ts[i] = objs[i] as T;
+        }
+        return ts;
+    }
+
+    /// <summary> Return true if port is connected and has a valid input. </summary>
+    /// <returns> <see cref="NodePort.GetOutputValue"/> </returns>
+    public bool TryGetInputValue<T>(out T value) where T : class {
+        value = GetInputValue() as T;
+        return value != null;
     }
 
     /// <summary> Connect this <see cref="NodePort"/> to another </summary>

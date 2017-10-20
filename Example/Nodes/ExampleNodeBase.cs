@@ -12,7 +12,7 @@ public abstract class ExampleNodeBase : Node {
         for (int i = 0; i < connectionCount; i++) {
             NodePort connection = port.GetConnection(i);
             if (connection == null) continue;
-            object obj = connection.GetValue();
+            object obj = connection.GetOutputValue();
             if (obj == null) continue;
             if (connection.type == typeof(int)) result += (int)obj;
             else if (connection.type == typeof(float)) result += (float)obj;

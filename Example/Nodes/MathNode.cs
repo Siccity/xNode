@@ -2,9 +2,9 @@
 
 [System.Serializable]
 public class MathNode : ExampleNodeBase {
-    [Input(true)] public float a;
-    [Input(true)] public float b;
-    [Output(false)] public float result;
+    [Input] public float a;
+    [Input] public float b;
+    [Output] public float result;
     public enum MathType { Add, Subtract, Multiply, Divide}
     public MathType mathType = MathType.Add;
 

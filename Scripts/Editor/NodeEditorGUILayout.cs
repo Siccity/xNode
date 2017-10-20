@@ -50,12 +50,13 @@ public class NodeEditorGUILayout {
         if (NodeEditorUtilities.GetAttrib(fieldAttribs, out inputAttrib)) {
             NodePort port = target.GetPortByFieldName(fieldName);
             Vector2 portPos;
-            fieldValue = PortField(fieldPrettyName, fieldValue, fieldType, port, inputAttrib.fallback, out portPos);
+            bool fallback = inputAttrib.backingValue == Node.ShowBackingValue.Always || (inputAttrib.backingValue == Node.ShowBackingValue.Unconnected && !port.IsConnected);
+            fieldValue = PortField(fieldPrettyName, fieldValue, fieldType, port, fallback, out portPos);
             portPositions.Add(port, portPos);
         } else if (NodeEditorUtilities.GetAttrib(fieldAttribs, out outputAttrib)) {
             NodePort port = target.GetPortByFieldName(fieldName);
             Vector2 portPos;
-            fieldValue = PortField(fieldPrettyName, fieldValue, fieldType, port, outputAttrib.fallback, out portPos);
+            fieldValue = PortField(fieldPrettyName, fieldValue, fieldType, port, false, out portPos);
             portPositions.Add(port, portPos);
         } else {
             fieldValue = PropertyField(fieldPrettyName, fieldValue, fieldType);

@@ -108,10 +108,7 @@ public partial class NodeEditorWindow {
         if (startPoint.x > endPoint.x) endTangent.x = Mathf.LerpUnclamped(endPoint.x, startPoint.x, -0.7f);
         else endTangent.x = Mathf.LerpUnclamped(endPoint.x, startPoint.x, 0.7f);
 
-        Color prevCol = GUI.color;
-        Color edgeCol = new Color(0.1f, 0.1f, 0.1f, col.a);
         Handles.DrawBezier(startPoint, endPoint, startTangent, endTangent, col, null, 4);
-        GUI.color = prevCol;
     }
 
     /// <summary> Draws all connections </summary>

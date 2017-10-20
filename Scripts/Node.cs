@@ -7,7 +7,14 @@ using UnityEngine;
 /// <summary> Base class for all nodes </summary>
 [Serializable]
 public abstract class Node : ScriptableObject {
-    public enum ShowBackingValue { Never, Unconnected, Always }
+    public enum ShowBackingValue {
+        /// <summary> Never show the backing value </summary>
+        Never,
+        /// <summary> Show the backing value only when the port does not have any active connections </summary>
+        Unconnected,
+        /// <summary> Always show the backing value </summary>
+        Always
+    }
 
     /// <summary> Name of the node </summary>
     [SerializeField] public NodeGraph graph;
@@ -21,7 +28,7 @@ public abstract class Node : ScriptableObject {
     public int OutputCount { get { return outputs.Count; } }
 
     protected void OnEnable() {
-        GetPorts();
+        NodeDataCache.UpdatePorts(this, inputs, outputs);
         Init();
     }
 
@@ -98,19 +105,20 @@ public abstract class Node : ScriptableObject {
         return JsonUtility.ToJson(this).GetHashCode();
     }
 
+    /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInputByFieldName(string)"/> </summary>
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
     public class InputAttribute : Attribute {
         public ShowBackingValue backingValue;
+        
+        /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInputByFieldName(string)"/> </summary>
+        /// <param name="backingValue">Should we display the backing value for this port as an editor field? </param>
         public InputAttribute(ShowBackingValue backingValue = ShowBackingValue.Unconnected) { this.backingValue = backingValue; }
     }
 
+    /// <summary> Mark a serializable field as an output port. You can access this through <see cref="GetOutputByFieldName(string)"/> </summary>
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
     public class OutputAttribute : Attribute {
-        public bool fallback;
-        public OutputAttribute(bool fallback) { this.fallback = fallback; }
-    }
-
-    private void GetPorts() {
-        NodeDataCache.UpdatePorts(this, inputs, outputs);
+        /// <summary> Mark a serializable field as an output port. You can access this through <see cref="GetOutputByFieldName(string)"/> </summary>
+        public OutputAttribute() { }
     }
 }

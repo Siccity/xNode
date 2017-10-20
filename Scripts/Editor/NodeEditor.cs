@@ -31,7 +31,6 @@ public class NodeEditor {
         EditorGUI.BeginChangeCheck();
         FieldInfo[] fields = GetInspectorFields(target);
         for (int i = 0; i < fields.Length; i++) {
-            object[] fieldAttribs = fields[i].GetCustomAttributes(false);
             if (fields[i].Name == "graph" || fields[i].Name == "position") continue;
             NodeEditorGUILayout.PropertyField(target, fields[i], portPositions);
         }

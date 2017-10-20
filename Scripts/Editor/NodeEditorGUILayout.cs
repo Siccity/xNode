@@ -82,7 +82,7 @@ public class NodeEditorGUILayout {
         else if (type == typeof(Vector4)) return Vector4Field(label, (Vector4) value);
         else if (type == typeof(Color)) return ColorField(label, (Color) value);
         else if (type == typeof(AnimationCurve)) return CurveField(label, (AnimationCurve) value);
-        else if (type.IsSubclassOf(typeof(UnityEngine.Object)) || type == typeof(UnityEngine.Object)) return ObjectField(label, (UnityEngine.Object) value);
+        else if (type.IsSubclassOf(typeof(UnityEngine.Object)) || type == typeof(UnityEngine.Object)) return ObjectField(label, (UnityEngine.Object) value, type);
         else return value;
     }
     public static Rect GetRect(string label) {
@@ -92,8 +92,8 @@ public class NodeEditorGUILayout {
         rect.x += rect.width;
         return rect;
     }
-    public static UnityEngine.Object ObjectField(string label, UnityEngine.Object value) {
-        return EditorGUI.ObjectField(GetRect(label), value, value.GetType(), true);
+    public static UnityEngine.Object ObjectField(string label, UnityEngine.Object value, Type type) {
+        return EditorGUI.ObjectField(GetRect(label), value, type, true);
     }
     public static AnimationCurve CurveField(string label, AnimationCurve value) {
         if (value == null) value = new AnimationCurve();

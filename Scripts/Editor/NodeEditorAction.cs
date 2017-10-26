@@ -137,7 +137,7 @@ public partial class NodeEditorWindow {
         Vector2 mousePos = Event.current.mousePosition;
         //Get node position
         Vector2 nodePos = GridToWindowPosition(node.position);
-        Rect windowRect = new Rect(nodePos, new Vector2(/*Node width*/200 / zoom, 30 / zoom));
+        Rect windowRect = new Rect(nodePos, new Vector2(200 / zoom, 30 / zoom));
         return windowRect.Contains(mousePos);
     }
 }

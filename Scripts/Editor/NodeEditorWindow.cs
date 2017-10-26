@@ -67,8 +67,7 @@ public partial class NodeEditorWindow : EditorWindow {
     }
 
     public Rect GridToWindowRect(Rect gridRect) {
-        gridRect.position = GridToWindowPosition(gridRect.position);
-        gridRect.size /= zoom;
+        gridRect.position = GridToWindowPositionNoClipped(gridRect.position);
         return gridRect;
     }
 

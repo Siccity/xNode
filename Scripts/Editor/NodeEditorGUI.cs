@@ -188,7 +188,7 @@ public partial class NodeEditorWindow {
 
             if (e.type != EventType.Layout) {
                 //Check if we are hovering this node
-                Vector2 nodeSize = GUILayoutUtility.GetLastRect().size / zoom;
+                Vector2 nodeSize = GUILayoutUtility.GetLastRect().size;
                 Rect windowRect = new Rect(nodePos, nodeSize);
                 if (windowRect.Contains(mousePos)) hoveredNode = node;
 

@@ -68,10 +68,12 @@ public partial class NodeEditorWindow {
                     } else {
                         hoveredPort.VerifyConnections();
                         if (hoveredPort.IsConnected) {
+                            Node node = hoveredPort.node;
                             NodePort output = hoveredPort.Connection;
                             hoveredPort.Disconnect(output);
                             draggedOutput = output;
                             draggedOutputTarget = hoveredPort;
+                            NodeEditor.onUpdateNode(node);
                         }
                     }
                 } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
@@ -85,7 +87,9 @@ public partial class NodeEditorWindow {
                     if (IsDraggingPort) {
                         //If connection is valid, save it
                         if (draggedOutputTarget != null) {
+                            Node node = draggedOutputTarget.node;
                             if (graph.nodes.Count != 0) draggedOutput.Connect(draggedOutputTarget);
+                            NodeEditor.onUpdateNode(node);
                             EditorUtility.SetDirty(graph);
                         }
                         //Release dragged connection

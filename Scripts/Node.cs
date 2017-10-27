@@ -48,6 +48,7 @@ public abstract class Node : ScriptableObject {
         else return GetInputByFieldName(fieldName);
     }
 
+
     /// <summary> Returns output port which matches fieldName. Returns null if none found. </summary>
     public NodePort GetOutputByFieldName(string fieldName) {
         for (int i = 0; i < OutputCount; i++) {
@@ -56,12 +57,30 @@ public abstract class Node : ScriptableObject {
         return null;
     }
 
-    /// <summary> Returns input port which matches. Returns null if none found. </summary>
+    /// <summary> Returns input port which matches fieldName. Returns null if none found. </summary>
     public NodePort GetInputByFieldName(string fieldName) {
         for (int i = 0; i < InputCount; i++) {
             if (inputs[i].fieldName == fieldName) return inputs[i];
         }
         return null;
+    }
+
+    /// <summary> Return input value for a specified port. Returns fallback value if no ports are connected </summary>
+    /// <param name="fieldName">Field name of requested input port</param>
+    /// <param name="fallback">If no ports are connected, this value will be returned</param>
+    public T GetInputByFieldName<T>(string fieldName, T fallback = default(T)) {
+        NodePort port = GetInputByFieldName(fieldName);
+        if (port != null && port.IsConnected) return port.GetInputValue<T>();
+        else return fallback;
+    }
+
+    /// <summary> Return all input values for a specified port. Returns fallback value if no ports are connected </summary>
+    /// <param name="fieldName">Field name of requested input port</param>
+    /// <param name="fallback">If no ports are connected, this value will be returned</param>
+    public T[] GetInputsByFieldName<T>(string fieldName, T[] fallback = default(T[])) {
+        NodePort port = GetInputByFieldName(fieldName);
+        if (port != null && port.IsConnected) return port.GetInputValues<T>();
+        else return fallback;
     }
 
     /// <summary> Returns a value based on requested port output. Should be overridden before used. </summary>

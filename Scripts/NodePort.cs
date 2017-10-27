@@ -82,17 +82,17 @@ public class NodePort {
 
     /// <summary> Return the output value of the first connected port. Returns null if none found or invalid. </summary>
     /// <returns> <see cref="NodePort.GetOutputValue"/> </returns>
-    public T GetInputValue<T>() where T : class {
-        return GetInputValue() as T;
+    public T GetInputValue<T>() {
+        return (T)GetInputValue();
     }
 
     /// <summary> Return the output values of all connected ports. </summary>
     /// <returns> <see cref="NodePort.GetOutputValue"/> </returns>
-    public T[] GetInputValues<T>() where T : class {
+    public T[] GetInputValues<T>() {
         object[] objs = GetInputValues();
         T[] ts = new T[objs.Length];
         for (int i = 0; i < objs.Length; i++) {
-            ts[i] = objs[i] as T;
+            ts[i] = (T)objs[i];
         }
         return ts;
     }

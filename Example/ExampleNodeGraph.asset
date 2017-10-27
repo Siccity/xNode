@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Name: ExampleNodeGraph
   m_EditorClassIdentifier: 
   nodes:
-  - {fileID: 114253037537709940}
-  - {fileID: 114976558807377558}
---- !u!114 &114253037537709940
+  - {fileID: 114386305456729202}
+  - {fileID: 114862693020615806}
+  - {fileID: 114245132648392102}
+  - {fileID: 114602227203521556}
+--- !u!114 &114245132648392102
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
@@ -23,31 +25,33 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 22e05e2a1f5ad7645850d52212143629, type: 3}
-  m_Name: Math
+  m_Name: MathNode
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: 0, y: 0}
+  position: {x: -429.5, y: -110.5}
   inputs:
-  - node: {fileID: 114253037537709940}
+  - node: {fileID: 114245132648392102}
     _fieldName: a
     connections: []
     _direction: 0
-  - node: {fileID: 114253037537709940}
+  - node: {fileID: 114245132648392102}
     _fieldName: b
     connections: []
     _direction: 0
   outputs:
-  - node: {fileID: 114253037537709940}
+  - node: {fileID: 114245132648392102}
     _fieldName: result
     connections:
-    - fieldName: myFloat
-      node: {fileID: 114976558807377558}
+    - fieldName: a
+      node: {fileID: 114862693020615806}
+    - fieldName: value
+      node: {fileID: 114602227203521556}
     _direction: 1
-  a: 5.1719556
-  b: 2.0752559
+  a: 4.771955
+  b: 8.313191
   result: 0
   mathType: 0
---- !u!114 &114976558807377558
+--- !u!114 &114386305456729202
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
@@ -55,62 +59,74 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 47bfd6281f41a10459bcb45bb4cd03f3, type: 3}
-  m_Name: TestNode
+  m_Script: {fileID: 11500000, guid: 98f6f901f0da53142b79277ea3f42518, type: 3}
+  m_Name: DisplayValue
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: 271, y: -57}
+  position: {x: 23.5, y: -98.5}
   inputs:
-  - node: {fileID: 114976558807377558}
-    _fieldName: myString
-    connections: []
-    _direction: 0
-  - node: {fileID: 114976558807377558}
-    _fieldName: myVec2
-    connections: []
-    _direction: 0
-  - node: {fileID: 114976558807377558}
-    _fieldName: myVec3
-    connections: []
-    _direction: 0
-  - node: {fileID: 114976558807377558}
-    _fieldName: myFloat
+  - node: {fileID: 114386305456729202}
+    _fieldName: value
     connections:
     - fieldName: result
-      node: {fileID: 114253037537709940}
+      node: {fileID: 114862693020615806}
     _direction: 0
   outputs: []
-  myInt: 0
-  myFloat: 0
-  myDouble: 0
-  myLong: 0
-  myBool: 0
-  myString: 
-  myRect:
-    serializedVersion: 2
-    x: 0
-    y: 0
-    width: 0
-    height: 0
-  myVec2: {x: 0, y: 0}
-  myVec3: {x: 0, y: 0, z: 0}
-  myVec4: {x: 0, y: 0, z: 0, w: 0}
-  myColor: {r: 0.25383312, g: 0.44852942, b: 0.628, a: 0.641}
-  myCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 2
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-    - serializedVersion: 2
-      time: 1
-      value: 1
-      inSlope: 2
-      outSlope: 2
-      tangentMode: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+  value: 4.01703
+--- !u!114 &114602227203521556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f6f901f0da53142b79277ea3f42518, type: 3}
+  m_Name: DisplayValue
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: -194.5, y: -140.5}
+  inputs:
+  - node: {fileID: 114602227203521556}
+    _fieldName: value
+    connections:
+    - fieldName: result
+      node: {fileID: 114245132648392102}
+    _direction: 0
+  outputs: []
+  value: 0
+--- !u!114 &114862693020615806
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22e05e2a1f5ad7645850d52212143629, type: 3}
+  m_Name: MathNode
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: -196.5, y: -45.5}
+  inputs:
+  - node: {fileID: 114862693020615806}
+    _fieldName: a
+    connections:
+    - fieldName: result
+      node: {fileID: 114245132648392102}
+    _direction: 0
+  - node: {fileID: 114862693020615806}
+    _fieldName: b
+    connections: []
+    _direction: 0
+  outputs:
+  - node: {fileID: 114862693020615806}
+    _fieldName: result
+    connections:
+    - fieldName: value
+      node: {fileID: 114386305456729202}
+    _direction: 1
+  a: 8.142139
+  b: 3.53361
+  result: 0
+  mathType: 1

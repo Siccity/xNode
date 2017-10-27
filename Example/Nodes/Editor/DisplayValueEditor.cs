@@ -3,16 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-[CustomNodeEditor(typeof(DisplayValue), "Display Value")]
-public class DisplayValueEditor : NodeEditor {
+namespace ExampleNodes {
+    [CustomNodeEditor(typeof(ExampleNodes.DisplayValue), "ExampleNodes/Display Value")]
+    public class DisplayValueEditor : NodeEditor {
 
-    protected override void OnBodyGUI(out Dictionary<NodePort, Vector2> portPositions) {
-        base.OnBodyGUI(out portPositions);
-        EditorGUILayout.LabelField("Value: " + GetResult());
-    }
+        protected override void OnBodyGUI(out Dictionary<NodePort, Vector2> portPositions) {
+            base.OnBodyGUI(out portPositions);
+            EditorGUILayout.LabelField(GetResult().ToString());
+        }
 
-    public float GetResult() {
-        ExampleNodeBase t = target as ExampleNodeBase;
-        return t.GetInputFloat("value");
+        public float GetResult() {
+            DisplayValue t = target as DisplayValue;
+            return t.GetValue();
+        }
     }
 }

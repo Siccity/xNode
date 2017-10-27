@@ -1,6 +1,9 @@
-﻿using UnityEngine;
+﻿namespace ExampleNodes {
+    public class DisplayValue : Node {
+        [Input] public float value;
 
-public class DisplayValue : ExampleNodeBase {
-    [Input] public float value;
-
+        public float GetValue() {
+            return GetInputByFieldName<float>("value", value);
+        }
+    }
 }

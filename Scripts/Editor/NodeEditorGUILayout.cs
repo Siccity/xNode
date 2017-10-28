@@ -16,6 +16,7 @@ public class NodeEditorGUILayout {
         else EditorGUILayout.LabelField(label);
 
         Rect rect = GUILayoutUtility.GetLastRect();
+        if (port == null) { portPosition = rect.position; return null; }
         if (port.direction == NodePort.IO.Input) rect.position = rect.position - new Vector2(16, 0);
         if (port.direction == NodePort.IO.Output) rect.position = rect.position + new Vector2(rect.width, 0);
         rect.size = new Vector2(16, 16);

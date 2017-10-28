@@ -83,7 +83,8 @@ public class NodePort {
     /// <summary> Return the output value of the first connected port. Returns null if none found or invalid. </summary>
     /// <returns> <see cref="NodePort.GetOutputValue"/> </returns>
     public T GetInputValue<T>() {
-        return (T)GetInputValue();
+        object obj = GetInputValue();
+        return obj is T ? (T) obj : default(T);
     }
 
     /// <summary> Return the output values of all connected ports. </summary>
@@ -92,16 +93,22 @@ public class NodePort {
         object[] objs = GetInputValues();
         T[] ts = new T[objs.Length];
         for (int i = 0; i < objs.Length; i++) {
-            ts[i] = (T)objs[i];
+            if (objs[i] is T) ts[i] = (T) objs[i];
         }
         return ts;
     }
 
     /// <summary> Return true if port is connected and has a valid input. </summary>
     /// <returns> <see cref="NodePort.GetOutputValue"/> </returns>
-    public bool TryGetInputValue<T>(out T value) where T : class {
-        value = GetInputValue() as T;
-        return value != null;
+    public bool TryGetInputValue<T>(out T value) {
+        object obj = GetInputValue();
+        if (obj is T) {
+            value = (T) obj;
+            return true;
+        } else {
+            value = default(T);
+            return false;
+        }
     }
 
     /// <summary> Return the sum of all inputs. </summary>
@@ -111,7 +118,7 @@ public class NodePort {
         if (objs.Length == 0) return fallback;
         float result = 0;
         for (int i = 0; i < objs.Length; i++) {
-            if (objs[i] is float) result += (float)objs[i];
+            if (objs[i] is float) result += (float) objs[i];
         }
         return result;
     }
@@ -123,7 +130,7 @@ public class NodePort {
         if (objs.Length == 0) return fallback;
         int result = 0;
         for (int i = 0; i < objs.Length; i++) {
-            if (objs[i] is int) result += (int)objs[i];
+            if (objs[i] is int) result += (int) objs[i];
         }
         return result;
     }

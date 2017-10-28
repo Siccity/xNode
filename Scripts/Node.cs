@@ -77,7 +77,7 @@ public abstract class Node : ScriptableObject {
     /// <summary> Return all input values for a specified port. Returns fallback value if no ports are connected </summary>
     /// <param name="fieldName">Field name of requested input port</param>
     /// <param name="fallback">If no ports are connected, this value will be returned</param>
-    public T[] GetInputsByFieldName<T>(string fieldName, T[] fallback = default(T[])) {
+    public T[] GetInputsByFieldName<T>(string fieldName, params T[] fallback) {
         NodePort port = GetInputByFieldName(fieldName);
         if (port != null && port.IsConnected) return port.GetInputValues<T>();
         else return fallback;

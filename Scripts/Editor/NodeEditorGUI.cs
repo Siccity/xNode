@@ -150,14 +150,16 @@ public partial class NodeEditorWindow {
 
         Vector2 mousePos = Event.current.mousePosition;
 
-        
         if (e.type != EventType.Layout) {
             hoveredNode = null;
             hoveredPort = null;
         }
 
-        foreach (Node node in graph.nodes) {
-            if (node == null) return;
+        for (int n = 0; n < graph.nodes.Count; n++) {
+            while (graph.nodes[n] == null) graph.nodes.RemoveAt(n);
+            if (n >= graph.nodes.Count) return;
+            Node node = graph.nodes[n];
+
             NodeEditor nodeEditor = GetNodeEditor(node.GetType());
             nodeEditor.target = node;
 
@@ -213,6 +215,7 @@ public partial class NodeEditorWindow {
 
             GUILayout.EndArea();
         }
+
         EndZoomed(position, zoom);
 
         //If a change in hash is detected in the selected node, call OnValidate method. 

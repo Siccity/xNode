@@ -1,9 +1,9 @@
-﻿namespace ExampleNodes {
+﻿namespace BasicNodes {
     public class DisplayValue : Node {
-        [Input] public float value;
+        [Input(ShowBackingValue.Never)] public object value;
 
-        public float GetValue() {
-            return GetInputByFieldName<float>("value", value);
+        public override object GetValue(NodePort port) {
+            return GetInputByFieldName<object>("value", value);
         }
     }
 }

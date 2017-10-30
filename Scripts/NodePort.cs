@@ -145,7 +145,7 @@ public class NodePort {
         if (direction == port.direction) { Debug.LogWarning("Cannot connect two " + (direction == IO.Input ? "input" : "output") + " connections"); return; }
         connections.Add(new PortConnection(port));
         if (port.connections == null) port.connections = new List<PortConnection>();
-        port.connections.Add(new PortConnection(this));
+        if (!port.IsConnectedTo(this)) port.connections.Add(new PortConnection(this));
         node.OnCreateConnection(this, port);
         port.node.OnCreateConnection(this, port);
     }

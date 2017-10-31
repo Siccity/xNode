@@ -164,23 +164,31 @@ public partial class NodeEditorWindow {
 
             NodeEditor nodeEditor = GetNodeEditor(node.GetType());
             nodeEditor.target = node;
+            nodeEditor.serializedObject = new SerializedObject(node);
+            NodeEditor.portPositions = new Dictionary<NodePort, Vector2>();
 
             //Get node position
             Vector2 nodePos = GridToWindowPositionNoClipped(node.position);
-
-            //GUIStyle style = (node == selectedNode) ? (GUIStyle)"flow node 0 on" : (GUIStyle)"flow node 0";
 
             GUILayout.BeginArea(new Rect(nodePos, new Vector2(nodeEditor.GetWidth(), 4000)));
 
             GUIStyle style = NodeEditorResources.styles.nodeBody;
             GUILayout.BeginVertical(new GUIStyle(style));
+            EditorGUI.BeginChangeCheck();
 
             //Draw node contents
-            Dictionary<NodePort, Vector2> portHandlePoints;
-            nodeEditor.OnNodeGUI(out portHandlePoints);
+            nodeEditor.OnNodeGUI();
+
+            //Apply
+            nodeEditor.serializedObject.ApplyModifiedProperties();
+
+            //If user changed a value, notify other scripts through onUpdateNode
+            if (EditorGUI.EndChangeCheck()) {
+                if (NodeEditor.onUpdateNode != null) NodeEditor.onUpdateNode(node);
+            }
 
             if (e.type == EventType.Repaint) {
-                foreach (var kvp in portHandlePoints) {
+                foreach (var kvp in NodeEditor.portPositions) {
                     Vector2 portHandlePos = kvp.Value;
                     portHandlePos += node.position;
                     Rect rect = new Rect(portHandlePos.x - 8, portHandlePos.y - 8, 16, 16);

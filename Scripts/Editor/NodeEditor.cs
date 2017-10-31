@@ -10,38 +10,35 @@ public class NodeEditor {
     /// <summary> Fires every whenever a node was modified through the editor </summary>
     public static Action<Node> onUpdateNode;
     public Node target;
+    public SerializedObject serializedObject;
+    public static Dictionary<NodePort, Vector2> portPositions;
 
     /// <summary> Draws the node GUI.</summary>
     /// <param name="portPositions">Port handle positions need to be returned to the NodeEditorWindow </param>
-    public void OnNodeGUI(out Dictionary<NodePort, Vector2> portPositions) {
+    public void OnNodeGUI() {
         OnHeaderGUI();
-        OnBodyGUI(out portPositions);
+        OnBodyGUI();
     }
 
-    protected virtual void OnHeaderGUI() {
+    protected void OnHeaderGUI() {
         GUI.color = Color.white;
         string title = NodeEditorUtilities.PrettifyCamelCase(target.name);
         GUILayout.Label(title, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
     }
 
     /// <summary> Draws standard field editors for all public fields </summary>
-    protected virtual void OnBodyGUI(out Dictionary<NodePort, Vector2> portPositions) {
+    protected virtual void OnBodyGUI() {
+        string[] excludes = { "m_Script", "graph", "position", "inputs", "outputs" };
         portPositions = new Dictionary<NodePort, Vector2>();
 
-        EditorGUI.BeginChangeCheck();
-        FieldInfo[] fields = GetInspectorFields(target);
-        for (int i = 0; i < fields.Length; i++) {
-            switch (fields[i].Name) { case "graph": case "position": case "inputs": case "outputs": continue; }
-            NodeEditorGUILayout.PropertyField(target, fields[i], portPositions);
+        SerializedProperty iterator = serializedObject.GetIterator();
+        bool enterChildren = true;
+        EditorGUIUtility.labelWidth = 84;
+        while (iterator.NextVisible(enterChildren)) {
+            enterChildren = false;
+            if (excludes.Contains(iterator.name)) continue;
+            NodeEditorGUILayout.PropertyField(iterator, true);
         }
-        //If user changed a value, notify other scripts through onUpdateNode
-        if (EditorGUI.EndChangeCheck()) {
-            if (onUpdateNode != null) onUpdateNode(target);
-        }
-    }
-
-    private static FieldInfo[] GetInspectorFields(Node node) {
-        return node.GetType().GetFields().Where(f => f.IsPublic || f.GetCustomAttributes(typeof(SerializeField), false) != null).ToArray();
     }
 
     public virtual int GetWidth() {

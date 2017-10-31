@@ -71,21 +71,21 @@ public class NodeEditorGUILayout {
     }
 
     public static object PropertyField(string label, object value, System.Type type) {
-        if (type == typeof(int)) return IntField(label, value is int ? (int) value : default(int));
-        else if (type == typeof(float)) return FloatField(label, value is float ? (float) value : default(float));
-        else if (type == typeof(double)) return DoubleField(label, value is double ? (double) value : default(double));
-        else if (type == typeof(long)) return LongField(label, value is long ? (long) value : default(long));
-        else if (type == typeof(bool)) return Toggle(label, value is bool ? (bool) value : default(bool));
-        else if (type == typeof(string)) return TextField(label, value is string ? (string) value : default(string));
-        else if (type == typeof(Rect)) return RectField(label, value is Rect ? (Rect) value : default(Rect));
-        else if (type == typeof(Vector2)) return Vector2Field(label, value is Vector2 ? (Vector2) value : default(Vector2));
-        else if (type == typeof(Vector3)) return Vector3Field(label, value is Vector3 ? (Vector3) value : default(Vector3));
-        else if (type == typeof(Vector4)) return Vector4Field(label, value is Vector4 ? (Vector4) value : default(Vector4));
-        else if (type == typeof(Color)) return ColorField(label, value is Color ? (Color) value : default(Color));
-        else if (type == typeof(AnimationCurve)) return CurveField(label, value is AnimationCurve ? (AnimationCurve) value : default(AnimationCurve));
-        else if (type.IsSubclassOf(typeof(Enum)) || type == typeof(Enum)) return EnumField(label, (Enum) value);
-        else if (type.IsSubclassOf(typeof(UnityEngine.Object)) || type == typeof(UnityEngine.Object)) return ObjectField(label, (UnityEngine.Object) value, type);
-        else return value;
+        if (type == typeof(int)) return IntField(label, value is int ? (int)value : default(int));
+        else if (type == typeof(float)) return FloatField(label, value is float ? (float)value : default(float));
+        else if (type == typeof(double)) return DoubleField(label, value is double ? (double)value : default(double));
+        else if (type == typeof(long)) return LongField(label, value is long ? (long)value : default(long));
+        else if (type == typeof(bool)) return Toggle(label, value is bool ? (bool)value : default(bool));
+        else if (type == typeof(string)) return TextField(label, value is string ? (string)value : default(string));
+        else if (type == typeof(Rect)) return RectField(label, value is Rect ? (Rect)value : default(Rect));
+        else if (type == typeof(Vector2)) return Vector2Field(label, value is Vector2 ? (Vector2)value : default(Vector2));
+        else if (type == typeof(Vector3)) return Vector3Field(label, value is Vector3 ? (Vector3)value : default(Vector3));
+        else if (type == typeof(Vector4)) return Vector4Field(label, value is Vector4 ? (Vector4)value : default(Vector4));
+        else if (type == typeof(Color)) return ColorField(label, value is Color ? (Color)value : default(Color));
+        else if (type == typeof(AnimationCurve)) return CurveField(label, value is AnimationCurve ? (AnimationCurve)value : default(AnimationCurve));
+        else if (type.IsSubclassOf(typeof(Enum)) || type == typeof(Enum)) return EnumField(label, (Enum)value);
+        else if (type.IsSubclassOf(typeof(UnityEngine.Object)) || type == typeof(UnityEngine.Object)) return ObjectField(label, (UnityEngine.Object)value, type);
+        else { GUILayout.Label(label); return value; }
     }
     public static Rect GetRect(string label) {
         Rect rect = EditorGUILayout.GetControlRect();

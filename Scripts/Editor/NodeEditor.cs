@@ -31,7 +31,7 @@ public class NodeEditor {
         EditorGUI.BeginChangeCheck();
         FieldInfo[] fields = GetInspectorFields(target);
         for (int i = 0; i < fields.Length; i++) {
-            if (fields[i].Name == "graph" || fields[i].Name == "position") continue;
+            switch (fields[i].Name) { case "graph": case "position": case "inputs": case "outputs": continue; }
             NodeEditorGUILayout.PropertyField(target, fields[i], portPositions);
         }
         //If user changed a value, notify other scripts through onUpdateNode

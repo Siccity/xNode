@@ -20,14 +20,14 @@ public class NodeEditor {
         OnBodyGUI();
     }
 
-    protected void OnHeaderGUI() {
+    public void OnHeaderGUI() {
         GUI.color = Color.white;
         string title = NodeEditorUtilities.PrettifyCamelCase(target.name);
         GUILayout.Label(title, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
     }
 
     /// <summary> Draws standard field editors for all public fields </summary>
-    protected virtual void OnBodyGUI() {
+    public virtual void OnBodyGUI() {
         string[] excludes = { "m_Script", "graph", "position", "ports" };
         portPositions = new Dictionary<NodePort, Vector2>();
 

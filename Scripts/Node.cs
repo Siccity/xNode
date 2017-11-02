@@ -19,9 +19,13 @@ public abstract class Node : ScriptableObject {
     /// <summary> Position on the <see cref="NodeGraph"/> </summary>
     [SerializeField] public Vector2 position;
     /// <summary> Input <see cref="NodePort"/>s. It is recommended not to modify these at hand. Instead, see <see cref="InputAttribute"/> </summary>
-    [SerializeField] public List<NodePort> inputs = new List<NodePort>();
+    [SerializeField] private List<NodePort> inputs = new List<NodePort>();
     /// <summary> Output <see cref="NodePort"/>s. It is recommended not to modify these at hand. Instead, see <see cref="OutputAttribute"/> </summary>
-    [SerializeField] public List<NodePort> outputs = new List<NodePort>();
+    [SerializeField] private List<NodePort> outputs = new List<NodePort>();
+    /// <summary> Additional instance-specific inputs. </summary>
+    [SerializeField] public List<NodePort> instanceInputs = new List<NodePort>();
+    /// <summary> Additional instance-specific outputs. </summary>
+    [SerializeField] public List<NodePort> instanceOutputs = new List<NodePort>();
 
     public int InputCount { get { return inputs.Count; } }
     public int OutputCount { get { return outputs.Count; } }
@@ -41,13 +45,22 @@ public abstract class Node : ScriptableObject {
         }
     }
 
+    /// <summary> Returns input port at index </summary>
+    public NodePort GetInput(int i) {
+        return inputs[i];
+    }
+
+    /// <summary> Returns output port at index. </summary>
+    public NodePort GetOutput(int i) {
+        return outputs[i];
+    }
+
     /// <summary> Returns input or output port which matches fieldName </summary>
     public NodePort GetPortByFieldName(string fieldName) {
         NodePort port = GetOutputByFieldName(fieldName);
         if (port != null) return port;
         else return GetInputByFieldName(fieldName);
     }
-
 
     /// <summary> Returns output port which matches fieldName. Returns null if none found. </summary>
     public NodePort GetOutputByFieldName(string fieldName) {

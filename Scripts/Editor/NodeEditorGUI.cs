@@ -118,7 +118,7 @@ public partial class NodeEditorWindow {
             //If a null node is found, return. This can happen if the nodes associated script is deleted. It is currently not possible in Unity to delete a null asset.
             if (node == null) continue;
             for (int i = 0; i < node.OutputCount; i++) {
-                NodePort output = node.outputs[i];
+                NodePort output = node.GetOutput(i);
 
                 //Needs cleanup. Null checks are ugly
                 if (!portConnectionPoints.ContainsKey(output)) continue;
@@ -207,7 +207,7 @@ public partial class NodeEditorWindow {
                 //Check if we are hovering any of this nodes ports
                 //Check input ports
                 for (int i = 0; i < node.InputCount; i++) {
-                    NodePort port = node.inputs[i];
+                    NodePort port = node.GetInput(i);
                     //Check if port rect is available
                     if (!portConnectionPoints.ContainsKey(port)) continue;
                     Rect r = GridToWindowRect(portConnectionPoints[port]);
@@ -215,7 +215,7 @@ public partial class NodeEditorWindow {
                 }
                 //Check all output ports
                 for (int i = 0; i < node.OutputCount; i++) {
-                    NodePort port = node.outputs[i];
+                    NodePort port = node.GetOutput(i);
                     //Check if port rect is available
                     if (!portConnectionPoints.ContainsKey(port)) continue;
                     Rect r = GridToWindowRect(portConnectionPoints[port]);

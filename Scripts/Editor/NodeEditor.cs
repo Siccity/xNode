@@ -50,13 +50,10 @@ public class NodeEditor {
 public class CustomNodeEditorAttribute : Attribute {
     public Type inspectedType { get { return _inspectedType; } }
     private Type _inspectedType;
-    public string contextMenuName { get { return _contextMenuName; } }
-    private string _contextMenuName;
     /// <summary> Tells a NodeEditor which Node type it is an editor for </summary>
     /// <param name="inspectedType">Type that this editor can edit</param>
     /// <param name="contextMenuName">Path to the node</param>
-    public CustomNodeEditorAttribute(Type inspectedType, string contextMenuName) {
+    public CustomNodeEditorAttribute(Type inspectedType) {
         _inspectedType = inspectedType;
-        _contextMenuName = contextMenuName;
     }
 }

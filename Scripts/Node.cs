@@ -163,6 +163,16 @@ public abstract class Node : ScriptableObject {
         public OutputAttribute() { }
     }
 
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    public class CreateNodeMenuAttribute : Attribute {
+        public string menuName;
+        /// <summary> Manually supply node class with a context menu path </summary>
+        /// <param name="menuName"> Path to this node in the context menu </param>
+        public CreateNodeMenuAttribute(string menuName) {
+            this.menuName = menuName;
+        }
+    }
+
     [Serializable] private class NodePortDictionary : Dictionary<string, NodePort>, ISerializationCallbackReceiver {
         [SerializeField] private List<string> keys = new List<string>();
         [SerializeField] private List<NodePort> values = new List<NodePort>();

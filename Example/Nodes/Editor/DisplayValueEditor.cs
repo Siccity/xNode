@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 
 namespace BasicNodes {
-    [CustomNodeEditor(typeof(DisplayValue), "BasicNodes/DisplayValue")]
+    [CustomNodeEditor(typeof(DisplayValue))]
     public class DisplayValueEditor : NodeEditor {
 
         protected override void OnBodyGUI() {

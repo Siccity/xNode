@@ -17,13 +17,15 @@ public abstract class Node : ScriptableObject {
     /// <summary> Iterate over all ports on this node. </summary>
     public IEnumerable<NodePort> Ports { get { foreach (NodePort port in ports.Values) yield return port; } }
     /// <summary> Iterate over all outputs on this node. </summary>
-    public IEnumerable<NodePort> Outputs { get { foreach (NodePort port in Ports) { if (port.direction == NodePort.IO.Output) yield return port; } } }
+    public IEnumerable<NodePort> Outputs { get { foreach (NodePort port in Ports) { if (port.IsOutput) yield return port; } } }
     /// <summary> Iterate over all inputs on this node. </summary>
-    public IEnumerable<NodePort> Inputs { get { foreach (NodePort port in Ports) { if (port.direction == NodePort.IO.Input) yield return port; } } }
+    public IEnumerable<NodePort> Inputs { get { foreach (NodePort port in Ports) { if (port.IsInput) yield return port; } } }
+    /// <summary> Iterate over all instane ports on this node. </summary>
+    public IEnumerable<NodePort> InstancePorts { get { foreach (NodePort port in Ports) { if (port.IsDynamic) yield return port; } } }
     /// <summary> Iterate over all instance outputs on this node. </summary>
-    public IEnumerable<NodePort> InstanceOutputs { get { foreach (NodePort port in Ports) { if (port.direction == NodePort.IO.Input) yield return port; } } }
+    public IEnumerable<NodePort> InstanceOutputs { get { foreach (NodePort port in Ports) { if (port.IsDynamic && port.IsOutput) yield return port; } } }
     /// <summary> Iterate over all instance inputs on this node. </summary>
-    public IEnumerable<NodePort> InstanceInputs { get { foreach (NodePort port in Ports) { if (port.direction == NodePort.IO.Input) yield return port; } } }
+    public IEnumerable<NodePort> InstanceInputs { get { foreach (NodePort port in Ports) { if (port.IsDynamic && port.IsInput) yield return port; } } }
     /// <summary> Parent <see cref="NodeGraph"/> </summary>
     [SerializeField] public NodeGraph graph;
     /// <summary> Position on the <see cref="NodeGraph"/> </summary>

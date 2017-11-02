@@ -48,6 +48,26 @@ public static class NodeEditorGUILayout {
         EditorGUIUtility.labelWidth = temp_labelWidth;
     }
 
+    public static void PortField(NodePort port) {
+        if (port == null) return;
+        float temp_labelWidth = EditorGUIUtility.labelWidth;
+
+        EditorGUILayout.LabelField(port.fieldName.PrettifyCamelCase());
+
+        Rect rect = GUILayoutUtility.GetLastRect();
+        if (port.direction == NodePort.IO.Input) rect.position = rect.position - new Vector2(16, 0);
+        else if (port.direction == NodePort.IO.Output) rect.position = rect.position + new Vector2(rect.width, 0);
+        rect.size = new Vector2(16, 16);
+
+        DrawPortHandle(rect, port.ValueType);
+
+        // Register the handle position
+        Vector2 portPos = rect.center;
+        if (NodeEditor.portPositions.ContainsKey(port)) NodeEditor.portPositions[port] = portPos;
+        else NodeEditor.portPositions.Add(port, portPos);
+        EditorGUIUtility.labelWidth = temp_labelWidth;
+    }
+
     private static void DrawPortHandle(Rect rect, Type type) {
         Color col = GUI.color;
         GUI.color = new Color32(90, 97, 105, 255);

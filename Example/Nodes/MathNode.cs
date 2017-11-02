@@ -15,8 +15,8 @@
         public override object GetValue(NodePort port) {
 
             // Get new a and b values from input connections. Fallback to field values if input is not connected
-            float a = GetInputByFieldName<float>("a", this.a);
-            float b = GetInputByFieldName<float>("b", this.b);
+            float a = GetInputValue<float>("a", this.a);
+            float b = GetInputValue<float>("b", this.b);
 
             // After you've gotten your input values, you can perform your calculations and return a value
             if (port.fieldName == "result")

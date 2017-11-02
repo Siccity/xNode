@@ -12,7 +12,7 @@ public static class NodeEditorGUILayout  {
     public static void PropertyField(SerializedProperty property, bool includeChildren = true) {
         if (property == null) throw new NullReferenceException();
         Node node = property.serializedObject.targetObject as Node;
-        NodePort port = node.GetPortByFieldName(property.name);
+        NodePort port = node.GetPort(property.name);
 
         float temp_labelWidth = EditorGUIUtility.labelWidth;
 

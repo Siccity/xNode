@@ -117,9 +117,8 @@ public partial class NodeEditorWindow {
         foreach (Node node in graph.nodes) {
             //If a null node is found, return. This can happen if the nodes associated script is deleted. It is currently not possible in Unity to delete a null asset.
             if (node == null) continue;
-            for (int i = 0; i < node.OutputCount; i++) {
-                NodePort output = node.GetOutput(i);
 
+            foreach(NodePort output in node.Outputs) {
                 //Needs cleanup. Null checks are ugly
                 if (!portConnectionPoints.ContainsKey(output)) continue;
                 Vector2 from = _portConnectionPoints[output].center;
@@ -206,20 +205,18 @@ public partial class NodeEditorWindow {
 
                 //Check if we are hovering any of this nodes ports
                 //Check input ports
-                for (int i = 0; i < node.InputCount; i++) {
-                    NodePort port = node.GetInput(i);
+                foreach(NodePort input in node.Inputs) {
                     //Check if port rect is available
-                    if (!portConnectionPoints.ContainsKey(port)) continue;
-                    Rect r = GridToWindowRect(portConnectionPoints[port]);
-                    if (r.Contains(mousePos)) hoveredPort = port;
+                    if (!portConnectionPoints.ContainsKey(input)) continue;
+                    Rect r = GridToWindowRect(portConnectionPoints[input]);
+                    if (r.Contains(mousePos)) hoveredPort = input;
                 }
                 //Check all output ports
-                for (int i = 0; i < node.OutputCount; i++) {
-                    NodePort port = node.GetOutput(i);
+                foreach(NodePort output in node.Outputs) {
                     //Check if port rect is available
-                    if (!portConnectionPoints.ContainsKey(port)) continue;
-                    Rect r = GridToWindowRect(portConnectionPoints[port]);
-                    if (r.Contains(mousePos)) hoveredPort = port;
+                    if (!portConnectionPoints.ContainsKey(output)) continue;
+                    Rect r = GridToWindowRect(portConnectionPoints[output]);
+                    if (r.Contains(mousePos)) hoveredPort = output;
                 }
             }
 

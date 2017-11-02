@@ -28,7 +28,7 @@ public class NodeEditor {
 
     /// <summary> Draws standard field editors for all public fields </summary>
     protected virtual void OnBodyGUI() {
-        string[] excludes = { "m_Script", "graph", "position", "inputs", "outputs" };
+        string[] excludes = { "m_Script", "graph", "position", "ports" };
         portPositions = new Dictionary<NodePort, Vector2>();
 
         SerializedProperty iterator = serializedObject.GetIterator();

@@ -10,46 +10,33 @@ public static class NodeDataCache {
     private static PortDataCache portDataCache;
     private static bool Initialized { get { return portDataCache != null; } }
 
-    /// <summary> Checks for invalid and removes them. 
-    /// Checks for missing ports and adds them. 
-    /// Checks for invalid connections and removes them. </summary>
-    public static void UpdatePorts(Node node, List<NodePort> inputs, List<NodePort> outputs) {
+    /// <summary> Update static ports to reflect class fields. </summary>
+    public static void UpdatePorts(Node node, Dictionary<string, NodePort> ports) {
         if (!Initialized) BuildCache();
 
-        List<NodePort> inputPorts = new List<NodePort>();
-        List<NodePort> outputPorts = new List<NodePort>();
-
+        Dictionary<string, NodePort> staticPorts = new Dictionary<string, NodePort>();
         System.Type nodeType = node.GetType();
-        inputPorts = new List<NodePort>();
-        outputPorts = new List<NodePort>();
+
         if (!portDataCache.ContainsKey(nodeType)) return;
         for (int i = 0; i < portDataCache[nodeType].Count; i++) {
-            if (portDataCache[nodeType][i].direction == NodePort.IO.Input) inputPorts.Add(new NodePort(portDataCache[nodeType][i], node));
-            else outputPorts.Add(new NodePort(portDataCache[nodeType][i], node));
+            staticPorts.Add(portDataCache[nodeType][i].fieldName, portDataCache[nodeType][i]);
         }
 
-        for (int i = inputs.Count - 1; i >= 0; i--) {
-            int index = inputPorts.FindIndex(x => inputs[i].fieldName == x.fieldName);
-            //If input nodeport does not exist, remove it
-            if (index == -1) inputs.RemoveAt(i);
-            //If input nodeport does exist, update it
-            else inputs[i].type = inputPorts[index].type;
+        // Cleanup port dict - Remove nonexisting static ports - update static port types
+        foreach (NodePort port in ports.Values) {
+            if (staticPorts.ContainsKey(port.fieldName)) {
+                NodePort staticPort = staticPorts[port.fieldName];
+                if (port.IsDynamic || port.direction != staticPort.direction) ports.Remove(port.fieldName);
+                else port.type = staticPort.type;
+            } else {
+                ports.Remove(port.fieldName);
+            }
         }
-        for (int i = outputs.Count - 1; i >= 0; i--) {
-            int index = outputPorts.FindIndex(x => outputs[i].fieldName == x.fieldName);
-            //If output nodeport does not exist, remove it
-            if (index == -1) outputs.RemoveAt(i);
-            //If output nodeport does exist, update it
-            else outputs[i].type = outputPorts[index].type;
-        }
-        //Add
-        for (int i = 0; i < inputPorts.Count; i++) {
-            //If inputports contains a new port, add it
-            if (!inputs.Any(x => x.fieldName == inputPorts[i].fieldName)) inputs.Add(inputPorts[i]);
-        }
-        for (int i = 0; i < outputPorts.Count; i++) {
-            //If inputports contains a new port, add it
-            if (!outputs.Any(x => x.fieldName == outputPorts[i].fieldName)) outputs.Add(outputPorts[i]);
+        // Add missing ports
+        foreach (NodePort staticPort in staticPorts.Values) {
+            if (!ports.ContainsKey(staticPort.fieldName)) {
+                ports.Add(staticPort.fieldName, new NodePort(staticPort, node));
+            }
         }
     }
 

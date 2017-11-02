@@ -14,75 +14,101 @@ public abstract class Node : ScriptableObject {
         Always
     }
 
+    /// <summary> Iterate over all ports on this node. </summary>
+    public IEnumerable<NodePort> Ports { get { foreach (NodePort port in ports.Values) yield return port; } }
+    /// <summary> Iterate over all outputs on this node. </summary>
+    public IEnumerable<NodePort> Outputs { get { foreach (NodePort port in Ports) { if (port.direction == NodePort.IO.Output) yield return port; } } }
+    /// <summary> Iterate over all inputs on this node. </summary>
+    public IEnumerable<NodePort> Inputs { get { foreach (NodePort port in Ports) { if (port.direction == NodePort.IO.Input) yield return port; } } }
+    /// <summary> Iterate over all instance outputs on this node. </summary>
+    public IEnumerable<NodePort> InstanceOutputs { get { foreach (NodePort port in Ports) { if (port.direction == NodePort.IO.Input) yield return port; } } }
+    /// <summary> Iterate over all instance inputs on this node. </summary>
+    public IEnumerable<NodePort> InstanceInputs { get { foreach (NodePort port in Ports) { if (port.direction == NodePort.IO.Input) yield return port; } } }
     /// <summary> Parent <see cref="NodeGraph"/> </summary>
     [SerializeField] public NodeGraph graph;
     /// <summary> Position on the <see cref="NodeGraph"/> </summary>
     [SerializeField] public Vector2 position;
     /// <summary> Input <see cref="NodePort"/>s. It is recommended not to modify these at hand. Instead, see <see cref="InputAttribute"/> </summary>
-    [SerializeField] private List<NodePort> inputs = new List<NodePort>();
-    /// <summary> Output <see cref="NodePort"/>s. It is recommended not to modify these at hand. Instead, see <see cref="OutputAttribute"/> </summary>
-    [SerializeField] private List<NodePort> outputs = new List<NodePort>();
-    /// <summary> Additional instance-specific inputs. </summary>
-    [SerializeField] public List<NodePort> instanceInputs = new List<NodePort>();
-    /// <summary> Additional instance-specific outputs. </summary>
-    [SerializeField] public List<NodePort> instanceOutputs = new List<NodePort>();
-
-    public int InputCount { get { return inputs.Count; } }
-    public int OutputCount { get { return outputs.Count; } }
+    [SerializeField] private NodePortDictionary ports = new NodePortDictionary();
 
     protected void OnEnable() {
-        NodeDataCache.UpdatePorts(this, inputs, outputs);
+        NodeDataCache.UpdatePorts(this, ports);
         Init();
     }
 
+    /// <summary> Initialize node. Called on creation. </summary>
+    protected virtual void Init() { name = GetType().Name; }
+
     /// <summary> Checks all connections for invalid references, and removes them. </summary>
     public void VerifyConnections() {
-        for (int i = 0; i < InputCount; i++) {
-            inputs[i].VerifyConnections();
-        }
-        for (int i = 0; i < OutputCount; i++) {
-            outputs[i].VerifyConnections();
-        }
+        foreach (NodePort port in Ports) port.VerifyConnections();
+    }
+
+    #region Instance Ports
+    /// <summary> Returns input port at index </summary>
+    public NodePort AddInstanceInput(Type type, string fieldName = null) {
+        return AddInstancePort(type, NodePort.IO.Input, fieldName);
     }
 
     /// <summary> Returns input port at index </summary>
-    public NodePort GetInput(int i) {
-        return inputs[i];
+    public NodePort AddInstanceOutput(Type type, string fieldName = null) {
+        return AddInstancePort(type, NodePort.IO.Output, fieldName);
     }
 
-    /// <summary> Returns output port at index. </summary>
-    public NodePort GetOutput(int i) {
-        return outputs[i];
-    }
-
-    /// <summary> Returns input or output port which matches fieldName </summary>
-    public NodePort GetPortByFieldName(string fieldName) {
-        NodePort port = GetOutputByFieldName(fieldName);
-        if (port != null) return port;
-        else return GetInputByFieldName(fieldName);
-    }
-
-    /// <summary> Returns output port which matches fieldName. Returns null if none found. </summary>
-    public NodePort GetOutputByFieldName(string fieldName) {
-        for (int i = 0; i < OutputCount; i++) {
-            if (outputs[i].fieldName == fieldName) return outputs[i];
+    private NodePort AddInstancePort(Type type, NodePort.IO direction, string fieldName = null) {
+        if (fieldName == null) {
+            fieldName = "instanceInput_0";
+            int i = 0;
+            while (HasPort(fieldName)) fieldName = "instanceInput_" + (++i);
+        } else if (HasPort(fieldName)) {
+            Debug.LogWarning("Port '" + fieldName + "' already exists in " + name, this);
+            return ports[fieldName];
         }
-        return null;
+        NodePort port = new NodePort(fieldName, type, direction, this);
+        ports.Add(fieldName, port);
+        return port;
     }
 
-    /// <summary> Returns input port which matches fieldName. Returns null if none found. </summary>
-    public NodePort GetInputByFieldName(string fieldName) {
-        for (int i = 0; i < InputCount; i++) {
-            if (inputs[i].fieldName == fieldName) return inputs[i];
-        }
-        return null;
+    public bool RemoveInstancePort(string fieldName) {
+        NodePort port = GetPort(fieldName);
+        if (port == null || port.IsStatic) return false;
+        ports.Remove(fieldName);
+        return true;
+    }
+    #endregion
+
+    #region Ports
+    /// <summary> Returns output port which matches fieldName </summary>
+    public NodePort GetOutputPort(string fieldName) {
+        NodePort port = GetPort(fieldName);
+        if (port == null || port.direction != NodePort.IO.Output) return null;
+        else return port;
     }
 
+    /// <summary> Returns input port which matches fieldName </summary>
+    public NodePort GetInputPort(string fieldName) {
+        NodePort port = GetPort(fieldName);
+        if (port == null || port.direction != NodePort.IO.Input) return null;
+        else return port;
+    }
+
+    /// <summary> Returns port which matches fieldName </summary>
+    public NodePort GetPort(string fieldName) {
+        if (ports.ContainsKey(fieldName)) return ports[fieldName];
+        else return null;
+    }
+
+    public bool HasPort(string fieldName) {
+        return ports.ContainsKey(fieldName);
+    }
+    #endregion
+
+    #region Inputs/Outputs
     /// <summary> Return input value for a specified port. Returns fallback value if no ports are connected </summary>
     /// <param name="fieldName">Field name of requested input port</param>
     /// <param name="fallback">If no ports are connected, this value will be returned</param>
-    public T GetInputByFieldName<T>(string fieldName, T fallback = default(T)) {
-        NodePort port = GetInputByFieldName(fieldName);
+    public T GetInputValue<T>(string fieldName, T fallback = default(T)) {
+        NodePort port = GetPort(fieldName);
         if (port != null && port.IsConnected) return port.GetInputValue<T>();
         else return fallback;
     }
@@ -90,8 +116,8 @@ public abstract class Node : ScriptableObject {
     /// <summary> Return all input values for a specified port. Returns fallback value if no ports are connected </summary>
     /// <param name="fieldName">Field name of requested input port</param>
     /// <param name="fallback">If no ports are connected, this value will be returned</param>
-    public T[] GetInputsByFieldName<T>(string fieldName, params T[] fallback) {
-        NodePort port = GetInputByFieldName(fieldName);
+    public T[] GetInputValues<T>(string fieldName, params T[] fallback) {
+        NodePort port = GetPort(fieldName);
         if (port != null && port.IsConnected) return port.GetInputValues<T>();
         else return fallback;
     }
@@ -102,9 +128,7 @@ public abstract class Node : ScriptableObject {
         Debug.LogWarning("No GetValue(NodePort port) override defined for " + GetType());
         return null;
     }
-
-    /// <summary> Initialize node. Called on creation. </summary>
-    protected virtual void Init() { name = GetType().Name; }
+    #endregion
 
     /// <summary> Called whenever a connection is being made between two <see cref="NodePort"/>s</summary>
     /// <param name="from">Output</param> <param name="to">Input</param>
@@ -112,32 +136,51 @@ public abstract class Node : ScriptableObject {
 
     /// <summary> Disconnect everything from this node </summary>
     public void ClearConnections() {
-        for (int i = 0; i < inputs.Count; i++) {
-            inputs[i].ClearConnections();
-        }
-        for (int i = 0; i < outputs.Count; i++) {
-            outputs[i].ClearConnections();
-        }
+        foreach (NodePort port in Ports) port.ClearConnections();
     }
 
     public override int GetHashCode() {
         return JsonUtility.ToJson(this).GetHashCode();
     }
 
-    /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInputByFieldName(string)"/> </summary>
+    /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInput(string)"/> </summary>
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
     public class InputAttribute : Attribute {
         public ShowBackingValue backingValue;
-        
-        /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInputByFieldName(string)"/> </summary>
+
+        /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInput(string)"/> </summary>
         /// <param name="backingValue">Should we display the backing value for this port as an editor field? </param>
         public InputAttribute(ShowBackingValue backingValue = ShowBackingValue.Unconnected) { this.backingValue = backingValue; }
     }
 
-    /// <summary> Mark a serializable field as an output port. You can access this through <see cref="GetOutputByFieldName(string)"/> </summary>
+    /// <summary> Mark a serializable field as an output port. You can access this through <see cref="GetOutput(string)"/> </summary>
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
     public class OutputAttribute : Attribute {
-        /// <summary> Mark a serializable field as an output port. You can access this through <see cref="GetOutputByFieldName(string)"/> </summary>
+        /// <summary> Mark a serializable field as an output port. You can access this through <see cref="GetOutput(string)"/> </summary>
         public OutputAttribute() { }
+    }
+
+    [Serializable] private class NodePortDictionary : Dictionary<string, NodePort>, ISerializationCallbackReceiver {
+        [SerializeField] private List<string> keys = new List<string>();
+        [SerializeField] private List<NodePort> values = new List<NodePort>();
+
+        public void OnBeforeSerialize() {
+            keys.Clear();
+            values.Clear();
+            foreach (KeyValuePair<string, NodePort> pair in this) {
+                keys.Add(pair.Key);
+                values.Add(pair.Value);
+            }
+        }
+
+        public void OnAfterDeserialize() {
+            this.Clear();
+
+            if (keys.Count != values.Count)
+                throw new System.Exception(string.Format("there are {0} keys and {1} values after deserialization. Make sure that both key and value types are serializable."));
+
+            for (int i = 0; i < keys.Count; i++)
+                this.Add(keys[i], values[i]);
+        }
     }
 }

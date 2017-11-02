@@ -20,18 +20,21 @@ public class NodePort {
 
     public string fieldName { get { return _fieldName; } }
     public Node node { get { return _node; } }
+    public bool IsDynamic { get { return _dynamic; } }
+    public bool IsStatic { get { return !_dynamic; } }
 
     [SerializeField] private Node _node;
     [SerializeField] private string _fieldName;
     [SerializeField] public Type type;
     [SerializeField] private List<PortConnection> connections = new List<PortConnection>();
     [SerializeField] private IO _direction;
+    [SerializeField] private bool _dynamic;
 
     /// <summary> Construct a static targetless nodeport. Used as a template. </summary>
     public NodePort(FieldInfo fieldInfo) {
         _fieldName = fieldInfo.Name;
         type = fieldInfo.FieldType;
-
+        _dynamic = false;
         var attribs = fieldInfo.GetCustomAttributes(false);
         for (int i = 0; i < attribs.Length; i++) {
             if (attribs[i] is Node.InputAttribute) _direction = IO.Input;
@@ -44,6 +47,7 @@ public class NodePort {
         _fieldName = nodePort._fieldName;
         type = nodePort.type;
         _direction = nodePort.direction;
+        _dynamic = nodePort._dynamic;
         _node = node;
     }
 
@@ -53,6 +57,7 @@ public class NodePort {
         this.type = type;
         _direction = direction;
         _node = node;
+        _dynamic = true;
     }
 
     /// <summary> Checks all connections for invalid references, and removes them. </summary>
@@ -60,7 +65,7 @@ public class NodePort {
         for (int i = connections.Count - 1; i >= 0; i--) {
             if (connections[i].node != null &&
                 !string.IsNullOrEmpty(connections[i].fieldName) &&
-                connections[i].node.GetPortByFieldName(connections[i].fieldName) != null)
+                connections[i].node.GetPort(connections[i].fieldName) != null)
                 continue;
             connections.RemoveAt(i);
         }
@@ -69,6 +74,7 @@ public class NodePort {
     /// <summary> Return the output value of this node through its parent nodes GetValue override method. </summary>
     /// <returns> <see cref="Node.GetValue(NodePort)"/> </returns>
     public object GetOutputValue() {
+        if (direction == IO.Input) return null;
         return node.GetValue(this);
     }
 
@@ -167,7 +173,7 @@ public class NodePort {
             connections.RemoveAt(i);
             return null;
         }
-        NodePort port = connections[i].node.GetPortByFieldName(connections[i].fieldName);
+        NodePort port = connections[i].node.GetPort(connections[i].fieldName);
         if (port == null) {
             connections.RemoveAt(i);
             return null;
@@ -218,7 +224,7 @@ public class NodePort {
         /// <summary> Returns the port that this <see cref="PortConnection"/> points to </summary>
         private NodePort GetPort() {
             if (node == null || string.IsNullOrEmpty(fieldName)) return null;
-            return node.GetPortByFieldName(fieldName);
+            return node.GetPort(fieldName);
         }
     }
 }

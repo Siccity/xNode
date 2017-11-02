@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary> UNEC-specific version of <see cref="EditorGUILayout"/> </summary>
-public static class NodeEditorGUILayout  {
+public static class NodeEditorGUILayout {
 
     public static void PropertyField(SerializedProperty property, bool includeChildren = true) {
         if (property == null) throw new NullReferenceException();
@@ -29,7 +29,7 @@ public static class NodeEditorGUILayout  {
                 else EditorGUILayout.PropertyField(property, includeChildren);
                 rect = GUILayoutUtility.GetLastRect();
                 rect.position = rect.position - new Vector2(16, 0);
-            // If property is an output, display a text label and put a port handle on the right side
+                // If property is an output, display a text label and put a port handle on the right side
             } else if (port.direction == NodePort.IO.Output) {
                 EditorGUILayout.LabelField(property.displayName, NodeEditorResources.styles.outputPort);
                 rect = GUILayoutUtility.GetLastRect();
@@ -38,7 +38,7 @@ public static class NodeEditorGUILayout  {
 
             rect.size = new Vector2(16, 16);
 
-            DrawPortHandle(rect, port.type);
+            DrawPortHandle(rect, port.ValueType);
 
             // Register the handle position
             Vector2 portPos = rect.center;

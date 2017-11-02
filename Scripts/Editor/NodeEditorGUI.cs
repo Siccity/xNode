@@ -129,7 +129,7 @@ public partial class NodeEditorWindow {
                     if (!input.IsConnectedTo(output)) input.Connect(output);
                     if (!_portConnectionPoints.ContainsKey(input)) continue;
                     Vector2 to = _portConnectionPoints[input].center;
-                    DrawConnection(from, to, NodeEditorPreferences.GetTypeColor(output.type));
+                    DrawConnection(from, to, NodeEditorPreferences.GetTypeColor(output.ValueType));
                 }
             }
         }
@@ -235,7 +235,7 @@ public partial class NodeEditorWindow {
 
     private void DrawTooltip() {
         if (hoveredPort != null) {
-            Type type = hoveredPort.type;
+            Type type = hoveredPort.ValueType;
             GUIContent content = new GUIContent();
             content.text = TypeToString(type);
             Vector2 size = NodeEditorResources.styles.tooltip.CalcSize(content);
@@ -246,6 +246,7 @@ public partial class NodeEditorWindow {
     }
 
     private string TypeToString(Type type) {
+        if (type == null) return "null";
         if (type == typeof(float)) return "float";
         else if (type == typeof(int)) return "int";
         else if (type == typeof(long)) return "long";
@@ -276,6 +277,6 @@ public partial class NodeEditorWindow {
                 int i = s.IndexOf('[');
                 return s.Substring(0,i) + "["+rank+"]" + s.Substring(i);
             }
-        } else return hoveredPort.type.ToString();
+        } else return hoveredPort.ValueType.ToString();
     }
 }

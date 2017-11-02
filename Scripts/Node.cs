@@ -74,6 +74,7 @@ public abstract class Node : ScriptableObject {
     public bool RemoveInstancePort(string fieldName) {
         NodePort port = GetPort(fieldName);
         if (port == null || port.IsStatic) return false;
+        port.ClearConnections();
         ports.Remove(fieldName);
         return true;
     }

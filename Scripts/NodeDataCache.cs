@@ -23,14 +23,12 @@ public static class NodeDataCache {
         }
 
         // Cleanup port dict - Remove nonexisting static ports - update static port types
-        foreach (NodePort port in ports.Values) {
+        foreach (NodePort port in ports.Values.ToList()) {
             if (staticPorts.ContainsKey(port.fieldName)) {
                 NodePort staticPort = staticPorts[port.fieldName];
                 if (port.IsDynamic || port.direction != staticPort.direction) ports.Remove(port.fieldName);
-                else port.type = staticPort.type;
-            } else {
-                ports.Remove(port.fieldName);
-            }
+                else port.ValueType = staticPort.ValueType;
+            } else if (port.IsStatic) ports.Remove(port.fieldName);
         }
         // Add missing ports
         foreach (NodePort staticPort in staticPorts.Values) {

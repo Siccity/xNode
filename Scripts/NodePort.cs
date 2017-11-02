@@ -103,6 +103,11 @@ public class NodePort {
         object[] objs = new object[ConnectionCount];
         for (int i = 0; i < ConnectionCount; i++) {
             NodePort connectedPort = connections[i].Port;
+            if (connectedPort == null) { // if we happen to find a null port, remove it and look again
+                connections.RemoveAt(i);
+                i--;
+                continue;
+            }
             objs[i] = connectedPort.GetOutputValue();
         }
         return objs;

@@ -22,10 +22,21 @@ public class NodePort {
     public Node node { get { return _node; } }
     public bool IsDynamic { get { return _dynamic; } }
     public bool IsStatic { get { return !_dynamic; } }
+    public Type ValueType {
+        get {
+            if (valueType == null && !string.IsNullOrEmpty(_typeQualifiedName)) valueType = Type.GetType(_typeQualifiedName, false);
+            return valueType;
+        }
+        set {
+            valueType = value;
+            if (value != null) _typeQualifiedName = value.AssemblyQualifiedName;
+        }
+    }
+    private Type valueType;
 
-    [SerializeField] private Node _node;
     [SerializeField] private string _fieldName;
-    [SerializeField] public Type type;
+    [SerializeField] private Node _node;
+    [SerializeField] private string _typeQualifiedName;
     [SerializeField] private List<PortConnection> connections = new List<PortConnection>();
     [SerializeField] private IO _direction;
     [SerializeField] private bool _dynamic;
@@ -33,7 +44,7 @@ public class NodePort {
     /// <summary> Construct a static targetless nodeport. Used as a template. </summary>
     public NodePort(FieldInfo fieldInfo) {
         _fieldName = fieldInfo.Name;
-        type = fieldInfo.FieldType;
+        ValueType = fieldInfo.FieldType;
         _dynamic = false;
         var attribs = fieldInfo.GetCustomAttributes(false);
         for (int i = 0; i < attribs.Length; i++) {
@@ -45,7 +56,7 @@ public class NodePort {
     /// <summary> Copy a nodePort but assign it to another node. </summary>
     public NodePort(NodePort nodePort, Node node) {
         _fieldName = nodePort._fieldName;
-        type = nodePort.type;
+        ValueType = nodePort.valueType;
         _direction = nodePort.direction;
         _dynamic = nodePort._dynamic;
         _node = node;
@@ -54,7 +65,7 @@ public class NodePort {
     /// <summary> Construct a dynamic port. Dynamic ports are not forgotten on reimport, and is ideal for runtime-created ports. </summary>
     public NodePort(string fieldName, Type type, IO direction, Node node) {
         _fieldName = fieldName;
-        this.type = type;
+        this.ValueType = type;
         _direction = direction;
         _node = node;
         _dynamic = true;

@@ -19,13 +19,15 @@ public class NodePort {
     public bool IsOutput { get { return direction == IO.Output; } }
 
     public string fieldName { get { return _fieldName; } }
+    public Node node { get { return _node; } }
 
-    [SerializeField] public Node node;
+    [SerializeField] private Node _node;
     [SerializeField] private string _fieldName;
     [SerializeField] public Type type;
     [SerializeField] private List<PortConnection> connections = new List<PortConnection>();
     [SerializeField] private IO _direction;
 
+    /// <summary> Construct a static targetless nodeport. Used as a template. </summary>
     public NodePort(FieldInfo fieldInfo) {
         _fieldName = fieldInfo.Name;
         type = fieldInfo.FieldType;
@@ -37,11 +39,20 @@ public class NodePort {
         }
     }
 
+    /// <summary> Copy a nodePort but assign it to another node. </summary>
     public NodePort(NodePort nodePort, Node node) {
         _fieldName = nodePort._fieldName;
         type = nodePort.type;
-        this.node = node;
         _direction = nodePort.direction;
+        _node = node;
+    }
+
+    /// <summary> Construct a dynamic port. Dynamic ports are not forgotten on reimport, and is ideal for runtime-created ports. </summary>
+    public NodePort(string fieldName, Type type, IO direction, Node node) {
+        _fieldName = fieldName;
+        this.type = type;
+        _direction = direction;
+        _node = node;
     }
 
     /// <summary> Checks all connections for invalid references, and removes them. </summary>
@@ -192,7 +203,7 @@ public class NodePort {
     }
 
     [Serializable]
-    public class PortConnection {
+    private class PortConnection {
         [SerializeField] public string fieldName;
         [SerializeField] public Node node;
         public NodePort Port { get { return port != null ? port : port = GetPort(); } }
@@ -207,14 +218,7 @@ public class NodePort {
         /// <summary> Returns the port that this <see cref="PortConnection"/> points to </summary>
         private NodePort GetPort() {
             if (node == null || string.IsNullOrEmpty(fieldName)) return null;
-
-            for (int i = 0; i < node.OutputCount; i++) {
-                if (node.outputs[i].fieldName == fieldName) return node.outputs[i];
-            }
-            for (int i = 0; i < node.InputCount; i++) {
-                if (node.inputs[i].fieldName == fieldName) return node.inputs[i];
-            }
-            return null;
+            return node.GetPortByFieldName(fieldName);
         }
     }
 }

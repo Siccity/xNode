@@ -13,6 +13,8 @@ public partial class NodeEditorWindow : EditorWindow {
     /// <summary> Stores node positions for all nodePorts. </summary>
     public Dictionary<NodePort, Rect> portConnectionPoints { get { return _portConnectionPoints; } }
     private Dictionary<NodePort, Rect> _portConnectionPoints = new Dictionary<NodePort, Rect>();
+    public Dictionary<Node, float> nodeWidths { get { return _nodeWidths; } }
+    private Dictionary<Node, float> _nodeWidths = new Dictionary<Node, float>();
     public NodeGraph graph;
     public Vector2 panOffset { get { return _panOffset; } set { _panOffset = value; Repaint(); } }
     private Vector2 _panOffset;

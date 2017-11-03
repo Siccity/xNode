@@ -117,7 +117,7 @@ public partial class NodeEditorWindow {
             //If a null node is found, return. This can happen if the nodes associated script is deleted. It is currently not possible in Unity to delete a null asset.
             if (node == null) continue;
 
-            foreach(NodePort output in node.Outputs) {
+            foreach (NodePort output in node.Outputs) {
                 //Needs cleanup. Null checks are ugly
                 if (!portConnectionPoints.ContainsKey(output)) continue;
                 Vector2 from = _portConnectionPoints[output].center;
@@ -136,7 +136,10 @@ public partial class NodeEditorWindow {
 
     private void DrawNodes() {
         Event e = Event.current;
-        if (e.type == EventType.Repaint) portConnectionPoints.Clear();
+        if (e.type == EventType.Repaint) {
+            portConnectionPoints.Clear();
+            nodeWidths.Clear();
+        }
 
         //Selected node is hashed before and after node GUI to detect changes
         int nodeHash = 0;
@@ -186,6 +189,8 @@ public partial class NodeEditorWindow {
             }
 
             if (e.type == EventType.Repaint) {
+                nodeWidths.Add(node, nodeEditor.GetWidth());
+
                 foreach (var kvp in NodeEditor.portPositions) {
                     Vector2 portHandlePos = kvp.Value;
                     portHandlePos += node.position;
@@ -204,14 +209,14 @@ public partial class NodeEditorWindow {
 
                 //Check if we are hovering any of this nodes ports
                 //Check input ports
-                foreach(NodePort input in node.Inputs) {
+                foreach (NodePort input in node.Inputs) {
                     //Check if port rect is available
                     if (!portConnectionPoints.ContainsKey(input)) continue;
                     Rect r = GridToWindowRect(portConnectionPoints[input]);
                     if (r.Contains(mousePos)) hoveredPort = input;
                 }
                 //Check all output ports
-                foreach(NodePort output in node.Outputs) {
+                foreach (NodePort output in node.Outputs) {
                     //Check if port rect is available
                     if (!portConnectionPoints.ContainsKey(output)) continue;
                     Rect r = GridToWindowRect(portConnectionPoints[output]);
@@ -274,7 +279,7 @@ public partial class NodeEditorWindow {
             else {
                 string s = TypeToString(elementType);
                 int i = s.IndexOf('[');
-                return s.Substring(0,i) + "["+rank+"]" + s.Substring(i);
+                return s.Substring(0, i) + "[" + rank + "]" + s.Substring(i);
             }
         } else return hoveredPort.ValueType.ToString();
     }

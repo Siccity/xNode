@@ -57,9 +57,9 @@ MonoBehaviour:
         node: {fileID: 114708853913061688}
       _direction: 1
       _dynamic: 0
-  a: 3.06
-  b: 7.29
-  result: 0
+  a: 6.48
+  b: 7.59
+  result: 14.07
   mathType: 0
 --- !u!114 &114708853913061688
 MonoBehaviour:
@@ -116,7 +116,7 @@ MonoBehaviour:
   x: 0
   y: 2.6412349
   z: 14.33477
-  vector: {x: 0, y: 0, z: 0}
+  vector: {x: 14.07, y: 2.6412349, z: 14.33477}
 --- !u!114 &114729867621534192
 MonoBehaviour:
   m_ObjectHideFlags: 0

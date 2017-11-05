@@ -48,5 +48,11 @@ namespace XNodeEditor {
         public static object ObjectFromType(Type type) {
             return Activator.CreateInstance(type);
         }
+
+        public static object ObjectFromFieldName(object obj, string fieldName) {
+            Type type = obj.GetType();
+            FieldInfo fieldInfo = type.GetField(fieldName);
+            return fieldInfo.GetValue(obj);
+        }
     }
 }

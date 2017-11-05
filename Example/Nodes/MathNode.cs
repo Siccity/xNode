@@ -21,14 +21,15 @@ namespace BasicNodes {
             float b = GetInputValue<float>("b", this.b);
 
             // After you've gotten your input values, you can perform your calculations and return a value
+            result = 0f;
             if (port.fieldName == "result")
                 switch (mathType) {
-                    case MathType.Add: default: return a + b;
-                    case MathType.Subtract: return a - b;
-                    case MathType.Multiply: return a * b;
-                    case MathType.Divide: return a / b;
+                    case MathType.Add: default: result = a+b; break;
+                    case MathType.Subtract: result = a - b; break;
+                    case MathType.Multiply: result = a * b; break;
+                    case MathType.Divide: result = a / b; break;
                 }
-            else return 0f;
+            return result;
         }
     }
 }

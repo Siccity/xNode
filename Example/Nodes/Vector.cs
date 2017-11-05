@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using XNode;
 
 namespace BasicNodes {
     public class Vector : Node {

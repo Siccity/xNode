@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
-using UnityEngine;
+﻿using UnityEditor;
+using XNodeEditor;
 
 namespace BasicNodes {
     [CustomNodeEditor(typeof(DisplayValue))]

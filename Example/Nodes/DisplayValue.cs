@@ -1,4 +1,6 @@
-﻿namespace BasicNodes {
+﻿using XNode;
+
+namespace BasicNodes {
     public class DisplayValue : Node {
         [Input(ShowBackingValue.Never)] public object value;
 

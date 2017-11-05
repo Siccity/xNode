@@ -1,5 +1,5 @@
 [![Discord](https://img.shields.io/discord/361769369404964864.svg)](https://discord.gg/qgPrHv4)
-[![GitHub issues](https://img.shields.io/github/issues/Siccity/UnityNodeEditorCore.svg)](https://github.com/Siccity/xNode/issues)
+[![GitHub issues](https://img.shields.io/github/issues/Siccity/xNode.svg)](https://github.com/Siccity/xNode/issues)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/Siccity/xNode/master/LICENSE.md)
 [![GitHub Wiki](https://img.shields.io/badge/wiki-available-brightgreen.svg)](https://github.com/Siccity/xNode/wiki)
 

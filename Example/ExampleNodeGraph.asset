@@ -27,25 +27,38 @@ MonoBehaviour:
   m_Name: MathNode
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: -539.5, y: -205}
-  inputs:
-  - node: {fileID: 114511978881715272}
-    _fieldName: a
-    connections: []
-    _direction: 0
-  - node: {fileID: 114511978881715272}
-    _fieldName: b
-    connections: []
-    _direction: 0
-  outputs:
-  - node: {fileID: 114511978881715272}
-    _fieldName: result
-    connections:
-    - fieldName: x
-      node: {fileID: 114708853913061688}
-    _direction: 1
-  a: 2.7975256
-  b: 6.7917466
+  position: {x: -401.5, y: -119}
+  ports:
+    keys:
+    - a
+    - b
+    - result
+    values:
+    - _fieldName: a
+      _node: {fileID: 114511978881715272}
+      _typeQualifiedName: System.Single, mscorlib, Version=2.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 0
+      _dynamic: 0
+    - _fieldName: b
+      _node: {fileID: 114511978881715272}
+      _typeQualifiedName: System.Single, mscorlib, Version=2.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 0
+      _dynamic: 0
+    - _fieldName: result
+      _node: {fileID: 114511978881715272}
+      _typeQualifiedName: System.Single, mscorlib, Version=2.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections:
+      - fieldName: x
+        node: {fileID: 114708853913061688}
+      _direction: 1
+      _dynamic: 0
+  a: 3.06
+  b: 7.29
   result: 0
   mathType: 0
 --- !u!114 &114708853913061688
@@ -61,28 +74,45 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
   position: {x: -157.5, y: -115}
-  inputs:
-  - node: {fileID: 114708853913061688}
-    _fieldName: x
-    connections:
-    - fieldName: result
-      node: {fileID: 114511978881715272}
-    _direction: 0
-  - node: {fileID: 114708853913061688}
-    _fieldName: y
-    connections: []
-    _direction: 0
-  - node: {fileID: 114708853913061688}
-    _fieldName: z
-    connections: []
-    _direction: 0
-  outputs:
-  - node: {fileID: 114708853913061688}
-    _fieldName: vector
-    connections:
-    - fieldName: value
-      node: {fileID: 114729867621534192}
-    _direction: 1
+  ports:
+    keys:
+    - x
+    - y
+    - z
+    - vector
+    values:
+    - _fieldName: x
+      _node: {fileID: 114708853913061688}
+      _typeQualifiedName: System.Single, mscorlib, Version=2.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections:
+      - fieldName: result
+        node: {fileID: 114511978881715272}
+      _direction: 0
+      _dynamic: 0
+    - _fieldName: y
+      _node: {fileID: 114708853913061688}
+      _typeQualifiedName: System.Single, mscorlib, Version=2.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 0
+      _dynamic: 0
+    - _fieldName: z
+      _node: {fileID: 114708853913061688}
+      _typeQualifiedName: System.Single, mscorlib, Version=2.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 0
+      _dynamic: 0
+    - _fieldName: vector
+      _node: {fileID: 114708853913061688}
+      _typeQualifiedName: UnityEngine.Vector3, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      connections:
+      - fieldName: input
+        node: {fileID: 114729867621534192}
+      _direction: 1
+      _dynamic: 0
   x: 0
   y: 2.6412349
   z: 14.33477
@@ -99,12 +129,25 @@ MonoBehaviour:
   m_Name: DisplayValue
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: 78.5, y: -64}
-  inputs:
-  - node: {fileID: 114729867621534192}
-    _fieldName: value
-    connections:
-    - fieldName: vector
-      node: {fileID: 114708853913061688}
-    _direction: 0
-  outputs: []
+  position: {x: 104.5, y: -82}
+  ports:
+    keys:
+    - value
+    - input
+    values:
+    - _fieldName: value
+      _node: {fileID: 114729867621534192}
+      _typeQualifiedName: System.Object, mscorlib, Version=2.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 0
+      _dynamic: 0
+    - _fieldName: input
+      _node: {fileID: 114729867621534192}
+      _typeQualifiedName: System.Object, mscorlib, Version=2.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections:
+      - fieldName: vector
+        node: {fileID: 114708853913061688}
+      _direction: 0
+      _dynamic: 1

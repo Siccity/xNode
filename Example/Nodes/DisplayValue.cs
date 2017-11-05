@@ -2,10 +2,12 @@
 
 namespace BasicNodes {
     public class DisplayValue : Node {
-        [Input(ShowBackingValue.Never)] public object value;
+        protected override void Init() {
+            if (!HasPort("input")) AddInstanceInput(typeof(object), "input");
+        }
 
         public override object GetValue(NodePort port) {
-            return GetInputValue<object>("value", value);
+            return GetInputValue<object>("input");
         }
     }
 }

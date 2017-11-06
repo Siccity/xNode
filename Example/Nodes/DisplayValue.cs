@@ -3,6 +3,7 @@
 namespace BasicNodes {
     public class DisplayValue : Node {
         protected override void Init() {
+            base.Init();
             if (!HasPort("input")) AddInstanceInput(typeof(object), "input");
         }
 

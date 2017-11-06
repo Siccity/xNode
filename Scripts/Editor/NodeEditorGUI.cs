@@ -243,7 +243,10 @@ namespace XNodeEditor {
                 Type type = hoveredPort.ValueType;
                 GUIContent content = new GUIContent();
                 content.text = TypeToString(type);
-                if (hoveredPort.IsStatic && hoveredPort.IsOutput) content.text += " = " + ObjectFromFieldName(hoveredPort.node, hoveredPort.fieldName).ToString();
+                if (hoveredPort.IsStatic && hoveredPort.IsOutput) {
+                    object obj = ObjectFromFieldName(hoveredPort.node, hoveredPort.fieldName);
+                    if (obj != null) content.text += " = " + obj.ToString();
+                }
                 Vector2 size = NodeEditorResources.styles.tooltip.CalcSize(content);
                 Rect rect = new Rect(Event.current.mousePosition - (size), size);
                 EditorGUI.LabelField(rect, content, NodeEditorResources.styles.tooltip);

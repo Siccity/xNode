@@ -27,10 +27,9 @@ namespace XNodeEditor {
 
         partial void OnEnable();
         /// <summary> Create editor window </summary>
-        //[MenuItem("Window/UNEC")]
         public static NodeEditorWindow Init() {
             NodeEditorWindow w = CreateInstance<NodeEditorWindow>();
-            w.titleContent = new GUIContent("UNEC");
+            w.titleContent = new GUIContent("xNode");
             w.wantsMouseMove = true;
             w.Show();
             return w;

@@ -27,7 +27,6 @@ namespace XNodeEditor {
 
         public void Controls() {
             wantsMouseMove = true;
-
             Event e = Event.current;
             switch (e.type) {
                 case EventType.MouseMove:
@@ -57,28 +56,31 @@ namespace XNodeEditor {
                     }
                     break;
                 case EventType.KeyDown:
-                    if (e.keyCode == KeyCode.F) Home();
+                    if (GUIUtility.keyboardControl == 0) break;
+                    else if (e.keyCode == KeyCode.F) Home();
                     break;
                 case EventType.MouseDown:
                     Repaint();
-                    SelectNode(hoveredNode);
-                    if (IsHoveringPort) {
-                        if (hoveredPort.IsOutput) {
-                            draggedOutput = hoveredPort;
-                        } else {
-                            hoveredPort.VerifyConnections();
-                            if (hoveredPort.IsConnected) {
-                                Node node = hoveredPort.node;
-                                NodePort output = hoveredPort.Connection;
-                                hoveredPort.Disconnect(output);
-                                draggedOutput = output;
-                                draggedOutputTarget = hoveredPort;
-                                if (NodeEditor.onUpdateNode != null) NodeEditor.onUpdateNode(node);
+                    if (e.button == 0) {
+                        SelectNode(hoveredNode);
+                        if (IsHoveringPort) {
+                            if (hoveredPort.IsOutput) {
+                                draggedOutput = hoveredPort;
+                            } else {
+                                hoveredPort.VerifyConnections();
+                                if (hoveredPort.IsConnected) {
+                                    Node node = hoveredPort.node;
+                                    NodePort output = hoveredPort.Connection;
+                                    hoveredPort.Disconnect(output);
+                                    draggedOutput = output;
+                                    draggedOutputTarget = hoveredPort;
+                                    if (NodeEditor.onUpdateNode != null) NodeEditor.onUpdateNode(node);
+                                }
                             }
+                        } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
+                            draggedNode = hoveredNode;
+                            dragOffset = hoveredNode.position - WindowToGridPosition(e.mousePosition);
                         }
-                    } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
-                        draggedNode = hoveredNode;
-                        dragOffset = hoveredNode.position - WindowToGridPosition(e.mousePosition);
                     }
                     break;
                 case EventType.MouseUp:
@@ -97,14 +99,17 @@ namespace XNodeEditor {
                             draggedOutputTarget = null;
                             EditorUtility.SetDirty(graph);
                             Repaint();
+                            AssetDatabase.SaveAssets();
                         } else if (IsDraggingNode) {
                             draggedNode = null;
+                            AssetDatabase.SaveAssets();
+                        } else if (GUIUtility.hotControl != 0) {
+                            AssetDatabase.SaveAssets();
                         }
                     } else if (e.button == 1) {
                         if (!isPanning) ShowContextMenu();
                         isPanning = false;
                     }
-                    AssetDatabase.SaveAssets();
                     break;
             }
         }

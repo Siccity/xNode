@@ -16,9 +16,10 @@ namespace XNode {
             Dictionary<string, NodePort> staticPorts = new Dictionary<string, NodePort>();
             System.Type nodeType = node.GetType();
 
-            if (!portDataCache.ContainsKey(nodeType)) return;
-            for (int i = 0; i < portDataCache[nodeType].Count; i++) {
-                staticPorts.Add(portDataCache[nodeType][i].fieldName, portDataCache[nodeType][i]);
+            if (portDataCache.ContainsKey(nodeType)) {
+                for (int i = 0; i < portDataCache[nodeType].Count; i++) {
+                    staticPorts.Add(portDataCache[nodeType][i].fieldName, portDataCache[nodeType][i]);
+                }
             }
 
             // Cleanup port dict - Remove nonexisting static ports - update static port types

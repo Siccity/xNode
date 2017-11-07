@@ -9,7 +9,7 @@ namespace BasicNodes {
             base.OnBodyGUI();
             NodeEditorGUILayout.PortField(target.GetInputPort("input"));
             object obj = target.GetValue(null);
-            if (obj != null) EditorGUILayout.LabelField(target.GetValue(null).ToString());
+            if (obj != null) EditorGUILayout.LabelField(obj.ToString());
         }
     }
 }

@@ -55,10 +55,6 @@ namespace XNodeEditor {
                         isPanning = true;
                     }
                     break;
-                case EventType.KeyDown:
-                    if (GUIUtility.keyboardControl == 0) break;
-                    else if (e.keyCode == KeyCode.F) Home();
-                    break;
                 case EventType.MouseDown:
                     Repaint();
                     if (e.button == 0) {

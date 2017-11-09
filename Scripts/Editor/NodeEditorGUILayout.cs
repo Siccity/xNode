@@ -51,14 +51,16 @@ namespace XNodeEditor {
             }
         }
 
-        public static void PortField(NodePort port) {
-            PortField(null, port);
+        /// <summary> Make a simple port field. </summary>
+        public static void PortField(NodePort port, params GUILayoutOption[] option) {
+            PortField(null, port, option);
         }
-        
-        public static void PortField(GUIContent label, NodePort port) {
+
+        /// <summary> Make a simple port field. </summary>
+        public static void PortField(GUIContent label, NodePort port, params GUILayoutOption[] option) {
             if (port == null) return;
-            if (label == null) EditorGUILayout.LabelField(port.fieldName.PrettifyCamelCase(), GUILayout.MinWidth(30));
-            else EditorGUILayout.LabelField(label, GUILayout.MinWidth(30));
+            if (label == null) EditorGUILayout.LabelField(port.fieldName.PrettifyCamelCase(), option);
+            else EditorGUILayout.LabelField(label, option);
             Rect rect = GUILayoutUtility.GetLastRect();
             if (port.direction == NodePort.IO.Input) rect.position = rect.position - new Vector2(16, 0);
             else if (port.direction == NodePort.IO.Output) rect.position = rect.position + new Vector2(rect.width, 0);

@@ -7,10 +7,18 @@ namespace XNodeEditor {
     /// <summary> UNEC-specific version of <see cref="EditorGUILayout"/> </summary>
     public static class NodeEditorGUILayout {
 
+        /// <summary> Make a field for a serialized property. Automatically displays relevant node port. </summary>            
         public static void PropertyField(SerializedProperty property, bool includeChildren = true) {
             if (property == null) throw new NullReferenceException();
+
             Node node = property.serializedObject.targetObject as Node;
             NodePort port = node.GetPort(property.name);
+            PropertyField(property, port, includeChildren);
+        }
+
+        /// <summary> Make a field for a serialized property. Manual node port override. </summary>            
+        public static void PropertyField(SerializedProperty property, NodePort port, bool includeChildren = true) {
+            if (property == null) throw new NullReferenceException();
 
             // If property is not a port, display a regular property field
             if (port == null) EditorGUILayout.PropertyField(property, includeChildren, GUILayout.MinWidth(30));
@@ -44,9 +52,13 @@ namespace XNodeEditor {
         }
 
         public static void PortField(NodePort port) {
+            PortField(null, port);
+        }
+        
+        public static void PortField(GUIContent label, NodePort port) {
             if (port == null) return;
-            EditorGUILayout.LabelField(port.fieldName.PrettifyCamelCase(), GUILayout.MinWidth(30));
-
+            if (label == null) EditorGUILayout.LabelField(port.fieldName.PrettifyCamelCase(), GUILayout.MinWidth(30));
+            else EditorGUILayout.LabelField(label, GUILayout.MinWidth(30));
             Rect rect = GUILayoutUtility.GetLastRect();
             if (port.direction == NodePort.IO.Input) rect.position = rect.position - new Vector2(16, 0);
             else if (port.direction == NodePort.IO.Output) rect.position = rect.position + new Vector2(rect.width, 0);

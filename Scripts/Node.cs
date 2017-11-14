@@ -174,6 +174,24 @@ namespace XNode {
             }
         }
 
+        [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+        public class NodeTint : Attribute {
+            public Color color;
+            /// <summary> Specify a color for this node type </summary>
+            /// <param name="r"> Red [0..1] </param>
+            /// <param name="g"> Green [0..1] </param>
+            /// <param name="b"> Blue [0..1] </param>
+            public NodeTint(float r, float g, float b) {
+                color = new Color(r, g, b);
+            }
+
+            /// <summary> Specify a color for this node type </summary>
+            /// <param name="hex"> HEX color value </param>
+            public NodeTint(string hex) {
+                ColorUtility.TryParseHtmlString(hex, out color);
+            }
+        }
+
         [Serializable] private class NodePortDictionary : Dictionary<string, NodePort>, ISerializationCallbackReceiver {
             [SerializeField] private List<string> keys = new List<string>();
             [SerializeField] private List<NodePort> values = new List<NodePort>();

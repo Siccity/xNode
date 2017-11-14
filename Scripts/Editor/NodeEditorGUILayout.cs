@@ -42,7 +42,9 @@ namespace XNodeEditor {
 
                 rect.size = new Vector2(16, 16);
 
-                DrawPortHandle(rect, port.ValueType);
+                Color backgroundColor = new Color32(90, 97, 105, 255);
+                if (NodeEditorWindow.nodeTint.ContainsKey(port.node.GetType())) backgroundColor *= NodeEditorWindow.nodeTint[port.node.GetType()];
+                DrawPortHandle(rect, port.ValueType, backgroundColor);
 
                 // Register the handle position
                 Vector2 portPos = rect.center;
@@ -66,7 +68,9 @@ namespace XNodeEditor {
             else if (port.direction == NodePort.IO.Output) rect.position = rect.position + new Vector2(rect.width, 0);
             rect.size = new Vector2(16, 16);
 
-            DrawPortHandle(rect, port.ValueType);
+            Color backgroundColor = new Color32(90, 97, 105, 255);
+            if (NodeEditorWindow.nodeTint.ContainsKey(port.node.GetType())) backgroundColor *= NodeEditorWindow.nodeTint[port.node.GetType()];
+            DrawPortHandle(rect, port.ValueType, backgroundColor);
 
             // Register the handle position
             Vector2 portPos = rect.center;
@@ -74,9 +78,9 @@ namespace XNodeEditor {
             else NodeEditor.portPositions.Add(port, portPos);
         }
 
-        private static void DrawPortHandle(Rect rect, Type type) {
+        private static void DrawPortHandle(Rect rect, Type type, Color backgroundColor) {
             Color col = GUI.color;
-            GUI.color = new Color32(90, 97, 105, 255);
+            GUI.color = backgroundColor;
             GUI.DrawTexture(rect, NodeEditorResources.dotOuter);
             GUI.color = NodeEditorPreferences.GetTypeColor(type);
             GUI.DrawTexture(rect, NodeEditorResources.dot);

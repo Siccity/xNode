@@ -159,12 +159,15 @@ namespace XNodeEditor {
                 hoveredPort = null;
             }
 
+            //Save guiColor so we can revert it
+            Color guiColor = GUI.color;
             for (int n = 0; n < graph.nodes.Count; n++) {
                 while (graph.nodes[n] == null) graph.nodes.RemoveAt(n);
                 if (n >= graph.nodes.Count) return;
                 Node node = graph.nodes[n];
+                Type nodeType = node.GetType();
 
-                NodeEditor nodeEditor = GetNodeEditor(node.GetType());
+                NodeEditor nodeEditor = GetNodeEditor(nodeType);
                 nodeEditor.target = node;
                 nodeEditor.serializedObject = new SerializedObject(node);
                 NodeEditor.portPositions = new Dictionary<NodePort, Vector2>();
@@ -175,7 +178,9 @@ namespace XNodeEditor {
                 GUILayout.BeginArea(new Rect(nodePos, new Vector2(nodeEditor.GetWidth(), 4000)));
 
                 GUIStyle style = NodeEditorResources.styles.nodeBody;
+                if (nodeTint.ContainsKey(nodeType)) GUI.color = nodeTint[nodeType];
                 GUILayout.BeginVertical(new GUIStyle(style));
+                GUI.color = guiColor;
                 EditorGUI.BeginChangeCheck();
 
                 //Draw node contents

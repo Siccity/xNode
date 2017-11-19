@@ -73,25 +73,30 @@ namespace XNodeEditor {
 
         /// <summary> Show right-click context menu </summary>
         public void ShowContextMenu() {
+            if (hoveredNode != null) {
+                GetNodeEditor(hoveredNode.GetType()).ShowNodeContextMenu(hoveredNode);
+            } 
+            else
+            {
+                ShowGraphContextMenu();
+            }
+        }
+
+        public virtual void ShowGraphContextMenu()
+        {
             GenericMenu contextMenu = new GenericMenu();
             Vector2 pos = WindowToGridPosition(Event.current.mousePosition);
+            for (int i = 0; i < nodeTypes.Length; i++) {
+                Type type = nodeTypes[i];
 
-            if (hoveredNode != null) {
-                Node node = hoveredNode;
-                contextMenu.AddItem(new GUIContent("Remove"), false, () => graph.RemoveNode(node));
-            } else {
-                for (int i = 0; i < nodeTypes.Length; i++) {
-                    Type type = nodeTypes[i];
-
-                    string name = nodeTypes[i].ToString().Replace('.', '/');
-                    Node.CreateNodeMenuAttribute attrib;
-                    if (NodeEditorUtilities.GetAttrib(type, out attrib)) {
-                        name = attrib.menuName;
-                    }
-                    contextMenu.AddItem(new GUIContent(name), false, () => {
-                        CreateNode(type, pos);
-                    });
+                string name = nodeTypes[i].ToString().Replace('.', '/');
+                Node.CreateNodeMenuAttribute attrib;
+                if (NodeEditorUtilities.GetAttrib(type, out attrib)) {
+                    name = attrib.menuName;
                 }
+                contextMenu.AddItem(new GUIContent(name), false, () => {
+                    CreateNode(type, pos);
+                });
             }
             contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
         }

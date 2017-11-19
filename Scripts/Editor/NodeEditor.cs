@@ -21,7 +21,7 @@ namespace XNodeEditor {
             OnBodyGUI();
         }
 
-        public void OnHeaderGUI() {
+        public virtual void OnHeaderGUI() {
             GUI.color = Color.white;
             string title = NodeEditorUtilities.PrettifyCamelCase(target.name);
             GUILayout.Label(title, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
@@ -44,6 +44,13 @@ namespace XNodeEditor {
 
         public virtual int GetWidth() {
             return 200;
+        }
+
+        public virtual void ShowNodeContextMenu(Node node) 
+        {
+            GenericMenu contextMenu = new GenericMenu();
+            contextMenu.AddItem(new GUIContent("Remove"), false, () => target.graph.RemoveNode(node));
+            contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
         }
     }
 

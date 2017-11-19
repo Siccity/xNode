@@ -11,12 +11,29 @@ namespace XNode {
         /// See: <see cref="AddNode{T}"/> </summary>
         [SerializeField] public List<Node> nodes = new List<Node>();
 
+        /// <summary> Add a node to the graph by type </summary>
         public T AddNode<T>() where T : Node {
             return AddNode(typeof(T)) as T;
         }
 
+        /// <summary> Add a node to the graph by type </summary>
         public virtual Node AddNode(Type type) {
             Node node = ScriptableObject.CreateInstance(type) as Node;
+#if UNITY_EDITOR
+            if (!Application.isPlaying) {
+                UnityEditor.AssetDatabase.AddObjectToAsset(node, this);
+                UnityEditor.AssetDatabase.SaveAssets();
+            }
+#endif
+            nodes.Add(node);
+            node.graph = this;
+            return node;
+        }
+
+        /// <summary> Creates a copy of the original node in the graph </summary>
+        public virtual Node CopyNode(Node original) {
+            Node node = ScriptableObject.Instantiate(original);
+            node.ClearConnections();
 #if UNITY_EDITOR
             if (!Application.isPlaying) {
                 UnityEditor.AssetDatabase.AddObjectToAsset(node, this);

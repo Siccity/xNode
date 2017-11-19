@@ -57,5 +57,5 @@ public class MathNode : Node {
 Join the [Discord](https://discord.gg/qgPrHv4 "Join Discord server") server to leave feedback or get support.
 Feel free to also leave suggestions/requests in the [issues](https://github.com/Siccity/xNode/issues "Go to Issues") page.
 
-Projects using UnityNodeEditorCore:
+Projects using xNode:
 * [Graphmesh](https://github.com/Siccity/Graphmesh "Go to github page")

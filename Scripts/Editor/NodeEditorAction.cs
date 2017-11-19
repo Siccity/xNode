@@ -103,7 +103,13 @@ namespace XNodeEditor {
                             AssetDatabase.SaveAssets();
                         }
                     } else if (e.button == 1) {
-                        if (!isPanning) ShowContextMenu();
+                        if (!isPanning) {
+                            if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
+                                ShowNodeContextMenu(hoveredNode);
+                            } else if (!IsHoveringNode) {
+                                ShowGraphContextMenu();
+                            }
+                        }
                         isPanning = false;
                     }
                     break;

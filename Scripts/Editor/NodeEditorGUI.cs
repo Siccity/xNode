@@ -71,27 +71,29 @@ namespace XNodeEditor {
             return GUILayout.Button(name, EditorStyles.toolbarDropDown, GUILayout.Width(width));
         }
 
-        /// <summary> Show right-click context menu </summary>
-        public void ShowContextMenu() {
+        /// <summary> Show right-click context menu for a node </summary>
+        public void ShowNodeContextMenu(Node node) {
             GenericMenu contextMenu = new GenericMenu();
             Vector2 pos = WindowToGridPosition(Event.current.mousePosition);
+            contextMenu.AddItem(new GUIContent("Remove"), false, () => graph.RemoveNode(node));
+            contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
+        }
 
-            if (hoveredNode != null) {
-                Node node = hoveredNode;
-                contextMenu.AddItem(new GUIContent("Remove"), false, () => graph.RemoveNode(node));
-            } else {
-                for (int i = 0; i < nodeTypes.Length; i++) {
-                    Type type = nodeTypes[i];
+        /// <summary> Show right-click context menu for current graph </summary>
+        void ShowGraphContextMenu() {
+            GenericMenu contextMenu = new GenericMenu();
+            Vector2 pos = WindowToGridPosition(Event.current.mousePosition);
+            for (int i = 0; i < nodeTypes.Length; i++) {
+                Type type = nodeTypes[i];
 
-                    string name = nodeTypes[i].ToString().Replace('.', '/');
-                    Node.CreateNodeMenuAttribute attrib;
-                    if (NodeEditorUtilities.GetAttrib(type, out attrib)) {
-                        name = attrib.menuName;
-                    }
-                    contextMenu.AddItem(new GUIContent(name), false, () => {
-                        CreateNode(type, pos);
-                    });
+                string name = nodeTypes[i].ToString().Replace('.', '/');
+                Node.CreateNodeMenuAttribute attrib;
+                if (NodeEditorUtilities.GetAttrib(type, out attrib)) {
+                    name = attrib.menuName;
                 }
+                contextMenu.AddItem(new GUIContent(name), false, () => {
+                    CreateNode(type, pos);
+                });
             }
             contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
         }

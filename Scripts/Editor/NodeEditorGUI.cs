@@ -74,8 +74,8 @@ namespace XNodeEditor {
         /// <summary> Show right-click context menu for a node </summary>
         public void ShowNodeContextMenu(Node node) {
             GenericMenu contextMenu = new GenericMenu();
-            Vector2 pos = WindowToGridPosition(Event.current.mousePosition);
             contextMenu.AddItem(new GUIContent("Remove"), false, () => graph.RemoveNode(node));
+            AddCustomContextMenuItems(contextMenu, node);
             contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
         }
 
@@ -85,7 +85,6 @@ namespace XNodeEditor {
             Vector2 pos = WindowToGridPosition(Event.current.mousePosition);
             for (int i = 0; i < nodeTypes.Length; i++) {
                 Type type = nodeTypes[i];
-
                 string name = nodeTypes[i].ToString().Replace('.', '/');
                 Node.CreateNodeMenuAttribute attrib;
                 if (NodeEditorUtilities.GetAttrib(type, out attrib)) {
@@ -95,7 +94,19 @@ namespace XNodeEditor {
                     CreateNode(type, pos);
                 });
             }
+            AddCustomContextMenuItems(contextMenu, graph);
             contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
+        }
+
+        void AddCustomContextMenuItems(GenericMenu contextMenu, object obj) {
+            KeyValuePair<ContextMenu, System.Reflection.MethodInfo>[] items = GetContextMenuMethods(obj);
+            if (items.Length != 0) {
+                contextMenu.AddSeparator("");
+                for (int i = 0; i < items.Length; i++) {
+                    KeyValuePair<ContextMenu, System.Reflection.MethodInfo> kvp = items[i];
+                    contextMenu.AddItem(new GUIContent(kvp.Key.menuItem), false, () => kvp.Value.Invoke(obj, null));
+                }
+            }
         }
 
         /// <summary> Draw a bezier from startpoint to endpoint, both in grid coordinates </summary>

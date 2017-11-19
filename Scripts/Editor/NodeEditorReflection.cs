@@ -71,5 +71,30 @@ namespace XNodeEditor {
             FieldInfo fieldInfo = type.GetField(fieldName);
             return fieldInfo.GetValue(obj);
         }
+
+        public static KeyValuePair<ContextMenu, MethodInfo>[] GetContextMenuMethods(object obj) {
+            Type type = obj.GetType();
+            MethodInfo[] methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            List<KeyValuePair<ContextMenu, MethodInfo>> kvp = new List<KeyValuePair<ContextMenu, MethodInfo>>();
+            for (int i = 0; i < methods.Length; i++) {
+                ContextMenu[] attribs = methods[i].GetCustomAttributes(typeof(ContextMenu), true).Select(x => x as ContextMenu).ToArray();
+                if (attribs == null || attribs.Length == 0) continue;
+                if (methods[i].GetParameters().Length != 0) {
+                    Debug.LogWarning("Method " + methods[i].DeclaringType.Name + "." + methods[i].Name + " has parameters and cannot be used for context menu commands.");
+                    continue;
+                }
+                if (methods[i].IsStatic) {
+                    Debug.LogWarning("Method " + methods[i].DeclaringType.Name + "." + methods[i].Name + " is static and cannot be used for context menu commands.");
+                    continue;
+                }
+
+                for (int k = 0; k < attribs.Length; k++) {
+                    kvp.Add(new KeyValuePair<ContextMenu, MethodInfo>(attribs[k], methods[i]));
+                }
+            }
+            //Sort menu items
+            kvp.Sort((x, y) => x.Key.priority.CompareTo(y.Key.priority));
+            return kvp.ToArray();
+        }
     }
 }

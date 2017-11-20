@@ -17,6 +17,7 @@ With a minimal footprint, xNode is ideal as a base for custom state machines, di
 * No runtime reflection (unless you need to edit/build node graphs at runtime. In this case, all reflection is cached.)
 * Does not rely on any 3rd party plugins
 * Custom node inspector code is very similar to regular custom inspector code
+* For a full list of features, see [this page](https://github.com/Siccity/xNode/wiki/Full-features-list)
 
 ### Node example:
 ```csharp

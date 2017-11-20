@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using UnityEditor;
 using UnityEngine;
 using XNode;
 
@@ -95,6 +97,45 @@ namespace XNodeEditor {
             //Sort menu items
             kvp.Sort((x, y) => x.Key.priority.CompareTo(y.Key.priority));
             return kvp.ToArray();
+        }
+
+        public static void OpenPreferences() {
+            try {
+                //Open preferences window
+                Assembly assembly = Assembly.GetAssembly(typeof(UnityEditor.EditorWindow));
+                Type type = assembly.GetType("UnityEditor.PreferencesWindow");
+                type.GetMethod("ShowPreferencesWindow", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, null);
+
+                //Get the window
+                EditorWindow window = EditorWindow.GetWindow(type);
+
+                //Make sure custom sections are added (because waiting for it to happen automatically is too slow)
+                FieldInfo refreshField = type.GetField("m_RefreshCustomPreferences", BindingFlags.NonPublic | BindingFlags.Instance);
+                if ((bool) refreshField.GetValue(window)) {
+                    type.GetMethod("AddCustomSections", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(window, null);
+                    refreshField.SetValue(window, false);
+                }
+
+                //Get sections
+                FieldInfo sectionsField = type.GetField("m_Sections", BindingFlags.Instance | BindingFlags.NonPublic);
+                IList sections = sectionsField.GetValue(window) as IList;
+
+                //Iterate through sections and check contents
+                Type sectionType = sectionsField.FieldType.GetGenericArguments() [0];
+                FieldInfo sectionContentField = sectionType.GetField("content", BindingFlags.Instance | BindingFlags.Public);
+                for (int i = 0; i < sections.Count; i++) {
+                    GUIContent sectionContent = sectionContentField.GetValue(sections[i]) as GUIContent;
+                    if (sectionContent.text == "Node Editor") {
+                        //Found contents - Set index
+                        FieldInfo sectionIndexField = type.GetField("m_SelectedSectionIndex", BindingFlags.Instance | BindingFlags.NonPublic);
+                        sectionIndexField.SetValue(window, i);
+                        return;
+                    }
+                }
+            } catch (Exception e) {
+                Debug.LogError(e);
+                Debug.LogWarning("Unity has changed around internally. Can't open properties through reflection. Please contact xNode developer and supply unity version number.");
+            }
         }
     }
 }

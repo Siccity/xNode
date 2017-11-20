@@ -105,6 +105,8 @@ namespace XNodeEditor {
                     CreateNode(type, pos);
                 });
             }
+            contextMenu.AddSeparator("");
+            contextMenu.AddItem(new GUIContent("Preferences"), false, () => OpenPreferences());
             AddCustomContextMenuItems(contextMenu, graph);
             contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
         }

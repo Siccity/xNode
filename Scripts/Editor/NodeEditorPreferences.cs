@@ -6,22 +6,29 @@ using UnityEngine;
 namespace XNodeEditor {
     public static class NodeEditorPreferences {
 
+        public static Texture2D gridTexture { get { VerifyLoaded(); return _gridTexture; } }
+        private static Texture2D _gridTexture;
+        public static Texture2D crossTexture { get { VerifyLoaded(); return _crossTexture; } }
+        private static Texture2D _crossTexture;
+
         /// <summary> Have we loaded the prefs yet </summary>
         private static bool prefsLoaded = false;
 
         private static Dictionary<string, Color> typeColors;
         private static Dictionary<string, Color> generatedTypeColors;
-        private static bool gridSnap;
+        public static bool gridSnap { get { VerifyLoaded(); return _gridSnap; } }
+        private static bool _gridSnap = true;
         public static Color gridLineColor { get { VerifyLoaded(); return _gridLineColor; } }
         private static Color _gridLineColor;
         public static Color gridBgColor { get { VerifyLoaded(); return _gridBgColor; } }
         private static Color _gridBgColor;
         [PreferenceItem("Node Editor")]
         private static void PreferencesGUI() {
-            if (!prefsLoaded) LoadPrefs();
+            VerifyLoaded();
+
             GridSettingsGUI();
             TypeColorsGUI();
-            if (GUILayout.Button("Set Default", GUILayout.Width(120))) {
+            if (GUILayout.Button(new GUIContent("Set Default", "Reset all values to default"), GUILayout.Width(120))) {
                 ResetPrefs();
             }
         }
@@ -29,13 +36,16 @@ namespace XNodeEditor {
         private static void GridSettingsGUI() {
             //Label
             EditorGUILayout.LabelField("Grid", EditorStyles.boldLabel);
-            gridSnap = EditorGUILayout.Toggle("Snap", gridSnap);
+            _gridSnap = EditorGUILayout.Toggle("Snap", _gridSnap);
 
             //EditorGUIUtility.labelWidth = 30;
             _gridLineColor = EditorGUILayout.ColorField("Color", _gridLineColor);
             _gridBgColor = EditorGUILayout.ColorField(" ", _gridBgColor);
             if (GUI.changed) {
                 SavePrefs();
+                _gridTexture = NodeEditorResources.GenerateGridTexture(_gridLineColor, _gridBgColor);
+                _crossTexture = NodeEditorResources.GenerateCrossTexture(_gridLineColor);
+                NodeEditorWindow.RepaintAll();
             }
             EditorGUILayout.Space();
         }
@@ -53,6 +63,8 @@ namespace XNodeEditor {
                 if (!EditorGUILayout.Toggle(key, true)) {
                     typeColors.Remove(key);
                     SavePrefs();
+                    EditorGUILayout.EndHorizontal();
+                    continue;
                 }
                 Color col = typeColors[key];
                 col = EditorGUILayout.ColorField(col);
@@ -61,6 +73,7 @@ namespace XNodeEditor {
             }
             if (GUI.changed) {
                 SavePrefs();
+                NodeEditorWindow.RepaintAll();
             }
 
             //Get generated type keys
@@ -73,6 +86,8 @@ namespace XNodeEditor {
                     typeColors.Add(key, generatedTypeColors[key]);
                     generatedTypeColors.Remove(key);
                     SavePrefs();
+                    EditorGUILayout.EndHorizontal();
+                    continue;
                 }
                 Color col = generatedTypeColors[key];
                 EditorGUI.BeginDisabledGroup(true);
@@ -86,37 +101,41 @@ namespace XNodeEditor {
         private static void LoadPrefs() {
             //Load type colors
             generatedTypeColors = new Dictionary<string, Color>();
-            typeColors = GetTypeColors();
+
+            if (!EditorPrefs.HasKey("unec_typecolors")) EditorPrefs.SetString("unec_typecolors", "int,2568CA,string,CE743A,bool,00FF00");
+            string[] data = EditorPrefs.GetString("unec_typecolors").Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            typeColors = new Dictionary<string, Color>();
+            for (int i = 0; i < data.Length; i += 2) {
+                Color col;
+                if (ColorUtility.TryParseHtmlString("#" + data[i + 1], out col)) {
+                    typeColors.Add(data[i], col);
+                }
+            }
 
             //Load grid colors
-            if (EditorPrefs.HasKey("unec_gridcolor0")) {
-                Color color;
-                if (ColorUtility.TryParseHtmlString(EditorPrefs.GetString("unec_gridcolor0"), out color)) {
-                    _gridLineColor = color;
-                }
-            }
-            if (EditorPrefs.HasKey("unec_gridcolor1")) {
-                Color color;
-                if (ColorUtility.TryParseHtmlString(EditorPrefs.GetString("unec_gridcolor1"), out color)) {
-                    _gridBgColor = color;
-                }
-            }
+            if (!EditorPrefs.HasKey("unec_gridcolor0")) EditorPrefs.SetString("unec_gridcolor0", ColorUtility.ToHtmlStringRGB(new Color(0.45f, 0.45f, 0.45f)));
+            ColorUtility.TryParseHtmlString("#" + EditorPrefs.GetString("unec_gridcolor0"), out _gridLineColor);
+            if (!EditorPrefs.HasKey("unec_gridcolor1")) EditorPrefs.SetString("unec_gridcolor1", ColorUtility.ToHtmlStringRGB(new Color(0.18f, 0.18f, 0.18f)));
+            ColorUtility.TryParseHtmlString("#" + EditorPrefs.GetString("unec_gridcolor1"), out _gridBgColor);
 
             //Load snap option
-            if (EditorPrefs.HasKey("unec_gridsnap")) gridSnap = EditorPrefs.GetBool("unec_gridsnap");
+            if (EditorPrefs.HasKey("unec_gridsnap")) _gridSnap = EditorPrefs.GetBool("unec_gridsnap");
 
+            _gridTexture = NodeEditorResources.GenerateGridTexture(_gridLineColor, _gridBgColor);
+            _crossTexture = NodeEditorResources.GenerateCrossTexture(_gridLineColor);
+            NodeEditorWindow.RepaintAll();
             prefsLoaded = true;
         }
 
-        private static void ResetPrefs() {
-            EditorPrefs.SetString("unec_typecolors", "int,2568CA,string,CE743A,bool,00FF00");
-            EditorPrefs.SetString("unec_gridcolor0", ColorUtility.ToHtmlStringRGB(new Color(0.45f, 0.45f, 0.45f)));
-            EditorPrefs.SetString("unec_gridcolor1", ColorUtility.ToHtmlStringRGB(new Color(0.18f, 0.18f, 0.18f)));
+        /// <summary> Delete all prefs </summary>
+        public static void ResetPrefs() {
+            if (EditorPrefs.HasKey("unec_typecolors")) EditorPrefs.DeleteKey("unec_typecolors");
+            if (EditorPrefs.HasKey("unec_gridcolor0")) EditorPrefs.DeleteKey("unec_gridcolor0");
+            if (EditorPrefs.HasKey("unec_gridcolor1")) EditorPrefs.DeleteKey("unec_gridcolor1");
             LoadPrefs();
         }
 
         private static void SavePrefs() {
-            if (!prefsLoaded) return;
             string s = "";
             foreach (var item in typeColors) {
                 s += item.Key + "," + ColorUtility.ToHtmlStringRGB(item.Value) + ",";
@@ -124,24 +143,11 @@ namespace XNodeEditor {
             EditorPrefs.SetString("unec_typecolors", s);
             EditorPrefs.SetString("unec_gridcolor0", ColorUtility.ToHtmlStringRGB(_gridLineColor));
             EditorPrefs.SetString("unec_gridcolor1", ColorUtility.ToHtmlStringRGB(_gridBgColor));
-            EditorPrefs.SetBool("unec_gridsnap", gridSnap);
+            EditorPrefs.SetBool("unec_gridsnap", _gridSnap);
         }
 
         private static void VerifyLoaded() {
             if (!prefsLoaded) LoadPrefs();
-        }
-
-        public static Dictionary<string, Color> GetTypeColors() {
-            if (prefsLoaded) return typeColors;
-            string[] data = EditorPrefs.GetString("unec_typecolors").Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            Dictionary<string, Color> dict = new Dictionary<string, Color>();
-            for (int i = 0; i < data.Length; i += 2) {
-                Color col;
-                if (ColorUtility.TryParseHtmlString("#" + data[i + 1], out col)) {
-                    dict.Add(data[i], col);
-                }
-            }
-            return dict;
         }
 
         /// <summary> Return color based on type </summary>

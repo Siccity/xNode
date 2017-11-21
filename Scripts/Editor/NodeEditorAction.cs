@@ -48,6 +48,10 @@ namespace XNodeEditor {
                             Repaint();
                         } else if (IsDraggingNode) {
                             draggedNode.position = WindowToGridPosition(e.mousePosition) + dragOffset;
+                            if (NodeEditorPreferences.gridSnap) {
+                                draggedNode.position.x = (Mathf.Round((draggedNode.position.x + 8) / 16) * 16) - 8;
+                                draggedNode.position.y = (Mathf.Round((draggedNode.position.y + 8) / 16) * 16) - 8;
+                            }
                             Repaint();
                         }
                     } else if (e.button == 1) {

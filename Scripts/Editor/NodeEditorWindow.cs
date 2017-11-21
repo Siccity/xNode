@@ -92,5 +92,13 @@ namespace XNodeEditor {
             }
             return false;
         }
+
+        /// <summary> Repaint all open NodeEditorWindows. </summary>
+        public static void RepaintAll() {
+            NodeEditorWindow[] windows = Resources.FindObjectsOfTypeAll<NodeEditorWindow>();
+            for (int i = 0; i < windows.Length; i++) {
+                windows[i].Repaint();
+            }
+        }
     }
 }

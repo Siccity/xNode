@@ -47,8 +47,8 @@ namespace XNodeEditor {
             rect.position = Vector2.zero;
 
             Vector2 center = rect.size / 2f;
-            Texture2D gridTex = NodeEditorResources.gridTexture;
-            Texture2D crossTex = NodeEditorResources.crossTexture;
+            Texture2D gridTex = NodeEditorPreferences.gridTexture;
+            Texture2D crossTex = NodeEditorPreferences.crossTexture;
 
             // Offset from origin in tile units
             float xOffset = -(center.x * zoom + panOffset.x) / gridTex.width;

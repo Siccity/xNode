@@ -3,10 +3,6 @@
 namespace XNodeEditor {
     public static class NodeEditorResources {
         //Unec textures
-        public static Texture2D gridTexture { get { return _gridTexture != null ? _gridTexture : _gridTexture = GenerateGridTexture(NodeEditorPreferences.gridLineColor,NodeEditorPreferences.gridBgColor); } }
-        private static Texture2D _gridTexture;
-        public static Texture2D crossTexture { get { return _crossTexture != null ? _crossTexture : _crossTexture = GenerateCrossTexture(NodeEditorPreferences.gridLineColor); } }
-        private static Texture2D _crossTexture;
         public static Texture2D dot { get { return _dot != null ? _dot : _dot = Resources.Load<Texture2D>("unec_dot"); } }
         private static Texture2D _dot;
         public static Texture2D dotOuter { get { return _dotOuter != null ? _dotOuter : _dotOuter = Resources.Load<Texture2D>("unec_dot_outer"); } }
@@ -54,8 +50,8 @@ namespace XNodeEditor {
             for (int y = 0; y < 64; y++) {
                 for (int x = 0; x < 64; x++) {
                     Color col = bg;
-                    if (y % 16 == 0 || x % 16 == 0) col = Color.Lerp(line,bg,0.6f);
-                    if (y == 63 || x == 63) col = Color.Lerp(line,bg,0.3f);
+                    if (y % 16 == 0 || x % 16 == 0) col = Color.Lerp(line,bg,0.65f);
+                    if (y == 63 || x == 63) col = Color.Lerp(line,bg,0.35f);
                     cols[(y * 64) + x] = col;
                 }
             }

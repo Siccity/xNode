@@ -99,6 +99,7 @@ namespace XNodeEditor {
             return kvp.ToArray();
         }
 
+        /// <summary> Very crude. Uses a lot of reflection. </summary>
         public static void OpenPreferences() {
             try {
                 //Open preferences window
@@ -119,6 +120,7 @@ namespace XNodeEditor {
                 //Get sections
                 FieldInfo sectionsField = type.GetField("m_Sections", BindingFlags.Instance | BindingFlags.NonPublic);
                 IList sections = sectionsField.GetValue(window) as IList;
+
 
                 //Iterate through sections and check contents
                 Type sectionType = sectionsField.FieldType.GetGenericArguments() [0];

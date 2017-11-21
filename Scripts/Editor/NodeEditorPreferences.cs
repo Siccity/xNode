@@ -60,7 +60,7 @@ namespace XNodeEditor {
             //Display saved type colors
             foreach (var key in typeKeys) {
                 EditorGUILayout.BeginHorizontal();
-                if (!EditorGUILayout.Toggle(key, true)) {
+                if (!EditorGUILayout.Toggle(new GUIContent(key, key), true)) {
                     typeColors.Remove(key);
                     SavePrefs();
                     EditorGUILayout.EndHorizontal();
@@ -82,7 +82,7 @@ namespace XNodeEditor {
             //Display generated type colors
             foreach (var key in generatedTypeKeys) {
                 EditorGUILayout.BeginHorizontal();
-                if (EditorGUILayout.Toggle(key, false)) {
+                if (EditorGUILayout.Toggle(new GUIContent(key, key), false)) {
                     typeColors.Add(key, generatedTypeColors[key]);
                     generatedTypeColors.Remove(key);
                     SavePrefs();
@@ -102,7 +102,7 @@ namespace XNodeEditor {
             //Load type colors
             generatedTypeColors = new Dictionary<string, Color>();
 
-            if (!EditorPrefs.HasKey("unec_typecolors")) EditorPrefs.SetString("unec_typecolors", "int,2568CA,string,CE743A,bool,00FF00");
+            if (!EditorPrefs.HasKey("unec_typecolors")) EditorPrefs.SetString("unec_typecolors", "");
             string[] data = EditorPrefs.GetString("unec_typecolors").Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             typeColors = new Dictionary<string, Color>();
             for (int i = 0; i < data.Length; i += 2) {
@@ -152,13 +152,14 @@ namespace XNodeEditor {
 
         /// <summary> Return color based on type </summary>
         public static Color GetTypeColor(System.Type type) {
-            if (!prefsLoaded) LoadPrefs();
+            VerifyLoaded();
             if (type == null) return Color.gray;
-            if (typeColors.ContainsKey(type.Name)) return typeColors[type.Name];
-            if (generatedTypeColors.ContainsKey(type.Name)) return generatedTypeColors[type.Name];
-            UnityEngine.Random.InitState(type.Name.GetHashCode());
-            generatedTypeColors.Add(type.Name, new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value));
-            return generatedTypeColors[type.Name];
+            string typeName = type.PrettyName();
+            if (typeColors.ContainsKey(typeName)) return typeColors[typeName];
+            if (generatedTypeColors.ContainsKey(typeName)) return generatedTypeColors[typeName];
+            UnityEngine.Random.InitState(typeName.GetHashCode());
+            generatedTypeColors.Add(typeName, new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value));
+            return generatedTypeColors[typeName];
         }
     }
 }

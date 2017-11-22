@@ -193,7 +193,7 @@ namespace XNodeEditor {
                 Node node = graph.nodes[n];
                 Type nodeType = node.GetType();
 
-                NodeEditor nodeEditor = GetNodeEditor(nodeType);
+                NodeEditor nodeEditor = NodeEditor.GetEditor(nodeType);
                 nodeEditor.target = node;
                 nodeEditor.serializedObject = new SerializedObject(node);
                 NodeEditor.portPositions = new Dictionary<NodePort, Vector2>();

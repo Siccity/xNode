@@ -7,7 +7,9 @@ using XNode;
 
 namespace XNodeEditor {
     /// <summary> Base class to derive custom Node editors from. Use this to create your own custom inspectors and editors for your nodes. </summary>
-    public class NodeEditor {
+    [CustomNodeEditor(typeof(Node))]
+    public class NodeEditor : XNodeInternal.NodeEditorBase<NodeEditor, NodeEditor.CustomNodeEditorAttribute> {
+
         /// <summary> Fires every whenever a node was modified through the editor </summary>
         public static Action<Node> onUpdateNode;
         public Node target;
@@ -45,17 +47,21 @@ namespace XNodeEditor {
         public virtual int GetWidth() {
             return 200;
         }
-    }
 
-    [AttributeUsage(AttributeTargets.Class)]
-    public class CustomNodeEditorAttribute : Attribute {
-        public Type inspectedType { get { return _inspectedType; } }
-        private Type _inspectedType;
-        /// <summary> Tells a NodeEditor which Node type it is an editor for </summary>
-        /// <param name="inspectedType">Type that this editor can edit</param>
-        /// <param name="contextMenuName">Path to the node</param>
-        public CustomNodeEditorAttribute(Type inspectedType) {
-            _inspectedType = inspectedType;
+        [AttributeUsage(AttributeTargets.Class)]
+        public class CustomNodeEditorAttribute : Attribute,
+        INodeEditorAttrib {
+            private Type inspectedType;
+            /// <summary> Tells a NodeEditor which Node type it is an editor for </summary>
+            /// <param name="inspectedType">Type that this editor can edit</param>
+            /// <param name="contextMenuName">Path to the node</param>
+            public CustomNodeEditorAttribute(Type inspectedType) {
+                this.inspectedType = inspectedType;
+            }
+
+            public Type GetInspectedType() {
+                return inspectedType;
+            }
         }
     }
 }

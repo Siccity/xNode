@@ -6,9 +6,10 @@
 ### xNode
 Thinking of developing a node-based plugin? Then this is for you. You can download it as an archive and unpack to a new unity project, or connect it as git submodule.
 
-With a minimal footprint, xNode is ideal as a base for custom state machines, dialogue systems, decision makers etc.
+xNode is super userfriendly, intuitive and will help you reap the benefits of node graphs in no time.
+With a minimal footprint, it is ideal as a base for custom state machines, dialogue systems, decision makers etc.
 
-![editor](https://user-images.githubusercontent.com/6402525/31379481-a9c15950-adae-11e7-91c4-387dd020261e.png)
+![editor](https://user-images.githubusercontent.com/6402525/33150712-01d60602-cfd5-11e7-83b4-eb008fd9d711.png)
 
 ### Key features
 * Lightweight in runtime

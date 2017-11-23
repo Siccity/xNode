@@ -204,7 +204,7 @@ namespace XNodeEditor {
                 GUILayout.BeginArea(new Rect(nodePos, new Vector2(nodeEditor.GetWidth(), 4000)));
 
                 GUIStyle style = NodeEditorResources.styles.nodeBody;
-                if (nodeTint.ContainsKey(nodeType)) GUI.color = nodeTint[nodeType];
+                GUI.color = nodeEditor.GetTint();
                 GUILayout.BeginVertical(new GUIStyle(style));
                 GUI.color = guiColor;
                 EditorGUI.BeginChangeCheck();

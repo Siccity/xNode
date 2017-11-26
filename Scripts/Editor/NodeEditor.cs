@@ -48,7 +48,7 @@ namespace XNodeEditor {
         }
 
         public virtual Color GetTint() {
-            Type type = GetType();
+            Type type = target.GetType();
             if (NodeEditorWindow.nodeTint.ContainsKey(type)) return NodeEditorWindow.nodeTint[type];
             else return Color.white;
         }

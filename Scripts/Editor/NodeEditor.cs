@@ -44,7 +44,7 @@ namespace XNodeEditor {
         }
 
         public virtual int GetWidth() {
-            return 200;
+            return 208;
         }
 
         public virtual Color GetTint() {

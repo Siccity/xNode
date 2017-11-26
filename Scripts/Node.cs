@@ -160,8 +160,11 @@ namespace XNode {
         /// <summary> Mark a serializable field as an output port. You can access this through <see cref="GetOutput(string)"/> </summary>
         [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
         public class OutputAttribute : Attribute {
+            public ShowBackingValue backingValue;
+
             /// <summary> Mark a serializable field as an output port. You can access this through <see cref="GetOutput(string)"/> </summary>
-            public OutputAttribute() { }
+            /// <param name="backingValue">Should we display the backing value for this port as an editor field? </param>
+            public OutputAttribute(ShowBackingValue backingValue = ShowBackingValue.Never) { this.backingValue = backingValue; }
         }
 
         [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]

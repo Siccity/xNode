@@ -23,6 +23,11 @@ namespace XNodeEditor {
             return false;
         }
 
+        public static bool GetAttrib<T>(Type classType, string fieldName, out T attribOut) where T : Attribute {
+            object[] attribs = classType.GetField(fieldName).GetCustomAttributes(typeof(T), false);
+            return GetAttrib(attribs, out attribOut);
+        }
+
         public static bool HasAttrib<T>(object[] attribs) where T : Attribute {
             for (int i = 0; i < attribs.Length; i++) {
                 if (attribs[i].GetType() == typeof(T)) {

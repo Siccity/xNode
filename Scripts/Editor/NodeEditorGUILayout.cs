@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 using XNode;
@@ -36,15 +37,54 @@ namespace XNodeEditor {
 
                 // If property is an input, display a regular property field and put a port handle on the left side
                 if (port.direction == NodePort.IO.Input) {
-                    // Display a label if port is connected
-                    if (port.IsConnected) EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName));
-                    // Display an editable property field if port is not connected
-                    else EditorGUILayout.PropertyField(property, label, includeChildren, GUILayout.MinWidth(30));
+                    // Get data from [Input] attribute
+                    Node.ShowBackingValue showBacking = Node.ShowBackingValue.Unconnected;
+                    Node.InputAttribute inputAttribute;
+                    if (NodeEditorUtilities.GetAttrib(port.node.GetType(), property.name, out inputAttribute)) showBacking = inputAttribute.backingValue;
+
+                    switch (showBacking) {
+                        case Node.ShowBackingValue.Unconnected:
+                            // Display a label if port is connected
+                            if (port.IsConnected) EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName));
+                            // Display an editable property field if port is not connected
+                            else EditorGUILayout.PropertyField(property, label, includeChildren, GUILayout.MinWidth(30));
+                            break;
+                        case Node.ShowBackingValue.Never:
+                            // Display a label
+                            EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName));
+                            break;
+                        case Node.ShowBackingValue.Always:
+                            // Display an editable property field
+                            EditorGUILayout.PropertyField(property, label, includeChildren, GUILayout.MinWidth(30));
+                            break;
+                    }
+
                     rect = GUILayoutUtility.GetLastRect();
                     rect.position = rect.position - new Vector2(16, 0);
                     // If property is an output, display a text label and put a port handle on the right side
                 } else if (port.direction == NodePort.IO.Output) {
-                    EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName), NodeEditorResources.styles.outputPort, GUILayout.MinWidth(30));
+                    // Get data from [Output] attribute
+                    Node.ShowBackingValue showBacking = Node.ShowBackingValue.Unconnected;
+                    Node.OutputAttribute outputAttribute;
+                    if (NodeEditorUtilities.GetAttrib(port.node.GetType(), property.name, out outputAttribute)) showBacking = outputAttribute.backingValue;
+
+                    switch (showBacking) {
+                        case Node.ShowBackingValue.Unconnected:
+                            // Display a label if port is connected
+                            if (port.IsConnected) EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName), NodeEditorResources.styles.outputPort, GUILayout.MinWidth(30));
+                            // Display an editable property field if port is not connected
+                            else EditorGUILayout.PropertyField(property, label, includeChildren, GUILayout.MinWidth(30));
+                            break;
+                        case Node.ShowBackingValue.Never:
+                            // Display a label
+                            EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName), NodeEditorResources.styles.outputPort, GUILayout.MinWidth(30));
+                            break;
+                        case Node.ShowBackingValue.Always:
+                            // Display an editable property field
+                            EditorGUILayout.PropertyField(property, label, includeChildren, GUILayout.MinWidth(30));
+                            break;
+                    }
+
                     rect = GUILayoutUtility.GetLastRect();
                     rect.position = rect.position + new Vector2(rect.width, 0);
                 }

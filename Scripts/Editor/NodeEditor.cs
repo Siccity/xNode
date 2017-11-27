@@ -46,11 +46,11 @@ namespace XNodeEditor {
         }
 
         public virtual int GetWidth() {
-            return 200;
+            return 208;
         }
 
         public virtual Color GetTint() {
-            Type type = GetType();
+            Type type = target.GetType();
             if (NodeEditorWindow.nodeTint.ContainsKey(type)) return NodeEditorWindow.nodeTint[type];
             else return Color.white;
         }

@@ -7,10 +7,15 @@ using XNode;
 namespace XNodeEditor {
     /// <summary> Contains GUI methods </summary>
     public partial class NodeEditorWindow {
+        NodeGraphEditor currentGraphEditor;
 
         private void OnGUI() {
             Event e = Event.current;
             Matrix4x4 m = GUI.matrix;
+            currentGraphEditor = NodeGraphEditor.GetEditor(graph.GetType());
+            currentGraphEditor.target = graph;
+            currentGraphEditor.serializedObject = new SerializedObject(graph);
+
             Controls();
 
             DrawGrid(position, zoom, panOffset);
@@ -42,12 +47,12 @@ namespace XNodeEditor {
             GUI.matrix = Matrix4x4.TRS(offset, Quaternion.identity, Vector3.one);
         }
 
-        public static void DrawGrid(Rect rect, float zoom, Vector2 panOffset) {
+        public void DrawGrid(Rect rect, float zoom, Vector2 panOffset) {
 
             rect.position = Vector2.zero;
 
             Vector2 center = rect.size / 2f;
-            Texture2D gridTex = NodeEditorPreferences.gridTexture;
+            Texture2D gridTex = currentGraphEditor.GetGridTexture();
             Texture2D crossTex = NodeEditorPreferences.crossTexture;
 
             // Offset from origin in tile units
@@ -204,7 +209,7 @@ namespace XNodeEditor {
                 GUILayout.BeginArea(new Rect(nodePos, new Vector2(nodeEditor.GetWidth(), 4000)));
 
                 GUIStyle style = NodeEditorResources.styles.nodeBody;
-                if (nodeTint.ContainsKey(nodeType)) GUI.color = nodeTint[nodeType];
+                GUI.color = nodeEditor.GetTint();
                 GUILayout.BeginVertical(new GUIStyle(style));
                 GUI.color = guiColor;
                 EditorGUI.BeginChangeCheck();

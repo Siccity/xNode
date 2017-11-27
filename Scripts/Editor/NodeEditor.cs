@@ -7,6 +7,7 @@ using XNode;
 
 namespace XNodeEditor {
     /// <summary> Base class to derive custom Node editors from. Use this to create your own custom inspectors and editors for your nodes. </summary>
+
     [CustomNodeEditor(typeof(Node))]
     public class NodeEditor : XNodeInternal.NodeEditorBase<NodeEditor, NodeEditor.CustomNodeEditorAttribute> {
 
@@ -46,6 +47,12 @@ namespace XNodeEditor {
 
         public virtual int GetWidth() {
             return 200;
+        }
+
+        public virtual Color GetTint() {
+            Type type = GetType();
+            if (NodeEditorWindow.nodeTint.ContainsKey(type)) return NodeEditorWindow.nodeTint[type];
+            else return Color.white;
         }
 
         [AttributeUsage(AttributeTargets.Class)]

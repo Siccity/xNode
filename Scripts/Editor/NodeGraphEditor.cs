@@ -19,6 +19,10 @@ namespace XNodeEditor {
             return NodeEditorPreferences.gridTexture;
         }
 
+        public virtual Texture2D GetSecondaryGridTexture() {
+            return NodeEditorPreferences.crossTexture;
+        }
+
         [AttributeUsage(AttributeTargets.Class)]
         public class CustomNodeGraphEditorAttribute : Attribute,
         INodeEditorAttrib {

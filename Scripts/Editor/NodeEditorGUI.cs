@@ -53,7 +53,7 @@ namespace XNodeEditor {
 
             Vector2 center = rect.size / 2f;
             Texture2D gridTex = currentGraphEditor.GetGridTexture();
-            Texture2D crossTex = NodeEditorPreferences.crossTexture;
+            Texture2D crossTex = currentGraphEditor.GetSecondaryGridTexture();
 
             // Offset from origin in tile units
             float xOffset = -(center.x * zoom + panOffset.x) / gridTex.width;

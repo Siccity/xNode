@@ -12,6 +12,7 @@ namespace XNodeEditor {
         private void OnGUI() {
             Event e = Event.current;
             Matrix4x4 m = GUI.matrix;
+            if (graph == null) return;
             currentGraphEditor = NodeGraphEditor.GetEditor(graph.GetType());
             currentGraphEditor.target = graph;
             currentGraphEditor.serializedObject = new SerializedObject(graph);

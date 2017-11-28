@@ -37,13 +37,6 @@ namespace XNodeEditor {
             return false;
         }
 
-        /// <summary> Turns camelCaseString into Camel Case String </summary>
-        public static string PrettifyCamelCase(this string camelCase) {
-            if (string.IsNullOrEmpty(camelCase)) return "";
-            string s = System.Text.RegularExpressions.Regex.Replace(camelCase, "([A-Z])", " $1", System.Text.RegularExpressions.RegexOptions.Compiled).Trim();
-            return char.ToUpper(s[0]) + s.Substring(1);
-        }
-
         /// <summary> Returns true if this can be casted to <see cref="Type"/></summary>
         public static bool IsCastableTo(this Type from, Type to) {
             if (to.IsAssignableFrom(from)) return true;

@@ -23,6 +23,7 @@ namespace XNode {
             if (!Application.isPlaying) {
                 UnityEditor.AssetDatabase.AddObjectToAsset(node, this);
                 UnityEditor.AssetDatabase.SaveAssets();
+                node.name = UnityEditor.ObjectNames.NicifyVariableName(node.name);
             }
 #endif
             nodes.Add(node);
@@ -38,6 +39,7 @@ namespace XNode {
             if (!Application.isPlaying) {
                 UnityEditor.AssetDatabase.AddObjectToAsset(node, this);
                 UnityEditor.AssetDatabase.SaveAssets();
+                node.name = UnityEditor.ObjectNames.NicifyVariableName(node.name);
             }
 #endif
             nodes.Add(node);

@@ -110,7 +110,7 @@ namespace XNodeEditor {
         /// <summary> Make a simple port field. </summary>
         public static void PortField(GUIContent label, NodePort port, params GUILayoutOption[] options) {
             if (port == null) return;
-            if (label == null) EditorGUILayout.LabelField(port.fieldName.PrettifyCamelCase(), options);
+            if (label == null) EditorGUILayout.LabelField(ObjectNames.NicifyVariableName(port.fieldName), options);
             else EditorGUILayout.LabelField(label, options);
             Rect rect = GUILayoutUtility.GetLastRect();
             if (port.direction == NodePort.IO.Input) rect.position = rect.position - new Vector2(16, 0);

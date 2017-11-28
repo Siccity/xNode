@@ -26,7 +26,7 @@ namespace XNodeEditor {
 
         public virtual void OnHeaderGUI() {
             GUI.color = Color.white;
-            string title = NodeEditorUtilities.PrettifyCamelCase(target.name);
+            string title = target.name;
             GUILayout.Label(title, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
         }
 

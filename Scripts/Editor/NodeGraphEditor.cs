@@ -8,12 +8,9 @@ using XNode;
 namespace XNodeEditor {
     /// <summary> Base class to derive custom Node Graph editors from. Use this to override how graphs are drawn in the editor. </summary>
     [CustomNodeGraphEditor(typeof(NodeGraph))]
-    public class NodeGraphEditor : XNodeInternal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute> {
+    public class NodeGraphEditor : XNodeInternal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, NodeGraph> {
         /// <summary> Custom node editors defined with [CustomNodeGraphEditor] </summary>
         [NonSerialized] private static Dictionary<Type, NodeGraphEditor> editors;
-
-        public NodeGraph target;
-        public SerializedObject serializedObject;
 
         public virtual Texture2D GetGridTexture() {
             return NodeEditorPreferences.gridTexture;
@@ -31,6 +28,10 @@ namespace XNodeEditor {
                 return attrib.menuName;
             else // Return generated path
                 return ObjectNames.NicifyVariableName(type.ToString().Replace('.', '/'));
+        }
+
+        public virtual Color GetTypeColor(Type type) {
+            return NodeEditorPreferences.GetTypeColor(type);
         }
 
         [AttributeUsage(AttributeTargets.Class)]

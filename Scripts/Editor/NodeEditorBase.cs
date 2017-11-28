@@ -3,16 +3,28 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using UnityEditor;
 using XNode;
 using XNodeEditor;
 
 namespace XNodeInternal {
 	/// <summary> Handles caching of custom editor classes and their target types. Accessible with GetEditor(Type type) </summary>
-	public class NodeEditorBase<T, A> where A : Attribute, NodeEditorBase<T, A>.INodeEditorAttrib where T : class {
+	public class NodeEditorBase<T, A, K> where A : Attribute, NodeEditorBase<T, A, K>.INodeEditorAttrib where T : NodeEditorBase<T,A,K> where K : ScriptableObject {
 		/// <summary> Custom editors defined with [CustomNodeEditor] </summary>
 		private static Dictionary<Type, T> editors;
+		public K target;
+		public SerializedObject serializedObject;
 
-		public static T GetEditor(Type type) {
+		public static T GetEditor(K target) {
+			if (target == null) return null;
+			Type type = target.GetType();
+			T editor = GetEditor(type);
+			editor.target = target;
+			editor.serializedObject = new SerializedObject(target);
+			return editor;
+		}
+
+		private static T GetEditor(Type type) {
 			if (type == null) return null;
 			if (editors == null) CacheCustomEditors();
 			if (editors.ContainsKey(type)) return editors[type];

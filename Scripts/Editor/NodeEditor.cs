@@ -9,12 +9,10 @@ namespace XNodeEditor {
     /// <summary> Base class to derive custom Node editors from. Use this to create your own custom inspectors and editors for your nodes. </summary>
 
     [CustomNodeEditor(typeof(Node))]
-    public class NodeEditor : XNodeInternal.NodeEditorBase<NodeEditor, NodeEditor.CustomNodeEditorAttribute> {
+    public class NodeEditor : XNodeInternal.NodeEditorBase<NodeEditor, NodeEditor.CustomNodeEditorAttribute, Node> {
 
         /// <summary> Fires every whenever a node was modified through the editor </summary>
         public static Action<Node> onUpdateNode;
-        public Node target;
-        public SerializedObject serializedObject;
         public static Dictionary<NodePort, Vector2> portPositions;
 
         /// <summary> Draws the node GUI.</summary>

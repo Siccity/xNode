@@ -13,9 +13,7 @@ namespace XNodeEditor {
             Event e = Event.current;
             Matrix4x4 m = GUI.matrix;
             if (graph == null) return;
-            currentGraphEditor = NodeGraphEditor.GetEditor(graph.GetType());
-            currentGraphEditor.target = graph;
-            currentGraphEditor.serializedObject = new SerializedObject(graph);
+            currentGraphEditor = NodeGraphEditor.GetEditor(graph);
 
             Controls();
 
@@ -162,7 +160,8 @@ namespace XNodeEditor {
                         if (!input.IsConnectedTo(output)) input.Connect(output);
                         if (!_portConnectionPoints.ContainsKey(input)) continue;
                         Vector2 to = _portConnectionPoints[input].center;
-                        DrawConnection(from, to, NodeEditorPreferences.GetTypeColor(output.ValueType));
+                        Color connectionColor = currentGraphEditor.GetTypeColor(output.ValueType);
+                        DrawConnection(from, to, connectionColor);
                     }
                 }
             }
@@ -198,11 +197,8 @@ namespace XNodeEditor {
                 while (graph.nodes[n] == null) graph.nodes.RemoveAt(n);
                 if (n >= graph.nodes.Count) return;
                 Node node = graph.nodes[n];
-                Type nodeType = node.GetType();
 
-                NodeEditor nodeEditor = NodeEditor.GetEditor(nodeType);
-                nodeEditor.target = node;
-                nodeEditor.serializedObject = new SerializedObject(node);
+                NodeEditor nodeEditor = NodeEditor.GetEditor(node);
                 NodeEditor.portPositions = new Dictionary<NodePort, Vector2>();
 
                 //Get node position

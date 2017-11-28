@@ -80,18 +80,19 @@ namespace XNodeEditor {
         /// <summary> Show right-click context menu for a node </summary>
         public void ShowNodeContextMenu(Node node) {
             GenericMenu contextMenu = new GenericMenu();
-            contextMenu.AddItem(new GUIContent("Remove"), false, () => graph.RemoveNode(node));
-            contextMenu.AddItem(new GUIContent("Duplicate"), false, () => {
-                Node n = graph.CopyNode(node);
-                n.position = node.position + new Vector2(30,30);
-            });
             contextMenu.AddItem(new GUIContent("Move To Top"), false, () => {
                 int index;
-                while((index = graph.nodes.IndexOf(node)) != graph.nodes.Count-1) {
-                    graph.nodes[index] = graph.nodes[index+1];
-                    graph.nodes[index+1] = node;
+                while ((index = graph.nodes.IndexOf(node)) != graph.nodes.Count - 1) {
+                    graph.nodes[index] = graph.nodes[index + 1];
+                    graph.nodes[index + 1] = node;
                 }
             });
+            contextMenu.AddItem(new GUIContent("Duplicate"), false, () => {
+                Node n = graph.CopyNode(node);
+                n.position = node.position + new Vector2(30, 30);
+            });
+            contextMenu.AddItem(new GUIContent("Remove"), false, () => graph.RemoveNode(node));
+
             AddCustomContextMenuItems(contextMenu, node);
             contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
         }

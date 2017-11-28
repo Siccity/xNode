@@ -103,12 +103,12 @@ namespace XNodeEditor {
             Vector2 pos = WindowToGridPosition(Event.current.mousePosition);
             for (int i = 0; i < nodeTypes.Length; i++) {
                 Type type = nodeTypes[i];
-                string name = nodeTypes[i].ToString().Replace('.', '/');
-                Node.CreateNodeMenuAttribute attrib;
-                if (NodeEditorUtilities.GetAttrib(type, out attrib)) {
-                    name = attrib.menuName;
-                }
-                contextMenu.AddItem(new GUIContent(name), false, () => {
+
+                //Get node context menu path
+                string path = currentGraphEditor.GetNodePath(type);
+                if (path == null) continue;
+
+                contextMenu.AddItem(new GUIContent(path), false, () => {
                     CreateNode(type, pos);
                 });
             }

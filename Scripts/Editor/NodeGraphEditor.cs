@@ -23,6 +23,16 @@ namespace XNodeEditor {
             return NodeEditorPreferences.crossTexture;
         }
 
+        /// <summary> Returns context menu path. Returns null if node is not available. </summary>
+        public virtual string GetNodePath(Type type) {
+            //Check if type has the CreateNodeMenuAttribute
+            Node.CreateNodeMenuAttribute attrib;
+            if (NodeEditorUtilities.GetAttrib(type, out attrib)) // Return custom path
+                return attrib.menuName;
+            else // Return generated path
+                return ObjectNames.NicifyVariableName(type.ToString().Replace('.', '/'));
+        }
+
         [AttributeUsage(AttributeTargets.Class)]
         public class CustomNodeGraphEditorAttribute : Attribute,
         INodeEditorAttrib {

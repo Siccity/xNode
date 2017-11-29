@@ -61,3 +61,4 @@ Feel free to also leave suggestions/requests in the [issues](https://github.com/
 
 Projects using xNode:
 * [Graphmesh](https://github.com/Siccity/Graphmesh "Go to github page")
+* [Dialogue](https://github.com/Siccity/Dialogue "Go to github page")

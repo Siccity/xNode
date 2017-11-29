@@ -6,9 +6,21 @@ using UnityEngine;
 namespace XNodeEditor {
     public static class NodeEditorPreferences {
 
-        public static Texture2D gridTexture { get { VerifyLoaded(); return _gridTexture; } }
+        public static Texture2D gridTexture {
+            get {
+                VerifyLoaded();
+                if (_gridTexture == null) _gridTexture = NodeEditorResources.GenerateGridTexture(_gridLineColor, _gridBgColor);
+                return _gridTexture;
+            }
+        }
         private static Texture2D _gridTexture;
-        public static Texture2D crossTexture { get { VerifyLoaded(); return _crossTexture; } }
+        public static Texture2D crossTexture {
+            get {
+                VerifyLoaded();
+                if (_crossTexture == null) _crossTexture = NodeEditorResources.GenerateCrossTexture(_gridLineColor);
+                return _crossTexture;
+            }
+        }
         private static Texture2D _crossTexture;
 
         /// <summary> Have we loaded the prefs yet </summary>
@@ -121,8 +133,6 @@ namespace XNodeEditor {
             //Load snap option
             if (EditorPrefs.HasKey("unec_gridsnap")) _gridSnap = EditorPrefs.GetBool("unec_gridsnap");
 
-            _gridTexture = NodeEditorResources.GenerateGridTexture(_gridLineColor, _gridBgColor);
-            _crossTexture = NodeEditorResources.GenerateCrossTexture(_gridLineColor);
             NodeEditorWindow.RepaintAll();
             prefsLoaded = true;
         }

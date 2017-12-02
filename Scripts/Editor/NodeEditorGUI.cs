@@ -76,7 +76,7 @@ namespace XNodeEditor {
         }
 
         /// <summary> Show right-click context menu for a node </summary>
-        public void ShowNodeContextMenu(Node node) {
+        public void ShowNodeContextMenu(XNode.Node node) {
             GenericMenu contextMenu = new GenericMenu();
             contextMenu.AddItem(new GUIContent("Move To Top"), false, () => {
                 int index;
@@ -86,7 +86,7 @@ namespace XNodeEditor {
                 }
             });
             contextMenu.AddItem(new GUIContent("Duplicate"), false, () => {
-                Node n = graph.CopyNode(node);
+                XNode.Node n = graph.CopyNode(node);
                 n.position = node.position + new Vector2(30, 30);
             });
             contextMenu.AddItem(new GUIContent("Remove"), false, () => graph.RemoveNode(node));
@@ -145,17 +145,17 @@ namespace XNodeEditor {
 
         /// <summary> Draws all connections </summary>
         public void DrawConnections() {
-            foreach (Node node in graph.nodes) {
+            foreach (XNode.Node node in graph.nodes) {
                 //If a null node is found, return. This can happen if the nodes associated script is deleted. It is currently not possible in Unity to delete a null asset.
                 if (node == null) continue;
 
-                foreach (NodePort output in node.Outputs) {
+                foreach (XNode.NodePort output in node.Outputs) {
                     //Needs cleanup. Null checks are ugly
                     if (!portConnectionPoints.ContainsKey(output)) continue;
                     Vector2 from = _portConnectionPoints[output].center;
                     for (int k = 0; k < output.ConnectionCount; k++) {
 
-                        NodePort input = output.GetConnection(k);
+                        XNode.NodePort input = output.GetConnection(k);
                         if (input == null) continue; //If a script has been updated and the port doesn't exist, it is removed and null is returned. If this happens, return.
                         if (!input.IsConnectedTo(output)) input.Connect(output);
                         if (!_portConnectionPoints.ContainsKey(input)) continue;
@@ -196,10 +196,10 @@ namespace XNodeEditor {
             for (int n = 0; n < graph.nodes.Count; n++) {
                 while (graph.nodes[n] == null) graph.nodes.RemoveAt(n);
                 if (n >= graph.nodes.Count) return;
-                Node node = graph.nodes[n];
+                XNode.Node node = graph.nodes[n];
 
                 NodeEditor nodeEditor = NodeEditor.GetEditor(node);
-                NodeEditor.portPositions = new Dictionary<NodePort, Vector2>();
+                NodeEditor.portPositions = new Dictionary<XNode.NodePort, Vector2>();
 
                 //Get node position
                 Vector2 nodePos = GridToWindowPositionNoClipped(node.position);
@@ -244,14 +244,14 @@ namespace XNodeEditor {
 
                     //Check if we are hovering any of this nodes ports
                     //Check input ports
-                    foreach (NodePort input in node.Inputs) {
+                    foreach (XNode.NodePort input in node.Inputs) {
                         //Check if port rect is available
                         if (!portConnectionPoints.ContainsKey(input)) continue;
                         Rect r = GridToWindowRect(portConnectionPoints[input]);
                         if (r.Contains(mousePos)) hoveredPort = input;
                     }
                     //Check all output ports
-                    foreach (NodePort output in node.Outputs) {
+                    foreach (XNode.NodePort output in node.Outputs) {
                         //Check if port rect is available
                         if (!portConnectionPoints.ContainsKey(output)) continue;
                         Rect r = GridToWindowRect(portConnectionPoints[output]);

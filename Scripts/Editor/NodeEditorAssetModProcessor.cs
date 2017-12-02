@@ -12,7 +12,7 @@ namespace XNodeEditor {
             UnityEditor.MonoScript script = obj as UnityEditor.MonoScript;
             System.Type scriptType = script.GetClass();
 
-            if (scriptType != typeof(Node) && !scriptType.IsSubclassOf(typeof(Node))) return AssetDeleteResult.DidNotDelete;
+            if (scriptType != typeof(XNode.Node) && !scriptType.IsSubclassOf(typeof(XNode.Node))) return AssetDeleteResult.DidNotDelete;
 
             //Find ScriptableObjects using this script
             string[] guids = AssetDatabase.FindAssets("t:" + scriptType);
@@ -20,7 +20,7 @@ namespace XNodeEditor {
                 string assetpath = AssetDatabase.GUIDToAssetPath(guids[i]);
                 Object[] objs = AssetDatabase.LoadAllAssetRepresentationsAtPath(assetpath);
                 for (int k = 0; k < objs.Length; k++) {
-                    Node node = objs[k] as Node;
+                    XNode.Node node = objs[k] as XNode.Node;
                     if (node.GetType() == scriptType) {
                         if (node != null && node.graph != null) {
                             Debug.LogWarning(node.name + " of " + node.graph + " depended on deleted script and has been removed automatically.", node.graph);

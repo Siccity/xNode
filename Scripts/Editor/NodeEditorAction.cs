@@ -15,13 +15,13 @@ namespace XNodeEditor {
         private bool IsHoveringNode { get { return hoveredNode != null; } }
         private bool HasSelectedNode { get { return selectedNode != null; } }
 
-        private Node hoveredNode = null;
+        private XNode.Node hoveredNode = null;
 
-        [NonSerialized] private Node selectedNode = null;
-        [NonSerialized] private Node draggedNode = null;
-        [NonSerialized] private NodePort hoveredPort = null;
-        [NonSerialized] private NodePort draggedOutput = null;
-        [NonSerialized] private NodePort draggedOutputTarget = null;
+        [NonSerialized] private XNode.Node selectedNode = null;
+        [NonSerialized] private XNode.Node draggedNode = null;
+        [NonSerialized] private XNode.NodePort hoveredPort = null;
+        [NonSerialized] private XNode.NodePort draggedOutput = null;
+        [NonSerialized] private XNode.NodePort draggedOutputTarget = null;
 
         private Rect nodeRects;
 
@@ -69,8 +69,8 @@ namespace XNodeEditor {
                             } else {
                                 hoveredPort.VerifyConnections();
                                 if (hoveredPort.IsConnected) {
-                                    Node node = hoveredPort.node;
-                                    NodePort output = hoveredPort.Connection;
+                                    XNode.Node node = hoveredPort.node;
+                                    XNode.NodePort output = hoveredPort.Connection;
                                     hoveredPort.Disconnect(output);
                                     draggedOutput = output;
                                     draggedOutputTarget = hoveredPort;
@@ -89,7 +89,7 @@ namespace XNodeEditor {
                         if (IsDraggingPort) {
                             //If connection is valid, save it
                             if (draggedOutputTarget != null) {
-                                Node node = draggedOutputTarget.node;
+                                XNode.Node node = draggedOutputTarget.node;
                                 if (graph.nodes.Count != 0) draggedOutput.Connect(draggedOutputTarget);
                                 if (NodeEditor.onUpdateNode != null) NodeEditor.onUpdateNode(node);
                                 EditorUtility.SetDirty(graph);
@@ -127,7 +127,7 @@ namespace XNodeEditor {
         }
 
         public void CreateNode(Type type, Vector2 position) {
-            Node node = graph.AddNode(type);
+            XNode.Node node = graph.AddNode(type);
             node.position = position;
             Repaint();
         }
@@ -144,7 +144,7 @@ namespace XNodeEditor {
             }
         }
 
-        bool IsHoveringTitle(Node node) {
+        bool IsHoveringTitle(XNode.Node node) {
             Vector2 mousePos = Event.current.mousePosition;
             //Get node position
             Vector2 nodePos = GridToWindowPosition(node.position);

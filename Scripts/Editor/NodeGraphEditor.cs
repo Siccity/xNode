@@ -7,8 +7,8 @@ using XNode;
 
 namespace XNodeEditor {
     /// <summary> Base class to derive custom Node Graph editors from. Use this to override how graphs are drawn in the editor. </summary>
-    [CustomNodeGraphEditor(typeof(NodeGraph))]
-    public class NodeGraphEditor : XNodeInternal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, NodeGraph> {
+    [CustomNodeGraphEditor(typeof(XNode.NodeGraph))]
+    public class NodeGraphEditor : XNodeInternal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph> {
         /// <summary> Custom node editors defined with [CustomNodeGraphEditor] </summary>
         [NonSerialized] private static Dictionary<Type, NodeGraphEditor> editors;
 
@@ -23,7 +23,7 @@ namespace XNodeEditor {
         /// <summary> Returns context menu path. Returns null if node is not available. </summary>
         public virtual string GetNodePath(Type type) {
             //Check if type has the CreateNodeMenuAttribute
-            Node.CreateNodeMenuAttribute attrib;
+            XNode.Node.CreateNodeMenuAttribute attrib;
             if (NodeEditorUtilities.GetAttrib(type, out attrib)) // Return custom path
                 return attrib.menuName;
             else // Return generated path

@@ -10,11 +10,11 @@ namespace XNodeEditor {
         public static NodeEditorWindow current;
 
         /// <summary> Stores node positions for all nodePorts. </summary>
-        public Dictionary<NodePort, Rect> portConnectionPoints { get { return _portConnectionPoints; } }
-        private Dictionary<NodePort, Rect> _portConnectionPoints = new Dictionary<NodePort, Rect>();
-        public Dictionary<Node, float> nodeWidths { get { return _nodeWidths; } }
-        private Dictionary<Node, float> _nodeWidths = new Dictionary<Node, float>();
-        public NodeGraph graph;
+        public Dictionary<XNode.NodePort, Rect> portConnectionPoints { get { return _portConnectionPoints; } }
+        private Dictionary<XNode.NodePort, Rect> _portConnectionPoints = new Dictionary<XNode.NodePort, Rect>();
+        public Dictionary<XNode.Node, float> nodeWidths { get { return _nodeWidths; } }
+        private Dictionary<XNode.Node, float> _nodeWidths = new Dictionary<XNode.Node, float>();
+        public XNode.NodeGraph graph;
         public Vector2 panOffset { get { return _panOffset; } set { _panOffset = value; Repaint(); } }
         private Vector2 _panOffset;
         public float zoom { get { return _zoom; } set { _zoom = Mathf.Clamp(value, 1f, 5f); Repaint(); } }
@@ -46,7 +46,7 @@ namespace XNodeEditor {
             string path = EditorUtility.SaveFilePanelInProject("Save NodeGraph", "NewNodeGraph", "asset", "");
             if (string.IsNullOrEmpty(path)) return;
             else {
-                NodeGraph existingGraph = AssetDatabase.LoadAssetAtPath<NodeGraph>(path);
+                XNode.NodeGraph existingGraph = AssetDatabase.LoadAssetAtPath<XNode.NodeGraph>(path);
                 if (existingGraph != null) AssetDatabase.DeleteAsset(path);
                 AssetDatabase.CreateAsset(graph, path);
                 EditorUtility.SetDirty(graph);
@@ -78,13 +78,13 @@ namespace XNodeEditor {
             return new Vector2(xOffset, yOffset);
         }
 
-        public void SelectNode(Node node) {
+        public void SelectNode(XNode.Node node) {
             selectedNode = node;
         }
 
         [OnOpenAsset(0)]
         public static bool OnOpen(int instanceID, int line) {
-            NodeGraph nodeGraph = EditorUtility.InstanceIDToObject(instanceID) as NodeGraph;
+            XNode.NodeGraph nodeGraph = EditorUtility.InstanceIDToObject(instanceID) as XNode.NodeGraph;
             if (nodeGraph != null) {
                 NodeEditorWindow w = Init();
                 w.graph = nodeGraph;

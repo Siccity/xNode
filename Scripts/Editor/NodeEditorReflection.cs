@@ -72,8 +72,10 @@ namespace XNodeEditor {
                     kvp.Add(new KeyValuePair<ContextMenu, MethodInfo>(attribs[k], methods[i]));
                 }
             }
+            #if UNITY_5_5_OR_NEWER
             //Sort menu items
             kvp.Sort((x, y) => x.Key.priority.CompareTo(y.Key.priority));
+            #endif
             return kvp.ToArray();
         }
 

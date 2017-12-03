@@ -36,7 +36,7 @@ namespace XNodeEditor {
 
         [AttributeUsage(AttributeTargets.Class)]
         public class CustomNodeGraphEditorAttribute : Attribute,
-        INodeEditorAttrib {
+            XNodeInternal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph>.INodeEditorAttrib {
             private Type inspectedType;
             /// <summary> Tells a NodeEditor which Node type it is an editor for </summary>
             /// <param name="inspectedType">Type that this editor can edit</param>

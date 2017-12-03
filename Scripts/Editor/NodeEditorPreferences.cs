@@ -167,7 +167,11 @@ namespace XNodeEditor {
             string typeName = type.PrettyName();
             if (typeColors.ContainsKey(typeName)) return typeColors[typeName];
             if (generatedTypeColors.ContainsKey(typeName)) return generatedTypeColors[typeName];
+            #if UNITY_5_4_OR_NEWER
             UnityEngine.Random.InitState(typeName.GetHashCode());
+            #else
+            UnityEngine.Random.seed = typeName.GetHashCode();
+            #endif
             generatedTypeColors.Add(typeName, new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value));
             return generatedTypeColors[typeName];
         }

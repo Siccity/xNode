@@ -134,9 +134,13 @@ namespace XNode {
         }
         #endregion
 
-        /// <summary> Called whenever a connection is being made between two <see cref="NodePort"/>s</summary>
+        /// <summary> Called after a connection between two <see cref="NodePort"/>s is created </summary>
         /// <param name="from">Output</param> <param name="to">Input</param>
         public virtual void OnCreateConnection(NodePort from, NodePort to) { }
+
+        /// <summary> Called after a connection is removed from this port </summary>
+        /// <param name="from">Output</param> <param name="to">Input</param>
+        public virtual void OnRemoveConnection(NodePort port) { }
 
         /// <summary> Disconnect everything from this node </summary>
         public void ClearConnections() {

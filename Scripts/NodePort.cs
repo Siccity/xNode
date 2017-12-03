@@ -204,16 +204,22 @@ namespace XNode {
             return false;
         }
 
+        /// <summary> Disconnect this port from another port </summary>
         public void Disconnect(NodePort port) {
+            NodePort from = direction == IO.Input ? port : this;
+            NodePort to = direction == IO.Input ? this : port;
+            // Remove this ports connection to the other
             for (int i = connections.Count - 1; i >= 0; i--) {
-                //Remove matching ports.
                 if (connections[i].Port == port) {
                     connections.RemoveAt(i);
+                    node.OnRemoveConnection(this);
                 }
             }
+            // Remove the other ports connection to this port
             for (int i = 0; i < port.connections.Count; i++) {
                 if (port.connections[i].Port == this) {
                     port.connections.RemoveAt(i);
+                    port.node.OnRemoveConnection(port);
                 }
             }
         }

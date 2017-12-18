@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using UnityEditor;
-using XNode;
-using XNodeEditor;
 
 namespace XNodeInternal {
 	/// <summary> Handles caching of custom editor classes and their target types. Accessible with GetEditor(Type type) </summary>
@@ -36,7 +34,7 @@ namespace XNodeInternal {
 			editors = new Dictionary<Type, T>();
 
 			//Get all classes deriving from NodeEditor via reflection
-			Type[] nodeEditors = NodeEditorWindow.GetDerivedTypes(typeof(T));
+			Type[] nodeEditors = XNodeEditor.NodeEditorWindow.GetDerivedTypes(typeof(T));
 			for (int i = 0; i < nodeEditors.Length; i++) {
 				var attribs = nodeEditors[i].GetCustomAttributes(typeof(A), false);
 				if (attribs == null || attribs.Length == 0) continue;

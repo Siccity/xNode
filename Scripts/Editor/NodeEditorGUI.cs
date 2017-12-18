@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using XNode;
 
 namespace XNodeEditor {
     /// <summary> Contains GUI methods </summary>

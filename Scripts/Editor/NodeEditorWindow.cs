@@ -2,7 +2,6 @@
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
-using XNode;
 
 namespace XNodeEditor {
     [InitializeOnLoad]

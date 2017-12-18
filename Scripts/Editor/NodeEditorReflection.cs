@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
-using XNode;
 
 namespace XNodeEditor {
     /// <summary> Contains reflection-related info </summary>

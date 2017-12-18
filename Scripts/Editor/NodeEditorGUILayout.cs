@@ -2,7 +2,6 @@
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
-using XNode;
 
 namespace XNodeEditor {
     /// <summary> UNEC-specific version of <see cref="EditorGUILayout"/> </summary>

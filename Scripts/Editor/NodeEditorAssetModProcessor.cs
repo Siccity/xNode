@@ -1,6 +1,5 @@
 ﻿using UnityEditor;
 using UnityEngine;
-using XNode;
 
 namespace XNodeEditor {
     public class NodeEditorAssetModProcessor : UnityEditor.AssetModificationProcessor {

@@ -47,7 +47,7 @@ namespace XNode {
             foreach (NodePort port in Ports) port.VerifyConnections();
         }
 
-        #region Instance Ports
+#region Instance Ports
         /// <summary> Returns input port at index </summary>
         public NodePort AddInstanceInput(Type type, string fieldName = null) {
             return AddInstancePort(type, NodePort.IO.Input, fieldName);
@@ -72,16 +72,21 @@ namespace XNode {
             return port;
         }
 
-        public bool RemoveInstancePort(string fieldName) {
-            NodePort port = GetPort(fieldName);
-            if (port == null || port.IsStatic) return false;
-            port.ClearConnections();
-            ports.Remove(fieldName);
-            return true;
+        /// <summary> Remove an instance port from the node </summary>
+        public void RemoveInstancePort(string fieldName) {
+            RemoveInstancePort(GetPort(fieldName));
         }
-        #endregion
 
-        #region Ports
+        /// <summary> Remove an instance port from the node </summary>
+        public void RemoveInstancePort(NodePort port) {
+            if (port == null) throw new ArgumentNullException("port");
+            else if (port.IsStatic) throw new ArgumentException("cannot remove static port");
+            port.ClearConnections();
+            ports.Remove(port.fieldName);
+        }
+#endregion
+
+#region Ports
         /// <summary> Returns output port which matches fieldName </summary>
         public NodePort GetOutputPort(string fieldName) {
             NodePort port = GetPort(fieldName);
@@ -105,9 +110,9 @@ namespace XNode {
         public bool HasPort(string fieldName) {
             return ports.ContainsKey(fieldName);
         }
-        #endregion
+#endregion
 
-        #region Inputs/Outputs
+#region Inputs/Outputs
         /// <summary> Return input value for a specified port. Returns fallback value if no ports are connected </summary>
         /// <param name="fieldName">Field name of requested input port</param>
         /// <param name="fallback">If no ports are connected, this value will be returned</param>
@@ -132,7 +137,7 @@ namespace XNode {
             Debug.LogWarning("No GetValue(NodePort port) override defined for " + GetType());
             return null;
         }
-        #endregion
+#endregion
 
         /// <summary> Called after a connection between two <see cref="NodePort"/>s is created </summary>
         /// <param name="from">Output</param> <param name="to">Input</param>

@@ -64,5 +64,26 @@ namespace XNode {
         public void Clear() {
             nodes.Clear();
         }
+
+        /// <summary> Create a new deep copy of this graph </summary>
+        public XNode.NodeGraph Copy() {
+            // Instantiate a new nodegraph instance
+            NodeGraph graph = Instantiate(this);
+            // Instantiate all nodes inside the graph
+            for (int i = 0; i < nodes.Count; i++) {
+                Node node = Instantiate(nodes[i]) as Node;
+                node.graph = graph;
+                graph.nodes[i] = node;
+            }
+
+            // Redirect all connections
+            for (int i = 0; i < graph.nodes.Count; i++) {
+                foreach (NodePort port in graph.nodes[i].Ports) {
+                    port.Redirect(nodes, graph.nodes);
+                }
+            }
+
+            return graph;
+        }
     }
 }

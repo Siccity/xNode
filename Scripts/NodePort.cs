@@ -230,11 +230,20 @@ namespace XNode {
             }
         }
 
+        /// <summary> Swap connected nodes from the old list with nodes from the new list </summary>
+        public void Redirect(List<Node> oldNodes, List<Node> newNodes) {
+            foreach (PortConnection connection in connections) {
+                int index = oldNodes.IndexOf(connection.node);
+                if (index >= 0) connection.node = newNodes[index];
+            }
+        }
+
         [Serializable]
         private class PortConnection {
             [SerializeField] public string fieldName;
             [SerializeField] public Node node;
             public NodePort Port { get { return port != null ? port : port = GetPort(); } }
+
             [NonSerialized] private NodePort port;
 
             public PortConnection(NodePort port) {

@@ -3,11 +3,11 @@
 namespace XNodeEditor {
     public static class NodeEditorResources {
         //Unec textures
-        public static Texture2D dot { get { return _dot != null ? _dot : _dot = Resources.Load<Texture2D>("unec_dot"); } }
+        public static Texture2D dot { get { return _dot != null ? _dot : _dot = Resources.Load<Texture2D>("xnode_dot"); } }
         private static Texture2D _dot;
-        public static Texture2D dotOuter { get { return _dotOuter != null ? _dotOuter : _dotOuter = Resources.Load<Texture2D>("unec_dot_outer"); } }
+        public static Texture2D dotOuter { get { return _dotOuter != null ? _dotOuter : _dotOuter = Resources.Load<Texture2D>("xnode_dot_outer"); } }
         private static Texture2D _dotOuter;
-        public static Texture2D nodeBody { get { return _nodeBody != null ? _nodeBody : _nodeBody = Resources.Load<Texture2D>("unec_node"); } }
+        public static Texture2D nodeBody { get { return _nodeBody != null ? _nodeBody : _nodeBody = Resources.Load<Texture2D>("xnode_node"); } }
         private static Texture2D _nodeBody;
 
         //Unec styles

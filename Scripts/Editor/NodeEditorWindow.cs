@@ -85,7 +85,8 @@ namespace XNodeEditor {
         public static bool OnOpen(int instanceID, int line) {
             XNode.NodeGraph nodeGraph = EditorUtility.InstanceIDToObject(instanceID) as XNode.NodeGraph;
             if (nodeGraph != null) {
-                NodeEditorWindow w = Init();
+                NodeEditorWindow w = GetWindow(typeof(NodeEditorWindow), false, "xNode", true) as NodeEditorWindow;
+                w.wantsMouseMove = true;
                 w.graph = nodeGraph;
                 return true;
             }

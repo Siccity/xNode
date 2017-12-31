@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 
 namespace XNodeEditor {
-    /// <summary> UNEC-specific version of <see cref="EditorGUILayout"/> </summary>
+    /// <summary> xNode-specific version of <see cref="EditorGUILayout"/> </summary>
     public static class NodeEditorGUILayout {
 
         /// <summary> Make a field for a serialized property. Automatically displays relevant node port. </summary>

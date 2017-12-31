@@ -9,7 +9,7 @@ namespace BasicNodes {
         // The value of an output node field is not used for anything, but could be used for caching output results
         [Output] public float result;
 
-        // UNEC will display this as an editable field - just like the normal inspector would
+        // Will be displayed as an editable field - just like the normal inspector
         public MathType mathType = MathType.Add;
         public enum MathType { Add, Subtract, Multiply, Divide }
 

@@ -114,8 +114,8 @@ namespace XNodeEditor {
             //Load type colors
             generatedTypeColors = new Dictionary<string, Color>();
 
-            if (!EditorPrefs.HasKey("unec_typecolors")) EditorPrefs.SetString("unec_typecolors", "");
-            string[] data = EditorPrefs.GetString("unec_typecolors").Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            if (!EditorPrefs.HasKey("xnode_typecolors")) EditorPrefs.SetString("xnode_typecolors", "");
+            string[] data = EditorPrefs.GetString("xnode_typecolors").Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             typeColors = new Dictionary<string, Color>();
             for (int i = 0; i < data.Length; i += 2) {
                 Color col;
@@ -125,13 +125,13 @@ namespace XNodeEditor {
             }
 
             //Load grid colors
-            if (!EditorPrefs.HasKey("unec_gridcolor0")) EditorPrefs.SetString("unec_gridcolor0", ColorUtility.ToHtmlStringRGB(new Color(0.45f, 0.45f, 0.45f)));
-            ColorUtility.TryParseHtmlString("#" + EditorPrefs.GetString("unec_gridcolor0"), out _gridLineColor);
-            if (!EditorPrefs.HasKey("unec_gridcolor1")) EditorPrefs.SetString("unec_gridcolor1", ColorUtility.ToHtmlStringRGB(new Color(0.18f, 0.18f, 0.18f)));
-            ColorUtility.TryParseHtmlString("#" + EditorPrefs.GetString("unec_gridcolor1"), out _gridBgColor);
+            if (!EditorPrefs.HasKey("xnode_gridcolor0")) EditorPrefs.SetString("xnode_gridcolor0", ColorUtility.ToHtmlStringRGB(new Color(0.45f, 0.45f, 0.45f)));
+            ColorUtility.TryParseHtmlString("#" + EditorPrefs.GetString("xnode_gridcolor0"), out _gridLineColor);
+            if (!EditorPrefs.HasKey("xnode_gridcolor1")) EditorPrefs.SetString("xnode_gridcolor1", ColorUtility.ToHtmlStringRGB(new Color(0.18f, 0.18f, 0.18f)));
+            ColorUtility.TryParseHtmlString("#" + EditorPrefs.GetString("xnode_gridcolor1"), out _gridBgColor);
 
             //Load snap option
-            if (EditorPrefs.HasKey("unec_gridsnap")) _gridSnap = EditorPrefs.GetBool("unec_gridsnap");
+            if (EditorPrefs.HasKey("xnode_gridsnap")) _gridSnap = EditorPrefs.GetBool("xnode_gridsnap");
 
             NodeEditorWindow.RepaintAll();
             prefsLoaded = true;
@@ -139,9 +139,9 @@ namespace XNodeEditor {
 
         /// <summary> Delete all prefs </summary>
         public static void ResetPrefs() {
-            if (EditorPrefs.HasKey("unec_typecolors")) EditorPrefs.DeleteKey("unec_typecolors");
-            if (EditorPrefs.HasKey("unec_gridcolor0")) EditorPrefs.DeleteKey("unec_gridcolor0");
-            if (EditorPrefs.HasKey("unec_gridcolor1")) EditorPrefs.DeleteKey("unec_gridcolor1");
+            if (EditorPrefs.HasKey("xnode_typecolors")) EditorPrefs.DeleteKey("xnode_typecolors");
+            if (EditorPrefs.HasKey("xnode_gridcolor0")) EditorPrefs.DeleteKey("xnode_gridcolor0");
+            if (EditorPrefs.HasKey("xnode_gridcolor1")) EditorPrefs.DeleteKey("xnode_gridcolor1");
             LoadPrefs();
         }
 
@@ -150,10 +150,10 @@ namespace XNodeEditor {
             foreach (var item in typeColors) {
                 s += item.Key + "," + ColorUtility.ToHtmlStringRGB(item.Value) + ",";
             }
-            EditorPrefs.SetString("unec_typecolors", s);
-            EditorPrefs.SetString("unec_gridcolor0", ColorUtility.ToHtmlStringRGB(_gridLineColor));
-            EditorPrefs.SetString("unec_gridcolor1", ColorUtility.ToHtmlStringRGB(_gridBgColor));
-            EditorPrefs.SetBool("unec_gridsnap", _gridSnap);
+            EditorPrefs.SetString("xnode_typecolors", s);
+            EditorPrefs.SetString("xnode_gridcolor0", ColorUtility.ToHtmlStringRGB(_gridLineColor));
+            EditorPrefs.SetString("xnode_gridcolor1", ColorUtility.ToHtmlStringRGB(_gridBgColor));
+            EditorPrefs.SetBool("xnode_gridsnap", _gridSnap);
         }
 
         private static void VerifyLoaded() {

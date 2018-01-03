@@ -13,6 +13,8 @@ namespace XNode {
         public NodePort Connection { get { return connections.Count > 0 ? connections[0].Port : null; } }
 
         public IO direction { get { return _direction; } }
+        public Node.ConnectionType connectionType { get { return _connectionType; } }
+
         /// <summary> Is this port connected to anytihng? </summary>
         public bool IsConnected { get { return connections.Count != 0; } }
         public bool IsInput { get { return direction == IO.Input; } }
@@ -39,6 +41,7 @@ namespace XNode {
         [SerializeField] private string _typeQualifiedName;
         [SerializeField] private List<PortConnection> connections = new List<PortConnection>();
         [SerializeField] private IO _direction;
+        [SerializeField] private Node.ConnectionType _connectionType;
         [SerializeField] private bool _dynamic;
 
         /// <summary> Construct a static targetless nodeport. Used as a template. </summary>
@@ -48,8 +51,14 @@ namespace XNode {
             _dynamic = false;
             var attribs = fieldInfo.GetCustomAttributes(false);
             for (int i = 0; i < attribs.Length; i++) {
-                if (attribs[i] is Node.InputAttribute) _direction = IO.Input;
-                else if (attribs[i] is Node.OutputAttribute) _direction = IO.Output;
+                if (attribs[i] is Node.InputAttribute) {
+                    _direction = IO.Input;
+                    _connectionType = (attribs[i] as Node.InputAttribute).connectionType;
+                }
+                else if (attribs[i] is Node.OutputAttribute) {
+                    _direction = IO.Output;
+                    _connectionType = (attribs[i] as Node.OutputAttribute).connectionType;
+                }
             }
         }
 
@@ -59,16 +68,18 @@ namespace XNode {
             ValueType = nodePort.valueType;
             _direction = nodePort.direction;
             _dynamic = nodePort._dynamic;
+            _connectionType = nodePort._connectionType;
             _node = node;
         }
 
         /// <summary> Construct a dynamic port. Dynamic ports are not forgotten on reimport, and is ideal for runtime-created ports. </summary>
-        public NodePort(string fieldName, Type type, IO direction, Node node) {
+        public NodePort(string fieldName, Type type, IO direction, Node.ConnectionType connectionType, Node node) {
             _fieldName = fieldName;
             this.ValueType = type;
             _direction = direction;
             _node = node;
             _dynamic = true;
+            _connectionType = connectionType;            
         }
 
         /// <summary> Checks all connections for invalid references, and removes them. </summary>
@@ -176,6 +187,8 @@ namespace XNode {
             if (port == this) { Debug.LogWarning("Attempting to connect port to self."); return; }
             if (IsConnectedTo(port)) { Debug.LogWarning("Port already connected. "); return; }
             if (direction == port.direction) { Debug.LogWarning("Cannot connect two " + (direction == IO.Input ? "input" : "output") + " connections"); return; }
+            if (port.connectionType == Node.ConnectionType.Override && port.ConnectionCount != 0) { port.ClearConnections(); }
+            if (connectionType == Node.ConnectionType.Override && ConnectionCount != 0) { ClearConnections(); }
             connections.Add(new PortConnection(port));
             if (port.connections == null) port.connections = new List<PortConnection>();
             if (!port.IsConnectedTo(this)) port.connections.Add(new PortConnection(this));

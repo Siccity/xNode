@@ -12,9 +12,64 @@ MonoBehaviour:
   m_Name: ExampleNodeGraph
   m_EditorClassIdentifier: 
   nodes:
-  - {fileID: 114729867621534192}
   - {fileID: 114708853913061688}
   - {fileID: 114511978881715272}
+  - {fileID: 114509033286994848}
+  - {fileID: 114245496101350052}
+--- !u!114 &114245496101350052
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f6f901f0da53142b79277ea3f42518, type: 3}
+  m_Name: DisplayValue
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: -168, y: 8}
+  ports:
+    keys:
+    - input
+    values:
+    - _fieldName: input
+      _node: {fileID: 114245496101350052}
+      _typeQualifiedName: System.Object, mscorlib, Version=2.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections:
+      - fieldName: result
+        node: {fileID: 114511978881715272}
+      _direction: 0
+      _connectionType: 1
+      _dynamic: 1
+--- !u!114 &114509033286994848
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f6f901f0da53142b79277ea3f42518, type: 3}
+  m_Name: DisplayValue
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: 72, y: -72}
+  ports:
+    keys:
+    - input
+    values:
+    - _fieldName: input
+      _node: {fileID: 114509033286994848}
+      _typeQualifiedName: System.Object, mscorlib, Version=2.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections:
+      - fieldName: vector
+        node: {fileID: 114708853913061688}
+      _direction: 0
+      _connectionType: 1
+      _dynamic: 1
 --- !u!114 &114511978881715272
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27,7 +82,7 @@ MonoBehaviour:
   m_Name: MathNode
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: -401.5, y: -119}
+  position: {x: -472, y: -120}
   ports:
     keys:
     - a
@@ -40,6 +95,7 @@ MonoBehaviour:
         PublicKeyToken=b77a5c561934e089
       connections: []
       _direction: 0
+      _connectionType: 0
       _dynamic: 0
     - _fieldName: b
       _node: {fileID: 114511978881715272}
@@ -47,6 +103,7 @@ MonoBehaviour:
         PublicKeyToken=b77a5c561934e089
       connections: []
       _direction: 0
+      _connectionType: 0
       _dynamic: 0
     - _fieldName: result
       _node: {fileID: 114511978881715272}
@@ -55,7 +112,10 @@ MonoBehaviour:
       connections:
       - fieldName: x
         node: {fileID: 114708853913061688}
+      - fieldName: input
+        node: {fileID: 114245496101350052}
       _direction: 1
+      _connectionType: 0
       _dynamic: 0
   a: 6.48
   b: 7.59
@@ -73,7 +133,7 @@ MonoBehaviour:
   m_Name: Vector
   m_EditorClassIdentifier: 
   graph: {fileID: 11400000}
-  position: {x: -157.5, y: -115}
+  position: {x: -168, y: -120}
   ports:
     keys:
     - x
@@ -89,6 +149,7 @@ MonoBehaviour:
       - fieldName: result
         node: {fileID: 114511978881715272}
       _direction: 0
+      _connectionType: 0
       _dynamic: 0
     - _fieldName: y
       _node: {fileID: 114708853913061688}
@@ -96,6 +157,7 @@ MonoBehaviour:
         PublicKeyToken=b77a5c561934e089
       connections: []
       _direction: 0
+      _connectionType: 0
       _dynamic: 0
     - _fieldName: z
       _node: {fileID: 114708853913061688}
@@ -103,6 +165,7 @@ MonoBehaviour:
         PublicKeyToken=b77a5c561934e089
       connections: []
       _direction: 0
+      _connectionType: 0
       _dynamic: 0
     - _fieldName: vector
       _node: {fileID: 114708853913061688}
@@ -110,44 +173,11 @@ MonoBehaviour:
         Culture=neutral, PublicKeyToken=null
       connections:
       - fieldName: input
-        node: {fileID: 114729867621534192}
+        node: {fileID: 114509033286994848}
       _direction: 1
+      _connectionType: 0
       _dynamic: 0
   x: 0
   y: 2.6412349
   z: 14.33477
   vector: {x: 14.07, y: 2.6412349, z: 14.33477}
---- !u!114 &114729867621534192
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 98f6f901f0da53142b79277ea3f42518, type: 3}
-  m_Name: DisplayValue
-  m_EditorClassIdentifier: 
-  graph: {fileID: 11400000}
-  position: {x: 104.5, y: -82}
-  ports:
-    keys:
-    - value
-    - input
-    values:
-    - _fieldName: value
-      _node: {fileID: 114729867621534192}
-      _typeQualifiedName: System.Object, mscorlib, Version=2.0.0.0, Culture=neutral,
-        PublicKeyToken=b77a5c561934e089
-      connections: []
-      _direction: 0
-      _dynamic: 0
-    - _fieldName: input
-      _node: {fileID: 114729867621534192}
-      _typeQualifiedName: System.Object, mscorlib, Version=2.0.0.0, Culture=neutral,
-        PublicKeyToken=b77a5c561934e089
-      connections:
-      - fieldName: vector
-        node: {fileID: 114708853913061688}
-      _direction: 0
-      _dynamic: 1

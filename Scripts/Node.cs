@@ -15,6 +15,13 @@ namespace XNode {
             Always
         }
 
+        public enum ConnectionType {
+            /// <summary> Allow multiple connections</summery>
+            Multiple,
+            /// <summary> always override the current connection </summery>
+            Override,
+        }
+
         /// <summary> Iterate over all ports on this node. </summary>
         public IEnumerable<NodePort> Ports { get { foreach (NodePort port in ports.Values) yield return port; } }
         /// <summary> Iterate over all outputs on this node. </summary>
@@ -49,16 +56,16 @@ namespace XNode {
 
 #region Instance Ports
         /// <summary> Returns input port at index </summary>
-        public NodePort AddInstanceInput(Type type, string fieldName = null) {
-            return AddInstancePort(type, NodePort.IO.Input, fieldName);
+        public NodePort AddInstanceInput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, string fieldName = null) {
+            return AddInstancePort(type, NodePort.IO.Input, connectionType, fieldName);
         }
 
         /// <summary> Returns input port at index </summary>
-        public NodePort AddInstanceOutput(Type type, string fieldName = null) {
-            return AddInstancePort(type, NodePort.IO.Output, fieldName);
+        public NodePort AddInstanceOutput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, string fieldName = null) {
+            return AddInstancePort(type, NodePort.IO.Output, connectionType, fieldName);
         }
 
-        private NodePort AddInstancePort(Type type, NodePort.IO direction, string fieldName = null) {
+        private NodePort AddInstancePort(Type type, NodePort.IO direction, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, string fieldName = null) {
             if (fieldName == null) {
                 fieldName = "instanceInput_0";
                 int i = 0;
@@ -67,7 +74,7 @@ namespace XNode {
                 Debug.LogWarning("Port '" + fieldName + "' already exists in " + name, this);
                 return ports[fieldName];
             }
-            NodePort port = new NodePort(fieldName, type, direction, this);
+            NodePort port = new NodePort(fieldName, type, direction, connectionType, this);
             ports.Add(fieldName, port);
             return port;
         }
@@ -168,20 +175,30 @@ namespace XNode {
         [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
         public class InputAttribute : Attribute {
             public ShowBackingValue backingValue;
-
+            public ConnectionType connectionType;
+            
             /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInput(string)"/> </summary>
             /// <param name="backingValue">Should we display the backing value for this port as an editor field? </param>
-            public InputAttribute(ShowBackingValue backingValue = ShowBackingValue.Unconnected) { this.backingValue = backingValue; }
+            /// <param name="connectionType">Should we allow multiple connections? </param>
+            public InputAttribute(ShowBackingValue backingValue = ShowBackingValue.Unconnected, ConnectionType connectionType = ConnectionType.Multiple) {
+                this.backingValue = backingValue;
+                this.connectionType = connectionType;                
+            }
         }
 
         /// <summary> Mark a serializable field as an output port. You can access this through <see cref="GetOutput(string)"/> </summary>
         [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
         public class OutputAttribute : Attribute {
             public ShowBackingValue backingValue;
+            public ConnectionType connectionType;
 
             /// <summary> Mark a serializable field as an output port. You can access this through <see cref="GetOutput(string)"/> </summary>
             /// <param name="backingValue">Should we display the backing value for this port as an editor field? </param>
-            public OutputAttribute(ShowBackingValue backingValue = ShowBackingValue.Never) { this.backingValue = backingValue; }
+            /// <param name="connectionType">Should we allow multiple connections? </param>
+            public OutputAttribute(ShowBackingValue backingValue = ShowBackingValue.Never, ConnectionType connectionType = ConnectionType.Multiple) {
+                this.backingValue = backingValue;
+                this.connectionType = connectionType;
+            }
         }
 
         [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]

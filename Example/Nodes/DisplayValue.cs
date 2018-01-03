@@ -4,7 +4,7 @@ namespace BasicNodes {
     public class DisplayValue : XNode.Node {
         protected override void Init() {
             base.Init();
-            if (!HasPort("input")) AddInstanceInput(typeof(object), "input");
+            if (!HasPort("input")) AddInstanceInput(typeof(object), ConnectionType.Override ,"input");
         }
 
         public override object GetValue(XNode.NodePort port) {

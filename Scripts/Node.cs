@@ -3,9 +3,28 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace XNode {
-    /// <summary> Base class for all nodes </summary>
+    /// <summary>
+    /// Base class for all nodes
+    /// </summary>
+    /// <example>
+    /// Classes extending this class will be considered as valid nodes by xNode.
+    /// <code>
+    /// [System.Serializable]
+    /// public class Adder : Node {
+    ///     [Input] public float a;
+    ///     [Input] public float b;
+    ///     [Output] public float result;
+    ///
+    ///     // GetValue should be overridden to return a value for any specified output port
+    ///     public override object GetValue(NodePort port) {
+    ///         return a + b;
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
     [Serializable]
     public abstract class Node : ScriptableObject {
+        /// <summary> Used by <see cref="InputAttribute"/> and <see cref="OutputAttribute"/> to determine when to display the field value associated with a <see cref="NodePort"/> </summary>
         public enum ShowBackingValue {
             /// <summary> Never show the backing value </summary>
             Never,

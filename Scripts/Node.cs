@@ -67,16 +67,26 @@ namespace XNode {
         }
 
 #region Instance Ports
-        /// <summary> Returns input port at index </summary>
+        /// <summary> Convenience function.
+        /// </summary>
+        /// <seealso cref="AddInstancePort"/>
+        /// <seealso cref="AddInstanceOutput"/>
         public NodePort AddInstanceInput(Type type, string fieldName = null) {
             return AddInstancePort(type, NodePort.IO.Input, fieldName);
         }
 
-        /// <summary> Returns input port at index </summary>
+        /// <summary> Convenience function.
+        /// </summary>
+        /// <seealso cref="AddInstancePort"/>
+        /// <seealso cref="AddInstanceInput"/>
         public NodePort AddInstanceOutput(Type type, string fieldName = null) {
             return AddInstancePort(type, NodePort.IO.Output, fieldName);
         }
 
+        /// <summary> Add a dynamic, serialized port to this node.
+        /// </summary>
+        /// <seealso cref="AddInstanceInput"/>
+        /// <seealso cref="AddInstanceOutput"/>
         private NodePort AddInstancePort(Type type, NodePort.IO direction, string fieldName = null) {
             if (fieldName == null) {
                 fieldName = "instanceInput_0";

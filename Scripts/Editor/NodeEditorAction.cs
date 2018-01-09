@@ -53,7 +53,7 @@ namespace XNodeEditor {
                             }
                             Repaint();
                         }
-                    } else if (e.button == 1) {
+                    } else if (e.button == 1 || e.button == 2) {
                         panOffset += e.delta * zoom;
                         isPanning = true;
                     }

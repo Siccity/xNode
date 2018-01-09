@@ -3,9 +3,28 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace XNode {
-    /// <summary> Base class for all nodes </summary>
+    /// <summary>
+    /// Base class for all nodes
+    /// </summary>
+    /// <example>
+    /// Classes extending this class will be considered as valid nodes by xNode.
+    /// <code>
+    /// [System.Serializable]
+    /// public class Adder : Node {
+    ///     [Input] public float a;
+    ///     [Input] public float b;
+    ///     [Output] public float result;
+    ///
+    ///     // GetValue should be overridden to return a value for any specified output port
+    ///     public override object GetValue(NodePort port) {
+    ///         return a + b;
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
     [Serializable]
     public abstract class Node : ScriptableObject {
+        /// <summary> Used by <see cref="InputAttribute"/> and <see cref="OutputAttribute"/> to determine when to display the field value associated with a <see cref="NodePort"/> </summary>
         public enum ShowBackingValue {
             /// <summary> Never show the backing value </summary>
             Never,
@@ -55,16 +74,26 @@ namespace XNode {
         }
 
 #region Instance Ports
-        /// <summary> Returns input port at index </summary>
+        /// <summary> Convenience function.
+        /// </summary>
+        /// <seealso cref="AddInstancePort"/>
+        /// <seealso cref="AddInstanceOutput"/>
         public NodePort AddInstanceInput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, string fieldName = null) {
             return AddInstancePort(type, NodePort.IO.Input, connectionType, fieldName);
         }
 
-        /// <summary> Returns input port at index </summary>
+        /// <summary> Convenience function.
+        /// </summary>
+        /// <seealso cref="AddInstancePort"/>
+        /// <seealso cref="AddInstanceInput"/>
         public NodePort AddInstanceOutput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, string fieldName = null) {
             return AddInstancePort(type, NodePort.IO.Output, connectionType, fieldName);
         }
 
+        /// <summary> Add a dynamic, serialized port to this node.
+        /// </summary>
+        /// <seealso cref="AddInstanceInput"/>
+        /// <seealso cref="AddInstanceOutput"/>
         private NodePort AddInstancePort(Type type, NodePort.IO direction, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, string fieldName = null) {
             if (fieldName == null) {
                 fieldName = "instanceInput_0";

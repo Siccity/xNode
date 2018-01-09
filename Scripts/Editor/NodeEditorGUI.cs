@@ -193,7 +193,8 @@ namespace XNodeEditor {
             //Save guiColor so we can revert it
             Color guiColor = GUI.color;
             for (int n = 0; n < graph.nodes.Count; n++) {
-                while (graph.nodes[n] == null) graph.nodes.RemoveAt(n);
+                // Skip null nodes. The user could be in the process of renaming scripts, so removing them at this point is not advisable.
+                if (graph.nodes[n] == null) continue;
                 if (n >= graph.nodes.Count) return;
                 XNode.Node node = graph.nodes[n];
 

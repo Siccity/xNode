@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
-using XNode;
 
-namespace BasicNodes {
+namespace XNode.Examples.MathNodes {
     public class Vector : XNode.Node {
         [Input] public float x, y, z;
         [Output] public Vector3 vector;

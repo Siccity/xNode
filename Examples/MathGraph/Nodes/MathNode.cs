@@ -1,6 +1,4 @@
-﻿using XNode;
-
-namespace BasicNodes {
+﻿namespace XNode.Examples.MathNodes {
     [System.Serializable]
     public class MathNode : XNode.Node {
         // Adding [Input] or [Output] is all you need to do to register a field as a valid port on your node 

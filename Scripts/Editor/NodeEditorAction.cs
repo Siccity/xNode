@@ -54,7 +54,12 @@ namespace XNodeEditor {
                             Repaint();
                         }
                     } else if (e.button == 1 || e.button == 2) {
-                        panOffset += e.delta * zoom;
+                        Vector2 tempOffset = panOffset;
+                        tempOffset += e.delta * zoom;
+                        // Round value to increase crispyness of UI text
+                        tempOffset.x = Mathf.Round(tempOffset.x);
+                        tempOffset.y = Mathf.Round(tempOffset.y);
+                        panOffset = tempOffset;
                         isPanning = true;
                     }
                     break;

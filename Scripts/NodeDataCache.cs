@@ -63,7 +63,7 @@ namespace XNode {
 
                 if (inputAttrib == null && outputAttrib == null) continue;
 
-                if (inputAttrib != null && outputAttrib != null) Debug.LogError("Field " + fieldInfo + " cannot be both input and output.");
+                if (inputAttrib != null && outputAttrib != null) Debug.LogError("Field " + fieldInfo[i].Name + " cannot be both input and output.");
                 else {
                     if (!portDataCache.ContainsKey(nodeType)) portDataCache.Add(nodeType, new List<NodePort>());
                     portDataCache[nodeType].Add(new NodePort(fieldInfo[i]));

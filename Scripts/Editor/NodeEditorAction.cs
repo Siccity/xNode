@@ -126,7 +126,7 @@ namespace XNodeEditor {
                             AssetDatabase.SaveAssets();
                         }
 
-                        if (IsHoveringNode && !DidDragNodeHeader && !e.control) {
+                        if (IsHoveringNode && !DidDragNodeHeader && !(e.control || e.shift)) {
                             SelectNode(hoveredNode, false);
                             Repaint();
                         }

@@ -82,7 +82,7 @@ namespace XNodeEditor {
                 List<Object> selection = new List<Object>(Selection.objects);
                 selection.Add(node);
                 Selection.objects = selection.ToArray();
-            } else Selection.activeObject = node;
+            } else Selection.objects = new Object[] { node };
         }
 
         public void DeselectNode(XNode.Node node) {

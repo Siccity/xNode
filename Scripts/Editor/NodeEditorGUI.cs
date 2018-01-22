@@ -6,7 +6,8 @@ using UnityEngine;
 namespace XNodeEditor {
     /// <summary> Contains GUI methods </summary>
     public partial class NodeEditorWindow {
-        NodeGraphEditor currentGraphEditor;
+        private NodeGraphEditor currentGraphEditor;
+        private List<UnityEngine.Object> selectionCache;
 
         private void OnGUI() {
             Event e = Event.current;
@@ -74,23 +75,30 @@ namespace XNodeEditor {
             return GUILayout.Button(name, EditorStyles.toolbarDropDown, GUILayout.Width(width));
         }
 
-        /// <summary> Show right-click context menu for a node </summary>
-        public void ShowNodeContextMenu(XNode.Node node) {
+        /// <summary> Show right-click context menu for selected nodes </summary>
+        public void ShowNodeContextMenu() {
             GenericMenu contextMenu = new GenericMenu();
-            contextMenu.AddItem(new GUIContent("Move To Top"), false, () => {
-                int index;
-                while ((index = graph.nodes.IndexOf(node)) != graph.nodes.Count - 1) {
-                    graph.nodes[index] = graph.nodes[index + 1];
-                    graph.nodes[index + 1] = node;
-                }
-            });
-            contextMenu.AddItem(new GUIContent("Duplicate"), false, () => {
-                XNode.Node n = graph.CopyNode(node);
-                n.position = node.position + new Vector2(30, 30);
-            });
-            contextMenu.AddItem(new GUIContent("Remove"), false, () => graph.RemoveNode(node));
+            // If only one node is selected
+            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
+                XNode.Node node = Selection.activeObject as XNode.Node;
+                contextMenu.AddItem(new GUIContent("Move To Top"), false, () => {
+                    int index;
+                    while ((index = graph.nodes.IndexOf(node)) != graph.nodes.Count - 1) {
+                        graph.nodes[index] = graph.nodes[index + 1];
+                        graph.nodes[index + 1] = node;
+                    }
+                });
+            }
 
-            AddCustomContextMenuItems(contextMenu, node);
+            contextMenu.AddItem(new GUIContent("Duplicate"), false, DublicateSelectedNodes);
+            contextMenu.AddItem(new GUIContent("Remove"), false, RemoveSelectedNodes);
+
+            // If only one node is selected
+            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
+                XNode.Node node = Selection.activeObject as XNode.Node;
+                AddCustomContextMenuItems(contextMenu, node);
+            }
+
             contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
         }
 
@@ -168,17 +176,20 @@ namespace XNodeEditor {
 
         private void DrawNodes() {
             Event e = Event.current;
+            if (e.type == EventType.Layout) {
+                selectionCache = new List<UnityEngine.Object>(Selection.objects);
+            }
             if (e.type == EventType.Repaint) {
                 portConnectionPoints.Clear();
                 nodeWidths.Clear();
             }
 
-            //Selected node is hashed before and after node GUI to detect changes
+            //Active node is hashed before and after node GUI to detect changes
             int nodeHash = 0;
             System.Reflection.MethodInfo onValidate = null;
-            if (selectedNode != null) {
-                onValidate = selectedNode.GetType().GetMethod("OnValidate");
-                if (onValidate != null) nodeHash = selectedNode.GetHashCode();
+            if (Selection.activeObject != null && Selection.activeObject is XNode.Node) {
+                onValidate = Selection.activeObject.GetType().GetMethod("OnValidate");
+                if (onValidate != null) nodeHash = Selection.activeObject.GetHashCode();
             }
 
             BeginZoomed(position, zoom);
@@ -206,9 +217,23 @@ namespace XNodeEditor {
 
                 GUILayout.BeginArea(new Rect(nodePos, new Vector2(nodeEditor.GetWidth(), 4000)));
 
-                GUIStyle style = NodeEditorResources.styles.nodeBody;
-                GUI.color = nodeEditor.GetTint();
-                GUILayout.BeginVertical(new GUIStyle(style));
+                bool selected = selectionCache.Contains(graph.nodes[n]);
+
+                if (selected) {
+                    GUIStyle style = new GUIStyle(NodeEditorResources.styles.nodeBody);
+                    GUIStyle highlightStyle = new GUIStyle(NodeEditorResources.styles.nodeHighlight);
+                    highlightStyle.padding = style.padding;
+                    style.padding = new RectOffset();
+                    GUI.color = nodeEditor.GetTint();
+                    GUILayout.BeginVertical(new GUIStyle(style));
+                    GUI.color = Color.white;
+                    GUILayout.BeginVertical(new GUIStyle(highlightStyle));
+                } else {
+                    GUIStyle style = NodeEditorResources.styles.nodeBody;
+                    GUI.color = nodeEditor.GetTint();
+                    GUILayout.BeginVertical(new GUIStyle(style));
+                }
+
                 GUI.color = guiColor;
                 EditorGUI.BeginChangeCheck();
 
@@ -235,6 +260,7 @@ namespace XNodeEditor {
                 }
 
                 GUILayout.EndVertical();
+                if (selected) GUILayout.EndVertical();
 
                 if (e.type != EventType.Layout) {
                     //Check if we are hovering this node
@@ -267,8 +293,8 @@ namespace XNodeEditor {
             //If a change in hash is detected in the selected node, call OnValidate method. 
             //This is done through reflection because OnValidate is only relevant in editor, 
             //and thus, the code should not be included in build.
-            if (selectedNode != null) {
-                if (onValidate != null && nodeHash != selectedNode.GetHashCode()) onValidate.Invoke(selectedNode, null);
+            if (nodeHash != 0) {
+                if (onValidate != null && nodeHash != Selection.activeObject.GetHashCode()) onValidate.Invoke(Selection.activeObject, null);
             }
         }
 

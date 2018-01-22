@@ -6,22 +6,20 @@ namespace XNodeEditor {
     public partial class NodeEditorWindow {
 
         public static bool isPanning { get; private set; }
-        public static Vector2 dragOffset;
+        public static Vector2[] dragOffset;
 
-        private bool IsDraggingNode { get { return draggedNode != null; } }
+        //private bool IsDraggingNode { get { return draggedNode != null; } }
         private bool IsDraggingPort { get { return draggedOutput != null; } }
         private bool IsHoveringPort { get { return hoveredPort != null; } }
         private bool IsHoveringNode { get { return hoveredNode != null; } }
-        private bool HasSelectedNode { get { return selectedNode != null; } }
-
+        public bool CanDragNodeHeader { get; private set; }
+        public bool DidDragNodeHeader { get; private set; }
         private XNode.Node hoveredNode = null;
 
-        [NonSerialized] private XNode.Node selectedNode = null;
-        [NonSerialized] private XNode.Node draggedNode = null;
+        //[NonSerialized] private XNode.Node draggedNode = null;
         [NonSerialized] private XNode.NodePort hoveredPort = null;
         [NonSerialized] private XNode.NodePort draggedOutput = null;
         [NonSerialized] private XNode.NodePort draggedOutputTarget = null;
-
         private Rect nodeRects;
 
         public void Controls() {
@@ -45,12 +43,18 @@ namespace XNodeEditor {
                                 draggedOutputTarget = null;
                             }
                             Repaint();
-                        } else if (IsDraggingNode) {
-                            draggedNode.position = WindowToGridPosition(e.mousePosition) + dragOffset;
-                            if (NodeEditorPreferences.gridSnap) {
-                                draggedNode.position.x = (Mathf.Round((draggedNode.position.x + 8) / 16) * 16) - 8;
-                                draggedNode.position.y = (Mathf.Round((draggedNode.position.y + 8) / 16) * 16) - 8;
+                        } else if (CanDragNodeHeader) {
+                            for (int i = 0; i < Selection.objects.Length; i++) {
+                                if (Selection.objects[i] is XNode.Node) {
+                                    XNode.Node node = Selection.objects[i] as XNode.Node;
+                                    node.position = WindowToGridPosition(e.mousePosition) + dragOffset[i];
+                                    if (NodeEditorPreferences.gridSnap) {
+                                        node.position.x = (Mathf.Round((node.position.x + 8) / 16) * 16) - 8;
+                                        node.position.y = (Mathf.Round((node.position.y + 8) / 16) * 16) - 8;
+                                    }
+                                }
                             }
+                            DidDragNodeHeader = true;
                             Repaint();
                         }
                     } else if (e.button == 1 || e.button == 2) {
@@ -66,7 +70,11 @@ namespace XNodeEditor {
                 case EventType.MouseDown:
                     Repaint();
                     if (e.button == 0) {
-                        SelectNode(hoveredNode);
+
+                        if (hoveredNode == null) Selection.activeObject = null;
+                        else if (!Selection.Contains(hoveredNode)) SelectNode(hoveredNode, e.control || e.shift);
+                        else if (e.control || e.shift) DeselectNode(hoveredNode);
+
                         if (IsHoveringPort) {
                             if (hoveredPort.IsOutput) {
                                 draggedOutput = hoveredPort;
@@ -82,8 +90,15 @@ namespace XNodeEditor {
                                 }
                             }
                         } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
-                            draggedNode = hoveredNode;
-                            dragOffset = hoveredNode.position - WindowToGridPosition(e.mousePosition);
+                            DidDragNodeHeader = false;
+                            CanDragNodeHeader = true;
+                            dragOffset = new Vector2[Selection.objects.Length];
+                            for (int i = 0; i < dragOffset.Length; i++) {
+                                if (Selection.objects[i] is XNode.Node) {
+                                    XNode.Node node = Selection.objects[i] as XNode.Node;
+                                    dragOffset[i] = node.position - WindowToGridPosition(e.mousePosition);
+                                }
+                            }
                         }
                     }
                     break;
@@ -104,22 +119,33 @@ namespace XNodeEditor {
                             EditorUtility.SetDirty(graph);
                             Repaint();
                             AssetDatabase.SaveAssets();
-                        } else if (IsDraggingNode) {
-                            draggedNode = null;
+                        } else if (CanDragNodeHeader) {
+                            CanDragNodeHeader = false;
                             AssetDatabase.SaveAssets();
                         } else if (GUIUtility.hotControl != 0) {
                             AssetDatabase.SaveAssets();
                         }
+
+                        if (IsHoveringNode && !DidDragNodeHeader && !e.control) {
+                            SelectNode(hoveredNode, false);
+                            Repaint();
+                        }
                     } else if (e.button == 1) {
                         if (!isPanning) {
                             if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
-                                ShowNodeContextMenu(hoveredNode);
+                                if (!Selection.Contains(hoveredNode)) SelectNode(hoveredNode,false);
+                                ShowNodeContextMenu();
                             } else if (!IsHoveringNode) {
                                 ShowGraphContextMenu();
                             }
                         }
                         isPanning = false;
                     }
+                    break;
+                case EventType.KeyDown:
+                    if (e.keyCode == KeyCode.Delete) RemoveSelectedNodes();
+                    else if (e.keyCode == KeyCode.D && e.control) DublicateSelectedNodes();
+                    Repaint();
                     break;
             }
         }
@@ -134,6 +160,31 @@ namespace XNodeEditor {
             XNode.Node node = graph.AddNode(type);
             node.position = position;
             Repaint();
+        }
+
+        /// <summary> Remove nodes in the graph in Selection.objects</summary>
+        public void RemoveSelectedNodes() {
+            foreach (UnityEngine.Object item in Selection.objects) {
+                if (item is XNode.Node) {
+                    XNode.Node node = item as XNode.Node;
+                    graph.RemoveNode(node);
+                }
+            }
+        }
+
+        // <summary> Dublicate selected nodes and select the dublicates
+        public void DublicateSelectedNodes() {
+            UnityEngine.Object[] newNodes = new UnityEngine.Object[Selection.objects.Length];
+            for (int i = 0; i < Selection.objects.Length; i++) {
+                if (Selection.objects[i] is XNode.Node) {
+                    XNode.Node node = Selection.objects[i] as XNode.Node;
+                    if (node.graph != graph) continue; // ignore nodes selected in another graph
+                    XNode.Node n = graph.CopyNode(node);
+                    n.position = node.position + new Vector2(30, 30);
+                    newNodes[i] = n;
+                }
+            }
+            Selection.objects = newNodes;
         }
 
         /// <summary> Draw a connection as we are dragging it </summary>

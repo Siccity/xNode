@@ -90,6 +90,7 @@ namespace XNodeEditor {
                                 }
                             }
                         } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
+                            e.Use();
                             DidDragNodeHeader = false;
                             CanDragNodeHeader = true;
                             dragOffset = new Vector2[Selection.objects.Length];

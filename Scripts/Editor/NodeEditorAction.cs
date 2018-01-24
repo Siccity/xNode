@@ -71,10 +71,6 @@ namespace XNodeEditor {
                     Repaint();
                     if (e.button == 0) {
 
-                        if (hoveredNode == null) Selection.activeObject = null;
-                        else if (!Selection.Contains(hoveredNode)) SelectNode(hoveredNode, e.control || e.shift);
-                        else if (e.control || e.shift) DeselectNode(hoveredNode);
-
                         if (IsHoveringPort) {
                             if (hoveredPort.IsOutput) {
                                 draggedOutput = hoveredPort;
@@ -90,6 +86,9 @@ namespace XNodeEditor {
                                 }
                             }
                         } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
+                            // If mousedown on node header, select or deselect
+                            if (!Selection.Contains(hoveredNode)) SelectNode(hoveredNode, e.control || e.shift);
+                            else if (e.control || e.shift) DeselectNode(hoveredNode);
                             e.Use();
                             DidDragNodeHeader = false;
                             CanDragNodeHeader = true;
@@ -100,6 +99,10 @@ namespace XNodeEditor {
                                     dragOffset[i] = node.position - WindowToGridPosition(e.mousePosition);
                                 }
                             }
+                        }
+                        // If mousedown on grid background, deselect all
+                        else if (!IsHoveringNode) {
+                            Selection.activeObject = null;
                         }
                     }
                     break;
@@ -123,11 +126,18 @@ namespace XNodeEditor {
                         } else if (CanDragNodeHeader) {
                             CanDragNodeHeader = false;
                             AssetDatabase.SaveAssets();
-                        } else if (GUIUtility.hotControl != 0) {
+                        } else if (!IsHoveringNode) {
+                            // If click outside node, release field focus
+                            if (!isPanning) {
+                                GUIUtility.hotControl = 0;
+                                GUIUtility.keyboardControl = 0;
+                            }
+                            Repaint();
                             AssetDatabase.SaveAssets();
                         }
 
-                        if (IsHoveringNode && !DidDragNodeHeader && !(e.control || e.shift)) {
+                        // If click node header, select single node.
+                        if (IsHoveringNode && !DidDragNodeHeader && IsHoveringTitle(hoveredNode) && !(e.control || e.shift)) {
                             SelectNode(hoveredNode, false);
                             Repaint();
                         }

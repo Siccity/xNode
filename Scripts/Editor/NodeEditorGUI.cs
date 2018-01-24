@@ -21,6 +21,7 @@ namespace XNodeEditor {
             DrawConnections();
             DrawDraggedConnection();
             DrawNodes();
+            DrawBox();
             DrawTooltip();
 
             GUI.matrix = m;
@@ -69,6 +70,17 @@ namespace XNodeEditor {
             // Draw tiled background
             GUI.DrawTextureWithTexCoords(rect, gridTex, new Rect(tileOffset, tileAmount));
             GUI.DrawTextureWithTexCoords(rect, crossTex, new Rect(tileOffset + new Vector2(0.5f, 0.5f), tileAmount));
+        }
+
+        public void DrawBox() {
+            if (currentActivity == NodeActivity.DragGrid) {
+                Vector2 curPos = WindowToGridPosition(Event.current.mousePosition);
+                Vector2 size = curPos - dragBoxStart;
+                Rect r = new Rect(dragBoxStart, size);
+                r.position = GridToWindowPosition(r.position);
+                r.size /= zoom;
+                Handles.DrawSolidRectangleWithOutline(r, new Color(0, 0, 0, 0.1f), new Color(1, 1, 1, 0.6f));
+            }
         }
 
         public static bool DropdownButton(string name, float width) {
@@ -201,6 +213,8 @@ namespace XNodeEditor {
                 hoveredPort = null;
             }
 
+            List<UnityEngine.Object> preSelection = new List<UnityEngine.Object>(preBoxSelection);
+
             //Save guiColor so we can revert it
             Color guiColor = GUI.color;
             for (int n = 0; n < graph.nodes.Count; n++) {
@@ -268,6 +282,19 @@ namespace XNodeEditor {
                     Rect windowRect = new Rect(nodePos, nodeSize);
                     if (windowRect.Contains(mousePos)) hoveredNode = node;
 
+                    //If dragging a selection box, add nodes inside to selection
+                    if (currentActivity == NodeActivity.DragGrid) {
+                        Vector2 startPos = GridToWindowPosition(dragBoxStart);
+                        Vector2 size = (mousePos - startPos) / zoom;
+                        Rect r = new Rect(dragBoxStart, size);
+                        Vector2 rpos = GridToWindowPosition(r.position);
+                        if (size.x < 0) { rpos.x += size.x; size.x = Mathf.Abs(size.x); }
+                        if (size.y < 0) { rpos.y += size.y; size.y = Mathf.Abs(size.y); }
+                        r.position = rpos;
+                        r.size = size;
+                        if (windowRect.Overlaps(r)) preSelection.Add(node);
+                    }
+
                     //Check if we are hovering any of this nodes ports
                     //Check input ports
                     foreach (XNode.NodePort input in node.Inputs) {
@@ -288,6 +315,7 @@ namespace XNodeEditor {
                 GUILayout.EndArea();
             }
 
+            if (e.type != EventType.Layout && currentActivity == NodeActivity.DragGrid) Selection.objects = preSelection.ToArray();
             EndZoomed(position, zoom);
 
             //If a change in hash is detected in the selected node, call OnValidate method. 

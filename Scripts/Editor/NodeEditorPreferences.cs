@@ -26,8 +26,10 @@ namespace XNodeEditor {
         /// <summary> Have we loaded the prefs yet </summary>
         private static bool prefsLoaded = false;
 
-        private static Dictionary<string, Color> typeColors;
-        private static Dictionary<string, Color> generatedTypeColors;
+        /// <summary> TypeColors requested by the editor </summary>
+        private static Dictionary<string, Color> typeColors = new Dictionary<string, Color>();
+        /// <summary> TypeColors available in EditorPrefs </summary>
+        private static Dictionary<string, Color> prefsTypeColors = new Dictionary<string, Color>();
         public static bool gridSnap { get { VerifyLoaded(); return _gridSnap; } }
         private static bool _gridSnap = true;
         public static Color gridLineColor { get { VerifyLoaded(); return _gridLineColor; } }
@@ -66,63 +68,24 @@ namespace XNodeEditor {
             //Label
             EditorGUILayout.LabelField("Type colors", EditorStyles.boldLabel);
 
-            //Get saved type keys
-            string[] typeKeys = new string[typeColors.Count];
-            typeColors.Keys.CopyTo(typeKeys, 0);
-            //Display saved type colors
-            foreach (var key in typeKeys) {
-                EditorGUILayout.BeginHorizontal();
-                if (!EditorGUILayout.Toggle(new GUIContent(key, key), true)) {
-                    typeColors.Remove(key);
-                    SavePrefs();
-                    EditorGUILayout.EndHorizontal();
-                    continue;
-                }
+            //Display type colors. Save them if they are edited by the user
+            List<string> keys = new List<string>(typeColors.Keys);
+            foreach (string key in keys) {
                 Color col = typeColors[key];
-                col = EditorGUILayout.ColorField(col);
-                typeColors[key] = col;
-                EditorGUILayout.EndHorizontal();
-            }
-            if (GUI.changed) {
-                SavePrefs();
-                NodeEditorWindow.RepaintAll();
-            }
-
-            //Get generated type keys
-            string[] generatedTypeKeys = new string[generatedTypeColors.Count];
-            generatedTypeColors.Keys.CopyTo(generatedTypeKeys, 0);
-            //Display generated type colors
-            foreach (var key in generatedTypeKeys) {
+                EditorGUI.BeginChangeCheck();
                 EditorGUILayout.BeginHorizontal();
-                if (EditorGUILayout.Toggle(new GUIContent(key, key), false)) {
-                    typeColors.Add(key, generatedTypeColors[key]);
-                    generatedTypeColors.Remove(key);
-                    SavePrefs();
-                    EditorGUILayout.EndHorizontal();
-                    continue;
-                }
-                Color col = generatedTypeColors[key];
-                EditorGUI.BeginDisabledGroup(true);
-                col = EditorGUILayout.ColorField(col);
-                EditorGUI.EndDisabledGroup();
-
+                col = EditorGUILayout.ColorField(key, col);
                 EditorGUILayout.EndHorizontal();
+                if (EditorGUI.EndChangeCheck()) {
+                    typeColors[key] = col;
+                    SaveTypeColor(key, col);
+                    NodeEditorWindow.RepaintAll();
+                }
             }
         }
 
         private static void LoadPrefs() {
-            //Load type colors
-            generatedTypeColors = new Dictionary<string, Color>();
-
-            if (!EditorPrefs.HasKey("xnode_typecolors")) EditorPrefs.SetString("xnode_typecolors", "");
-            string[] data = EditorPrefs.GetString("xnode_typecolors").Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            typeColors = new Dictionary<string, Color>();
-            for (int i = 0; i < data.Length; i += 2) {
-                Color col;
-                if (ColorUtility.TryParseHtmlString("#" + data[i + 1], out col)) {
-                    typeColors.Add(data[i], col);
-                }
-            }
+            prefsTypeColors = LoadTypeColors();
 
             //Load grid colors
             if (!EditorPrefs.HasKey("xnode_gridcolor0")) EditorPrefs.SetString("xnode_gridcolor0", ColorUtility.ToHtmlStringRGB(new Color(0.45f, 0.45f, 0.45f)));
@@ -137,6 +100,36 @@ namespace XNodeEditor {
             prefsLoaded = true;
         }
 
+        /// <summary> Get Type Colors from EditorPrefs. Colors are saved as CSV in pairs of two hexcolor/name </summary>
+        public static Dictionary<string, Color> LoadTypeColors() {
+            //Load type colors
+            Dictionary<string, Color> result = new Dictionary<string, Color>();
+
+            if (!EditorPrefs.HasKey("xnode_typecolors")) EditorPrefs.SetString("xnode_typecolors", "");
+            string[] data = EditorPrefs.GetString("xnode_typecolors").Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < data.Length; i += 2) {
+                Color col;
+                if (ColorUtility.TryParseHtmlString("#" + data[i + 1], out col)) {
+                    result.Add(data[i], col);
+                }
+            }
+            return result;
+        }
+
+        /// <summary> Get Type Colors from EditorPrefs. Colors are saved as CSV in pairs of two hexcolor/name ""
+        public static Dictionary<string, Color> SaveTypeColor(string typeName, Color col) {
+            //Load type colors
+            Dictionary<string, Color> result = LoadTypeColors();
+            if (result.ContainsKey(typeName)) result[typeName] = col;
+            else result.Add(typeName, col);
+            string s = "";
+            foreach (var item in result) {
+                s += item.Key + "," + ColorUtility.ToHtmlStringRGB(item.Value) + ",";
+            }
+            EditorPrefs.SetString("xnode_typecolors", s);
+            return result;
+        }
+
         /// <summary> Delete all prefs </summary>
         public static void ResetPrefs() {
             if (EditorPrefs.HasKey("xnode_typecolors")) EditorPrefs.DeleteKey("xnode_typecolors");
@@ -146,11 +139,6 @@ namespace XNodeEditor {
         }
 
         private static void SavePrefs() {
-            string s = "";
-            foreach (var item in typeColors) {
-                s += item.Key + "," + ColorUtility.ToHtmlStringRGB(item.Value) + ",";
-            }
-            EditorPrefs.SetString("xnode_typecolors", s);
             EditorPrefs.SetString("xnode_gridcolor0", ColorUtility.ToHtmlStringRGB(_gridLineColor));
             EditorPrefs.SetString("xnode_gridcolor1", ColorUtility.ToHtmlStringRGB(_gridBgColor));
             EditorPrefs.SetBool("xnode_gridsnap", _gridSnap);
@@ -165,15 +153,18 @@ namespace XNodeEditor {
             VerifyLoaded();
             if (type == null) return Color.gray;
             string typeName = type.PrettyName();
-            if (typeColors.ContainsKey(typeName)) return typeColors[typeName];
-            if (generatedTypeColors.ContainsKey(typeName)) return generatedTypeColors[typeName];
-            #if UNITY_5_4_OR_NEWER
-            UnityEngine.Random.InitState(typeName.GetHashCode());
-            #else
-            UnityEngine.Random.seed = typeName.GetHashCode();
-            #endif
-            generatedTypeColors.Add(typeName, new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value));
-            return generatedTypeColors[typeName];
+            if (!typeColors.ContainsKey(typeName)) {
+                if (prefsTypeColors.ContainsKey(typeName)) typeColors.Add(typeName, prefsTypeColors[typeName]);
+                else {
+#if UNITY_5_4_OR_NEWER
+                    UnityEngine.Random.InitState(typeName.GetHashCode());
+#else
+                    UnityEngine.Random.seed = typeName.GetHashCode();
+#endif
+                    typeColors.Add(typeName, new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value));
+                }
+            }
+            return typeColors[typeName];
         }
     }
 }

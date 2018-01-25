@@ -23,8 +23,8 @@ namespace XNodeEditor {
         }
         private static Texture2D _crossTexture;
 
-        /// <summary> TypeColors requested by the editor </summary>
-        public static bool gridSnap { get { VerifyLoaded(); return settings.gridSnap; } }
+        public static bool GridSnap { get { VerifyLoaded(); return settings.gridSnap; } }
+        public static Color HighlightColor  { get { VerifyLoaded(); return settings.highlightColor; } }
 
         private static Dictionary<string, Color> typeColors = new Dictionary<string, Color>();
         private static Settings settings;
@@ -33,6 +33,7 @@ namespace XNodeEditor {
         private class Settings : ISerializationCallbackReceiver {
             public Color32 gridLineColor = new Color(0.45f, 0.45f, 0.45f);
             public Color32 gridBgColor = new Color(0.18f, 0.18f, 0.18f);
+            public Color32 highlightColor = new Color32(255, 223, 255, 255);
             public bool gridSnap = true;
             public string typeColorsData = "";
             public Dictionary<string, Color> typeColors = new Dictionary<string, Color>();
@@ -62,6 +63,7 @@ namespace XNodeEditor {
         private static void PreferencesGUI() {
             VerifyLoaded();
 
+            NodeSettingsGUI();
             GridSettingsGUI();
             TypeColorsGUI();
             if (GUILayout.Button(new GUIContent("Set Default", "Reset all values to default"), GUILayout.Width(120))) {
@@ -85,9 +87,20 @@ namespace XNodeEditor {
             EditorGUILayout.Space();
         }
 
+        private static void NodeSettingsGUI() {
+            //Label
+            EditorGUILayout.LabelField("Node", EditorStyles.boldLabel);
+            settings.highlightColor = EditorGUILayout.ColorField("Selection", settings.highlightColor);
+            if (GUI.changed) {
+                SavePrefs();
+                NodeEditorWindow.RepaintAll();
+            }
+            EditorGUILayout.Space();
+        }
+
         private static void TypeColorsGUI() {
             //Label
-            EditorGUILayout.LabelField("Type colors", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Types", EditorStyles.boldLabel);
 
             //Display type colors. Save them if they are edited by the user
             List<string> keys = new List<string>(typeColors.Keys);

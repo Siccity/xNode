@@ -240,7 +240,7 @@ namespace XNodeEditor {
                     style.padding = new RectOffset();
                     GUI.color = nodeEditor.GetTint();
                     GUILayout.BeginVertical(new GUIStyle(style));
-                    GUI.color = Color.white;
+                    GUI.color = NodeEditorPreferences.HighlightColor;
                     GUILayout.BeginVertical(new GUIStyle(highlightStyle));
                 } else {
                     GUIStyle style = NodeEditorResources.styles.nodeBody;

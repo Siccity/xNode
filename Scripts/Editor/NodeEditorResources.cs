@@ -9,13 +9,15 @@ namespace XNodeEditor {
         private static Texture2D _dotOuter;
         public static Texture2D nodeBody { get { return _nodeBody != null ? _nodeBody : _nodeBody = Resources.Load<Texture2D>("xnode_node"); } }
         private static Texture2D _nodeBody;
+        public static Texture2D nodeHighlight { get { return _nodeHighlight != null ? _nodeHighlight : _nodeHighlight = Resources.Load<Texture2D>("xnode_node_highlight"); } }
+        private static Texture2D _nodeHighlight;
 
         // Styles
         public static Styles styles { get { return _styles != null ? _styles : _styles = new Styles(); } }
         public static Styles _styles = null;
 
         public class Styles {
-            public GUIStyle inputPort, outputPort, nodeHeader, nodeBody, tooltip;
+            public GUIStyle inputPort, outputPort, nodeHeader, nodeBody, tooltip, nodeHighlight;
 
             public Styles() {
                 GUIStyle baseStyle = new GUIStyle("Label");
@@ -39,6 +41,10 @@ namespace XNodeEditor {
                 nodeBody.border = new RectOffset(32, 32, 32, 32);
                 nodeBody.padding = new RectOffset(16, 16, 4, 16);
 
+                nodeHighlight = new GUIStyle();
+                nodeHighlight.normal.background = NodeEditorResources.nodeHighlight;
+                nodeHighlight.border = new RectOffset(32, 32, 32, 32);
+
                 tooltip = new GUIStyle("helpBox");
                 tooltip.alignment = TextAnchor.MiddleCenter;
             }
@@ -50,8 +56,8 @@ namespace XNodeEditor {
             for (int y = 0; y < 64; y++) {
                 for (int x = 0; x < 64; x++) {
                     Color col = bg;
-                    if (y % 16 == 0 || x % 16 == 0) col = Color.Lerp(line,bg,0.65f);
-                    if (y == 63 || x == 63) col = Color.Lerp(line,bg,0.35f);
+                    if (y % 16 == 0 || x % 16 == 0) col = Color.Lerp(line, bg, 0.65f);
+                    if (y == 63 || x == 63) col = Color.Lerp(line, bg, 0.35f);
                     cols[(y * 64) + x] = col;
                 }
             }

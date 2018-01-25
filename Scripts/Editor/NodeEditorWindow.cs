@@ -77,8 +77,18 @@ namespace XNodeEditor {
             return new Vector2(xOffset, yOffset);
         }
 
-        public void SelectNode(XNode.Node node) {
-            selectedNode = node;
+        public void SelectNode(XNode.Node node, bool add) {
+            if (add) {
+                List<Object> selection = new List<Object>(Selection.objects);
+                selection.Add(node);
+                Selection.objects = selection.ToArray();
+            } else Selection.objects = new Object[] { node };
+        }
+
+        public void DeselectNode(XNode.Node node) {
+            List<Object> selection = new List<Object>(Selection.objects);
+            selection.Remove(node);
+            Selection.objects = selection.ToArray();
         }
 
         [OnOpenAsset(0)]

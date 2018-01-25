@@ -213,7 +213,7 @@ namespace XNodeEditor {
                 hoveredPort = null;
             }
 
-            List<UnityEngine.Object> preSelection = new List<UnityEngine.Object>(preBoxSelection);
+            List<UnityEngine.Object> preSelection = preBoxSelection != null ? new List<UnityEngine.Object>(preBoxSelection) : new List<UnityEngine.Object>();
 
             //Save guiColor so we can revert it
             Color guiColor = GUI.color;

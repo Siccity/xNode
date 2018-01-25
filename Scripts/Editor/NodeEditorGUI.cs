@@ -284,14 +284,11 @@ namespace XNodeEditor {
 
                     //If dragging a selection box, add nodes inside to selection
                     if (currentActivity == NodeActivity.DragGrid) {
-                        Vector2 startPos = GridToWindowPosition(dragBoxStart);
-                        Vector2 size = (mousePos - startPos) / zoom;
-                        Rect r = new Rect(dragBoxStart, size);
-                        Vector2 rpos = GridToWindowPosition(r.position);
-                        if (size.x < 0) { rpos.x += size.x; size.x = Mathf.Abs(size.x); }
-                        if (size.y < 0) { rpos.y += size.y; size.y = Mathf.Abs(size.y); }
-                        r.position = rpos;
-                        r.size = size;
+                        Vector2 startPos = GridToWindowPositionNoClipped(dragBoxStart);
+                        Vector2 size = mousePos - startPos;
+                        if (size.x < 0) { startPos.x += size.x; size.x = Mathf.Abs(size.x); }
+                        if (size.y < 0) { startPos.y += size.y; size.y = Mathf.Abs(size.y); }
+                        Rect r = new Rect(startPos, size);
                         if (windowRect.Overlaps(r)) preSelection.Add(node);
                     }
 

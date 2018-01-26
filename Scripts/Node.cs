@@ -35,9 +35,9 @@ namespace XNode {
         }
 
         public enum ConnectionType {
-            /// <summary> Allow multiple connections</summery>
+            /// <summary> Allow multiple connections</summary>
             Multiple,
-            /// <summary> always override the current connection </summery>
+            /// <summary> always override the current connection </summary>
             Override,
         }
 
@@ -124,7 +124,8 @@ namespace XNode {
         /// <summary> Removes all instance ports from the node </summary>
         [ContextMenu("Clear instance ports")]
         public void ClearInstancePorts() {
-            foreach (NodePort port in InstancePorts) {
+            List<NodePort> instancePorts = new List<NodePort>(InstancePorts);
+            foreach (NodePort port in instancePorts) {
                 RemoveInstancePort(port);
             }
         }
@@ -200,13 +201,13 @@ namespace XNode {
             return JsonUtility.ToJson(this).GetHashCode();
         }
 
-        /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInput(string)"/> </summary>
+        /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInputPort(string)"/> </summary>
         [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
         public class InputAttribute : Attribute {
             public ShowBackingValue backingValue;
             public ConnectionType connectionType;
             
-            /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInput(string)"/> </summary>
+            /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInputPort(string)"/> </summary>
             /// <param name="backingValue">Should we display the backing value for this port as an editor field? </param>
             /// <param name="connectionType">Should we allow multiple connections? </param>
             public InputAttribute(ShowBackingValue backingValue = ShowBackingValue.Unconnected, ConnectionType connectionType = ConnectionType.Multiple) {
@@ -215,13 +216,13 @@ namespace XNode {
             }
         }
 
-        /// <summary> Mark a serializable field as an output port. You can access this through <see cref="GetOutput(string)"/> </summary>
+        /// <summary> Mark a serializable field as an output port. You can access this through <see cref="GetOutputPort(string)"/> </summary>
         [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
         public class OutputAttribute : Attribute {
             public ShowBackingValue backingValue;
             public ConnectionType connectionType;
 
-            /// <summary> Mark a serializable field as an output port. You can access this through <see cref="GetOutput(string)"/> </summary>
+            /// <summary> Mark a serializable field as an output port. You can access this through <see cref="GetOutputPort(string)"/> </summary>
             /// <param name="backingValue">Should we display the backing value for this port as an editor field? </param>
             /// <param name="connectionType">Should we allow multiple connections? </param>
             public OutputAttribute(ShowBackingValue backingValue = ShowBackingValue.Never, ConnectionType connectionType = ConnectionType.Multiple) {

@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace XNodeEditor {
     public static class NodeEditorPreferences {
+        public enum NoodleType { Curve, Line, Angled }
 
         public static Texture2D gridTexture {
             get {
@@ -24,7 +25,8 @@ namespace XNodeEditor {
         private static Texture2D _crossTexture;
 
         public static bool GridSnap { get { VerifyLoaded(); return settings.gridSnap; } }
-        public static Color HighlightColor  { get { VerifyLoaded(); return settings.highlightColor; } }
+        public static Color HighlightColor { get { VerifyLoaded(); return settings.highlightColor; } }
+        public static NoodleType noodleType { get { VerifyLoaded(); return settings.noodleType; } }
 
         private static Dictionary<string, Color> typeColors = new Dictionary<string, Color>();
         private static Settings settings;
@@ -37,6 +39,7 @@ namespace XNodeEditor {
             public bool gridSnap = true;
             public string typeColorsData = "";
             public Dictionary<string, Color> typeColors = new Dictionary<string, Color>();
+            public NoodleType noodleType = NoodleType.Curve;
 
             public void OnAfterDeserialize() {
                 // Deserialize typeColorsData
@@ -91,6 +94,7 @@ namespace XNodeEditor {
             //Label
             EditorGUILayout.LabelField("Node", EditorStyles.boldLabel);
             settings.highlightColor = EditorGUILayout.ColorField("Selection", settings.highlightColor);
+            settings.noodleType = (NoodleType)EditorGUILayout.EnumPopup("Noodle type", (Enum)settings.noodleType);
             if (GUI.changed) {
                 SavePrefs();
                 NodeEditorWindow.RepaintAll();

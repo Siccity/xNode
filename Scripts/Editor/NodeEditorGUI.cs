@@ -151,15 +151,50 @@ namespace XNodeEditor {
             startPoint = GridToWindowPosition(startPoint);
             endPoint = GridToWindowPosition(endPoint);
 
-            Vector2 startTangent = startPoint;
-            if (startPoint.x < endPoint.x) startTangent.x = Mathf.LerpUnclamped(startPoint.x, endPoint.x, 0.7f);
-            else startTangent.x = Mathf.LerpUnclamped(startPoint.x, endPoint.x, -0.7f);
+            switch (NodeEditorPreferences.noodleType) {
+                case NodeEditorPreferences.NoodleType.Curve:
+                    Vector2 startTangent = startPoint;
+                    if (startPoint.x < endPoint.x) startTangent.x = Mathf.LerpUnclamped(startPoint.x, endPoint.x, 0.7f);
+                    else startTangent.x = Mathf.LerpUnclamped(startPoint.x, endPoint.x, -0.7f);
 
-            Vector2 endTangent = endPoint;
-            if (startPoint.x > endPoint.x) endTangent.x = Mathf.LerpUnclamped(endPoint.x, startPoint.x, -0.7f);
-            else endTangent.x = Mathf.LerpUnclamped(endPoint.x, startPoint.x, 0.7f);
-
-            Handles.DrawBezier(startPoint, endPoint, startTangent, endTangent, col, null, 4);
+                    Vector2 endTangent = endPoint;
+                    if (startPoint.x > endPoint.x) endTangent.x = Mathf.LerpUnclamped(endPoint.x, startPoint.x, -0.7f);
+                    else endTangent.x = Mathf.LerpUnclamped(endPoint.x, startPoint.x, 0.7f);
+                    Handles.DrawBezier(startPoint, endPoint, startTangent, endTangent, col, null, 4);
+                    break;
+                case NodeEditorPreferences.NoodleType.Line:
+                    Handles.color = col;
+                    Handles.DrawAAPolyLine(5, startPoint, endPoint);
+                    break;
+                case NodeEditorPreferences.NoodleType.Angled:
+                    Handles.color = col;
+                    if (startPoint.x <= endPoint.x - (50 / zoom)) {
+                        float midpoint = (startPoint.x + endPoint.x) * 0.5f;
+                        Vector2 start_1 = startPoint;
+                        Vector2 end_1 = endPoint;
+                        start_1.x = midpoint;
+                        end_1.x = midpoint;
+                        Handles.DrawAAPolyLine(5, startPoint, start_1);
+                        Handles.DrawAAPolyLine(5, start_1, end_1);
+                        Handles.DrawAAPolyLine(5, end_1, endPoint);
+                    } else {
+                        float midpoint = (startPoint.y + endPoint.y) * 0.5f;
+                        Vector2 start_1 = startPoint;
+                        Vector2 end_1 = endPoint;
+                        start_1.x += 25 / zoom;
+                        end_1.x -= 25 / zoom;
+                        Vector2 start_2 = start_1;
+                        Vector2 end_2 = end_1;
+                        start_2.y = midpoint;
+                        end_2.y = midpoint;
+                        Handles.DrawAAPolyLine(5, startPoint, start_1);
+                        Handles.DrawAAPolyLine(5, start_1, start_2);
+                        Handles.DrawAAPolyLine(5, start_2, end_2);
+                        Handles.DrawAAPolyLine(5, end_2, end_1);
+                        Handles.DrawAAPolyLine(5, end_1, endPoint);
+                    }
+                    break;
+            }
         }
 
         /// <summary> Draws all connections </summary>

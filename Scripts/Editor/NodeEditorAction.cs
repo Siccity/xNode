@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -197,16 +198,42 @@ namespace XNodeEditor {
             }
         }
 
-        // <summary> Dublicate selected nodes and select the dublicates
+        /// <summary> Dublicate selected nodes and select the dublicates </summary>
         public void DublicateSelectedNodes() {
             UnityEngine.Object[] newNodes = new UnityEngine.Object[Selection.objects.Length];
+            Dictionary<XNode.Node, XNode.Node> substitutes = new Dictionary<XNode.Node, XNode.Node>();
             for (int i = 0; i < Selection.objects.Length; i++) {
                 if (Selection.objects[i] is XNode.Node) {
-                    XNode.Node node = Selection.objects[i] as XNode.Node;
-                    if (node.graph != graph) continue; // ignore nodes selected in another graph
-                    XNode.Node n = graph.CopyNode(node);
-                    n.position = node.position + new Vector2(30, 30);
-                    newNodes[i] = n;
+                    XNode.Node srcNode = Selection.objects[i] as XNode.Node;
+                    if (srcNode.graph != graph) continue; // ignore nodes selected in another graph
+                    XNode.Node newNode = graph.CopyNode(srcNode);
+                    substitutes.Add(srcNode, newNode);
+                    newNode.position = srcNode.position + new Vector2(30, 30);
+                    newNodes[i] = newNode;
+                }
+            }
+
+            // Walk through the selected nodes again, recreate connections, using the new nodes
+            for (int i = 0; i < Selection.objects.Length; i++) {
+                if (Selection.objects[i] is XNode.Node) {
+                    XNode.Node srcNode = Selection.objects[i] as XNode.Node;
+                    if (srcNode.graph != graph) continue; // ignore nodes selected in another graph
+                    foreach (XNode.NodePort port in srcNode.Ports) {
+                        for (int c = 0; c < port.ConnectionCount; c++) {
+                            XNode.NodePort inputPort = port.direction == XNode.NodePort.IO.Input ? port : port.GetConnection(c);
+                            XNode.NodePort outputPort = port.direction == XNode.NodePort.IO.Output ? port : port.GetConnection(c);
+
+                            if (substitutes.ContainsKey(inputPort.node) && substitutes.ContainsKey(outputPort.node)) {
+                                XNode.Node newNodeIn = substitutes[inputPort.node];
+                                XNode.Node newNodeOut = substitutes[outputPort.node];
+                                newNodeIn.UpdateStaticPorts();
+                                newNodeOut.UpdateStaticPorts();
+                                inputPort = newNodeIn.GetInputPort(inputPort.fieldName);
+                                outputPort = newNodeOut.GetOutputPort(outputPort.fieldName);
+                            }
+                            if (!inputPort.IsConnectedTo(outputPort)) inputPort.Connect(outputPort);
+                        }
+                    }
                 }
             }
             Selection.objects = newNodes;

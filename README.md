@@ -3,7 +3,7 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/Siccity/xNode/master/LICENSE.md)
 [![GitHub Wiki](https://img.shields.io/badge/wiki-available-brightgreen.svg)](https://github.com/Siccity/xNode/wiki)
 
-[Go to Downloads](https://github.com/Siccity/xNode/releases)
+[Go to Downloads](https://github.com/Siccity/xNode/releases) / [Go to Asset Store](http://u3d.as/108S)
 
 ### xNode
 Thinking of developing a node-based plugin? Then this is for you. You can download it as an archive and unpack to a new unity project, or connect it as git submodule.

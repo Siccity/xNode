@@ -7,39 +7,42 @@ namespace XNodeEditor {
     public static class NodeEditorPreferences {
         public enum NoodleType { Curve, Line, Angled }
 
-        public static Texture2D gridTexture {
-            get {
-                VerifyLoaded();
-                if (_gridTexture == null) _gridTexture = NodeEditorResources.GenerateGridTexture(settings.gridLineColor, settings.gridBgColor);
-                return _gridTexture;
-            }
-        }
-        private static Texture2D _gridTexture;
-        public static Texture2D crossTexture {
-            get {
-                VerifyLoaded();
-                if (_crossTexture == null) _crossTexture = NodeEditorResources.GenerateCrossTexture(settings.gridLineColor);
-                return _crossTexture;
-            }
-        }
-        private static Texture2D _crossTexture;
-
-        public static bool GridSnap { get { VerifyLoaded(); return settings.gridSnap; } }
-        public static Color HighlightColor { get { VerifyLoaded(); return settings.highlightColor; } }
-        public static NoodleType noodleType { get { VerifyLoaded(); return settings.noodleType; } }
+        /// <summary> The last editor we checked. This should be the one we modify </summary>
+        private static XNodeEditor.NodeGraphEditor lastEditor;
+        /// <summary> The last key we checked. This should be the one we modify </summary>
+        private static string lastKey = "xNode.Settings";
 
         private static Dictionary<string, Color> typeColors = new Dictionary<string, Color>();
-        private static Settings settings;
+        private static Dictionary<string, Settings> settings = new Dictionary<string, Settings>();
 
         [System.Serializable]
-        private class Settings : ISerializationCallbackReceiver {
-            public Color32 gridLineColor = new Color(0.45f, 0.45f, 0.45f);
-            public Color32 gridBgColor = new Color(0.18f, 0.18f, 0.18f);
-            public Color32 highlightColor = new Color32(255, 223, 255, 255);
+        public class Settings : ISerializationCallbackReceiver {
+            [SerializeField] private Color32 _gridLineColor = new Color(0.45f, 0.45f, 0.45f);
+            public Color32 gridLineColor { get { return _gridLineColor; } set { _gridLineColor = value; _gridTexture = null; _crossTexture = null; } }
+
+            [SerializeField] private Color32 _gridBgColor = new Color(0.18f, 0.18f, 0.18f);
+            public Color32 gridBgColor { get { return _gridBgColor; } set { _gridBgColor = value; _gridTexture = null; } }
+
+            public Color32 highlightColor = new Color32(255, 255, 255, 255);
             public bool gridSnap = true;
-            public string typeColorsData = "";
-            public Dictionary<string, Color> typeColors = new Dictionary<string, Color>();
+            [SerializeField] private string typeColorsData = "";
+            [NonSerialized] public Dictionary<string, Color> typeColors = new Dictionary<string, Color>();
             public NoodleType noodleType = NoodleType.Curve;
+
+            private Texture2D _gridTexture;
+            public Texture2D gridTexture {
+                get {
+                    if (_gridTexture == null) _gridTexture = NodeEditorResources.GenerateGridTexture(gridLineColor, gridBgColor);
+                    return _gridTexture;
+                }
+            }
+            private Texture2D _crossTexture;
+            public Texture2D crossTexture {
+                get {
+                    if (_crossTexture == null) _crossTexture = NodeEditorResources.GenerateCrossTexture(gridLineColor);
+                    return _crossTexture;
+                }
+            }
 
             public void OnAfterDeserialize() {
                 // Deserialize typeColorsData
@@ -62,19 +65,34 @@ namespace XNodeEditor {
             }
         }
 
+        /// <summary> Get settings of current active editor </summary>
+        public static Settings GetSettings() {
+            if (lastEditor != XNodeEditor.NodeEditorWindow.current.graphEditor) {
+                object[] attribs = XNodeEditor.NodeEditorWindow.current.graphEditor.GetType().GetCustomAttributes(typeof(XNodeEditor.NodeGraphEditor.CustomNodeGraphEditorAttribute), true);
+                if (attribs.Length == 1) {
+                    XNodeEditor.NodeGraphEditor.CustomNodeGraphEditorAttribute attrib = attribs[0] as XNodeEditor.NodeGraphEditor.CustomNodeGraphEditorAttribute;
+                    lastEditor = XNodeEditor.NodeEditorWindow.current.graphEditor;
+                    lastKey = attrib.editorPrefsKey;
+                    VerifyLoaded();
+                } else return null;
+            }
+            return settings[lastKey];
+        }
+
         [PreferenceItem("Node Editor")]
         private static void PreferencesGUI() {
             VerifyLoaded();
+            Settings settings = NodeEditorPreferences.settings[lastKey];
 
-            NodeSettingsGUI();
-            GridSettingsGUI();
-            TypeColorsGUI();
+            NodeSettingsGUI(lastKey, settings);
+            GridSettingsGUI(lastKey, settings);
+            TypeColorsGUI(lastKey, settings);
             if (GUILayout.Button(new GUIContent("Set Default", "Reset all values to default"), GUILayout.Width(120))) {
                 ResetPrefs();
             }
         }
 
-        private static void GridSettingsGUI() {
+        private static void GridSettingsGUI(string key, Settings settings) {
             //Label
             EditorGUILayout.LabelField("Grid", EditorStyles.boldLabel);
             settings.gridSnap = EditorGUILayout.Toggle("Snap", settings.gridSnap);
@@ -82,76 +100,74 @@ namespace XNodeEditor {
             settings.gridLineColor = EditorGUILayout.ColorField("Color", settings.gridLineColor);
             settings.gridBgColor = EditorGUILayout.ColorField(" ", settings.gridBgColor);
             if (GUI.changed) {
-                SavePrefs();
-                _gridTexture = NodeEditorResources.GenerateGridTexture(settings.gridLineColor, settings.gridBgColor);
-                _crossTexture = NodeEditorResources.GenerateCrossTexture(settings.gridLineColor);
+                SavePrefs(key, settings);
+
                 NodeEditorWindow.RepaintAll();
             }
             EditorGUILayout.Space();
         }
 
-        private static void NodeSettingsGUI() {
+        private static void NodeSettingsGUI(string key, Settings settings) {
             //Label
             EditorGUILayout.LabelField("Node", EditorStyles.boldLabel);
             settings.highlightColor = EditorGUILayout.ColorField("Selection", settings.highlightColor);
-            settings.noodleType = (NoodleType)EditorGUILayout.EnumPopup("Noodle type", (Enum)settings.noodleType);
+            settings.noodleType = (NoodleType) EditorGUILayout.EnumPopup("Noodle type", (Enum) settings.noodleType);
             if (GUI.changed) {
-                SavePrefs();
+                SavePrefs(key, settings);
                 NodeEditorWindow.RepaintAll();
             }
             EditorGUILayout.Space();
         }
 
-        private static void TypeColorsGUI() {
+        private static void TypeColorsGUI(string key, Settings settings) {
             //Label
             EditorGUILayout.LabelField("Types", EditorStyles.boldLabel);
 
             //Display type colors. Save them if they are edited by the user
-            List<string> keys = new List<string>(typeColors.Keys);
-            foreach (string key in keys) {
-                Color col = typeColors[key];
+            List<string> typeColorKeys = new List<string>(typeColors.Keys);
+            foreach (string typeColorKey in typeColorKeys) {
+                Color col = typeColors[typeColorKey];
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.BeginHorizontal();
-                col = EditorGUILayout.ColorField(key, col);
+                col = EditorGUILayout.ColorField(typeColorKey, col);
                 EditorGUILayout.EndHorizontal();
                 if (EditorGUI.EndChangeCheck()) {
-                    typeColors[key] = col;
-                    if (settings.typeColors.ContainsKey(key)) settings.typeColors[key] = col;
-                    else settings.typeColors.Add(key, col);
-                    SavePrefs();
+                    typeColors[typeColorKey] = col;
+                    if (settings.typeColors.ContainsKey(typeColorKey)) settings.typeColors[typeColorKey] = col;
+                    else settings.typeColors.Add(typeColorKey, col);
+                    SavePrefs(typeColorKey, settings);
                     NodeEditorWindow.RepaintAll();
                 }
             }
         }
 
+        /// <summary> Load prefs if they exist. Create if they don't </summary>
         private static Settings LoadPrefs() {
-            // Remove obsolete editorprefs
-            if (EditorPrefs.HasKey("xnode_typecolors")) EditorPrefs.DeleteKey("xnode_typecolors");
-            if (EditorPrefs.HasKey("xnode_gridcolor0")) EditorPrefs.DeleteKey("xnode_gridcolor0");
-            if (EditorPrefs.HasKey("xnode_gridcolor1")) EditorPrefs.DeleteKey("xnode_gridcolor1");
-            if (EditorPrefs.HasKey("xnode_gridsnap")) EditorPrefs.DeleteKey("xnode_gridcolor1");
-
-            if (!EditorPrefs.HasKey("xNode.Settings")) EditorPrefs.SetString("xNode.Settings", JsonUtility.ToJson(new Settings()));
-            return JsonUtility.FromJson<Settings>(EditorPrefs.GetString("xNode.Settings"));
+            // Create settings if it doesn't exist
+            if (!EditorPrefs.HasKey(lastKey)) {
+                if (lastEditor != null) EditorPrefs.SetString(lastKey, JsonUtility.ToJson(lastEditor.GetDefaultPreferences()));
+                else EditorPrefs.SetString(lastKey, JsonUtility.ToJson(new Settings()));
+            }
+            return JsonUtility.FromJson<Settings>(EditorPrefs.GetString(lastKey));
         }
 
         /// <summary> Delete all prefs </summary>
         public static void ResetPrefs() {
-            if (EditorPrefs.HasKey("xNode.Settings")) EditorPrefs.DeleteKey("xNode.Settings");
-
-            settings = LoadPrefs();
+            if (EditorPrefs.HasKey(lastKey)) EditorPrefs.DeleteKey(lastKey);
+            if (settings.ContainsKey(lastKey)) settings.Remove(lastKey);
             typeColors = new Dictionary<string, Color>();
-            _gridTexture = NodeEditorResources.GenerateGridTexture(settings.gridLineColor, settings.gridBgColor);
-            _crossTexture = NodeEditorResources.GenerateCrossTexture(settings.gridLineColor);
+            VerifyLoaded();
             NodeEditorWindow.RepaintAll();
         }
 
-        private static void SavePrefs() {
-            EditorPrefs.SetString("xNode.Settings", JsonUtility.ToJson(settings));
+        /// <summary> Save preferences in EditorPrefs </summary>
+        private static void SavePrefs(string key, Settings settings) {
+            EditorPrefs.SetString(key, JsonUtility.ToJson(settings));
         }
 
+        /// <summary> Check if we have loaded settings for given key. If not, load them </summary>
         private static void VerifyLoaded() {
-            if (settings == null) settings = LoadPrefs();
+            if (!settings.ContainsKey(lastKey)) settings.Add(lastKey, LoadPrefs());
         }
 
         /// <summary> Return color based on type </summary>
@@ -160,7 +176,7 @@ namespace XNodeEditor {
             if (type == null) return Color.gray;
             string typeName = type.PrettyName();
             if (!typeColors.ContainsKey(typeName)) {
-                if (settings.typeColors.ContainsKey(typeName)) typeColors.Add(typeName, settings.typeColors[typeName]);
+                if (settings[lastKey].typeColors.ContainsKey(typeName)) typeColors.Add(typeName, settings[lastKey].typeColors[typeName]);
                 else {
 #if UNITY_5_4_OR_NEWER
                     UnityEngine.Random.InitState(typeName.GetHashCode());

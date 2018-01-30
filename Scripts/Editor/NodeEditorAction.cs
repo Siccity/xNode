@@ -47,7 +47,7 @@ namespace XNodeEditor {
                                 if (Selection.objects[i] is XNode.Node) {
                                     XNode.Node node = Selection.objects[i] as XNode.Node;
                                     node.position = WindowToGridPosition(e.mousePosition) + dragOffset[i];
-                                    bool gridSnap = NodeEditorPreferences.GridSnap;
+                                    bool gridSnap = NodeEditorPreferences.GetSettings().gridSnap;
                                     if (e.control) {
                                         gridSnap = !gridSnap;
                                     }

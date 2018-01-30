@@ -6,14 +6,14 @@ using UnityEngine;
 namespace XNodeEditor {
     /// <summary> Contains GUI methods </summary>
     public partial class NodeEditorWindow {
-        private NodeGraphEditor currentGraphEditor;
+        public NodeGraphEditor graphEditor;
         private List<UnityEngine.Object> selectionCache;
 
         private void OnGUI() {
             Event e = Event.current;
             Matrix4x4 m = GUI.matrix;
             if (graph == null) return;
-            currentGraphEditor = NodeGraphEditor.GetEditor(graph);
+            graphEditor = NodeGraphEditor.GetEditor(graph);
 
             Controls();
 
@@ -52,8 +52,8 @@ namespace XNodeEditor {
             rect.position = Vector2.zero;
 
             Vector2 center = rect.size / 2f;
-            Texture2D gridTex = currentGraphEditor.GetGridTexture();
-            Texture2D crossTex = currentGraphEditor.GetSecondaryGridTexture();
+            Texture2D gridTex = graphEditor.GetGridTexture();
+            Texture2D crossTex = graphEditor.GetSecondaryGridTexture();
 
             // Offset from origin in tile units
             float xOffset = -(center.x * zoom + panOffset.x) / gridTex.width;
@@ -122,7 +122,7 @@ namespace XNodeEditor {
                 Type type = nodeTypes[i];
 
                 //Get node context menu path
-                string path = currentGraphEditor.GetNodePath(type);
+                string path = graphEditor.GetNodePath(type);
                 if (path == null) continue;
 
                 contextMenu.AddItem(new GUIContent(path), false, () => {
@@ -151,7 +151,7 @@ namespace XNodeEditor {
             startPoint = GridToWindowPosition(startPoint);
             endPoint = GridToWindowPosition(endPoint);
 
-            switch (NodeEditorPreferences.noodleType) {
+            switch (NodeEditorPreferences.GetSettings().noodleType) {
                 case NodeEditorPreferences.NoodleType.Curve:
                     Vector2 startTangent = startPoint;
                     if (startPoint.x < endPoint.x) startTangent.x = Mathf.LerpUnclamped(startPoint.x, endPoint.x, 0.7f);
@@ -214,7 +214,7 @@ namespace XNodeEditor {
                         if (!input.IsConnectedTo(output)) input.Connect(output);
                         if (!_portConnectionPoints.ContainsKey(input)) continue;
                         Vector2 to = _portConnectionPoints[input].center;
-                        Color connectionColor = currentGraphEditor.GetTypeColor(output.ValueType);
+                        Color connectionColor = graphEditor.GetTypeColor(output.ValueType);
                         DrawConnection(from, to, connectionColor);
                     }
                 }
@@ -275,7 +275,7 @@ namespace XNodeEditor {
                     style.padding = new RectOffset();
                     GUI.color = nodeEditor.GetTint();
                     GUILayout.BeginVertical(new GUIStyle(style));
-                    GUI.color = NodeEditorPreferences.HighlightColor;
+                    GUI.color = NodeEditorPreferences.GetSettings().highlightColor;
                     GUILayout.BeginVertical(new GUIStyle(highlightStyle));
                 } else {
                     GUIStyle style = NodeEditorResources.styles.nodeBody;

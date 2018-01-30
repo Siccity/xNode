@@ -5,7 +5,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEditor;
 
-namespace XNodeInternal {
+namespace XNodeEditor.Internal {
 	/// <summary> Handles caching of custom editor classes and their target types. Accessible with GetEditor(Type type) </summary>
 	public class NodeEditorBase<T, A, K> where A : Attribute, NodeEditorBase<T, A, K>.INodeEditorAttrib where T : NodeEditorBase<T,A,K> where K : ScriptableObject {
 		/// <summary> Custom editors defined with [CustomNodeEditor] </summary>

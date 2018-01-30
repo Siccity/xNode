@@ -47,11 +47,11 @@ namespace XNodeEditor {
                                 if (Selection.objects[i] is XNode.Node) {
                                     XNode.Node node = Selection.objects[i] as XNode.Node;
                                     node.position = WindowToGridPosition(e.mousePosition) + dragOffset[i];
-									bool gridSnap = NodeEditorPreferences.GridSnap;
-									if (e.control) {
-										gridSnap = !gridSnap;
-									}
-									if (gridSnap) {
+                                    bool gridSnap = NodeEditorPreferences.GridSnap;
+                                    if (e.control) {
+                                        gridSnap = !gridSnap;
+                                    }
+                                    if (gridSnap) {
                                         node.position.x = (Mathf.Round((node.position.x + 8) / 16) * 16) - 8;
                                         node.position.y = (Mathf.Round((node.position.y + 8) / 16) * 16) - 8;
                                     }

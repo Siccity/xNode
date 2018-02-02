@@ -6,14 +6,14 @@ using UnityEngine;
 namespace XNodeEditor {
     /// <summary> Contains GUI methods </summary>
     public partial class NodeEditorWindow {
-        private NodeGraphEditor currentGraphEditor;
+        public NodeGraphEditor graphEditor;
         private List<UnityEngine.Object> selectionCache;
 
         private void OnGUI() {
             Event e = Event.current;
             Matrix4x4 m = GUI.matrix;
             if (graph == null) return;
-            currentGraphEditor = NodeGraphEditor.GetEditor(graph);
+            graphEditor = NodeGraphEditor.GetEditor(graph);
 
             Controls();
 
@@ -52,8 +52,8 @@ namespace XNodeEditor {
             rect.position = Vector2.zero;
 
             Vector2 center = rect.size / 2f;
-            Texture2D gridTex = currentGraphEditor.GetGridTexture();
-            Texture2D crossTex = currentGraphEditor.GetSecondaryGridTexture();
+            Texture2D gridTex = graphEditor.GetGridTexture();
+            Texture2D crossTex = graphEditor.GetSecondaryGridTexture();
 
             // Offset from origin in tile units
             float xOffset = -(center.x * zoom + panOffset.x) / gridTex.width;
@@ -122,7 +122,7 @@ namespace XNodeEditor {
                 Type type = nodeTypes[i];
 
                 //Get node context menu path
-                string path = currentGraphEditor.GetNodePath(type);
+                string path = graphEditor.GetNodePath(type);
                 if (path == null) continue;
 
                 contextMenu.AddItem(new GUIContent(path), false, () => {
@@ -151,15 +151,50 @@ namespace XNodeEditor {
             startPoint = GridToWindowPosition(startPoint);
             endPoint = GridToWindowPosition(endPoint);
 
-            Vector2 startTangent = startPoint;
-            if (startPoint.x < endPoint.x) startTangent.x = Mathf.LerpUnclamped(startPoint.x, endPoint.x, 0.7f);
-            else startTangent.x = Mathf.LerpUnclamped(startPoint.x, endPoint.x, -0.7f);
+            switch (NodeEditorPreferences.GetSettings().noodleType) {
+                case NodeEditorPreferences.NoodleType.Curve:
+                    Vector2 startTangent = startPoint;
+                    if (startPoint.x < endPoint.x) startTangent.x = Mathf.LerpUnclamped(startPoint.x, endPoint.x, 0.7f);
+                    else startTangent.x = Mathf.LerpUnclamped(startPoint.x, endPoint.x, -0.7f);
 
-            Vector2 endTangent = endPoint;
-            if (startPoint.x > endPoint.x) endTangent.x = Mathf.LerpUnclamped(endPoint.x, startPoint.x, -0.7f);
-            else endTangent.x = Mathf.LerpUnclamped(endPoint.x, startPoint.x, 0.7f);
-
-            Handles.DrawBezier(startPoint, endPoint, startTangent, endTangent, col, null, 4);
+                    Vector2 endTangent = endPoint;
+                    if (startPoint.x > endPoint.x) endTangent.x = Mathf.LerpUnclamped(endPoint.x, startPoint.x, -0.7f);
+                    else endTangent.x = Mathf.LerpUnclamped(endPoint.x, startPoint.x, 0.7f);
+                    Handles.DrawBezier(startPoint, endPoint, startTangent, endTangent, col, null, 4);
+                    break;
+                case NodeEditorPreferences.NoodleType.Line:
+                    Handles.color = col;
+                    Handles.DrawAAPolyLine(5, startPoint, endPoint);
+                    break;
+                case NodeEditorPreferences.NoodleType.Angled:
+                    Handles.color = col;
+                    if (startPoint.x <= endPoint.x - (50 / zoom)) {
+                        float midpoint = (startPoint.x + endPoint.x) * 0.5f;
+                        Vector2 start_1 = startPoint;
+                        Vector2 end_1 = endPoint;
+                        start_1.x = midpoint;
+                        end_1.x = midpoint;
+                        Handles.DrawAAPolyLine(5, startPoint, start_1);
+                        Handles.DrawAAPolyLine(5, start_1, end_1);
+                        Handles.DrawAAPolyLine(5, end_1, endPoint);
+                    } else {
+                        float midpoint = (startPoint.y + endPoint.y) * 0.5f;
+                        Vector2 start_1 = startPoint;
+                        Vector2 end_1 = endPoint;
+                        start_1.x += 25 / zoom;
+                        end_1.x -= 25 / zoom;
+                        Vector2 start_2 = start_1;
+                        Vector2 end_2 = end_1;
+                        start_2.y = midpoint;
+                        end_2.y = midpoint;
+                        Handles.DrawAAPolyLine(5, startPoint, start_1);
+                        Handles.DrawAAPolyLine(5, start_1, start_2);
+                        Handles.DrawAAPolyLine(5, start_2, end_2);
+                        Handles.DrawAAPolyLine(5, end_2, end_1);
+                        Handles.DrawAAPolyLine(5, end_1, endPoint);
+                    }
+                    break;
+            }
         }
 
         /// <summary> Draws all connections </summary>
@@ -179,7 +214,7 @@ namespace XNodeEditor {
                         if (!input.IsConnectedTo(output)) input.Connect(output);
                         if (!_portConnectionPoints.ContainsKey(input)) continue;
                         Vector2 to = _portConnectionPoints[input].center;
-                        Color connectionColor = currentGraphEditor.GetTypeColor(output.ValueType);
+                        Color connectionColor = graphEditor.GetTypeColor(output.ValueType);
                         DrawConnection(from, to, connectionColor);
                     }
                 }
@@ -213,7 +248,7 @@ namespace XNodeEditor {
                 hoveredPort = null;
             }
 
-            List<UnityEngine.Object> preSelection = new List<UnityEngine.Object>(preBoxSelection);
+            List<UnityEngine.Object> preSelection = preBoxSelection != null ? new List<UnityEngine.Object>(preBoxSelection) : new List<UnityEngine.Object>();
 
             //Save guiColor so we can revert it
             Color guiColor = GUI.color;
@@ -240,7 +275,7 @@ namespace XNodeEditor {
                     style.padding = new RectOffset();
                     GUI.color = nodeEditor.GetTint();
                     GUILayout.BeginVertical(new GUIStyle(style));
-                    GUI.color = NodeEditorPreferences.HighlightColor;
+                    GUI.color = NodeEditorPreferences.GetSettings().highlightColor;
                     GUILayout.BeginVertical(new GUIStyle(highlightStyle));
                 } else {
                     GUIStyle style = NodeEditorResources.styles.nodeBody;

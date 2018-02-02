@@ -7,16 +7,21 @@ using UnityEngine;
 namespace XNodeEditor {
     /// <summary> Base class to derive custom Node Graph editors from. Use this to override how graphs are drawn in the editor. </summary>
     [CustomNodeGraphEditor(typeof(XNode.NodeGraph))]
-    public class NodeGraphEditor : XNodeInternal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph> {
+    public class NodeGraphEditor : XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph> {
         /// <summary> Custom node editors defined with [CustomNodeGraphEditor] </summary>
         [NonSerialized] private static Dictionary<Type, NodeGraphEditor> editors;
 
         public virtual Texture2D GetGridTexture() {
-            return NodeEditorPreferences.gridTexture;
+            return NodeEditorPreferences.GetSettings().gridTexture;
         }
 
         public virtual Texture2D GetSecondaryGridTexture() {
-            return NodeEditorPreferences.crossTexture;
+            return NodeEditorPreferences.GetSettings().crossTexture;
+        }
+
+        /// <summary> Return default settings for this graph type. This is the settings the user will load if no previous settings have been saved. </summary>
+        public virtual NodeEditorPreferences.Settings GetDefaultPreferences() {
+            return new NodeEditorPreferences.Settings();
         }
 
         /// <summary> Returns context menu path. Returns null if node is not available. </summary>
@@ -35,13 +40,15 @@ namespace XNodeEditor {
 
         [AttributeUsage(AttributeTargets.Class)]
         public class CustomNodeGraphEditorAttribute : Attribute,
-            XNodeInternal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph>.INodeEditorAttrib {
+            XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph>.INodeEditorAttrib {
             private Type inspectedType;
-            /// <summary> Tells a NodeEditor which Node type it is an editor for </summary>
+            public string editorPrefsKey;
+            /// <summary> Tells a NodeGraphEditor which Graph type it is an editor for </summary>
             /// <param name="inspectedType">Type that this editor can edit</param>
-            /// <param name="contextMenuName">Path to the node</param>
-            public CustomNodeGraphEditorAttribute(Type inspectedType) {
+            /// <param name="uniquePreferencesID">Define unique key for unique layout settings instance</param>
+            public CustomNodeGraphEditorAttribute(Type inspectedType, string editorPrefsKey = "xNode.Settings") {
                 this.inspectedType = inspectedType;
+                this.editorPrefsKey = editorPrefsKey;
             }
 
             public Type GetInspectedType() {

@@ -92,7 +92,7 @@ namespace XNodeEditor {
 
                 Color backgroundColor = new Color32(90, 97, 105, 255);
                 if (NodeEditorWindow.nodeTint.ContainsKey(port.node.GetType())) backgroundColor *= NodeEditorWindow.nodeTint[port.node.GetType()];
-                Color col = NodeGraphEditor.GetEditor(port.node.graph).GetTypeColor(port.ValueType);
+                Color col = NodeEditorWindow.current.graphEditor.GetTypeColor(port.ValueType);
                 DrawPortHandle(rect, backgroundColor, col);
 
                 // Register the handle position
@@ -119,7 +119,7 @@ namespace XNodeEditor {
 
             Color backgroundColor = new Color32(90, 97, 105, 255);
             if (NodeEditorWindow.nodeTint.ContainsKey(port.node.GetType())) backgroundColor *= NodeEditorWindow.nodeTint[port.node.GetType()];
-            Color col = NodeGraphEditor.GetEditor(port.node.graph).GetTypeColor(port.ValueType);
+            Color col = NodeEditorWindow.current.graphEditor.GetTypeColor(port.ValueType);
             DrawPortHandle(rect, backgroundColor, col);
 
             // Register the handle position

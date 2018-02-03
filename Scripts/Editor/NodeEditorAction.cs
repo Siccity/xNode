@@ -165,9 +165,9 @@ namespace XNodeEditor {
                         isPanning = false;
                     }
                     break;
-                case EventType.KeyDown:
-                    if (e.keyCode == KeyCode.Delete) RemoveSelectedNodes();
-                    else if (e.keyCode == KeyCode.D && e.control) DublicateSelectedNodes();
+                case EventType.ValidateCommand:
+                    if (e.commandName == "SoftDelete") RemoveSelectedNodes();
+                    else if (e.commandName == "Duplicate") DublicateSelectedNodes();
                     Repaint();
                     break;
                 case EventType.Ignore:

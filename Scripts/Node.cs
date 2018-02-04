@@ -61,8 +61,12 @@ namespace XNode {
         [SerializeField] private NodePortDictionary ports = new NodePortDictionary();
 
         protected void OnEnable() {
+            UpdateStaticPorts();
+        }
+
+        /// <summary> Update static ports to reflect class fields. This happens automatically on enable. </summary>
+        public void UpdateStaticPorts() {
             NodeDataCache.UpdatePorts(this, ports);
-            // Init();
         }
 
         /// <summary> Initialize node. Called on creation. </summary>
@@ -197,22 +201,18 @@ namespace XNode {
             foreach (NodePort port in Ports) port.ClearConnections();
         }
 
-        public override int GetHashCode() {
-            return JsonUtility.ToJson(this).GetHashCode();
-        }
-
         /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInputPort(string)"/> </summary>
         [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
         public class InputAttribute : Attribute {
             public ShowBackingValue backingValue;
             public ConnectionType connectionType;
-            
+
             /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInputPort(string)"/> </summary>
             /// <param name="backingValue">Should we display the backing value for this port as an editor field? </param>
             /// <param name="connectionType">Should we allow multiple connections? </param>
             public InputAttribute(ShowBackingValue backingValue = ShowBackingValue.Unconnected, ConnectionType connectionType = ConnectionType.Multiple) {
                 this.backingValue = backingValue;
-                this.connectionType = connectionType;                
+                this.connectionType = connectionType;
             }
         }
 

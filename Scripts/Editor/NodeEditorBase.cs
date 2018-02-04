@@ -5,11 +5,12 @@ using System.Reflection;
 using UnityEngine;
 using UnityEditor;
 
-namespace XNodeInternal {
+namespace XNodeEditor.Internal {
 	/// <summary> Handles caching of custom editor classes and their target types. Accessible with GetEditor(Type type) </summary>
 	public class NodeEditorBase<T, A, K> where A : Attribute, NodeEditorBase<T, A, K>.INodeEditorAttrib where T : NodeEditorBase<T,A,K> where K : ScriptableObject {
 		/// <summary> Custom editors defined with [CustomNodeEditor] </summary>
 		private static Dictionary<Type, T> editors;
+		private static Dictionary<ScriptableObject, SerializedObject> serializeds;
 		public K target;
 		public SerializedObject serializedObject;
 
@@ -18,8 +19,15 @@ namespace XNodeInternal {
 			Type type = target.GetType();
 			T editor = GetEditor(type);
 			editor.target = target;
-			editor.serializedObject = new SerializedObject(target);
+			editor.serializedObject = GetSerialized(target);
 			return editor;
+		}
+
+		private static SerializedObject GetSerialized(K target) {
+			if (target == null) return null;
+			if (serializeds == null) serializeds = new Dictionary<ScriptableObject, SerializedObject>();
+			if (!serializeds.ContainsKey(target)) serializeds.Add(target, new SerializedObject(target));
+			return serializeds[target];
 		}
 
 		private static T GetEditor(Type type) {

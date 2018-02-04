@@ -54,8 +54,7 @@ namespace XNode {
                 if (attribs[i] is Node.InputAttribute) {
                     _direction = IO.Input;
                     _connectionType = (attribs[i] as Node.InputAttribute).connectionType;
-                }
-                else if (attribs[i] is Node.OutputAttribute) {
+                } else if (attribs[i] is Node.OutputAttribute) {
                     _direction = IO.Output;
                     _connectionType = (attribs[i] as Node.OutputAttribute).connectionType;
                 }
@@ -79,7 +78,7 @@ namespace XNode {
             _direction = direction;
             _node = node;
             _dynamic = true;
-            _connectionType = connectionType;            
+            _connectionType = connectionType;
         }
 
         /// <summary> Checks all connections for invalid references, and removes them. </summary>
@@ -225,15 +224,17 @@ namespace XNode {
                     connections.RemoveAt(i);
                 }
             }
-            // Remove the other ports connection to this port
-            for (int i = 0; i < port.connections.Count; i++) {
-                if (port.connections[i].Port == this) {
-                    port.connections.RemoveAt(i);
+            if (port != null) {
+                // Remove the other ports connection to this port
+                for (int i = 0; i < port.connections.Count; i++) {
+                    if (port.connections[i].Port == this) {
+                        port.connections.RemoveAt(i);
+                    }
                 }
             }
             // Trigger OnRemoveConnection
             node.OnRemoveConnection(this);
-            port.node.OnRemoveConnection(port);
+            if (port != null) port.node.OnRemoveConnection(port);
         }
 
         public void ClearConnections() {

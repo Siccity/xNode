@@ -13,13 +13,22 @@ namespace XNodeEditor
 	[CustomEditor(typeof(XNode.NodeGraph), true)]
 	public class NodeGraphInspector : Editor
 	{
-		SerializedProperty nodesProp;
 		SerializedProperty variablesProp;
 
+		List<Type> _knownTypes = new List<Type>();
 		void OnEnable()
 		{
-			nodesProp = serializedObject.FindProperty("nodes");
 			variablesProp = serializedObject.FindProperty("variables");
+			NodeGraph graph = target as NodeGraph;
+			
+			foreach (var node in graph.nodes)
+			{
+				foreach (var port in node.Ports)
+				{
+					if (!_knownTypes.Contains(port.ValueType))
+						_knownTypes.Add(port.ValueType);
+				}
+			}
 		}
 
 		public override void OnInspectorGUI()
@@ -74,20 +83,12 @@ namespace XNodeEditor
 			additionalTypes.Add(typeof(string).AssemblyQualifiedName);
 			additionalTypes.Add(typeof(Vector3).AssemblyQualifiedName);
 			
-			/*
-			Assembly asm = typeof(Vector3).Assembly;
-			foreach (var colorPair in NodeEditorPreferences.typeColors)
+			foreach (var type in _knownTypes)
 			{
-				var type = asm.GetType(colorPair.Key, false);
-				Debug.Log(colorPair.Key + "   " + type);
-
-				if (type == null)
-					continue;
 				if (additionalTypes.Contains(type.AssemblyQualifiedName))
 					continue;
-				additionalTypes.Add(colorPair.Key);
+				additionalTypes.Add(type.AssemblyQualifiedName);
 			}
-			*/
 
 			foreach (var addType in additionalTypes)
 			{

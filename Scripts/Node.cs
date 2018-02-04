@@ -62,11 +62,11 @@ namespace XNode {
 
         protected void OnEnable() {
             NodeDataCache.UpdatePorts(this, ports);
-            Init();
+            // Init();
         }
 
         /// <summary> Initialize node. Called on creation. </summary>
-        protected virtual void Init() { name = GetType().Name; }
+        public virtual void Init() { name = GetType().Name; }
 
         /// <summary> Checks all connections for invalid references, and removes them. </summary>
         public void VerifyConnections() {

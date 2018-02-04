@@ -48,8 +48,8 @@ namespace XNodeEditor {
                 );
             return methods.Count() > 0;
         }
-
-        /// <summary> Return a prettiefied type name. </summary>
+        
+        /// <summary> Return a prettified type name. </summary>
         public static string PrettyName(this Type type) {
             if (type == null) return "null";
             if (type == typeof(System.Object)) return "object";

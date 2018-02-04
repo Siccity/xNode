@@ -5,8 +5,12 @@ using UnityEditor;
 
 using XNode;
 
-[CustomEditor(typeof(Node), true)]
-public class NodeInspector : Editor
+namespace XNodeEditor
 {
-	public override void OnInspectorGUI() { /*hides unneeded info*/ }
+	[CustomEditor(typeof(Node), true)]
+	public class NodeInspector : Editor
+	{
+		public override void OnInspectorGUI() { /*hides unneeded info*/ }
+	}
 }
+

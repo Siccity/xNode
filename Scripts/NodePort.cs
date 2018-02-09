@@ -9,8 +9,15 @@ namespace XNode {
         public enum IO { Input, Output }
 
         public int ConnectionCount { get { return connections.Count; } }
-        /// <summary> Return the first connection </summary>
-        public NodePort Connection { get { return connections.Count > 0 ? connections[0].Port : null; } }
+        /// <summary> Return the first non-null connection </summary>
+        public NodePort Connection {
+            get {
+                for (int i = 0; i < connections.Count; i++) {
+                    if (connections[i] != null) return connections[i].Port;
+                }
+                return null;
+            }
+        }
 
         public IO direction { get { return _direction; } }
         public Node.ConnectionType connectionType { get { return _connectionType; } }

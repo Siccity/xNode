@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -135,6 +136,30 @@ namespace XNodeEditor {
             GUI.color =  typeColor;
             GUI.DrawTexture(rect, NodeEditorResources.dot);
             GUI.color = col;
+        }
+
+        /// <summary> Make a popup with all variable ids.</summary>
+        public static string VariablePopup(XNode.NodeGraph graph, string variableId, params GUILayoutOption[] options)
+        {
+            if (graph == null) return variableId;
+
+            List<string> variablesStrings = new List<string>();
+
+            foreach (var item in graph.variables)
+                variablesStrings.Add(item.id);
+              
+            int originalIdx = variablesStrings.IndexOf(variableId);
+            int newIdx = EditorGUILayout.Popup(originalIdx, variablesStrings.ToArray(), options);
+
+            if (originalIdx == -1 && newIdx == -1)
+            {
+                EditorGUILayout.HelpBox("Looks like the variable that used to be here, doesn't exist anymore. \n id:" + variableId, MessageType.Error);
+                return variableId;
+            }
+            
+            if (newIdx >= variablesStrings.Count)
+                return variableId;
+            return variablesStrings[newIdx];
         }
     }
 }

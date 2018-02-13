@@ -62,7 +62,6 @@ namespace XNode {
 
         protected void OnEnable() {
             UpdateStaticPorts();
-            Init();
         }
 
         /// <summary> Update static ports to reflect class fields. This happens automatically on enable. </summary>
@@ -71,7 +70,7 @@ namespace XNode {
         }
 
         /// <summary> Initialize node. Called on creation. </summary>
-        protected virtual void Init() { name = GetType().Name; }
+        public virtual void Init() { name = GetType().Name; }
 
         /// <summary> Checks all connections for invalid references, and removes them. </summary>
         public void VerifyConnections() {

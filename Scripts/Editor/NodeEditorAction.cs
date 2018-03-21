@@ -140,8 +140,12 @@ namespace XNodeEditor {
                         } else if (!IsHoveringNode) {
                             // If click outside node, release field focus
                             if (!isPanning) {
+                                // I've got no idea which of these do what, so we'll just reset all of it.
                                 GUIUtility.hotControl = 0;
                                 GUIUtility.keyboardControl = 0;
+                                EditorGUIUtility.editingTextField = false;
+                                EditorGUIUtility.keyboardControl = 0;
+                                EditorGUIUtility.hotControl = 0;
                             }
                             AssetDatabase.SaveAssets();
                         }
@@ -164,6 +168,10 @@ namespace XNodeEditor {
                         }
                         isPanning = false;
                     }
+                    break;
+                case EventType.KeyDown:
+                    if (EditorGUIUtility.editingTextField) break;
+                    else if (e.keyCode == KeyCode.F) Home();
                     break;
                 case EventType.ValidateCommand:
                     if (e.commandName == "SoftDelete") RemoveSelectedNodes();

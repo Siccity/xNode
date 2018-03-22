@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UnityEditor;
+using UnityEngine;
 
 namespace XNodeEditor {
     public static class NodeEditorResources {
@@ -15,9 +16,9 @@ namespace XNodeEditor {
         // Styles
         public static Styles styles { get { return _styles != null ? _styles : _styles = new Styles(); } }
         public static Styles _styles = null;
-
+        public static GUIStyle OutputPort { get { return new GUIStyle(EditorStyles.label) { alignment = TextAnchor.UpperRight }; } }
         public class Styles {
-            public GUIStyle inputPort, outputPort, nodeHeader, nodeBody, tooltip, nodeHighlight;
+            public GUIStyle inputPort, nodeHeader, nodeBody, tooltip, nodeHighlight;
 
             public Styles() {
                 GUIStyle baseStyle = new GUIStyle("Label");
@@ -26,10 +27,6 @@ namespace XNodeEditor {
                 inputPort = new GUIStyle(baseStyle);
                 inputPort.alignment = TextAnchor.UpperLeft;
                 inputPort.padding.left = 10;
-
-                outputPort = new GUIStyle(baseStyle);
-                outputPort.alignment = TextAnchor.UpperRight;
-                outputPort.padding.right = 10;
 
                 nodeHeader = new GUIStyle();
                 nodeHeader.alignment = TextAnchor.MiddleCenter;

@@ -10,7 +10,6 @@ namespace XNodeEditor.Internal {
 	public class NodeEditorBase<T, A, K> where A : Attribute, NodeEditorBase<T, A, K>.INodeEditorAttrib where T : NodeEditorBase<T,A,K> where K : ScriptableObject {
 		/// <summary> Custom editors defined with [CustomNodeEditor] </summary>
 		private static Dictionary<Type, T> editors;
-		private static Dictionary<ScriptableObject, SerializedObject> serializeds;
 		public K target;
 		public SerializedObject serializedObject;
 
@@ -19,15 +18,8 @@ namespace XNodeEditor.Internal {
 			Type type = target.GetType();
 			T editor = GetEditor(type);
 			editor.target = target;
-			editor.serializedObject = GetSerialized(target);
+			editor.serializedObject = new SerializedObject(target);
 			return editor;
-		}
-
-		private static SerializedObject GetSerialized(K target) {
-			if (target == null) return null;
-			if (serializeds == null) serializeds = new Dictionary<ScriptableObject, SerializedObject>();
-			if (!serializeds.ContainsKey(target)) serializeds.Add(target, new SerializedObject(target));
-			return serializeds[target];
 		}
 
 		private static T GetEditor(Type type) {

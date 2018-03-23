@@ -3,7 +3,7 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/Siccity/xNode/master/LICENSE.md)
 [![GitHub Wiki](https://img.shields.io/badge/wiki-available-brightgreen.svg)](https://github.com/Siccity/xNode/wiki)
 
-[Go to Downloads](https://github.com/Siccity/xNode/releases) / [Go to Asset Store](http://u3d.as/108S)
+[Downloads](https://github.com/Siccity/xNode/releases) / [Asset Store](http://u3d.as/108S) / [Documentation](https://github.com/Siccity/xNode/wiki)
 
 ### xNode
 Thinking of developing a node-based plugin? Then this is for you. You can download it as an archive and unpack to a new unity project, or connect it as git submodule.
@@ -20,7 +20,6 @@ With a minimal footprint, it is ideal as a base for custom state machines, dialo
 * No runtime reflection (unless you need to edit/build node graphs at runtime. In this case, all reflection is cached.)
 * Does not rely on any 3rd party plugins
 * Custom node inspector code is very similar to regular custom inspector code
-* For a full list of features, see [this page](https://github.com/Siccity/xNode/wiki/Full-features-list)
 
 ### Node example:
 ```csharp

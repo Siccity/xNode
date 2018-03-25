@@ -11,10 +11,12 @@ namespace XNodeEditor {
     public partial class NodeEditorWindow {
         /// <summary> Custom node tint colors defined with [NodeColor(r, g, b)] </summary>
         public static Dictionary<Type, Color> nodeTint { get { return _nodeTint != null ? _nodeTint : _nodeTint = GetNodeTint(); } }
-            [NonSerialized] private static Dictionary<Type, Color> _nodeTint;
+
+        [NonSerialized] private static Dictionary<Type, Color> _nodeTint;
         /// <summary> All available node types </summary>
         public static Type[] nodeTypes { get { return _nodeTypes != null ? _nodeTypes : _nodeTypes = GetNodeTypes(); } }
-            [NonSerialized] private static Type[] _nodeTypes = null;
+
+        [NonSerialized] private static Type[] _nodeTypes = null;
 
         public static Type[] GetNodeTypes() {
             //Get all classes deriving from Node via reflection
@@ -32,13 +34,14 @@ namespace XNodeEditor {
             return tints;
         }
 
+        /// <summary> Get all classes deriving from baseType via reflection </summary>
         public static Type[] GetDerivedTypes(Type baseType) {
-            //Get all classes deriving from baseType via reflection
-            Assembly assembly = Assembly.GetAssembly(baseType);
-            return assembly.GetTypes().Where(t =>
-                !t.IsAbstract &&
-                baseType.IsAssignableFrom(t)
-            ).ToArray();
+            List<System.Type> types = new List<System.Type>();
+            System.Reflection.Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
+            foreach (Assembly assembly in assemblies) {
+                types.AddRange(assembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray());
+            }
+            return types.ToArray();
         }
 
         public static object ObjectFromType(Type type) {
@@ -71,10 +74,10 @@ namespace XNodeEditor {
                     kvp.Add(new KeyValuePair<ContextMenu, MethodInfo>(attribs[k], methods[i]));
                 }
             }
-            #if UNITY_5_5_OR_NEWER
+#if UNITY_5_5_OR_NEWER
             //Sort menu items
             kvp.Sort((x, y) => x.Key.priority.CompareTo(y.Key.priority));
-            #endif
+#endif
             return kvp.ToArray();
         }
 

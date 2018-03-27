@@ -159,6 +159,8 @@ namespace XNodeEditor {
                         currentActivity = NodeActivity.Idle;
                     } else if (e.button == 1) {
                         if (!isPanning) {
+                            if (IsHoveringPort)
+                                ShowPortContextMenu(hoveredPort);
                             if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
                                 if (!Selection.Contains(hoveredNode)) SelectNode(hoveredNode, false);
                                 ShowNodeContextMenu();

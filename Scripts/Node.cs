@@ -127,7 +127,7 @@ namespace XNode {
         }
 
         /// <summary> Removes all instance ports from the node </summary>
-        [ContextMenu("Clear instance ports")]
+        [ContextMenu("Clear Instance Ports")]
         public void ClearInstancePorts() {
             List<NodePort> instancePorts = new List<NodePort>(InstancePorts);
             foreach (NodePort port in instancePorts) {

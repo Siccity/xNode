@@ -137,7 +137,7 @@ namespace XNodeEditor {
 
                             }
                             // Deselect
-                            else if (e.control || e.shift) selectedReroutes.RemoveAt(hoveredReroute);
+                            else if (e.control || e.shift) selectedReroutes.Remove(hoveredReroute);
                             e.Use();
                             currentActivity = NodeActivity.HoldNode;
                         }

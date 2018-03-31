@@ -20,8 +20,9 @@ namespace XNodeEditor {
             DrawGrid(position, zoom, panOffset);
             DrawConnections();
             DrawDraggedConnection();
+            DrawReroutes();
             DrawNodes();
-            DrawBox();
+            DrawSelectionBox();
             DrawTooltip();
 
             GUI.matrix = m;
@@ -72,7 +73,7 @@ namespace XNodeEditor {
             GUI.DrawTextureWithTexCoords(rect, crossTex, new Rect(tileOffset + new Vector2(0.5f, 0.5f), tileAmount));
         }
 
-        public void DrawBox() {
+        public void DrawSelectionBox() {
             if (currentActivity == NodeActivity.DragGrid) {
                 Vector2 curPos = WindowToGridPosition(Event.current.mousePosition);
                 Vector2 size = curPos - dragBoxStart;
@@ -85,6 +86,14 @@ namespace XNodeEditor {
 
         public static bool DropdownButton(string name, float width) {
             return GUILayout.Button(name, EditorStyles.toolbarDropDown, GUILayout.Width(width));
+        }
+
+        /// <summary> Show right-click context menu for hovered reroute </summary>
+        void ShowRerouteContextMenu(int reroute) {
+            GenericMenu contextMenu = new GenericMenu();
+            contextMenu.AddItem(new GUIContent("Remove"), false, () => RemoveReroute(reroute));
+            contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
+            AssetDatabase.SaveAssets();
         }
 
         /// <summary> Show right-click context menu for hovered port </summary>
@@ -138,6 +147,7 @@ namespace XNodeEditor {
                 });
             }
             contextMenu.AddSeparator("");
+            contextMenu.AddItem(new GUIContent("Reroute"), false, () => AddReroute(pos));
             contextMenu.AddItem(new GUIContent("Preferences"), false, () => OpenPreferences());
             AddCustomContextMenuItems(contextMenu, graph);
             contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
@@ -227,6 +237,34 @@ namespace XNodeEditor {
                     }
                 }
             }
+        }
+
+        /// <summary> Draws all connections </summary>
+        public void DrawReroutes() {
+            Vector2 mousePos = Event.current.mousePosition;
+            SerializedProperty reroutes = graphEditor.serializedObject.FindProperty("reroutes");
+
+            // Box selection support
+            List<int> selection = preBoxSelectionReroute != null ? new List<int>(preBoxSelectionReroute) : new List<int>();
+            Vector2 boxStartPos = GridToWindowPosition(dragBoxStart);
+            Vector2 boxSize = mousePos - boxStartPos;
+            if (boxSize.x < 0) { boxStartPos.x += boxSize.x; boxSize.x = Mathf.Abs(boxSize.x); }
+            if (boxSize.y < 0) { boxStartPos.y += boxSize.y; boxSize.y = Mathf.Abs(boxSize.y); }
+            Rect boxRect = new Rect(boxStartPos, boxSize);
+
+            hoveredReroute = -1;
+            for (int i = 0; i < reroutes.arraySize; i++) {
+                Rect rect = new Rect(reroutes.GetArrayElementAtIndex(i).vector2Value, new Vector2(16, 16));
+                rect.position = new Vector2(rect.position.x - 8, rect.position.y - 8);
+                rect = GridToWindowRect(rect);
+                Color bgcol = Color.black;
+                if (selectedReroutes.Contains(i)) bgcol = Color.yellow;
+                NodeEditorGUILayout.DrawPortHandle(rect, bgcol, Color.white);
+
+                if (rect.Overlaps(boxRect)) selection.Add(i);
+                if (rect.Contains(mousePos)) hoveredReroute = i;
+            }
+            if (Event.current.type != EventType.Layout && currentActivity == NodeActivity.DragGrid) selectedReroutes = new List<int>(selection);
         }
 
         private void DrawNodes() {
@@ -340,14 +378,14 @@ namespace XNodeEditor {
                     foreach (XNode.NodePort input in node.Inputs) {
                         //Check if port rect is available
                         if (!portConnectionPoints.ContainsKey(input)) continue;
-                        Rect r = GridToWindowRect(portConnectionPoints[input]);
+                        Rect r = GridToWindowRectNoClipped(portConnectionPoints[input]);
                         if (r.Contains(mousePos)) hoveredPort = input;
                     }
                     //Check all output ports
                     foreach (XNode.NodePort output in node.Outputs) {
                         //Check if port rect is available
                         if (!portConnectionPoints.ContainsKey(output)) continue;
-                        Rect r = GridToWindowRect(portConnectionPoints[output]);
+                        Rect r = GridToWindowRectNoClipped(portConnectionPoints[output]);
                         if (r.Contains(mousePos)) hoveredPort = output;
                     }
                 }

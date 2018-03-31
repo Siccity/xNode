@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace XNodeEditor {
     public partial class NodeEditorWindow {
-        public enum NodeActivity { Idle, HoldHeader, DragHeader, HoldGrid, DragGrid }
+        public enum NodeActivity { Idle, HoldNode, DragNode, HoldGrid, DragGrid }
         public static NodeActivity currentActivity = NodeActivity.Idle;
         public static bool isPanning { get; private set; }
         public static Vector2[] dragOffset;
@@ -13,13 +13,17 @@ namespace XNodeEditor {
         private bool IsDraggingPort { get { return draggedOutput != null; } }
         private bool IsHoveringPort { get { return hoveredPort != null; } }
         private bool IsHoveringNode { get { return hoveredNode != null; } }
+        private bool IsHoveringReroute { get { return hoveredReroute >= 0; } }
         private XNode.Node hoveredNode = null;
         [NonSerialized] private XNode.NodePort hoveredPort = null;
         [NonSerialized] private XNode.NodePort draggedOutput = null;
         [NonSerialized] private XNode.NodePort draggedOutputTarget = null;
+        private int hoveredReroute = -1;
+        private List<int> selectedReroutes = new List<int>();
         private Rect nodeRects;
         private Vector2 dragBoxStart;
         private UnityEngine.Object[] preBoxSelection;
+        private int[] preBoxSelectionReroute;
 
         public void Controls() {
             wantsMouseMove = true;
@@ -42,32 +46,47 @@ namespace XNodeEditor {
                                 draggedOutputTarget = null;
                             }
                             Repaint();
-                        } else if (currentActivity == NodeActivity.HoldHeader || currentActivity == NodeActivity.DragHeader) {
+                        } else if (currentActivity == NodeActivity.HoldNode) {
+                            RecalculateDragOffsets(e);
+                            currentActivity = NodeActivity.DragNode;
+                            Repaint();
+                        }
+                        if (currentActivity == NodeActivity.DragNode) {
+                            // Holding ctrl inverts grid snap
+                            bool gridSnap = NodeEditorPreferences.GetSettings().gridSnap;
+                            if (e.control) gridSnap = !gridSnap;
+
+                            Vector2 mousePos = WindowToGridPosition(e.mousePosition);
+                            // Move selected nodes with offset
                             for (int i = 0; i < Selection.objects.Length; i++) {
                                 if (Selection.objects[i] is XNode.Node) {
                                     XNode.Node node = Selection.objects[i] as XNode.Node;
-                                    node.position = WindowToGridPosition(e.mousePosition) + dragOffset[i];
-                                    bool gridSnap = NodeEditorPreferences.GetSettings().gridSnap;
-                                    if (e.control) {
-                                        gridSnap = !gridSnap;
-                                    }
+                                    node.position = mousePos + dragOffset[i];
                                     if (gridSnap) {
                                         node.position.x = (Mathf.Round((node.position.x + 8) / 16) * 16) - 8;
                                         node.position.y = (Mathf.Round((node.position.y + 8) / 16) * 16) - 8;
                                     }
                                 }
                             }
-                            currentActivity = NodeActivity.DragHeader;
+                            // Move selected reroutes with offset
+                            for (int i = 0; i < selectedReroutes.Count; i++) {
+                                Vector2 pos = mousePos + dragOffset[Selection.objects.Length + i];
+                                pos.x -= 8;
+                                pos.y -= 8;
+                                if (gridSnap) {
+                                    pos.x = (Mathf.Round((pos.x + 8) / 16) * 16);
+                                    pos.y = (Mathf.Round((pos.y + 8) / 16) * 16);
+                                }
+                                SetReroute(selectedReroutes[i], pos);
+                            }
                             Repaint();
                         } else if (currentActivity == NodeActivity.HoldGrid) {
                             currentActivity = NodeActivity.DragGrid;
                             preBoxSelection = Selection.objects;
+                            preBoxSelectionReroute = selectedReroutes.ToArray();
                             dragBoxStart = WindowToGridPosition(e.mousePosition);
                             Repaint();
                         } else if (currentActivity == NodeActivity.DragGrid) {
-                            foreach (XNode.Node node in graph.nodes) {
-
-                            }
                             Repaint();
                         }
                     } else if (e.button == 1 || e.button == 2) {
@@ -83,7 +102,6 @@ namespace XNodeEditor {
                 case EventType.MouseDown:
                     Repaint();
                     if (e.button == 0) {
-
                         if (IsHoveringPort) {
                             if (hoveredPort.IsOutput) {
                                 draggedOutput = hoveredPort;
@@ -100,22 +118,36 @@ namespace XNodeEditor {
                             }
                         } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
                             // If mousedown on node header, select or deselect
-                            if (!Selection.Contains(hoveredNode)) SelectNode(hoveredNode, e.control || e.shift);
-                            else if (e.control || e.shift) DeselectNode(hoveredNode);
+                            if (!Selection.Contains(hoveredNode)) {
+                                SelectNode(hoveredNode, e.control || e.shift);
+                                if (!e.control && !e.shift) selectedReroutes.Clear();
+                            } else if (e.control || e.shift) DeselectNode(hoveredNode);
                             e.Use();
-                            currentActivity = NodeActivity.HoldHeader;
-                            dragOffset = new Vector2[Selection.objects.Length];
-                            for (int i = 0; i < dragOffset.Length; i++) {
-                                if (Selection.objects[i] is XNode.Node) {
-                                    XNode.Node node = Selection.objects[i] as XNode.Node;
-                                    dragOffset[i] = node.position - WindowToGridPosition(e.mousePosition);
+                            currentActivity = NodeActivity.HoldNode;
+                        } else if (IsHoveringReroute) {
+                            // If reroute isn't selected
+                            if (!selectedReroutes.Contains(hoveredReroute)) {
+                                // Add it
+                                if (e.control || e.shift) selectedReroutes.Add(hoveredReroute);
+                                // Select it
+                                else {
+                                    selectedReroutes = new List<int>() { hoveredReroute };
+                                    Selection.activeObject = null;
                                 }
+
                             }
+                            // Deselect
+                            else if (e.control || e.shift) selectedReroutes.RemoveAt(hoveredReroute);
+                            e.Use();
+                            currentActivity = NodeActivity.HoldNode;
                         }
                         // If mousedown on grid background, deselect all
                         else if (!IsHoveringNode) {
                             currentActivity = NodeActivity.HoldGrid;
-                            if (!e.control && !e.shift) Selection.activeObject = null;
+                            if (!e.control && !e.shift) {
+                                selectedReroutes.Clear();
+                                Selection.activeObject = null;
+                            }
                         }
                     }
                     break;
@@ -135,7 +167,7 @@ namespace XNodeEditor {
                             draggedOutputTarget = null;
                             EditorUtility.SetDirty(graph);
                             AssetDatabase.SaveAssets();
-                        } else if (currentActivity == NodeActivity.DragHeader) {
+                        } else if (currentActivity == NodeActivity.DragNode) {
                             AssetDatabase.SaveAssets();
                         } else if (!IsHoveringNode) {
                             // If click outside node, release field focus
@@ -150,18 +182,27 @@ namespace XNodeEditor {
                             AssetDatabase.SaveAssets();
                         }
 
-                        // If click node header, select single node.
-                        if (currentActivity == NodeActivity.HoldHeader && !(e.control || e.shift)) {
+                        // If click node header, select it.
+                        if (currentActivity == NodeActivity.HoldNode && !(e.control || e.shift)) {
+                            selectedReroutes.Clear();
                             SelectNode(hoveredNode, false);
+                        }
+
+                        // If click reroute, select it.
+                        if (IsHoveringReroute && !(e.control || e.shift)) {
+                            selectedReroutes = new List<int>() { hoveredReroute };
+                            Selection.activeObject = null;
                         }
 
                         Repaint();
                         currentActivity = NodeActivity.Idle;
                     } else if (e.button == 1) {
                         if (!isPanning) {
-                            if (IsHoveringPort)
+                            if (IsHoveringReroute) {
+                                ShowRerouteContextMenu(hoveredReroute);
+                            } else if (IsHoveringPort) {
                                 ShowPortContextMenu(hoveredPort);
-                            if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
+                            } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
                                 if (!Selection.Contains(hoveredNode)) SelectNode(hoveredNode, false);
                                 ShowNodeContextMenu();
                             } else if (!IsHoveringNode) {
@@ -187,6 +228,22 @@ namespace XNodeEditor {
                         currentActivity = NodeActivity.Idle;
                     }
                     break;
+            }
+        }
+
+        private void RecalculateDragOffsets(Event current) {
+            dragOffset = new Vector2[Selection.objects.Length + selectedReroutes.Count];
+            // Selected nodes
+            for (int i = 0; i < Selection.objects.Length; i++) {
+                if (Selection.objects[i] is XNode.Node) {
+                    XNode.Node node = Selection.objects[i] as XNode.Node;
+                    dragOffset[i] = node.position - WindowToGridPosition(current.mousePosition);
+                }
+            }
+
+            // Selected reroutes
+            for (int i = 0; i < selectedReroutes.Count; i++) {
+                dragOffset[Selection.objects.Length + i] = GetReroutePos(selectedReroutes[i]) - WindowToGridPosition(current.mousePosition);
             }
         }
 
@@ -251,6 +308,35 @@ namespace XNodeEditor {
                 }
             }
             Selection.objects = newNodes;
+        }
+
+        /// <summary> Add a reroute node to a graph and return index </summary>
+        public int AddReroute(Vector2 position) {
+            SerializedProperty reroutes = graphEditor.serializedObject.FindProperty("reroutes");
+            reroutes.arraySize++;
+            reroutes.GetArrayElementAtIndex(reroutes.arraySize - 1).vector2Value = position;
+            graphEditor.serializedObject.ApplyModifiedProperties();
+            return reroutes.arraySize - 1;
+        }
+
+        /// <summary> Set the position of a reroute node </summary>
+        public void SetReroute(int index, Vector2 position) {
+            SerializedProperty reroutes = graphEditor.serializedObject.FindProperty("reroutes");
+            reroutes.GetArrayElementAtIndex(index).vector2Value = position;
+            graphEditor.serializedObject.ApplyModifiedProperties();
+        }
+
+        /// <summary> Get the position of a reroute node </summary>
+        public Vector2 GetReroutePos(int index) {
+            SerializedProperty reroutes = graphEditor.serializedObject.FindProperty("reroutes");
+            return reroutes.GetArrayElementAtIndex(index).vector2Value;
+        }
+
+        /// <summary> Remove a reroute node </summary>
+        public void RemoveReroute(int index) {
+            SerializedProperty reroutes = graphEditor.serializedObject.FindProperty("reroutes");
+            reroutes.DeleteArrayElementAtIndex(index);
+            graphEditor.serializedObject.ApplyModifiedProperties();
         }
 
         /// <summary> Draw a connection as we are dragging it </summary>

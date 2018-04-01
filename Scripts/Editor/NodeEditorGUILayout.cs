@@ -128,7 +128,7 @@ namespace XNodeEditor {
             else NodeEditor.portPositions.Add(port, portPos);
         }
 
-        private static void DrawPortHandle(Rect rect, Color backgroundColor, Color typeColor) {
+        public static void DrawPortHandle(Rect rect, Color backgroundColor, Color typeColor) {
             Color col = GUI.color;
             GUI.color = backgroundColor;
             GUI.DrawTexture(rect, NodeEditorResources.dotOuter);

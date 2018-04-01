@@ -216,6 +216,14 @@ namespace XNode {
             return port;
         }
 
+        /// <summary> Get index of the connection connecting this and specified ports </summary>
+        public int GetConnectionIndex(NodePort port) {
+            for (int i = 0; i < ConnectionCount; i++) {
+                if (connections[i].Port == port) return i;
+            }
+            return -1;
+        }
+
         public bool IsConnectedTo(NodePort port) {
             for (int i = 0; i < connections.Count; i++) {
                 if (connections[i].Port == port) return true;
@@ -250,10 +258,9 @@ namespace XNode {
             }
         }
 
-        /// <summary> Get reroute indices. This is used for graph organization purposes </summary>
-        /// <param name="i"> Connection index </param>
-        public int[] GetReroutes(int i) {
-            return connections[i].reroutes;
+        /// <summary> Get reroute points for a given connection. This is used for organization </summary>
+        public List<Vector2> GetReroutePoints(int index) {
+            return connections[index].reroutePoints;
         }
 
         /// <summary> Swap connected nodes from the old list with nodes from the new list </summary>
@@ -269,10 +276,10 @@ namespace XNode {
             [SerializeField] public string fieldName;
             [SerializeField] public Node node;
             public NodePort Port { get { return port != null ? port : port = GetPort(); } }
-            /// <summary> Used for organization</summary>
-            [SerializeField] public int[] reroutes = new int[0];
 
             [NonSerialized] private NodePort port;
+            /// <summary> Extra connection path points for organization </summary>
+            [SerializeField] public List<Vector2> reroutePoints = new List<Vector2>();
 
             public PortConnection(NodePort port) {
                 this.port = port;

@@ -250,6 +250,12 @@ namespace XNode {
             }
         }
 
+        /// <summary> Get reroute indices. This is used for graph organization purposes </summary>
+        /// <param name="i"> Connection index </param>
+        public int[] GetReroutes(int i) {
+            return connections[i].reroutes;
+        }
+
         /// <summary> Swap connected nodes from the old list with nodes from the new list </summary>
         public void Redirect(List<Node> oldNodes, List<Node> newNodes) {
             foreach (PortConnection connection in connections) {
@@ -263,6 +269,8 @@ namespace XNode {
             [SerializeField] public string fieldName;
             [SerializeField] public Node node;
             public NodePort Port { get { return port != null ? port : port = GetPort(); } }
+            /// <summary> Used for organization</summary>
+            [SerializeField] public int[] reroutes = new int[0];
 
             [NonSerialized] private NodePort port;
 

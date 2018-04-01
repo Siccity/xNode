@@ -10,11 +10,8 @@ namespace XNode {
         /// <summary> All nodes in the graph. <para/>
         /// See: <see cref="AddNode{T}"/> </summary>
         [SerializeField] public List<Node> nodes = new List<Node>();
-
-#if UNITY_EDITOR
-        /// <summary> Nodes used primarily for organization (Editor only) </summary>
-        public List<Vector2> reroutes = new List<Vector2>();
-#endif
+        /// <summary> Nodes used primarily for organization </summary>
+        [SerializeField] public List<Vector2> reroutes = new List<Vector2>();
 
         /// <summary> Add a node to the graph by type </summary>
         public T AddNode<T>() where T : Node {

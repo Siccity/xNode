@@ -217,6 +217,8 @@ namespace XNodeEditor {
 
         /// <summary> Draws all connections </summary>
         public void DrawConnections() {
+            List<int> drawnReroutes = new List<int>();
+
             foreach (XNode.Node node in graph.nodes) {
                 //If a null node is found, return. This can happen if the nodes associated script is deleted. It is currently not possible in Unity to delete a null asset.
                 if (node == null) continue;
@@ -224,16 +226,29 @@ namespace XNodeEditor {
                 foreach (XNode.NodePort output in node.Outputs) {
                     //Needs cleanup. Null checks are ugly
                     if (!portConnectionPoints.ContainsKey(output)) continue;
+
+                    Color connectionColor = graphEditor.GetTypeColor(output.ValueType);
+
                     Vector2 from = _portConnectionPoints[output].center;
                     for (int k = 0; k < output.ConnectionCount; k++) {
-
                         XNode.NodePort input = output.GetConnection(k);
+
+                        // Error handling
                         if (input == null) continue; //If a script has been updated and the port doesn't exist, it is removed and null is returned. If this happens, return.
                         if (!input.IsConnectedTo(output)) input.Connect(output);
                         if (!_portConnectionPoints.ContainsKey(input)) continue;
-                        Vector2 to = _portConnectionPoints[input].center;
-                        Color connectionColor = graphEditor.GetTypeColor(output.ValueType);
-                        DrawConnection(from, to, connectionColor);
+
+                        Vector2 to = Vector2.zero;
+                        int[] rerouteIndices = output.GetReroutes(k);
+                        for (int i = 0; i < rerouteIndices.Length + 1; i++) {
+                            if (i != rerouteIndices.Length) to = graph.reroutes[rerouteIndices[i]];
+                            else to = _portConnectionPoints[input].center;
+                            DrawConnection(from, to, connectionColor);
+                            from = to;
+
+                            if (drawnReroutes.Contains(i)) break;
+                            else drawnReroutes.Add(i);
+                        }
                     }
                 }
             }

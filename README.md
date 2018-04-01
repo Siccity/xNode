@@ -21,6 +21,10 @@ With a minimal footprint, it is ideal as a base for custom state machines, dialo
 * Does not rely on any 3rd party plugins
 * Custom node inspector code is very similar to regular custom inspector code
 
+### Wiki
+* [Getting started](https://github.com/Siccity/xNode/wiki/Getting%20Started) - create your very first node node and graph
+* [Examples branch](https://github.com/Siccity/xNode/tree/examples) - look at other small projects
+
 ### Node example:
 ```csharp
 [System.Serializable]

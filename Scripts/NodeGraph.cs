@@ -28,13 +28,6 @@ namespace XNode {
         public virtual Node CopyNode(Node original) {
             Node node = ScriptableObject.Instantiate(original);
             node.ClearConnections();
-#if UNITY_EDITOR
-            if (!Application.isPlaying) {
-                UnityEditor.AssetDatabase.AddObjectToAsset(node, this);
-                UnityEditor.AssetDatabase.SaveAssets();
-                node.name = UnityEditor.ObjectNames.NicifyVariableName(node.name);
-            }
-#endif
             nodes.Add(node);
             node.graph = this;
             return node;
@@ -44,12 +37,6 @@ namespace XNode {
         /// <param name="node"></param>
         public void RemoveNode(Node node) {
             node.ClearConnections();
-#if UNITY_EDITOR
-            if (!Application.isPlaying) {
-                DestroyImmediate(node, true);
-                UnityEditor.AssetDatabase.SaveAssets();
-            }
-#endif
             nodes.Remove(node);
         }
 

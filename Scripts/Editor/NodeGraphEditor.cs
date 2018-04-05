@@ -39,6 +39,22 @@ namespace XNodeEditor {
             return NodeEditorPreferences.GetTypeColor(type);
         }
 
+        /// <summary> Creates a copy of the original node in the graph </summary>
+        public XNode.Node CopyNode(XNode.Node original) {
+            XNode.Node node = target.CopyNode(original);
+            node.name = original.name;
+            AssetDatabase.AddObjectToAsset(node, target);
+            AssetDatabase.SaveAssets();
+            return node;
+        }
+
+        /// <summary> Safely remove a node and all its connections. </summary>
+        public void RemoveNode(XNode.Node node) {
+            UnityEngine.Object.DestroyImmediate(node, true);
+            target.RemoveNode(node);
+            AssetDatabase.SaveAssets();
+        }
+
         [AttributeUsage(AttributeTargets.Class)]
         public class CustomNodeGraphEditorAttribute : Attribute,
             XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph>.INodeEditorAttrib {

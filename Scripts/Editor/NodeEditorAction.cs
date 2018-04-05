@@ -302,7 +302,7 @@ namespace XNodeEditor {
             foreach (UnityEngine.Object item in Selection.objects) {
                 if (item is XNode.Node) {
                     XNode.Node node = item as XNode.Node;
-                    graph.RemoveNode(node);
+                    graphEditor.RemoveNode(node);
                 }
             }
         }
@@ -324,7 +324,7 @@ namespace XNodeEditor {
                 if (Selection.objects[i] is XNode.Node) {
                     XNode.Node srcNode = Selection.objects[i] as XNode.Node;
                     if (srcNode.graph != graph) continue; // ignore nodes selected in another graph
-                    XNode.Node newNode = graph.CopyNode(srcNode);
+                    XNode.Node newNode = graphEditor.CopyNode(srcNode);
                     substitutes.Add(srcNode, newNode);
                     newNode.position = srcNode.position + new Vector2(30, 30);
                     newNodes[i] = newNode;

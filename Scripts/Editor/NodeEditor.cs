@@ -13,6 +13,7 @@ namespace XNodeEditor {
         /// <summary> Fires every whenever a node was modified through the editor </summary>
         public static Action<XNode.Node> onUpdateNode;
         public static Dictionary<XNode.NodePort, Vector2> portPositions;
+        public static int renaming;
 
         /// <summary> Draws the node GUI.</summary>
         /// <param name="portPositions">Port handle positions need to be returned to the NodeEditorWindow </param>
@@ -24,7 +25,21 @@ namespace XNodeEditor {
         public virtual void OnHeaderGUI() {
             GUI.color = Color.white;
             string title = target.name;
-            GUILayout.Label(title, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
+            if (renaming != 0 && Selection.Contains(target)) {
+                int controlID = EditorGUIUtility.GetControlID(FocusType.Keyboard) + 1;
+                if (renaming == 1) {
+                    EditorGUIUtility.keyboardControl = controlID;
+                    EditorGUIUtility.editingTextField = true;
+                    renaming = 2;
+                }
+                target.name = EditorGUILayout.TextField(target.name, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
+                if (!EditorGUIUtility.editingTextField) {
+                    Rename(target.name);
+                    renaming = 0;
+                }
+            } else {
+                GUILayout.Label(title, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
+            }
         }
 
         /// <summary> Draws standard field editors for all public fields </summary>
@@ -50,6 +65,15 @@ namespace XNodeEditor {
             Type type = target.GetType();
             if (NodeEditorWindow.nodeTint.ContainsKey(type)) return NodeEditorWindow.nodeTint[type];
             else return Color.white;
+        }
+
+        public void InitiateRename() {
+            renaming = 1;
+        }
+
+        public void Rename(string newName) {
+            target.name = newName;
+            AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
         }
 
         [AttributeUsage(AttributeTargets.Class)]

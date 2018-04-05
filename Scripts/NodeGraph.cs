@@ -19,13 +19,6 @@ namespace XNode {
         /// <summary> Add a node to the graph by type </summary>
         public virtual Node AddNode(Type type) {
             Node node = ScriptableObject.CreateInstance(type) as Node;
-#if UNITY_EDITOR
-            if (!Application.isPlaying) {
-                UnityEditor.AssetDatabase.AddObjectToAsset(node, this);
-                UnityEditor.AssetDatabase.SaveAssets();
-                node.name = UnityEditor.ObjectNames.NicifyVariableName(node.name);
-            }
-#endif
             nodes.Add(node);
             node.graph = this;
             return node;

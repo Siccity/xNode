@@ -291,6 +291,9 @@ namespace XNodeEditor {
         public void CreateNode(Type type, Vector2 position) {
             XNode.Node node = graph.AddNode(type);
             node.position = position;
+            node.name = UnityEditor.ObjectNames.NicifyVariableName(type.ToString());
+            AssetDatabase.AddObjectToAsset(node, graph);
+            AssetDatabase.SaveAssets();
             Repaint();
         }
 
@@ -301,6 +304,15 @@ namespace XNodeEditor {
                     XNode.Node node = item as XNode.Node;
                     graph.RemoveNode(node);
                 }
+            }
+        }
+
+        /// <summary> Draw this node on top of other nodes by placing it last in the graph.nodes list </summary>
+        public void MoveNodeToTop(XNode.Node node) {
+            int index;
+            while ((index = graph.nodes.IndexOf(node)) != graph.nodes.Count - 1) {
+                graph.nodes[index] = graph.nodes[index + 1];
+                graph.nodes[index + 1] = node;
             }
         }
 

@@ -109,13 +109,8 @@ namespace XNodeEditor {
             // If only one node is selected
             if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
                 XNode.Node node = Selection.activeObject as XNode.Node;
-                contextMenu.AddItem(new GUIContent("Move To Top"), false, () => {
-                    int index;
-                    while ((index = graph.nodes.IndexOf(node)) != graph.nodes.Count - 1) {
-                        graph.nodes[index] = graph.nodes[index + 1];
-                        graph.nodes[index + 1] = node;
-                    }
-                });
+                contextMenu.AddItem(new GUIContent("Move To Top"), false, () => MoveNodeToTop(node));
+                contextMenu.AddItem(new GUIContent("Rename"), false, NodeEditor.GetEditor(node).InitiateRename);
             }
 
             contextMenu.AddItem(new GUIContent("Duplicate"), false, DublicateSelectedNodes);

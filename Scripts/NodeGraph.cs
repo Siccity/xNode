@@ -51,6 +51,7 @@ namespace XNode {
             NodeGraph graph = Instantiate(this);
             // Instantiate all nodes inside the graph
             for (int i = 0; i < nodes.Count; i++) {
+                if (nodes[i] == null) continue;
                 Node node = Instantiate(nodes[i]) as Node;
                 node.graph = graph;
                 graph.nodes[i] = node;
@@ -58,6 +59,7 @@ namespace XNode {
 
             // Redirect all connections
             for (int i = 0; i < graph.nodes.Count; i++) {
+                if (graph.nodes[i] == null) continue;
                 foreach (NodePort port in graph.nodes[i].Ports) {
                     port.Redirect(nodes, graph.nodes);
                 }

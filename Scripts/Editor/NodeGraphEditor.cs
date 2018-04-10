@@ -8,8 +8,6 @@ namespace XNodeEditor {
     /// <summary> Base class to derive custom Node Graph editors from. Use this to override how graphs are drawn in the editor. </summary>
     [CustomNodeGraphEditor(typeof(XNode.NodeGraph))]
     public class NodeGraphEditor : XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph> {
-        /// <summary> Custom node editors defined with [CustomNodeGraphEditor] </summary>
-        [NonSerialized] private static Dictionary<Type, NodeGraphEditor> editors;
         protected bool isRenaming;
 
         public virtual Texture2D GetGridTexture() {

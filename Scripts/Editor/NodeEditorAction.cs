@@ -187,10 +187,14 @@ namespace XNodeEditor {
                             if (draggedOutputTarget != null) {
                                 XNode.Node node = draggedOutputTarget.node;
                                 if (graph.nodes.Count != 0) draggedOutput.Connect(draggedOutputTarget);
+
+                                // ConnectionIndex can be -1 if the connection is removed instantly after creation
                                 int connectionIndex = draggedOutput.GetConnectionIndex(draggedOutputTarget);
-                                draggedOutput.GetReroutePoints(connectionIndex).AddRange(draggedOutputReroutes);
-                                if (NodeEditor.onUpdateNode != null) NodeEditor.onUpdateNode(node);
-                                EditorUtility.SetDirty(graph);
+                                if (connectionIndex != -1) {
+                                    draggedOutput.GetReroutePoints(connectionIndex).AddRange(draggedOutputReroutes);
+                                    if (NodeEditor.onUpdateNode != null) NodeEditor.onUpdateNode(node);
+                                    EditorUtility.SetDirty(graph);
+                                }
                             }
                             //Release dragged connection
                             draggedOutput = null;

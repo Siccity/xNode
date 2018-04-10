@@ -14,6 +14,7 @@ namespace XNodeEditor {
             Matrix4x4 m = GUI.matrix;
             if (graph == null) return;
             graphEditor = NodeGraphEditor.GetEditor(graph);
+            graphEditor.position = position;
 
             Controls();
 
@@ -23,6 +24,7 @@ namespace XNodeEditor {
             DrawNodes();
             DrawSelectionBox();
             DrawTooltip();
+            graphEditor.OnGUI();
 
             GUI.matrix = m;
         }

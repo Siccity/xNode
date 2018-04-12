@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -303,6 +304,12 @@ namespace XNodeEditor {
 
         /// <summary> Remove nodes in the graph in Selection.objects</summary>
         public void RemoveSelectedNodes() {
+            // We need to delete reroutes starting at the highest point index to avoid shifting indices
+            selectedReroutes = selectedReroutes.OrderByDescending(x => x.pointIndex).ToList();
+            for (int i = 0; i < selectedReroutes.Count; i++) {
+                selectedReroutes[i].RemovePoint();
+            }
+            selectedReroutes.Clear();
             foreach (UnityEngine.Object item in Selection.objects) {
                 if (item is XNode.Node) {
                     XNode.Node node = item as XNode.Node;

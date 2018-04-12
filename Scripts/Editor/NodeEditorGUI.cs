@@ -216,6 +216,7 @@ namespace XNodeEditor {
             List<RerouteReference> selection = preBoxSelectionReroute != null ? new List<RerouteReference>(preBoxSelectionReroute) : new List<RerouteReference>();
             hoveredReroute = new RerouteReference();
 
+            Color col = GUI.color;
             foreach (XNode.Node node in graph.nodes) {
                 //If a null node is found, return. This can happen if the nodes associated script is deleted. It is currently not possible in Unity to delete a null asset.
                 if (node == null) continue;
@@ -249,21 +250,28 @@ namespace XNodeEditor {
 
                         // Loop through reroute points again and draw the points
                         for (int i = 0; i < reroutePoints.Count; i++) {
+                            RerouteReference rerouteRef = new RerouteReference(output, k, i);
                             // Draw reroute point at position
-                            Rect rect = new Rect(reroutePoints[i], new Vector2(16, 16));
-                            rect.position = new Vector2(rect.position.x - 8, rect.position.y - 8);
+                            Rect rect = new Rect(reroutePoints[i], new Vector2(12, 12));
+                            rect.position = new Vector2(rect.position.x - 6, rect.position.y - 6);
                             rect = GridToWindowRect(rect);
-                            Color bgcol = new Color32(90, 97, 105, 255);;
-                            if (selectedReroutes.Contains(new RerouteReference(output, k, i))) bgcol = Color.yellow;
-                            NodeEditorGUILayout.DrawPortHandle(rect, bgcol, connectionColor);
 
-                            if (rect.Overlaps(selectionBox)) selection.Add(new RerouteReference(output, k, i));
-                            if (rect.Contains(mousePos)) hoveredReroute = new RerouteReference(output, k, i);
+                            // Draw selected reroute points with an outline
+                            if (selectedReroutes.Contains(rerouteRef)) {
+                                GUI.color = NodeEditorPreferences.GetSettings().highlightColor;
+                                GUI.DrawTexture(rect, NodeEditorResources.dotOuter);
+                            }
+
+                            GUI.color = connectionColor;
+                            GUI.DrawTexture(rect, NodeEditorResources.dot);
+                            if (rect.Overlaps(selectionBox)) selection.Add(rerouteRef);
+                            if (rect.Contains(mousePos)) hoveredReroute = rerouteRef;
 
                         }
                     }
                 }
             }
+            GUI.color = col;
             if (Event.current.type != EventType.Layout && currentActivity == NodeActivity.DragGrid) selectedReroutes = selection;
         }
 

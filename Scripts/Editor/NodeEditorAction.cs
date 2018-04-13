@@ -201,9 +201,9 @@ namespace XNodeEditor {
                             draggedOutput = null;
                             draggedOutputTarget = null;
                             EditorUtility.SetDirty(graph);
-                            AssetDatabase.SaveAssets();
+                            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
                         } else if (currentActivity == NodeActivity.DragNode) {
-                            AssetDatabase.SaveAssets();
+                            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
                         } else if (!IsHoveringNode) {
                             // If click outside node, release field focus
                             if (!isPanning) {
@@ -214,7 +214,7 @@ namespace XNodeEditor {
                                 EditorGUIUtility.keyboardControl = 0;
                                 EditorGUIUtility.hotControl = 0;
                             }
-                            AssetDatabase.SaveAssets();
+                            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
                         }
 
                         // If click node header, select it.
@@ -298,7 +298,7 @@ namespace XNodeEditor {
             node.position = position;
             node.name = UnityEditor.ObjectNames.NicifyVariableName(type.ToString());
             AssetDatabase.AddObjectToAsset(node, graph);
-            AssetDatabase.SaveAssets();
+            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             Repaint();
         }
 

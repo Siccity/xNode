@@ -47,7 +47,7 @@ namespace XNodeEditor {
             XNode.Node node = target.CopyNode(original);
             node.name = original.name;
             AssetDatabase.AddObjectToAsset(node, target);
-            AssetDatabase.SaveAssets();
+            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             return node;
         }
 
@@ -55,7 +55,7 @@ namespace XNodeEditor {
         public void RemoveNode(XNode.Node node) {
             UnityEngine.Object.DestroyImmediate(node, true);
             target.RemoveNode(node);
-            AssetDatabase.SaveAssets();
+            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 
         [AttributeUsage(AttributeTargets.Class)]

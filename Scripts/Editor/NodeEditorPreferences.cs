@@ -25,6 +25,7 @@ namespace XNodeEditor {
 
             public Color32 highlightColor = new Color32(255, 255, 255, 255);
             public bool gridSnap = true;
+            public bool autoSave = true;
             [SerializeField] private string typeColorsData = "";
             [NonSerialized] public Dictionary<string, Color> typeColors = new Dictionary<string, Color>();
             public NoodleType noodleType = NoodleType.Curve;
@@ -73,9 +74,9 @@ namespace XNodeEditor {
                     XNodeEditor.NodeGraphEditor.CustomNodeGraphEditorAttribute attrib = attribs[0] as XNodeEditor.NodeGraphEditor.CustomNodeGraphEditorAttribute;
                     lastEditor = XNodeEditor.NodeEditorWindow.current.graphEditor;
                     lastKey = attrib.editorPrefsKey;
-                    VerifyLoaded();
                 } else return null;
             }
+            if (!settings.ContainsKey(lastKey)) VerifyLoaded();
             return settings[lastKey];
         }
 
@@ -86,6 +87,7 @@ namespace XNodeEditor {
 
             NodeSettingsGUI(lastKey, settings);
             GridSettingsGUI(lastKey, settings);
+            SystemSettingsGUI(lastKey, settings);
             TypeColorsGUI(lastKey, settings);
             if (GUILayout.Button(new GUIContent("Set Default", "Reset all values to default"), GUILayout.Width(120))) {
                 ResetPrefs();
@@ -95,7 +97,7 @@ namespace XNodeEditor {
         private static void GridSettingsGUI(string key, Settings settings) {
             //Label
             EditorGUILayout.LabelField("Grid", EditorStyles.boldLabel);
-            settings.gridSnap = EditorGUILayout.Toggle("Snap", settings.gridSnap);
+            settings.gridSnap = EditorGUILayout.Toggle(new GUIContent("Snap", "Hold CTRL in editor to invert"), settings.gridSnap);
 
             settings.gridLineColor = EditorGUILayout.ColorField("Color", settings.gridLineColor);
             settings.gridBgColor = EditorGUILayout.ColorField(" ", settings.gridBgColor);
@@ -104,6 +106,14 @@ namespace XNodeEditor {
 
                 NodeEditorWindow.RepaintAll();
             }
+            EditorGUILayout.Space();
+        }
+
+        private static void SystemSettingsGUI(string key, Settings settings) {
+            //Label
+            EditorGUILayout.LabelField("System", EditorStyles.boldLabel);
+            settings.autoSave = EditorGUILayout.Toggle(new GUIContent("Autosave", "Disable for better editor performance"), settings.autoSave);
+            if (GUI.changed) SavePrefs(key, settings);
             EditorGUILayout.Space();
         }
 

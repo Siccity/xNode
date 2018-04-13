@@ -20,8 +20,8 @@ namespace XNodeEditor {
         private float _zoom = 1;
 
         void OnFocus() {
-            AssetDatabase.SaveAssets();
             current = this;
+            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 
         partial void OnEnable();
@@ -37,7 +37,7 @@ namespace XNodeEditor {
         public void Save() {
             if (AssetDatabase.Contains(graph)) {
                 EditorUtility.SetDirty(graph);
-                AssetDatabase.SaveAssets();
+                if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             } else SaveAs();
         }
 
@@ -49,7 +49,7 @@ namespace XNodeEditor {
                 if (existingGraph != null) AssetDatabase.DeleteAsset(path);
                 AssetDatabase.CreateAsset(graph, path);
                 EditorUtility.SetDirty(graph);
-                AssetDatabase.SaveAssets();
+                if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             }
         }
 

@@ -21,6 +21,7 @@ namespace XNodeEditor {
 
         void OnFocus() {
             current = this;
+            graphEditor = NodeGraphEditor.GetEditor(graph);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 

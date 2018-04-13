@@ -14,6 +14,7 @@ namespace XNodeEditor {
             Matrix4x4 m = GUI.matrix;
             if (graph == null) return;
             graphEditor = NodeGraphEditor.GetEditor(graph);
+            graphEditor.position = position;
 
             Controls();
 
@@ -21,8 +22,9 @@ namespace XNodeEditor {
             DrawConnections();
             DrawDraggedConnection();
             DrawNodes();
-            DrawBox();
+            DrawSelectionBox();
             DrawTooltip();
+            graphEditor.OnGUI();
 
             GUI.matrix = m;
         }
@@ -72,7 +74,7 @@ namespace XNodeEditor {
             GUI.DrawTextureWithTexCoords(rect, crossTex, new Rect(tileOffset + new Vector2(0.5f, 0.5f), tileAmount));
         }
 
-        public void DrawBox() {
+        public void DrawSelectionBox() {
             if (currentActivity == NodeActivity.DragGrid) {
                 Vector2 curPos = WindowToGridPosition(Event.current.mousePosition);
                 Vector2 size = curPos - dragBoxStart;
@@ -87,19 +89,30 @@ namespace XNodeEditor {
             return GUILayout.Button(name, EditorStyles.toolbarDropDown, GUILayout.Width(width));
         }
 
+        /// <summary> Show right-click context menu for hovered reroute </summary>
+        void ShowRerouteContextMenu(RerouteReference reroute) {
+            GenericMenu contextMenu = new GenericMenu();
+            contextMenu.AddItem(new GUIContent("Remove"), false, () => reroute.RemovePoint());
+            contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
+            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+        }
+
+        /// <summary> Show right-click context menu for hovered port </summary>
+        void ShowPortContextMenu(XNode.NodePort hoveredPort) {
+            GenericMenu contextMenu = new GenericMenu();
+            contextMenu.AddItem(new GUIContent("Clear Connections"), false, () => hoveredPort.ClearConnections());
+            contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
+            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+        }
+
         /// <summary> Show right-click context menu for selected nodes </summary>
         public void ShowNodeContextMenu() {
             GenericMenu contextMenu = new GenericMenu();
             // If only one node is selected
             if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
                 XNode.Node node = Selection.activeObject as XNode.Node;
-                contextMenu.AddItem(new GUIContent("Move To Top"), false, () => {
-                    int index;
-                    while ((index = graph.nodes.IndexOf(node)) != graph.nodes.Count - 1) {
-                        graph.nodes[index] = graph.nodes[index + 1];
-                        graph.nodes[index + 1] = node;
-                    }
-                });
+                contextMenu.AddItem(new GUIContent("Move To Top"), false, () => MoveNodeToTop(node));
+                contextMenu.AddItem(new GUIContent("Rename"), false, NodeEditor.GetEditor(node).InitiateRename);
             }
 
             contextMenu.AddItem(new GUIContent("Duplicate"), false, DublicateSelectedNodes);
@@ -199,26 +212,67 @@ namespace XNodeEditor {
 
         /// <summary> Draws all connections </summary>
         public void DrawConnections() {
+            Vector2 mousePos = Event.current.mousePosition;
+            List<RerouteReference> selection = preBoxSelectionReroute != null ? new List<RerouteReference>(preBoxSelectionReroute) : new List<RerouteReference>();
+            hoveredReroute = new RerouteReference();
+
+            Color col = GUI.color;
             foreach (XNode.Node node in graph.nodes) {
                 //If a null node is found, return. This can happen if the nodes associated script is deleted. It is currently not possible in Unity to delete a null asset.
                 if (node == null) continue;
 
+                // Draw full connections and output > reroute
                 foreach (XNode.NodePort output in node.Outputs) {
                     //Needs cleanup. Null checks are ugly
                     if (!portConnectionPoints.ContainsKey(output)) continue;
-                    Vector2 from = _portConnectionPoints[output].center;
-                    for (int k = 0; k < output.ConnectionCount; k++) {
 
+                    Color connectionColor = graphEditor.GetTypeColor(output.ValueType);
+
+                    for (int k = 0; k < output.ConnectionCount; k++) {
                         XNode.NodePort input = output.GetConnection(k);
+
+                        // Error handling
                         if (input == null) continue; //If a script has been updated and the port doesn't exist, it is removed and null is returned. If this happens, return.
                         if (!input.IsConnectedTo(output)) input.Connect(output);
                         if (!_portConnectionPoints.ContainsKey(input)) continue;
-                        Vector2 to = _portConnectionPoints[input].center;
-                        Color connectionColor = graphEditor.GetTypeColor(output.ValueType);
+
+                        Vector2 from = _portConnectionPoints[output].center;
+                        Vector2 to = Vector2.zero;
+                        List<Vector2> reroutePoints = output.GetReroutePoints(k);
+                        // Loop through reroute points and draw the path
+                        for (int i = 0; i < reroutePoints.Count; i++) {
+                            to = reroutePoints[i];
+                            DrawConnection(from, to, connectionColor);
+                            from = to;
+                        }
+                        to = _portConnectionPoints[input].center;
                         DrawConnection(from, to, connectionColor);
+
+                        // Loop through reroute points again and draw the points
+                        for (int i = 0; i < reroutePoints.Count; i++) {
+                            RerouteReference rerouteRef = new RerouteReference(output, k, i);
+                            // Draw reroute point at position
+                            Rect rect = new Rect(reroutePoints[i], new Vector2(12, 12));
+                            rect.position = new Vector2(rect.position.x - 6, rect.position.y - 6);
+                            rect = GridToWindowRect(rect);
+
+                            // Draw selected reroute points with an outline
+                            if (selectedReroutes.Contains(rerouteRef)) {
+                                GUI.color = NodeEditorPreferences.GetSettings().highlightColor;
+                                GUI.DrawTexture(rect, NodeEditorResources.dotOuter);
+                            }
+
+                            GUI.color = connectionColor;
+                            GUI.DrawTexture(rect, NodeEditorResources.dot);
+                            if (rect.Overlaps(selectionBox)) selection.Add(rerouteRef);
+                            if (rect.Contains(mousePos)) hoveredReroute = rerouteRef;
+
+                        }
                     }
                 }
             }
+            GUI.color = col;
+            if (Event.current.type != EventType.Layout && currentActivity == NodeActivity.DragGrid) selectedReroutes = selection;
         }
 
         private void DrawNodes() {
@@ -249,6 +303,13 @@ namespace XNodeEditor {
             }
 
             List<UnityEngine.Object> preSelection = preBoxSelection != null ? new List<UnityEngine.Object>(preBoxSelection) : new List<UnityEngine.Object>();
+
+            // Selection box stuff
+            Vector2 boxStartPos = GridToWindowPositionNoClipped(dragBoxStart);
+            Vector2 boxSize = mousePos - boxStartPos;
+            if (boxSize.x < 0) { boxStartPos.x += boxSize.x; boxSize.x = Mathf.Abs(boxSize.x); }
+            if (boxSize.y < 0) { boxStartPos.y += boxSize.y; boxSize.y = Mathf.Abs(boxSize.y); }
+            Rect selectionBox = new Rect(boxStartPos, boxSize);
 
             //Save guiColor so we can revert it
             Color guiColor = GUI.color;
@@ -319,12 +380,7 @@ namespace XNodeEditor {
 
                     //If dragging a selection box, add nodes inside to selection
                     if (currentActivity == NodeActivity.DragGrid) {
-                        Vector2 startPos = GridToWindowPositionNoClipped(dragBoxStart);
-                        Vector2 size = mousePos - startPos;
-                        if (size.x < 0) { startPos.x += size.x; size.x = Mathf.Abs(size.x); }
-                        if (size.y < 0) { startPos.y += size.y; size.y = Mathf.Abs(size.y); }
-                        Rect r = new Rect(startPos, size);
-                        if (windowRect.Overlaps(r)) preSelection.Add(node);
+                        if (windowRect.Overlaps(selectionBox)) preSelection.Add(node);
                     }
 
                     //Check if we are hovering any of this nodes ports
@@ -332,14 +388,14 @@ namespace XNodeEditor {
                     foreach (XNode.NodePort input in node.Inputs) {
                         //Check if port rect is available
                         if (!portConnectionPoints.ContainsKey(input)) continue;
-                        Rect r = GridToWindowRect(portConnectionPoints[input]);
+                        Rect r = GridToWindowRectNoClipped(portConnectionPoints[input]);
                         if (r.Contains(mousePos)) hoveredPort = input;
                     }
                     //Check all output ports
                     foreach (XNode.NodePort output in node.Outputs) {
                         //Check if port rect is available
                         if (!portConnectionPoints.ContainsKey(output)) continue;
-                        Rect r = GridToWindowRect(portConnectionPoints[output]);
+                        Rect r = GridToWindowRectNoClipped(portConnectionPoints[output]);
                         if (r.Contains(mousePos)) hoveredPort = output;
                     }
                 }

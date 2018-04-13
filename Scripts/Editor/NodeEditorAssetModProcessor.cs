@@ -17,7 +17,7 @@ namespace XNodeEditor {
             // Check script type. Return if deleting a non-node script
             UnityEditor.MonoScript script = obj as UnityEditor.MonoScript;
             System.Type scriptType = script.GetClass ();
-            if (scriptType != typeof (XNode.Node) && !scriptType.IsSubclassOf (typeof (XNode.Node))) return AssetDeleteResult.DidNotDelete;
+            if (scriptType == null || (scriptType != typeof (XNode.Node) && !scriptType.IsSubclassOf (typeof (XNode.Node)))) return AssetDeleteResult.DidNotDelete;
 
             // Find all ScriptableObjects using this script
             string[] guids = AssetDatabase.FindAssets ("t:" + scriptType);

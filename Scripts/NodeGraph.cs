@@ -19,13 +19,6 @@ namespace XNode {
         /// <summary> Add a node to the graph by type </summary>
         public virtual Node AddNode(Type type) {
             Node node = ScriptableObject.CreateInstance(type) as Node;
-#if UNITY_EDITOR
-            if (!Application.isPlaying) {
-                UnityEditor.AssetDatabase.AddObjectToAsset(node, this);
-                UnityEditor.AssetDatabase.SaveAssets();
-                node.name = UnityEditor.ObjectNames.NicifyVariableName(node.name);
-            }
-#endif
             nodes.Add(node);
             node.graph = this;
             return node;
@@ -35,13 +28,6 @@ namespace XNode {
         public virtual Node CopyNode(Node original) {
             Node node = ScriptableObject.Instantiate(original);
             node.ClearConnections();
-#if UNITY_EDITOR
-            if (!Application.isPlaying) {
-                UnityEditor.AssetDatabase.AddObjectToAsset(node, this);
-                UnityEditor.AssetDatabase.SaveAssets();
-                node.name = UnityEditor.ObjectNames.NicifyVariableName(node.name);
-            }
-#endif
             nodes.Add(node);
             node.graph = this;
             return node;
@@ -51,12 +37,6 @@ namespace XNode {
         /// <param name="node"></param>
         public void RemoveNode(Node node) {
             node.ClearConnections();
-#if UNITY_EDITOR
-            if (!Application.isPlaying) {
-                DestroyImmediate(node, true);
-                UnityEditor.AssetDatabase.SaveAssets();
-            }
-#endif
             nodes.Remove(node);
         }
 
@@ -71,6 +51,7 @@ namespace XNode {
             NodeGraph graph = Instantiate(this);
             // Instantiate all nodes inside the graph
             for (int i = 0; i < nodes.Count; i++) {
+                if (nodes[i] == null) continue;
                 Node node = Instantiate(nodes[i]) as Node;
                 node.graph = graph;
                 graph.nodes[i] = node;
@@ -78,6 +59,7 @@ namespace XNode {
 
             // Redirect all connections
             for (int i = 0; i < graph.nodes.Count; i++) {
+                if (graph.nodes[i] == null) continue;
                 foreach (NodePort port in graph.nodes[i].Ports) {
                     port.Redirect(nodes, graph.nodes);
                 }

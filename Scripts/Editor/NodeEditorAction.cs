@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
 namespace XNodeEditor {
     public partial class NodeEditorWindow {
-        public enum NodeActivity { Idle, HoldHeader, DragHeader, HoldGrid, DragGrid }
+        public enum NodeActivity { Idle, HoldNode, DragNode, HoldGrid, DragGrid }
         public static NodeActivity currentActivity = NodeActivity.Idle;
         public static bool isPanning { get; private set; }
         public static Vector2[] dragOffset;
@@ -13,13 +14,36 @@ namespace XNodeEditor {
         private bool IsDraggingPort { get { return draggedOutput != null; } }
         private bool IsHoveringPort { get { return hoveredPort != null; } }
         private bool IsHoveringNode { get { return hoveredNode != null; } }
+        private bool IsHoveringReroute { get { return hoveredReroute.port != null; } }
         private XNode.Node hoveredNode = null;
         [NonSerialized] private XNode.NodePort hoveredPort = null;
         [NonSerialized] private XNode.NodePort draggedOutput = null;
         [NonSerialized] private XNode.NodePort draggedOutputTarget = null;
+        [NonSerialized] private List<Vector2> draggedOutputReroutes = new List<Vector2>();
+        private RerouteReference hoveredReroute = new RerouteReference();
+        private List<RerouteReference> selectedReroutes = new List<RerouteReference>();
         private Rect nodeRects;
         private Vector2 dragBoxStart;
         private UnityEngine.Object[] preBoxSelection;
+        private RerouteReference[] preBoxSelectionReroute;
+        private Rect selectionBox;
+
+        private struct RerouteReference {
+            public XNode.NodePort port;
+            public int connectionIndex;
+            public int pointIndex;
+
+            public RerouteReference(XNode.NodePort port, int connectionIndex, int pointIndex) {
+                this.port = port;
+                this.connectionIndex = connectionIndex;
+                this.pointIndex = pointIndex;
+            }
+
+            public void InsertPoint(Vector2 pos) { port.GetReroutePoints(connectionIndex).Insert(pointIndex, pos); }
+            public void SetPoint(Vector2 pos) { port.GetReroutePoints(connectionIndex) [pointIndex] = pos; }
+            public void RemovePoint() { port.GetReroutePoints(connectionIndex).RemoveAt(pointIndex); }
+            public Vector2 GetPoint() { return port.GetReroutePoints(connectionIndex) [pointIndex]; }
+        }
 
         public void Controls() {
             wantsMouseMove = true;
@@ -42,32 +66,52 @@ namespace XNodeEditor {
                                 draggedOutputTarget = null;
                             }
                             Repaint();
-                        } else if (currentActivity == NodeActivity.HoldHeader || currentActivity == NodeActivity.DragHeader) {
+                        } else if (currentActivity == NodeActivity.HoldNode) {
+                            RecalculateDragOffsets(e);
+                            currentActivity = NodeActivity.DragNode;
+                            Repaint();
+                        }
+                        if (currentActivity == NodeActivity.DragNode) {
+                            // Holding ctrl inverts grid snap
+                            bool gridSnap = NodeEditorPreferences.GetSettings().gridSnap;
+                            if (e.control) gridSnap = !gridSnap;
+
+                            Vector2 mousePos = WindowToGridPosition(e.mousePosition);
+                            // Move selected nodes with offset
                             for (int i = 0; i < Selection.objects.Length; i++) {
                                 if (Selection.objects[i] is XNode.Node) {
                                     XNode.Node node = Selection.objects[i] as XNode.Node;
-                                    node.position = WindowToGridPosition(e.mousePosition) + dragOffset[i];
-                                    bool gridSnap = NodeEditorPreferences.GetSettings().gridSnap;
-                                    if (e.control) {
-                                        gridSnap = !gridSnap;
-                                    }
+                                    node.position = mousePos + dragOffset[i];
                                     if (gridSnap) {
                                         node.position.x = (Mathf.Round((node.position.x + 8) / 16) * 16) - 8;
                                         node.position.y = (Mathf.Round((node.position.y + 8) / 16) * 16) - 8;
                                     }
                                 }
                             }
-                            currentActivity = NodeActivity.DragHeader;
+                            // Move selected reroutes with offset
+                            for (int i = 0; i < selectedReroutes.Count; i++) {
+                                Vector2 pos = mousePos + dragOffset[Selection.objects.Length + i];
+                                pos.x -= 8;
+                                pos.y -= 8;
+                                if (gridSnap) {
+                                    pos.x = (Mathf.Round((pos.x + 8) / 16) * 16);
+                                    pos.y = (Mathf.Round((pos.y + 8) / 16) * 16);
+                                }
+                                selectedReroutes[i].SetPoint(pos);
+                            }
                             Repaint();
                         } else if (currentActivity == NodeActivity.HoldGrid) {
                             currentActivity = NodeActivity.DragGrid;
                             preBoxSelection = Selection.objects;
+                            preBoxSelectionReroute = selectedReroutes.ToArray();
                             dragBoxStart = WindowToGridPosition(e.mousePosition);
                             Repaint();
                         } else if (currentActivity == NodeActivity.DragGrid) {
-                            foreach (XNode.Node node in graph.nodes) {
-
-                            }
+                            Vector2 boxStartPos = GridToWindowPosition(dragBoxStart);
+                            Vector2 boxSize = e.mousePosition - boxStartPos;
+                            if (boxSize.x < 0) { boxStartPos.x += boxSize.x; boxSize.x = Mathf.Abs(boxSize.x); }
+                            if (boxSize.y < 0) { boxStartPos.y += boxSize.y; boxSize.y = Mathf.Abs(boxSize.y); }
+                            selectionBox = new Rect(boxStartPos, boxSize);
                             Repaint();
                         }
                     } else if (e.button == 1 || e.button == 2) {
@@ -83,6 +127,7 @@ namespace XNodeEditor {
                 case EventType.MouseDown:
                     Repaint();
                     if (e.button == 0) {
+                        draggedOutputReroutes.Clear();
 
                         if (IsHoveringPort) {
                             if (hoveredPort.IsOutput) {
@@ -92,6 +137,8 @@ namespace XNodeEditor {
                                 if (hoveredPort.IsConnected) {
                                     XNode.Node node = hoveredPort.node;
                                     XNode.NodePort output = hoveredPort.Connection;
+                                    int outputConnectionIndex = output.GetConnectionIndex(hoveredPort);
+                                    draggedOutputReroutes = output.GetReroutePoints(outputConnectionIndex);
                                     hoveredPort.Disconnect(output);
                                     draggedOutput = output;
                                     draggedOutputTarget = hoveredPort;
@@ -100,22 +147,36 @@ namespace XNodeEditor {
                             }
                         } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
                             // If mousedown on node header, select or deselect
-                            if (!Selection.Contains(hoveredNode)) SelectNode(hoveredNode, e.control || e.shift);
-                            else if (e.control || e.shift) DeselectNode(hoveredNode);
+                            if (!Selection.Contains(hoveredNode)) {
+                                SelectNode(hoveredNode, e.control || e.shift);
+                                if (!e.control && !e.shift) selectedReroutes.Clear();
+                            } else if (e.control || e.shift) DeselectNode(hoveredNode);
                             e.Use();
-                            currentActivity = NodeActivity.HoldHeader;
-                            dragOffset = new Vector2[Selection.objects.Length];
-                            for (int i = 0; i < dragOffset.Length; i++) {
-                                if (Selection.objects[i] is XNode.Node) {
-                                    XNode.Node node = Selection.objects[i] as XNode.Node;
-                                    dragOffset[i] = node.position - WindowToGridPosition(e.mousePosition);
+                            currentActivity = NodeActivity.HoldNode;
+                        } else if (IsHoveringReroute) {
+                            // If reroute isn't selected
+                            if (!selectedReroutes.Contains(hoveredReroute)) {
+                                // Add it
+                                if (e.control || e.shift) selectedReroutes.Add(hoveredReroute);
+                                // Select it
+                                else {
+                                    selectedReroutes = new List<RerouteReference>() { hoveredReroute };
+                                    Selection.activeObject = null;
                                 }
+
                             }
+                            // Deselect
+                            else if (e.control || e.shift) selectedReroutes.Remove(hoveredReroute);
+                            e.Use();
+                            currentActivity = NodeActivity.HoldNode;
                         }
                         // If mousedown on grid background, deselect all
                         else if (!IsHoveringNode) {
                             currentActivity = NodeActivity.HoldGrid;
-                            if (!e.control && !e.shift) Selection.activeObject = null;
+                            if (!e.control && !e.shift) {
+                                selectedReroutes.Clear();
+                                Selection.activeObject = null;
+                            }
                         }
                     }
                     break;
@@ -127,16 +188,22 @@ namespace XNodeEditor {
                             if (draggedOutputTarget != null) {
                                 XNode.Node node = draggedOutputTarget.node;
                                 if (graph.nodes.Count != 0) draggedOutput.Connect(draggedOutputTarget);
-                                if (NodeEditor.onUpdateNode != null) NodeEditor.onUpdateNode(node);
-                                EditorUtility.SetDirty(graph);
+
+                                // ConnectionIndex can be -1 if the connection is removed instantly after creation
+                                int connectionIndex = draggedOutput.GetConnectionIndex(draggedOutputTarget);
+                                if (connectionIndex != -1) {
+                                    draggedOutput.GetReroutePoints(connectionIndex).AddRange(draggedOutputReroutes);
+                                    if (NodeEditor.onUpdateNode != null) NodeEditor.onUpdateNode(node);
+                                    EditorUtility.SetDirty(graph);
+                                }
                             }
                             //Release dragged connection
                             draggedOutput = null;
                             draggedOutputTarget = null;
                             EditorUtility.SetDirty(graph);
-                            AssetDatabase.SaveAssets();
-                        } else if (currentActivity == NodeActivity.DragHeader) {
-                            AssetDatabase.SaveAssets();
+                            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+                        } else if (currentActivity == NodeActivity.DragNode) {
+                            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
                         } else if (!IsHoveringNode) {
                             // If click outside node, release field focus
                             if (!isPanning) {
@@ -147,19 +214,35 @@ namespace XNodeEditor {
                                 EditorGUIUtility.keyboardControl = 0;
                                 EditorGUIUtility.hotControl = 0;
                             }
-                            AssetDatabase.SaveAssets();
+                            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
                         }
 
-                        // If click node header, select single node.
-                        if (currentActivity == NodeActivity.HoldHeader && !(e.control || e.shift)) {
+                        // If click node header, select it.
+                        if (currentActivity == NodeActivity.HoldNode && !(e.control || e.shift)) {
+                            selectedReroutes.Clear();
                             SelectNode(hoveredNode, false);
+                        }
+
+                        // If click reroute, select it.
+                        if (IsHoveringReroute && !(e.control || e.shift)) {
+                            selectedReroutes = new List<RerouteReference>() { hoveredReroute };
+                            Selection.activeObject = null;
                         }
 
                         Repaint();
                         currentActivity = NodeActivity.Idle;
                     } else if (e.button == 1) {
                         if (!isPanning) {
-                            if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
+                            if (IsDraggingPort) {
+                                draggedOutputReroutes.Add(WindowToGridPosition(e.mousePosition));
+                            } else if (currentActivity == NodeActivity.DragNode && Selection.activeObject == null && selectedReroutes.Count == 1) {
+                                selectedReroutes[0].InsertPoint(selectedReroutes[0].GetPoint());
+                                selectedReroutes[0] = new RerouteReference(selectedReroutes[0].port, selectedReroutes[0].connectionIndex, selectedReroutes[0].pointIndex + 1);
+                            } else if (IsHoveringReroute) {
+                                ShowRerouteContextMenu(hoveredReroute);
+                            } else if (IsHoveringPort) {
+                                ShowPortContextMenu(hoveredPort);
+                            } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
                                 if (!Selection.Contains(hoveredNode)) SelectNode(hoveredNode, false);
                                 ShowNodeContextMenu();
                             } else if (!IsHoveringNode) {
@@ -188,6 +271,22 @@ namespace XNodeEditor {
             }
         }
 
+        private void RecalculateDragOffsets(Event current) {
+            dragOffset = new Vector2[Selection.objects.Length + selectedReroutes.Count];
+            // Selected nodes
+            for (int i = 0; i < Selection.objects.Length; i++) {
+                if (Selection.objects[i] is XNode.Node) {
+                    XNode.Node node = Selection.objects[i] as XNode.Node;
+                    dragOffset[i] = node.position - WindowToGridPosition(current.mousePosition);
+                }
+            }
+
+            // Selected reroutes
+            for (int i = 0; i < selectedReroutes.Count; i++) {
+                dragOffset[Selection.objects.Length + i] = selectedReroutes[i].GetPoint() - WindowToGridPosition(current.mousePosition);
+            }
+        }
+
         /// <summary> Puts all nodes in focus. If no nodes are present, resets view to  </summary>
         public void Home() {
             zoom = 2;
@@ -197,16 +296,34 @@ namespace XNodeEditor {
         public void CreateNode(Type type, Vector2 position) {
             XNode.Node node = graph.AddNode(type);
             node.position = position;
+            node.name = UnityEditor.ObjectNames.NicifyVariableName(type.ToString());
+            AssetDatabase.AddObjectToAsset(node, graph);
+            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             Repaint();
         }
 
         /// <summary> Remove nodes in the graph in Selection.objects</summary>
         public void RemoveSelectedNodes() {
+            // We need to delete reroutes starting at the highest point index to avoid shifting indices
+            selectedReroutes = selectedReroutes.OrderByDescending(x => x.pointIndex).ToList();
+            for (int i = 0; i < selectedReroutes.Count; i++) {
+                selectedReroutes[i].RemovePoint();
+            }
+            selectedReroutes.Clear();
             foreach (UnityEngine.Object item in Selection.objects) {
                 if (item is XNode.Node) {
                     XNode.Node node = item as XNode.Node;
-                    graph.RemoveNode(node);
+                    graphEditor.RemoveNode(node);
                 }
+            }
+        }
+
+        /// <summary> Draw this node on top of other nodes by placing it last in the graph.nodes list </summary>
+        public void MoveNodeToTop(XNode.Node node) {
+            int index;
+            while ((index = graph.nodes.IndexOf(node)) != graph.nodes.Count - 1) {
+                graph.nodes[index] = graph.nodes[index + 1];
+                graph.nodes[index + 1] = node;
             }
         }
 
@@ -218,7 +335,7 @@ namespace XNodeEditor {
                 if (Selection.objects[i] is XNode.Node) {
                     XNode.Node srcNode = Selection.objects[i] as XNode.Node;
                     if (srcNode.graph != graph) continue; // ignore nodes selected in another graph
-                    XNode.Node newNode = graph.CopyNode(srcNode);
+                    XNode.Node newNode = graphEditor.CopyNode(srcNode);
                     substitutes.Add(srcNode, newNode);
                     newNode.position = srcNode.position + new Vector2(30, 30);
                     newNodes[i] = newNode;
@@ -254,12 +371,34 @@ namespace XNodeEditor {
         /// <summary> Draw a connection as we are dragging it </summary>
         public void DrawDraggedConnection() {
             if (IsDraggingPort) {
-                if (!_portConnectionPoints.ContainsKey(draggedOutput)) return;
-                Vector2 from = _portConnectionPoints[draggedOutput].center;
-                Vector2 to = draggedOutputTarget != null ? portConnectionPoints[draggedOutputTarget].center : WindowToGridPosition(Event.current.mousePosition);
                 Color col = NodeEditorPreferences.GetTypeColor(draggedOutput.ValueType);
+
+                if (!_portConnectionPoints.ContainsKey(draggedOutput)) return;
                 col.a = 0.6f;
+                Vector2 from = _portConnectionPoints[draggedOutput].center;
+                Vector2 to = Vector2.zero;
+                for (int i = 0; i < draggedOutputReroutes.Count; i++) {
+                    to = draggedOutputReroutes[i];
+                    DrawConnection(from, to, col);
+                    from = to;
+                }
+                to = draggedOutputTarget != null ? portConnectionPoints[draggedOutputTarget].center : WindowToGridPosition(Event.current.mousePosition);
                 DrawConnection(from, to, col);
+
+                Color bgcol = Color.black;
+                Color frcol = col;
+                bgcol.a = 0.6f;
+                frcol.a = 0.6f;
+
+                // Loop through reroute points again and draw the points
+                for (int i = 0; i < draggedOutputReroutes.Count; i++) {
+                    // Draw reroute point at position
+                    Rect rect = new Rect(draggedOutputReroutes[i], new Vector2(16, 16));
+                    rect.position = new Vector2(rect.position.x - 8, rect.position.y - 8);
+                    rect = GridToWindowRect(rect);
+
+                    NodeEditorGUILayout.DrawPortHandle(rect, bgcol, frcol);
+                }
             }
         }
 

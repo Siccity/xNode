@@ -71,7 +71,7 @@ namespace XNode {
         }
 
         /// <summary> Initialize node. Called on creation. </summary>
-        protected virtual void Init() { name = GetType().Name; }
+        protected virtual void Init() { }
 
         /// <summary> Checks all connections for invalid references, and removes them. </summary>
         public void VerifyConnections() {
@@ -127,7 +127,7 @@ namespace XNode {
         }
 
         /// <summary> Removes all instance ports from the node </summary>
-        [ContextMenu("Clear instance ports")]
+        [ContextMenu("Clear Instance Ports")]
         public void ClearInstancePorts() {
             List<NodePort> instancePorts = new List<NodePort>(InstancePorts);
             foreach (NodePort port in instancePorts) {

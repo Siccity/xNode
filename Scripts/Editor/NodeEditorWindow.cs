@@ -20,8 +20,9 @@ namespace XNodeEditor {
         private float _zoom = 1;
 
         void OnFocus() {
-            AssetDatabase.SaveAssets();
             current = this;
+            graphEditor = NodeGraphEditor.GetEditor(graph);
+            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 
         partial void OnEnable();
@@ -37,7 +38,7 @@ namespace XNodeEditor {
         public void Save() {
             if (AssetDatabase.Contains(graph)) {
                 EditorUtility.SetDirty(graph);
-                AssetDatabase.SaveAssets();
+                if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             } else SaveAs();
         }
 
@@ -49,7 +50,7 @@ namespace XNodeEditor {
                 if (existingGraph != null) AssetDatabase.DeleteAsset(path);
                 AssetDatabase.CreateAsset(graph, path);
                 EditorUtility.SetDirty(graph);
-                AssetDatabase.SaveAssets();
+                if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             }
         }
 
@@ -65,8 +66,14 @@ namespace XNodeEditor {
             return (position.size * 0.5f) + (panOffset / zoom) + (gridPosition / zoom);
         }
 
-        public Rect GridToWindowRect(Rect gridRect) {
+        public Rect GridToWindowRectNoClipped(Rect gridRect) {
             gridRect.position = GridToWindowPositionNoClipped(gridRect.position);
+            return gridRect;
+        }
+
+        public Rect GridToWindowRect(Rect gridRect) {
+            gridRect.position = GridToWindowPosition(gridRect.position);
+            gridRect.size /= zoom;
             return gridRect;
         }
 

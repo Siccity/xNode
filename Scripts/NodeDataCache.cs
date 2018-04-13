@@ -46,13 +46,19 @@ namespace XNode {
         private static void BuildCache() {
             portDataCache = new PortDataCache();
             System.Type baseType = typeof(Node);
-            Assembly assembly = Assembly.GetAssembly(baseType);
-            System.Type[] nodeTypes = assembly.GetTypes().Where(t =>
-                !t.IsAbstract &&
-                baseType.IsAssignableFrom(t)
-            ).ToArray();
-
-            for (int i = 0; i < nodeTypes.Length; i++) {
+            List<System.Type> nodeTypes = new List<System.Type>();
+            System.Reflection.Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
+            Assembly selfAssembly = Assembly.GetAssembly(baseType);
+            if (selfAssembly.FullName.StartsWith("Assembly-CSharp")) {
+                // If xNode is not used as a DLL, check only CSharp (fast)
+                nodeTypes.AddRange(selfAssembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)));
+            } else {
+                // Else, check all DDLs (slow)
+                foreach (Assembly assembly in assemblies) {
+                    nodeTypes.AddRange(assembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray());
+                }
+            }
+            for (int i = 0; i < nodeTypes.Count; i++) {
                 CachePorts(nodeTypes[i]);
             }
         }

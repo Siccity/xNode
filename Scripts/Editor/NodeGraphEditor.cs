@@ -8,8 +8,12 @@ namespace XNodeEditor {
     /// <summary> Base class to derive custom Node Graph editors from. Use this to override how graphs are drawn in the editor. </summary>
     [CustomNodeGraphEditor(typeof(XNode.NodeGraph))]
     public class NodeGraphEditor : XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph> {
-        /// <summary> Custom node editors defined with [CustomNodeGraphEditor] </summary>
-        [NonSerialized] private static Dictionary<Type, NodeGraphEditor> editors;
+        /// <summary> The position of the window in screen space. </summary>
+        public Rect position;
+        /// <summary> Are we currently renaming a node? </summary>
+        protected bool isRenaming;
+
+        public virtual void OnGUI() { }
 
         public virtual Texture2D GetGridTexture() {
             return NodeEditorPreferences.GetSettings().gridTexture;
@@ -36,6 +40,22 @@ namespace XNodeEditor {
 
         public virtual Color GetTypeColor(Type type) {
             return NodeEditorPreferences.GetTypeColor(type);
+        }
+
+        /// <summary> Creates a copy of the original node in the graph </summary>
+        public XNode.Node CopyNode(XNode.Node original) {
+            XNode.Node node = target.CopyNode(original);
+            node.name = original.name;
+            AssetDatabase.AddObjectToAsset(node, target);
+            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+            return node;
+        }
+
+        /// <summary> Safely remove a node and all its connections. </summary>
+        public void RemoveNode(XNode.Node node) {
+            UnityEngine.Object.DestroyImmediate(node, true);
+            target.RemoveNode(node);
+            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 
         [AttributeUsage(AttributeTargets.Class)]

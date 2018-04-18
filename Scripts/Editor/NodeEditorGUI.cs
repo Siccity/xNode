@@ -112,7 +112,7 @@ namespace XNodeEditor {
             if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
                 XNode.Node node = Selection.activeObject as XNode.Node;
                 contextMenu.AddItem(new GUIContent("Move To Top"), false, () => MoveNodeToTop(node));
-                contextMenu.AddItem(new GUIContent("Rename"), false, NodeEditor.GetEditor(node).InitiateRename);
+                contextMenu.AddItem(new GUIContent("Rename"), false, RenameSelectedNode);
             }
 
             contextMenu.AddItem(new GUIContent("Duplicate"), false, DublicateSelectedNodes);

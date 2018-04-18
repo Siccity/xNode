@@ -255,6 +255,11 @@ namespace XNodeEditor {
                 case EventType.KeyDown:
                     if (EditorGUIUtility.editingTextField) break;
                     else if (e.keyCode == KeyCode.F) Home();
+                    if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX) {
+                        if (e.keyCode == KeyCode.Return) RenameSelectedNode();
+                    } else {
+                        if (e.keyCode == KeyCode.F2) RenameSelectedNode();
+                    }
                     break;
                 case EventType.ValidateCommand:
                     if (e.commandName == "SoftDelete") RemoveSelectedNodes();
@@ -315,6 +320,14 @@ namespace XNodeEditor {
                     XNode.Node node = item as XNode.Node;
                     graphEditor.RemoveNode(node);
                 }
+            }
+        }
+
+        /// <summary> Initiate a rename on the currently selected node </summary>
+        public void RenameSelectedNode() {
+            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
+                XNode.Node node = Selection.activeObject as XNode.Node;
+                NodeEditor.GetEditor(node).InitiateRename();
             }
         }
 

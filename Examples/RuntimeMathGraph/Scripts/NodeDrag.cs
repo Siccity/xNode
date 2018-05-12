@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace XNode.Examples.RuntimeMathNodes {
-	public class NodeDrag : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHandler {
+	public class NodeDrag : MonoBehaviour, IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler {
 		private Vector3 offset;
 		private UGUIMathBaseNode node;
 
@@ -16,7 +16,7 @@ namespace XNode.Examples.RuntimeMathNodes {
 			node.transform.localPosition = node.graph.scrollRect.content.InverseTransformPoint(eventData.position) - offset;
 		}
 
-		public void OnPointerDown(PointerEventData eventData) {
+		public void OnBeginDrag(PointerEventData eventData) {
 			Vector2 pointer = node.graph.scrollRect.content.InverseTransformPoint(eventData.position);
 			Vector2 pos = node.transform.localPosition;
 			offset = pointer - pos;
@@ -27,6 +27,14 @@ namespace XNode.Examples.RuntimeMathNodes {
 			Vector2 pos = node.transform.localPosition;
 			pos.y = -pos.y;
 			node.node.position = pos;
+		}
+
+		public void OnPointerClick(PointerEventData eventData) {
+			if (eventData.button != PointerEventData.InputButton.Right)
+				return;
+
+			node.graph.nodeContextMenu.selectedNode = node.node;
+			node.graph.nodeContextMenu.OpenAt(eventData.position);
 		}
 	}
 }

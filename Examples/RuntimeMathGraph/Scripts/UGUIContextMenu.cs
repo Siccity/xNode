@@ -9,7 +9,7 @@ namespace XNode.Examples.RuntimeMathNodes {
 
 		public Action<Type, Vector2> onClickSpawn;
 		public CanvasGroup group;
-
+		[HideInInspector] public Node selectedNode;
 		private Vector2 pos;
 
 		private void Start() {
@@ -45,6 +45,13 @@ namespace XNode.Examples.RuntimeMathNodes {
 		private void SpawnNode(Type nodeType) {
 			Vector2 pos = new Vector2(transform.localPosition.x, -transform.localPosition.y);
 			onClickSpawn(nodeType, pos);
+		}
+
+		public void RemoveNode() {
+			RuntimeMathGraph runtimeMathGraph = GetComponentInParent<RuntimeMathGraph>();
+			runtimeMathGraph.graph.RemoveNode(selectedNode);
+			runtimeMathGraph.Refresh();
+			Close();
 		}
 
 		public void OnPointerExit(PointerEventData eventData) {

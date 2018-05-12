@@ -16,7 +16,8 @@ namespace XNode.Examples.RuntimeMathNodes {
 		public XNode.Examples.RuntimeMathNodes.UGUIDisplayValue runtimeDisplayValuePrefab;
 		public XNode.Examples.RuntimeMathNodes.Connection runtimeConnectionPrefab;
 		[Header("References")]
-		public UGUIContextMenu contextMenu;
+		public UGUIContextMenu graphContextMenu;
+		public UGUIContextMenu nodeContextMenu;
 		public UGUITooltip tooltip;
 
 		public ScrollRect scrollRect { get; private set; }
@@ -26,8 +27,8 @@ namespace XNode.Examples.RuntimeMathNodes {
 			// Create a clone so we don't modify the original asset
 			graph = graph.Copy() as MathGraph;
 			scrollRect = GetComponentInChildren<ScrollRect>();
-			contextMenu.onClickSpawn -= SpawnNode;
-			contextMenu.onClickSpawn += SpawnNode;
+			graphContextMenu.onClickSpawn -= SpawnNode;
+			graphContextMenu.onClickSpawn += SpawnNode;
 		}
 
 		private void Start() {
@@ -88,7 +89,7 @@ namespace XNode.Examples.RuntimeMathNodes {
 			if (eventData.button != PointerEventData.InputButton.Right)
 				return;
 
-			contextMenu.OpenAt(eventData.position);
+			graphContextMenu.OpenAt(eventData.position);
 		}
 	}
 }

@@ -239,10 +239,12 @@ namespace XNode {
         [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
         public class CreateNodeMenuAttribute : Attribute {
             public string menuName;
+            public bool UseLastAsName;
             /// <summary> Manually supply node class with a context menu path </summary>
             /// <param name="menuName"> Path to this node in the context menu </param>
-            public CreateNodeMenuAttribute(string menuName) {
+            public CreateNodeMenuAttribute(string menuName, bool useLastAsName = false) {
                 this.menuName = menuName;
+                this.UseLastAsName = useLastAsName;
             }
         }
 

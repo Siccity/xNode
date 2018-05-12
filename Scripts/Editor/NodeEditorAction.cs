@@ -301,7 +301,19 @@ namespace XNodeEditor {
         public void CreateNode(Type type, Vector2 position) {
             XNode.Node node = graph.AddNode(type);
             node.position = position;
+
             node.name = UnityEditor.ObjectNames.NicifyVariableName(type.ToString());
+            
+            XNode.Node.CreateNodeMenuAttribute attrib;
+            if (NodeEditorUtilities.GetAttrib(type, out attrib))
+            {
+                if (attrib.UseLastAsName)
+                {
+                    var subPaths = attrib.menuName.Split('/');
+                    node.name = subPaths[subPaths.Length - 1];
+                }
+            }
+
             AssetDatabase.AddObjectToAsset(node, graph);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             Repaint();

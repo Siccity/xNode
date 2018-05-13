@@ -29,7 +29,13 @@ namespace XNodeEditor {
         }
 
         /// <summary> Returns context menu path. Returns null if node is not available. </summary>
+        [Obsolete("Use GetNodeMenuName instead")]
         public virtual string GetNodePath(Type type) {
+            return GetNodeMenuName(type);
+        }
+
+        /// <summary> Returns context node menu path. Null or empty strings for hidden nodes. </summary>
+        public virtual string GetNodeMenuName(Type type) {
             //Check if type has the CreateNodeMenuAttribute
             XNode.Node.CreateNodeMenuAttribute attrib;
             if (NodeEditorUtilities.GetAttrib(type, out attrib)) // Return custom path

@@ -135,8 +135,8 @@ namespace XNodeEditor {
                 Type type = nodeTypes[i];
 
                 //Get node context menu path
-                string path = graphEditor.GetNodePath(type);
-                if (path == null) continue;
+                string path = graphEditor.GetNodeMenuName(type);
+                if (string.IsNullOrEmpty(path)) continue;
 
                 contextMenu.AddItem(new GUIContent(path), false, () => {
                     CreateNode(type, pos);

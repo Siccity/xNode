@@ -34,7 +34,7 @@ namespace XNode {
         }
 
         /// <summary> Safely remove a node and all its connections </summary>
-        /// <param name="node"></param>
+        /// <param name="node"> The node to remove </param>
         public void RemoveNode(Node node) {
             node.ClearConnections();
             nodes.Remove(node);

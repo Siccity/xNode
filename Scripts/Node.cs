@@ -181,7 +181,7 @@ namespace XNode {
             else return fallback;
         }
 
-        /// <summary> Returns a value based on requested port output. Should be overridden before used. </summary>
+        /// <summary> Returns a value based on requested port output. Should be overridden in all derived nodes with outputs. </summary>
         /// <param name="port">The requested port.</param>
         public virtual object GetValue(NodePort port) {
             Debug.LogWarning("No GetValue(NodePort port) override defined for " + GetType());
@@ -194,7 +194,7 @@ namespace XNode {
         public virtual void OnCreateConnection(NodePort from, NodePort to) { }
 
         /// <summary> Called after a connection is removed from this port </summary>
-        /// <param name="from">Output</param> <param name="to">Input</param>
+        /// <param name="port">Output or Input</param>
         public virtual void OnRemoveConnection(NodePort port) { }
 
         /// <summary> Disconnect everything from this node </summary>

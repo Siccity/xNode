@@ -22,7 +22,7 @@ namespace XNodeEditor {
         void OnFocus() {
             current = this;
             graphEditor = NodeGraphEditor.GetEditor(graph);
-            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+            if (graphEditor != null && NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 
         partial void OnEnable();

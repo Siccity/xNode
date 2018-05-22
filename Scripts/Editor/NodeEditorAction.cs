@@ -420,7 +420,7 @@ namespace XNodeEditor {
             //Get node position
             Vector2 nodePos = GridToWindowPosition(node.position);
             float width = 200;
-            if (nodeWidths.ContainsKey(node)) width = nodeWidths[node];
+            if (nodeSizes.ContainsKey(node)) width = nodeSizes[node].x;
             Rect windowRect = new Rect(nodePos, new Vector2(width / zoom, 30 / zoom));
             return windowRect.Contains(mousePos);
         }

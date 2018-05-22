@@ -11,8 +11,8 @@ namespace XNodeEditor {
         /// <summary> Stores node positions for all nodePorts. </summary>
         public Dictionary<XNode.NodePort, Rect> portConnectionPoints { get { return _portConnectionPoints; } }
         private Dictionary<XNode.NodePort, Rect> _portConnectionPoints = new Dictionary<XNode.NodePort, Rect>();
-        public Dictionary<XNode.Node, float> nodeWidths { get { return _nodeWidths; } }
-        private Dictionary<XNode.Node, float> _nodeWidths = new Dictionary<XNode.Node, float>();
+        public Dictionary<XNode.Node, Vector2> nodeSizes { get { return _nodeSizes; } }
+        private Dictionary<XNode.Node, Vector2> _nodeSizes = new Dictionary<XNode.Node, Vector2>();
         public XNode.NodeGraph graph;
         public Vector2 panOffset { get { return _panOffset; } set { _panOffset = value; Repaint(); } }
         private Vector2 _panOffset;

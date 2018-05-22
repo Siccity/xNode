@@ -8,6 +8,7 @@ namespace XNodeEditor {
     public partial class NodeEditorWindow {
         public NodeGraphEditor graphEditor;
         private List<UnityEngine.Object> selectionCache;
+        private List<XNode.Node> culledNodes;
 
         private void OnGUI() {
             Event e = Event.current;
@@ -280,10 +281,6 @@ namespace XNodeEditor {
             if (e.type == EventType.Layout) {
                 selectionCache = new List<UnityEngine.Object>(Selection.objects);
             }
-            if (e.type == EventType.Repaint) {
-                portConnectionPoints.Clear();
-                nodeWidths.Clear();
-            }
 
             //Active node is hashed before and after node GUI to detect changes
             int nodeHash = 0;
@@ -313,6 +310,8 @@ namespace XNodeEditor {
 
             //Save guiColor so we can revert it
             Color guiColor = GUI.color;
+
+            if (e.type == EventType.Layout) culledNodes = new List<XNode.Node>();
             for (int n = 0; n < graph.nodes.Count; n++) {
                 // Skip null nodes. The user could be in the process of renaming scripts, so removing them at this point is not advisable.
                 if (graph.nodes[n] == null) continue;
@@ -320,6 +319,17 @@ namespace XNodeEditor {
                 XNode.Node node = graph.nodes[n];
 
                 NodeEditor nodeEditor = NodeEditor.GetEditor(node);
+
+                // Culling
+                if (e.type == EventType.Layout) {
+                    // Cull unselected nodes outside view
+                    if (!Selection.Contains(node) && ShouldBeCulled(nodeEditor)) {
+                        culledNodes.Add(node);
+                        continue;
+                    }
+                } else if (culledNodes.Contains(node)) continue;
+
+                Debug.Log("Draw " + n);
                 NodeEditor.portPositions = new Dictionary<XNode.NodePort, Vector2>();
 
                 //Get node position
@@ -358,18 +368,23 @@ namespace XNodeEditor {
                     if (NodeEditor.onUpdateNode != null) NodeEditor.onUpdateNode(node);
                 }
 
+                GUILayout.EndVertical();
+
+                //Cache data about the node for next frame
                 if (e.type == EventType.Repaint) {
-                    nodeWidths.Add(node, nodeEditor.GetWidth());
+                    Vector2 size = GUILayoutUtility.GetLastRect().size;
+                    if (nodeSizes.ContainsKey(node)) nodeSizes[node] = size;
+                    else nodeSizes.Add(node, size);
 
                     foreach (var kvp in NodeEditor.portPositions) {
                         Vector2 portHandlePos = kvp.Value;
                         portHandlePos += node.position;
                         Rect rect = new Rect(portHandlePos.x - 8, portHandlePos.y - 8, 16, 16);
-                        portConnectionPoints.Add(kvp.Key, rect);
+                        if (portConnectionPoints.ContainsKey(kvp.Key)) portConnectionPoints[kvp.Key] = rect;
+                        else portConnectionPoints.Add(kvp.Key, rect);
                     }
                 }
 
-                GUILayout.EndVertical();
                 if (selected) GUILayout.EndVertical();
 
                 if (e.type != EventType.Layout) {
@@ -412,6 +427,19 @@ namespace XNodeEditor {
             if (nodeHash != 0) {
                 if (onValidate != null && nodeHash != Selection.activeObject.GetHashCode()) onValidate.Invoke(Selection.activeObject, null);
             }
+        }
+
+        /// <summary> Returns true if outside window area </summary>
+        private bool ShouldBeCulled(XNodeEditor.NodeEditor nodeEditor) {
+            Vector2 nodePos = GridToWindowPositionNoClipped(nodeEditor.target.position);
+            if (nodePos.x / _zoom > position.width) return true; // Right
+            else if (nodePos.y / _zoom > position.height) return true; // Bottom
+            else if (nodeSizes.ContainsKey(nodeEditor.target)) {
+                Vector2 size = nodeSizes[nodeEditor.target];
+                if (nodePos.x + size.x < 0) return true; // Left
+                else if (nodePos.y + size.y < 0) return true; // Top
+            }
+            return false;
         }
 
         private void DrawTooltip() {

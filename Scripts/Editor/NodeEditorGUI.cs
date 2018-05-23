@@ -329,7 +329,6 @@ namespace XNodeEditor {
                     }
                 } else if (culledNodes.Contains(node)) continue;
 
-                Debug.Log("Draw " + n);
                 NodeEditor.portPositions = new Dictionary<XNode.NodePort, Vector2>();
 
                 //Get node position

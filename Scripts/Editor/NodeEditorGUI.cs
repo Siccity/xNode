@@ -277,6 +277,9 @@ namespace XNodeEditor {
 
         private void DrawNodes() {
             Event e = Event.current;
+            if (e.delta != Vector2.zero) {
+                return;
+            }
             if (e.type == EventType.Layout) {
                 selectionCache = new List<UnityEngine.Object>(Selection.objects);
             }

@@ -446,7 +446,7 @@ namespace XNodeEditor {
                 Type type = hoveredPort.ValueType;
                 GUIContent content = new GUIContent();
                 content.text = type.PrettyName();
-                if (hoveredPort.IsStatic && hoveredPort.IsOutput) {
+                if (hoveredPort.IsOutput) {
                     object obj = hoveredPort.node.GetValue(hoveredPort);
                     content.text += " = " + (obj != null ? obj.ToString() : "null");
                 }

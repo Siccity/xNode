@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -132,9 +134,75 @@ namespace XNodeEditor {
             Color col = GUI.color;
             GUI.color = backgroundColor;
             GUI.DrawTexture(rect, NodeEditorResources.dotOuter);
-            GUI.color =  typeColor;
+            GUI.color = typeColor;
             GUI.DrawTexture(rect, NodeEditorResources.dot);
             GUI.color = col;
+        }
+
+        /// <summary> Draw an editable list of instance ports. Port names are named as "[fieldName] [index]" </summary>
+        /// <param name="fieldName">Supply a list for editable values</param>
+        /// <param name="type">Value type of added instance ports</param>
+        /// <param name="serializedObject">The serializedObject of the node</param>
+        /// <param name="connectionType">Connection type of added instance ports</param>
+        public static void InstancePortList(string fieldName, Type type, SerializedObject serializedObject, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple) {
+            XNode.Node node = serializedObject.targetObject as XNode.Node;
+            SerializedProperty arrayData = serializedObject.FindProperty(fieldName);
+            bool hasArrayData = arrayData != null && arrayData.isArray;
+            int arraySize = hasArrayData ? arrayData.arraySize : 0;
+
+            List<XNode.NodePort> instancePorts = node.InstancePorts.Where(x => x.fieldName.StartsWith(fieldName)).OrderBy(x => x.fieldName).ToList();
+
+            for (int i = 0; i < instancePorts.Count(); i++) {
+                GUILayout.BeginHorizontal();
+                if (GUILayout.Button("-", GUILayout.Width(30))) {
+                    // Clear the removed ports connections
+                    instancePorts[i].ClearConnections();
+                    // Move following connections one step up to replace the missing connection
+                    for (int k = i + 1; k < instancePorts.Count(); k++) {
+                        for (int j = 0; j < instancePorts[k].ConnectionCount; j++) {
+                            XNode.NodePort other = instancePorts[k].GetConnection(j);
+                            instancePorts[k].Disconnect(other);
+                            instancePorts[k - 1].Connect(other);
+                        }
+                    }
+                    // Remove the last instance port, to avoid messing up the indexing
+                    node.RemoveInstancePort(instancePorts[instancePorts.Count() - 1].fieldName);
+                    serializedObject.Update();
+                    EditorUtility.SetDirty(node);
+                    if (hasArrayData) {
+                        arrayData.DeleteArrayElementAtIndex(i);
+                        arraySize--;
+                    }
+                    i--;
+                } else {
+                    if (hasArrayData) {
+                        if (i < arraySize) {
+                            SerializedProperty itemData = arrayData.GetArrayElementAtIndex(i);
+                            if (itemData != null) EditorGUILayout.PropertyField(itemData, new GUIContent(ObjectNames.NicifyVariableName(fieldName) + " " + i));
+                            else EditorGUILayout.LabelField("[Missing array data]");
+                        } else EditorGUILayout.LabelField("[Out of bounds]");
+
+                    } else {
+                        EditorGUILayout.LabelField(instancePorts[i].fieldName);
+                    }
+                    NodeEditorGUILayout.PortField(new GUIContent(), node.GetPort(instancePorts[i].fieldName), GUILayout.Width(-4));
+                }
+                GUILayout.EndHorizontal();
+            }
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.Space();
+            if (GUILayout.Button("+", GUILayout.Width(30))) {
+
+                string newName = fieldName + " 0";
+                int i = 0;
+                while (node.HasPort(newName)) newName = fieldName + " " + (++i);
+
+                instancePorts.Add(node.AddInstanceOutput(type, connectionType, newName));
+                serializedObject.Update();
+                EditorUtility.SetDirty(node);
+                if (hasArrayData) arrayData.InsertArrayElementAtIndex(arraySize);
+            }
+            GUILayout.EndHorizontal();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -328,6 +329,10 @@ namespace XNodeEditor {
                         continue;
                     }
                 } else if (culledNodes.Contains(node)) continue;
+
+                if (e.type == EventType.Repaint) {
+                    _portConnectionPoints = _portConnectionPoints.Where(x => x.Key.node != node).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                }
 
                 NodeEditor.portPositions = new Dictionary<XNode.NodePort, Vector2>();
 

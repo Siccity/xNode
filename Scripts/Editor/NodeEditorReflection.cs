@@ -13,6 +13,10 @@ namespace XNodeEditor {
         public static Dictionary<Type, Color> nodeTint { get { return _nodeTint != null ? _nodeTint : _nodeTint = GetNodeTint(); } }
 
         [NonSerialized] private static Dictionary<Type, Color> _nodeTint;
+        /// <summary> Custom node widths defined with [NodeWidth(width)] </summary>
+        public static Dictionary<Type, int> nodeWidth { get { return _nodeWidth != null ? _nodeWidth : _nodeWidth = GetNodeWidth(); } }
+
+        [NonSerialized] private static Dictionary<Type, int> _nodeWidth;
         /// <summary> All available node types </summary>
         public static Type[] nodeTypes { get { return _nodeTypes != null ? _nodeTypes : _nodeTypes = GetNodeTypes(); } }
 
@@ -32,6 +36,17 @@ namespace XNodeEditor {
                 tints.Add(nodeTypes[i], attrib.color);
             }
             return tints;
+        }
+
+        public static Dictionary<Type, int> GetNodeWidth() {
+            Dictionary<Type, int> widths = new Dictionary<Type, int>();
+            for (int i = 0; i < nodeTypes.Length; i++) {
+                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.Node.NodeWidth), true);
+                if (attribs == null || attribs.Length == 0) continue;
+                XNode.Node.NodeWidth attrib = attribs[0] as XNode.Node.NodeWidth;
+                widths.Add(nodeTypes[i], attrib.width);
+            }
+            return widths;
         }
 
         /// <summary> Get all classes deriving from baseType via reflection </summary>

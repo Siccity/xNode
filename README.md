@@ -1,4 +1,4 @@
-![alt text](https://github.com/baranpirincal/xNode/blob/master/logo/xNode-logo-50x50.png)
+(https://user-images.githubusercontent.com/37786733/41540908-d3bf993e-7319-11e8-99ab-4aa514314931.png)
 
 [![Discord](https://img.shields.io/discord/361769369404964864.svg)](https://discord.gg/qgPrHv4)
 [![GitHub issues](https://img.shields.io/github/issues/Siccity/xNode.svg)](https://github.com/Siccity/xNode/issues)

@@ -49,7 +49,7 @@ namespace XNode {
             List<System.Type> nodeTypes = new List<System.Type>();
             System.Reflection.Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
             Assembly selfAssembly = Assembly.GetAssembly(baseType);
-            if (selfAssembly.FullName.StartsWith("Assembly-CSharp")) {
+            if (selfAssembly.FullName.StartsWith("Assembly-CSharp") && !selfAssembly.FullName.Contains("-firstpass")) {
                 // If xNode is not used as a DLL, check only CSharp (fast)
                 nodeTypes.AddRange(selfAssembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)));
             } else {

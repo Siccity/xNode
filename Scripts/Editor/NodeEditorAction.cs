@@ -231,7 +231,7 @@ namespace XNodeEditor {
 
                         Repaint();
                         currentActivity = NodeActivity.Idle;
-                    } else if (e.button == 1) {
+                    } else if (e.button == 1 || e.button == 2) {
                         if (!isPanning) {
                             if (IsDraggingPort) {
                                 draggedOutputReroutes.Add(WindowToGridPosition(e.mousePosition));

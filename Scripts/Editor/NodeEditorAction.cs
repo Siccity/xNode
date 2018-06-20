@@ -207,12 +207,7 @@ namespace XNodeEditor {
                         } else if (!IsHoveringNode) {
                             // If click outside node, release field focus
                             if (!isPanning) {
-                                // I've got no idea which of these do what, so we'll just reset all of it.
-                                GUIUtility.hotControl = 0;
-                                GUIUtility.keyboardControl = 0;
-                                EditorGUIUtility.editingTextField = false;
-                                EditorGUIUtility.keyboardControl = 0;
-                                EditorGUIUtility.hotControl = 0;
+                                EditorGUI.FocusTextInControl(null);
                             }
                             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
                         }

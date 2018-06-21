@@ -112,11 +112,24 @@ namespace XNodeEditor {
         /// <summary> Make a simple port field. </summary>
         public static void PortField(GUIContent label, XNode.NodePort port, params GUILayoutOption[] options) {
             if (port == null) return;
-            if (label == null) EditorGUILayout.LabelField(ObjectNames.NicifyVariableName(port.fieldName), options);
-            else EditorGUILayout.LabelField(label, options);
-            Rect rect = GUILayoutUtility.GetLastRect();
-            if (port.direction == XNode.NodePort.IO.Input) rect.position = rect.position - new Vector2(16, 0);
-            else if (port.direction == XNode.NodePort.IO.Output) rect.position = rect.position + new Vector2(rect.width, 0);
+            Rect rect = new Rect();
+
+            // If property is an input, display a regular property field and put a port handle on the left side
+            if (port.direction == XNode.NodePort.IO.Input) {
+                // Display a label
+                EditorGUILayout.LabelField(label != null ? label : new GUIContent(ObjectNames.NicifyVariableName(port.fieldName)), options);
+
+                rect = GUILayoutUtility.GetLastRect();
+                rect.position = rect.position - new Vector2(16, 0);
+                // If property is an output, display a text label and put a port handle on the right side
+            } else if (port.direction == XNode.NodePort.IO.Output) {
+                // Display a label
+                EditorGUILayout.LabelField(label != null ? label : new GUIContent(ObjectNames.NicifyVariableName(port.fieldName)), NodeEditorResources.OutputPort, GUILayout.MinWidth(30));
+
+                rect = GUILayoutUtility.GetLastRect();
+                rect.position = rect.position + new Vector2(rect.width, 0);
+            }
+
             rect.size = new Vector2(16, 16);
 
             Color backgroundColor = new Color32(90, 97, 105, 255);

@@ -143,6 +143,14 @@ namespace XNodeEditor {
             else NodeEditor.portPositions.Add(port, portPos);
         }
 
+        /// <summary> Draws an input and an output port on the same line </summary>
+        public static void PortPair(XNode.NodePort input, XNode.NodePort output) {
+            GUILayout.BeginHorizontal();
+            NodeEditorGUILayout.PortField(input, GUILayout.MinWidth(0));
+            NodeEditorGUILayout.PortField(output, GUILayout.MinWidth(0));
+            GUILayout.EndHorizontal();
+        }
+
         public static void DrawPortHandle(Rect rect, Color backgroundColor, Color typeColor) {
             Color col = GUI.color;
             GUI.color = backgroundColor;

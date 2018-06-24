@@ -364,12 +364,11 @@ namespace XNodeEditor {
                 //Draw node contents
                 nodeEditor.OnNodeGUI();
 
-                //Apply
-                nodeEditor.serializedObject.ApplyModifiedProperties();
-
                 //If user changed a value, notify other scripts through onUpdateNode
                 if (EditorGUI.EndChangeCheck()) {
                     if (NodeEditor.onUpdateNode != null) NodeEditor.onUpdateNode(node);
+                    EditorUtility.SetDirty(node);
+                    nodeEditor.serializedObject.ApplyModifiedProperties();
                 }
 
                 GUILayout.EndVertical();

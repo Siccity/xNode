@@ -22,10 +22,8 @@ namespace XNodeEditor.Internal {
 				editors.Add(target, Activator.CreateInstance(editor.GetType()) as T);
 				editors[target].target = target;
 				editors[target].serializedObject = new SerializedObject(target);
-				return editor;
 			}
 			return editors[target];
-
 		}
 
 		private static T GetEditor(Type type) {

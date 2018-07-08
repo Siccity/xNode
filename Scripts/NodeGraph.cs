@@ -34,14 +34,20 @@ namespace XNode {
         }
 
         /// <summary> Safely remove a node and all its connections </summary>
-        /// <param name="node"></param>
+        /// <param name="node"> The node to remove </param>
         public void RemoveNode(Node node) {
             node.ClearConnections();
             nodes.Remove(node);
+            if (Application.isPlaying) Destroy(node);
         }
 
         /// <summary> Remove all nodes and connections from the graph </summary>
         public void Clear() {
+            if (Application.isPlaying) {
+                for (int i = 0; i < nodes.Count; i++) {
+                    Destroy(nodes[i]);
+                }
+            }
             nodes.Clear();
         }
 
@@ -66,6 +72,11 @@ namespace XNode {
             }
 
             return graph;
+        }
+
+        private void OnDestroy() {
+            // Remove all nodes prior to graph destruction
+            Clear();
         }
     }
 }

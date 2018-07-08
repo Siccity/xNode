@@ -57,7 +57,7 @@ namespace XNode {
         [SerializeField] public NodeGraph graph;
         /// <summary> Position on the <see cref="NodeGraph"/> </summary>
         [SerializeField] public Vector2 position;
-        /// <summary> Input <see cref="NodePort"/>s. It is recommended not to modify these at hand. Instead, see <see cref="InputAttribute"/> </summary>
+        /// <summary> It is recommended not to modify these at hand. Instead, see <see cref="InputAttribute"/> and <see cref="OutputAttribute"/> </summary>
         [SerializeField] private NodePortDictionary ports = new NodePortDictionary();
 
         protected void OnEnable() {
@@ -181,7 +181,7 @@ namespace XNode {
             else return fallback;
         }
 
-        /// <summary> Returns a value based on requested port output. Should be overridden before used. </summary>
+        /// <summary> Returns a value based on requested port output. Should be overridden in all derived nodes with outputs. </summary>
         /// <param name="port">The requested port.</param>
         public virtual object GetValue(NodePort port) {
             Debug.LogWarning("No GetValue(NodePort port) override defined for " + GetType());
@@ -194,7 +194,7 @@ namespace XNode {
         public virtual void OnCreateConnection(NodePort from, NodePort to) { }
 
         /// <summary> Called after a connection is removed from this port </summary>
-        /// <param name="from">Output</param> <param name="to">Input</param>
+        /// <param name="port">Output or Input</param>
         public virtual void OnRemoveConnection(NodePort port) { }
 
         /// <summary> Disconnect everything from this node </summary>
@@ -240,7 +240,7 @@ namespace XNode {
         public class CreateNodeMenuAttribute : Attribute {
             public string menuName;
             /// <summary> Manually supply node class with a context menu path </summary>
-            /// <param name="menuName"> Path to this node in the context menu </param>
+            /// <param name="menuName"> Path to this node in the context menu. Null or empty hides it. </param>
             public CreateNodeMenuAttribute(string menuName) {
                 this.menuName = menuName;
             }
@@ -269,6 +269,16 @@ namespace XNode {
             /// <param name="b"> Blue [0 .. 255] </param>
             public NodeTint(byte r, byte g, byte b) {
                 color = new Color32(r, g, b, byte.MaxValue);
+            }
+        }
+
+        [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+        public class NodeWidth : Attribute {
+            public int width;
+            /// <summary> Specify a width for this node type </summary>
+            /// <param name="width"> Width </param>
+            public NodeWidth(int width) {
+                this.width = width;
             }
         }
 

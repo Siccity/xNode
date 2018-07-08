@@ -23,7 +23,6 @@ namespace XNodeEditor {
         }
 
         public virtual void OnHeaderGUI() {
-            GUI.color = Color.white;
             string title = target.name;
             if (renaming != 0 && Selection.Contains(target)) {
                 int controlID = EditorGUIUtility.GetControlID(FocusType.Keyboard) + 1;
@@ -58,7 +57,9 @@ namespace XNodeEditor {
         }
 
         public virtual int GetWidth() {
-            return 208;
+            Type type = target.GetType();
+            if (NodeEditorWindow.nodeWidth.ContainsKey(type)) return NodeEditorWindow.nodeWidth[type];
+            else return 208;
         }
 
         public virtual Color GetTint() {

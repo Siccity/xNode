@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -8,6 +9,7 @@ namespace XNodeEditor {
     public partial class NodeEditorWindow {
         public NodeGraphEditor graphEditor;
         private List<UnityEngine.Object> selectionCache;
+        private List<XNode.Node> culledNodes;
 
         private void OnGUI() {
             Event e = Event.current;
@@ -112,7 +114,7 @@ namespace XNodeEditor {
             if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
                 XNode.Node node = Selection.activeObject as XNode.Node;
                 contextMenu.AddItem(new GUIContent("Move To Top"), false, () => MoveNodeToTop(node));
-                contextMenu.AddItem(new GUIContent("Rename"), false, NodeEditor.GetEditor(node).InitiateRename);
+                contextMenu.AddItem(new GUIContent("Rename"), false, RenameSelectedNode);
             }
 
             contextMenu.AddItem(new GUIContent("Duplicate"), false, DublicateSelectedNodes);
@@ -135,8 +137,8 @@ namespace XNodeEditor {
                 Type type = nodeTypes[i];
 
                 //Get node context menu path
-                string path = graphEditor.GetNodePath(type);
-                if (path == null) continue;
+                string path = graphEditor.GetNodeMenuName(type);
+                if (string.IsNullOrEmpty(path)) continue;
 
                 contextMenu.AddItem(new GUIContent(path), false, () => {
                     CreateNode(type, pos);
@@ -280,10 +282,6 @@ namespace XNodeEditor {
             if (e.type == EventType.Layout) {
                 selectionCache = new List<UnityEngine.Object>(Selection.objects);
             }
-            if (e.type == EventType.Repaint) {
-                portConnectionPoints.Clear();
-                nodeWidths.Clear();
-            }
 
             //Active node is hashed before and after node GUI to detect changes
             int nodeHash = 0;
@@ -313,6 +311,8 @@ namespace XNodeEditor {
 
             //Save guiColor so we can revert it
             Color guiColor = GUI.color;
+
+            if (e.type == EventType.Layout) culledNodes = new List<XNode.Node>();
             for (int n = 0; n < graph.nodes.Count; n++) {
                 // Skip null nodes. The user could be in the process of renaming scripts, so removing them at this point is not advisable.
                 if (graph.nodes[n] == null) continue;
@@ -320,6 +320,20 @@ namespace XNodeEditor {
                 XNode.Node node = graph.nodes[n];
 
                 NodeEditor nodeEditor = NodeEditor.GetEditor(node);
+
+                // Culling
+                if (e.type == EventType.Layout) {
+                    // Cull unselected nodes outside view
+                    if (!Selection.Contains(node) && ShouldBeCulled(nodeEditor)) {
+                        culledNodes.Add(node);
+                        continue;
+                    }
+                } else if (culledNodes.Contains(node)) continue;
+
+                if (e.type == EventType.Repaint) {
+                    _portConnectionPoints = _portConnectionPoints.Where(x => x.Key.node != node).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                }
+
                 NodeEditor.portPositions = new Dictionary<XNode.NodePort, Vector2>();
 
                 //Get node position
@@ -350,26 +364,30 @@ namespace XNodeEditor {
                 //Draw node contents
                 nodeEditor.OnNodeGUI();
 
-                //Apply
-                nodeEditor.serializedObject.ApplyModifiedProperties();
-
                 //If user changed a value, notify other scripts through onUpdateNode
                 if (EditorGUI.EndChangeCheck()) {
                     if (NodeEditor.onUpdateNode != null) NodeEditor.onUpdateNode(node);
+                    EditorUtility.SetDirty(node);
+                    nodeEditor.serializedObject.ApplyModifiedProperties();
                 }
 
+                GUILayout.EndVertical();
+
+                //Cache data about the node for next frame
                 if (e.type == EventType.Repaint) {
-                    nodeWidths.Add(node, nodeEditor.GetWidth());
+                    Vector2 size = GUILayoutUtility.GetLastRect().size;
+                    if (nodeSizes.ContainsKey(node)) nodeSizes[node] = size;
+                    else nodeSizes.Add(node, size);
 
                     foreach (var kvp in NodeEditor.portPositions) {
                         Vector2 portHandlePos = kvp.Value;
                         portHandlePos += node.position;
                         Rect rect = new Rect(portHandlePos.x - 8, portHandlePos.y - 8, 16, 16);
-                        portConnectionPoints.Add(kvp.Key, rect);
+                        if (portConnectionPoints.ContainsKey(kvp.Key)) portConnectionPoints[kvp.Key] = rect;
+                        else portConnectionPoints.Add(kvp.Key, rect);
                     }
                 }
 
-                GUILayout.EndVertical();
                 if (selected) GUILayout.EndVertical();
 
                 if (e.type != EventType.Layout) {
@@ -414,12 +432,25 @@ namespace XNodeEditor {
             }
         }
 
+        /// <summary> Returns true if outside window area </summary>
+        private bool ShouldBeCulled(XNodeEditor.NodeEditor nodeEditor) {
+            Vector2 nodePos = GridToWindowPositionNoClipped(nodeEditor.target.position);
+            if (nodePos.x / _zoom > position.width) return true; // Right
+            else if (nodePos.y / _zoom > position.height) return true; // Bottom
+            else if (nodeSizes.ContainsKey(nodeEditor.target)) {
+                Vector2 size = nodeSizes[nodeEditor.target];
+                if (nodePos.x + size.x < 0) return true; // Left
+                else if (nodePos.y + size.y < 0) return true; // Top
+            }
+            return false;
+        }
+
         private void DrawTooltip() {
             if (hoveredPort != null) {
                 Type type = hoveredPort.ValueType;
                 GUIContent content = new GUIContent();
                 content.text = type.PrettyName();
-                if (hoveredPort.IsStatic && hoveredPort.IsOutput) {
+                if (hoveredPort.IsOutput) {
                     object obj = hoveredPort.node.GetValue(hoveredPort);
                     content.text += " = " + (obj != null ? obj.ToString() : "null");
                 }

@@ -49,12 +49,16 @@ namespace XNode {
             List<System.Type> nodeTypes = new List<System.Type>();
             System.Reflection.Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
             Assembly selfAssembly = Assembly.GetAssembly(baseType);
-            if (selfAssembly.FullName.StartsWith("Assembly-CSharp")) {
+            if (selfAssembly.FullName.StartsWith("Assembly-CSharp") && !selfAssembly.FullName.Contains("-firstpass")) {
                 // If xNode is not used as a DLL, check only CSharp (fast)
                 nodeTypes.AddRange(selfAssembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)));
             } else {
-                // Else, check all DDLs (slow)
+                // Else, check all relevant DDLs (slower)
+                // ignore all unity related assemblies
                 foreach (Assembly assembly in assemblies) {
+                    if (assembly.FullName.StartsWith("Unity")) continue;
+                    // unity created assemblies always have version 0.0.0
+                    if (!assembly.FullName.Contains("Version=0.0.0")) continue;
                     nodeTypes.AddRange(assembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray());
                 }
             }

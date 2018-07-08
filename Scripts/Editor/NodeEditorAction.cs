@@ -203,16 +203,13 @@ namespace XNodeEditor {
                             EditorUtility.SetDirty(graph);
                             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
                         } else if (currentActivity == NodeActivity.DragNode) {
+                            IEnumerable<XNode.Node> nodes = Selection.objects.Where(x => x is XNode.Node).Select(x => x as XNode.Node);
+                            foreach (XNode.Node node in nodes) EditorUtility.SetDirty(node);
                             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
                         } else if (!IsHoveringNode) {
                             // If click outside node, release field focus
                             if (!isPanning) {
-                                // I've got no idea which of these do what, so we'll just reset all of it.
-                                GUIUtility.hotControl = 0;
-                                GUIUtility.keyboardControl = 0;
-                                EditorGUIUtility.editingTextField = false;
-                                EditorGUIUtility.keyboardControl = 0;
-                                EditorGUIUtility.hotControl = 0;
+                                EditorGUI.FocusTextInControl(null);
                             }
                             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
                         }
@@ -231,7 +228,7 @@ namespace XNodeEditor {
 
                         Repaint();
                         currentActivity = NodeActivity.Idle;
-                    } else if (e.button == 1) {
+                    } else if (e.button == 1 || e.button == 2) {
                         if (!isPanning) {
                             if (IsDraggingPort) {
                                 draggedOutputReroutes.Add(WindowToGridPosition(e.mousePosition));
@@ -255,6 +252,11 @@ namespace XNodeEditor {
                 case EventType.KeyDown:
                     if (EditorGUIUtility.editingTextField) break;
                     else if (e.keyCode == KeyCode.F) Home();
+                    if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX) {
+                        if (e.keyCode == KeyCode.Return) RenameSelectedNode();
+                    } else {
+                        if (e.keyCode == KeyCode.F2) RenameSelectedNode();
+                    }
                     break;
                 case EventType.ValidateCommand:
                     if (e.commandName == "SoftDelete") RemoveSelectedNodes();
@@ -296,7 +298,7 @@ namespace XNodeEditor {
         public void CreateNode(Type type, Vector2 position) {
             XNode.Node node = graph.AddNode(type);
             node.position = position;
-            node.name = UnityEditor.ObjectNames.NicifyVariableName(type.ToString());
+            node.name = UnityEditor.ObjectNames.NicifyVariableName(type.Name);
             AssetDatabase.AddObjectToAsset(node, graph);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             Repaint();
@@ -315,6 +317,14 @@ namespace XNodeEditor {
                     XNode.Node node = item as XNode.Node;
                     graphEditor.RemoveNode(node);
                 }
+            }
+        }
+
+        /// <summary> Initiate a rename on the currently selected node </summary>
+        public void RenameSelectedNode() {
+            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
+                XNode.Node node = Selection.activeObject as XNode.Node;
+                NodeEditor.GetEditor(node).InitiateRename();
             }
         }
 
@@ -407,7 +417,7 @@ namespace XNodeEditor {
             //Get node position
             Vector2 nodePos = GridToWindowPosition(node.position);
             float width = 200;
-            if (nodeWidths.ContainsKey(node)) width = nodeWidths[node];
+            if (nodeSizes.ContainsKey(node)) width = nodeSizes[node].x;
             Rect windowRect = new Rect(nodePos, new Vector2(width / zoom, 30 / zoom));
             return windowRect.Contains(mousePos);
         }

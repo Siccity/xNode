@@ -8,12 +8,12 @@ namespace XNodeEditor.Examples {
 	public class MathGraphEditor : NodeGraphEditor {
 
 		/// <summary> 
-		/// Overriding GetNodePath lets you control if and how nodes are categorized.
+		/// Overriding GetNodeMenuName lets you control if and how nodes are categorized.
 	    /// In this example we are sorting out all node types that are not in the XNode.Examples namespace.
 		/// </summary>
-		public override string GetNodePath(System.Type type) {
+		public override string GetNodeMenuName(System.Type type) {
 			if (type.Namespace == "XNode.Examples.MathNodes") {
-				return base.GetNodePath(type).Replace("X Node/Examples/Math Nodes/", "");
+				return base.GetNodeMenuName(type).Replace("X Node/Examples/Math Nodes/", "");
 			} else return null;
 		}
 	}

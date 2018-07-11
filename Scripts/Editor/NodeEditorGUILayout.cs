@@ -201,7 +201,7 @@ namespace XNodeEditor {
                     if (hasArrayData) {
                         if (i < arraySize) {
                             SerializedProperty itemData = arrayData.GetArrayElementAtIndex(i);
-                            if (itemData != null) EditorGUILayout.PropertyField(itemData, new GUIContent(ObjectNames.NicifyVariableName(fieldName) + " " + i));
+                            if (itemData != null) EditorGUILayout.PropertyField(itemData, new GUIContent(ObjectNames.NicifyVariableName(fieldName) + " " + i), true);
                             else EditorGUILayout.LabelField("[Missing array data]");
                         } else EditorGUILayout.LabelField("[Out of bounds]");
 

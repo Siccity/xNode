@@ -195,6 +195,15 @@ namespace XNodeEditor {
                     if (hasArrayData) {
                         arrayData.DeleteArrayElementAtIndex(i);
                         arraySize--;
+                        // Error handling. If the following happens too often, file a bug report at https://github.com/Siccity/xNode/issues
+                        if (instancePorts.Count <= arraySize) {
+                            while (instancePorts.Count <= arraySize) {
+                                arrayData.DeleteArrayElementAtIndex(--arraySize);
+                            }
+                            Debug.LogWarning("Array size exceeded instance ports size. Excess items removed.");
+                        }
+                        serializedObject.ApplyModifiedProperties();
+                        serializedObject.Update();
                     }
                     i--;
                 } else {
@@ -220,10 +229,11 @@ namespace XNodeEditor {
                 int i = 0;
                 while (node.HasPort(newName)) newName = fieldName + " " + (++i);
 
-                instancePorts.Add(node.AddInstanceOutput(type, connectionType, newName));
+                node.AddInstanceOutput(type, connectionType, newName);
                 serializedObject.Update();
                 EditorUtility.SetDirty(node);
                 if (hasArrayData) arrayData.InsertArrayElementAtIndex(arraySize);
+                serializedObject.ApplyModifiedProperties();
             }
             GUILayout.EndHorizontal();
         }

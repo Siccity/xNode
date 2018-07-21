@@ -145,6 +145,34 @@ namespace XNodeEditor {
             else NodeEditor.portPositions.Add(port, portPos);
         }
 
+        /// <summary> Add a port field to previous layout element. </summary>
+        public static void AddPortField(XNode.NodePort port) {
+            if (port == null) return;
+            Rect rect = new Rect();
+
+            // If property is an input, display a regular property field and put a port handle on the left side
+            if (port.direction == XNode.NodePort.IO.Input) {
+                rect = GUILayoutUtility.GetLastRect();
+                rect.position = rect.position - new Vector2(16, 0);
+                // If property is an output, display a text label and put a port handle on the right side
+            } else if (port.direction == XNode.NodePort.IO.Output) {
+                rect = GUILayoutUtility.GetLastRect();
+                rect.position = rect.position + new Vector2(rect.width, 0);
+            }
+
+            rect.size = new Vector2(16, 16);
+
+            Color backgroundColor = new Color32(90, 97, 105, 255);
+            if (NodeEditorWindow.nodeTint.ContainsKey(port.node.GetType())) backgroundColor *= NodeEditorWindow.nodeTint[port.node.GetType()];
+            Color col = NodeEditorWindow.current.graphEditor.GetTypeColor(port.ValueType);
+            DrawPortHandle(rect, backgroundColor, col);
+
+            // Register the handle position
+            Vector2 portPos = rect.center;
+            if (NodeEditor.portPositions.ContainsKey(port)) NodeEditor.portPositions[port] = portPos;
+            else NodeEditor.portPositions.Add(port, portPos);
+        }
+
         /// <summary> Draws an input and an output port on the same line </summary>
         public static void PortPair(XNode.NodePort input, XNode.NodePort output) {
             GUILayout.BeginHorizontal();

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -112,11 +112,9 @@ namespace XNodeEditor {
                             // Move selected reroutes with offset
                             for (int i = 0; i < selectedReroutes.Count; i++) {
                                 Vector2 pos = mousePos + dragOffset[Selection.objects.Length + i];
-                                pos.x -= 8;
-                                pos.y -= 8;
                                 if (gridSnap) {
-                                    pos.x = (Mathf.Round((pos.x + 8) / 16) * 16);
-                                    pos.y = (Mathf.Round((pos.y + 8) / 16) * 16);
+                                    pos.x = (Mathf.Round((pos.x + 8) / 16) * 16) - 8;
+                                    pos.y = (Mathf.Round((pos.y + 8) / 16) * 16) - 8;
                                 }
                                 selectedReroutes[i].SetPoint(pos);
                             }

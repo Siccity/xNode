@@ -81,10 +81,38 @@ namespace XNodeEditor {
                             for (int i = 0; i < Selection.objects.Length; i++) {
                                 if (Selection.objects[i] is XNode.Node) {
                                     XNode.Node node = Selection.objects[i] as XNode.Node;
+                                    Vector2 initial = node.position;
                                     node.position = mousePos + dragOffset[i];
                                     if (gridSnap) {
                                         node.position.x = (Mathf.Round((node.position.x + 8) / 16) * 16) - 8;
                                         node.position.y = (Mathf.Round((node.position.y + 8) / 16) * 16) - 8;
+                                    }
+
+                                    Vector2 offset = node.position - initial;
+                                    if (offset.sqrMagnitude > 0){
+                                        foreach (XNode.NodePort output in node.Outputs){
+                                            Rect rect;
+                                            if (portConnectionPoints.TryGetValue(output, out rect)) {
+                                                rect.position += offset;
+                                                portConnectionPoints[output] = rect;
+                                            }
+
+                                            for (int k = 0; k < output.ConnectionCount; k++) {
+                                                List<Vector2> reroutePoints = output.GetReroutePoints(k);
+                                                for (int index = 0; index < reroutePoints.Count; index++) {
+                                                    reroutePoints[index] += offset;
+                                                }
+                                            }
+
+                                        }
+
+                                        foreach (XNode.NodePort input in node.Inputs) {
+                                            Rect rect;
+                                            if (portConnectionPoints.TryGetValue(input, out rect)) {
+                                                rect.position += offset;
+                                                portConnectionPoints[input] = rect;
+                                            }
+                                        }
                                     }
                                 }
                             }

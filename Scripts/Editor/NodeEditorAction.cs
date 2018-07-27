@@ -97,13 +97,6 @@ namespace XNodeEditor {
                                                 rect.position += offset;
                                                 portConnectionPoints[output] = rect;
                                             }
-
-                                            for (int k = 0; k < output.ConnectionCount; k++) {
-                                                List<Vector2> reroutePoints = output.GetReroutePoints(k);
-                                                for (int index = 0; index < reroutePoints.Count; index++) {
-                                                    reroutePoints[index] += offset;
-                                                }
-                                            }
                                         }
 
                                         foreach (XNode.NodePort input in node.Inputs) {

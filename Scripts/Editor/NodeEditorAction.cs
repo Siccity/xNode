@@ -88,6 +88,7 @@ namespace XNodeEditor {
                                         node.position.y = (Mathf.Round((node.position.y + 8) / 16) * 16) - 8;
                                     }
 
+                                    // Offset portConnectionPoints instantly if a node is dragged so they aren't delayed by a frame.
                                     Vector2 offset = node.position - initial;
                                     if (offset.sqrMagnitude > 0){
                                         foreach (XNode.NodePort output in node.Outputs){
@@ -103,7 +104,6 @@ namespace XNodeEditor {
                                                     reroutePoints[index] += offset;
                                                 }
                                             }
-
                                         }
 
                                         foreach (XNode.NodePort input in node.Inputs) {

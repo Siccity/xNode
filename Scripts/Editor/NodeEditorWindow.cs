@@ -10,16 +10,13 @@ namespace XNodeEditor {
 
         /// <summary> Stores node positions for all nodePorts. </summary>
         public Dictionary<XNode.NodePort, Rect> portConnectionPoints { get { return _portConnectionPoints; } }
-
         private Dictionary<XNode.NodePort, Rect> _portConnectionPoints = new Dictionary<XNode.NodePort, Rect>();
+        [SerializeField] private NodePortReference[] _references = new NodePortReference[0];
+        [SerializeField] private Rect[] _rects = new Rect[0];
 
-        [System.Serializable]
-        private class NodePortReference {
-            [SerializeField]
-            private XNode.Node _node;
-            [SerializeField]
-            private string _name;
-
+        [System.Serializable] private class NodePortReference {
+            [SerializeField] private XNode.Node _node;
+            [SerializeField] private string _name;
 
             public NodePortReference(XNode.NodePort nodePort) {
                 _node = nodePort.node;
@@ -30,18 +27,12 @@ namespace XNodeEditor {
                 if (_node == null) {
                     return null;
                 }
-
                 return _node.GetPort(_name);
             }
-
         }
 
-        [SerializeField]
-        private NodePortReference[] _references = new NodePortReference[0];
-        [SerializeField]
-        private Rect[] _rects = new Rect[0];
-
         private void OnDisable() {
+            // Cache portConnectionPoints before serialization starts
             int count = portConnectionPoints.Count;
             _references = new NodePortReference[count];
             _rects = new Rect[count];
@@ -54,8 +45,8 @@ namespace XNodeEditor {
         }
 
         private void OnEnable() {
+            // Reload portConnectionPoints if there are any
             int length = _references.Length;
-
             if (length == _rects.Length) {
                 for (int i = 0; i < length; i++) {
                     XNode.NodePort nodePort = _references[i].GetNodePort();
@@ -79,7 +70,6 @@ namespace XNodeEditor {
             if (graphEditor != null && NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 
-        //partial void OnEnable();
         /// <summary> Create editor window </summary>
         public static NodeEditorWindow Init() {
             NodeEditorWindow w = CreateInstance<NodeEditorWindow>();

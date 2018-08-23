@@ -56,6 +56,13 @@ namespace XNodeEditor {
             }
         }
 
+        public void Update() {
+            // Repaint the graph if it is required during update.
+            if (graph.RepaintOnUpdate) {
+                Repaint();
+            }
+        }
+
         public Dictionary<XNode.Node, Vector2> nodeSizes { get { return _nodeSizes; } }
         private Dictionary<XNode.Node, Vector2> _nodeSizes = new Dictionary<XNode.Node, Vector2>();
         public XNode.NodeGraph graph;

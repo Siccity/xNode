@@ -78,5 +78,10 @@ namespace XNode {
             // Remove all nodes prior to graph destruction
             Clear();
         }
+
+        /// <summary>Whether the graph requires a repaint during updates.</summary>
+        public virtual bool RepaintOnUpdate {
+            get { return false; }
+        }
     }
 }

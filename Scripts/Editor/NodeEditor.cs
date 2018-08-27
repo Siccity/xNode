@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -43,6 +43,10 @@ namespace XNodeEditor {
 
         /// <summary> Draws standard field editors for all public fields </summary>
         public virtual void OnBodyGUI() {
+            // Unity specifically requires this to save/update any serial object.
+            // serializedObject.Update(); must go at the start of an inspector gui, and
+            // serializedObject.ApplyModifiedProperties(); goes at the end.
+            serializedObject.Update();
             string[] excludes = { "m_Script", "graph", "position", "ports" };
             portPositions = new Dictionary<XNode.NodePort, Vector2>();
 
@@ -54,6 +58,7 @@ namespace XNodeEditor {
                 if (excludes.Contains(iterator.name)) continue;
                 NodeEditorGUILayout.PropertyField(iterator, true);
             }
+            serializedObject.ApplyModifiedProperties();
         }
 
         public virtual int GetWidth() {
@@ -93,4 +98,5 @@ namespace XNodeEditor {
             }
         }
     }
+
 }

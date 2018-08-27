@@ -113,8 +113,8 @@ namespace XNodeEditor {
                             for (int i = 0; i < selectedReroutes.Count; i++) {
                                 Vector2 pos = mousePos + dragOffset[Selection.objects.Length + i];
                                 if (gridSnap) {
-                                    pos.x = (Mathf.Round((pos.x + 8) / 16) * 16) - 8;
-                                    pos.y = (Mathf.Round((pos.y + 8) / 16) * 16) - 8;
+                                    pos.x = (Mathf.Round(pos.x / 16) * 16);
+                                    pos.y = (Mathf.Round(pos.y / 16) * 16);
                                 }
                                 selectedReroutes[i].SetPoint(pos);
                             }

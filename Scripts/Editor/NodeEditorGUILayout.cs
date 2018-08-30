@@ -190,22 +190,34 @@ namespace XNodeEditor {
             GUI.color = col;
         }
 
+        [Obsolete("Use InstancePortList(string, Type, SerializedObject, NodePort.IO, Node.ConnectionType) instead")]
+        public static void InstancePortList(string fieldName, Type type, SerializedObject serializedObject, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple) {
+            InstancePortList(fieldName, type, serializedObject, XNode.NodePort.IO.Output, connectionType);
+        }
+
         /// <summary> Draw an editable list of instance ports. Port names are named as "[fieldName] [index]" </summary>
         /// <param name="fieldName">Supply a list for editable values</param>
         /// <param name="type">Value type of added instance ports</param>
         /// <param name="serializedObject">The serializedObject of the node</param>
         /// <param name="connectionType">Connection type of added instance ports</param>
-        public static void InstancePortList(string fieldName, Type type, SerializedObject serializedObject, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple) {
+        public static void InstancePortList(string fieldName, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple) {
             XNode.Node node = serializedObject.targetObject as XNode.Node;
             SerializedProperty arrayData = serializedObject.FindProperty(fieldName);
             bool hasArrayData = arrayData != null && arrayData.isArray;
             int arraySize = hasArrayData ? arrayData.arraySize : 0;
 
-            List<XNode.NodePort> instancePorts = node.InstancePorts.Where(x => x.fieldName.StartsWith(fieldName)).OrderBy(x => x.fieldName).ToList();
+            Predicate<string> isMatchingInstancePort =
+                x => {
+                    string[] split = x.Split(' ');
+                    if (split != null && split.Length == 2) return split[0] == fieldName;
+                    else return false;
+                };
+            List<XNode.NodePort> instancePorts = node.InstancePorts.Where(x => isMatchingInstancePort(x.fieldName)).OrderBy(x => x.fieldName).ToList();
 
             for (int i = 0; i < instancePorts.Count(); i++) {
                 GUILayout.BeginHorizontal();
-                if (GUILayout.Button("-", GUILayout.Width(30))) {
+                // 'Remove' button
+                if (GUILayout.Button("-", GUILayout.Width(20))) {
                     // Clear the removed ports connections
                     instancePorts[i].ClearConnections();
                     // Move following connections one step up to replace the missing connection
@@ -234,6 +246,7 @@ namespace XNodeEditor {
                         serializedObject.Update();
                     }
                     i--;
+                    GUILayout.EndHorizontal();
                 } else {
                     if (hasArrayData) {
                         if (i < arraySize) {
@@ -245,19 +258,23 @@ namespace XNodeEditor {
                     } else {
                         EditorGUILayout.LabelField(instancePorts[i].fieldName);
                     }
-                    NodeEditorGUILayout.PortField(new GUIContent(), node.GetPort(instancePorts[i].fieldName), GUILayout.Width(-4));
+
+                    GUILayout.EndHorizontal();
+                    NodeEditorGUILayout.AddPortField(node.GetPort(instancePorts[i].fieldName));
                 }
-                GUILayout.EndHorizontal();
+                // GUILayout.EndHorizontal();
             }
             GUILayout.BeginHorizontal();
-            EditorGUILayout.Space();
-            if (GUILayout.Button("+", GUILayout.Width(30))) {
+            GUILayout.FlexibleSpace();
+            // 'Add' button
+            if (GUILayout.Button("+", GUILayout.Width(20))) {
 
                 string newName = fieldName + " 0";
                 int i = 0;
                 while (node.HasPort(newName)) newName = fieldName + " " + (++i);
 
-                node.AddInstanceOutput(type, connectionType, newName);
+                if (io == XNode.NodePort.IO.Output) node.AddInstanceOutput(type, connectionType, newName);
+                else node.AddInstanceInput(type, connectionType, newName);
                 serializedObject.Update();
                 EditorUtility.SetDirty(node);
                 if (hasArrayData) arrayData.InsertArrayElementAtIndex(arraySize);

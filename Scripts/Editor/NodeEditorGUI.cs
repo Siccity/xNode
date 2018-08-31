@@ -319,12 +319,10 @@ namespace XNodeEditor {
                 if (n >= graph.nodes.Count) return;
                 XNode.Node node = graph.nodes[n];
 
-                NodeEditor nodeEditor = NodeEditor.GetEditor(node);
-
                 // Culling
                 if (e.type == EventType.Layout) {
                     // Cull unselected nodes outside view
-                    if (!Selection.Contains(node) && ShouldBeCulled(nodeEditor)) {
+                    if (!Selection.Contains(node) && ShouldBeCulled(node)) {
                         culledNodes.Add(node);
                         continue;
                     }
@@ -333,6 +331,8 @@ namespace XNodeEditor {
                 if (e.type == EventType.Repaint) {
                     _portConnectionPoints = _portConnectionPoints.Where(x => x.Key.node != node).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
                 }
+
+                NodeEditor nodeEditor = NodeEditor.GetEditor(node);
 
                 NodeEditor.portPositions = new Dictionary<XNode.NodePort, Vector2>();
 
@@ -432,13 +432,13 @@ namespace XNodeEditor {
             }
         }
 
-        /// <summary> Returns true if outside window area </summary>
-        private bool ShouldBeCulled(XNodeEditor.NodeEditor nodeEditor) {
-            Vector2 nodePos = GridToWindowPositionNoClipped(nodeEditor.target.position);
+        private bool ShouldBeCulled(XNode.Node node) {
+
+            Vector2 nodePos = GridToWindowPositionNoClipped(node.position);
             if (nodePos.x / _zoom > position.width) return true; // Right
             else if (nodePos.y / _zoom > position.height) return true; // Bottom
-            else if (nodeSizes.ContainsKey(nodeEditor.target)) {
-                Vector2 size = nodeSizes[nodeEditor.target];
+            else if (nodeSizes.ContainsKey(node)) {
+                Vector2 size = nodeSizes[node];
                 if (nodePos.x + size.x < 0) return true; // Left
                 else if (nodePos.y + size.y < 0) return true; // Top
             }

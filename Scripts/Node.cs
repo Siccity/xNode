@@ -153,7 +153,8 @@ namespace XNode {
 
         /// <summary> Returns port which matches fieldName </summary>
         public NodePort GetPort(string fieldName) {
-            if (ports.ContainsKey(fieldName)) return ports[fieldName];
+            NodePort port;
+            if (ports.TryGetValue(fieldName, out port)) return port;
             else return null;
         }
 

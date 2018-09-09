@@ -90,8 +90,8 @@ namespace XNodeEditor {
 
                                     // Offset portConnectionPoints instantly if a node is dragged so they aren't delayed by a frame.
                                     Vector2 offset = node.position - initial;
-                                    if (offset.sqrMagnitude > 0){
-                                        foreach (XNode.NodePort output in node.Outputs){
+                                    if (offset.sqrMagnitude > 0) {
+                                        foreach (XNode.NodePort output in node.Outputs) {
                                             Rect rect;
                                             if (portConnectionPoints.TryGetValue(output, out rect)) {
                                                 rect.position += offset;
@@ -381,9 +381,8 @@ namespace XNodeEditor {
                             XNode.NodePort inputPort = port.direction == XNode.NodePort.IO.Input ? port : port.GetConnection(c);
                             XNode.NodePort outputPort = port.direction == XNode.NodePort.IO.Output ? port : port.GetConnection(c);
 
-                            if (substitutes.ContainsKey(inputPort.node) && substitutes.ContainsKey(outputPort.node)) {
-                                XNode.Node newNodeIn = substitutes[inputPort.node];
-                                XNode.Node newNodeOut = substitutes[outputPort.node];
+                            XNode.Node newNodeIn, newNodeOut;
+                            if (substitutes.TryGetValue(inputPort.node, out newNodeIn) && substitutes.TryGetValue(outputPort.node, out newNodeOut)) {
                                 newNodeIn.UpdateStaticPorts();
                                 newNodeOut.UpdateStaticPorts();
                                 inputPort = newNodeIn.GetInputPort(inputPort.fieldName);
@@ -402,9 +401,10 @@ namespace XNodeEditor {
             if (IsDraggingPort) {
                 Color col = NodeEditorPreferences.GetTypeColor(draggedOutput.ValueType);
 
-                if (!_portConnectionPoints.ContainsKey(draggedOutput)) return;
+                Rect fromRect;
+                if (!_portConnectionPoints.TryGetValue(draggedOutput, out fromRect)) return;
+                Vector2 from = fromRect.center;
                 col.a = 0.6f;
-                Vector2 from = _portConnectionPoints[draggedOutput].center;
                 Vector2 to = Vector2.zero;
                 for (int i = 0; i < draggedOutputReroutes.Count; i++) {
                     to = draggedOutputReroutes[i];
@@ -435,8 +435,10 @@ namespace XNodeEditor {
             Vector2 mousePos = Event.current.mousePosition;
             //Get node position
             Vector2 nodePos = GridToWindowPosition(node.position);
-            float width = 200;
-            if (nodeSizes.ContainsKey(node)) width = nodeSizes[node].x;
+            float width;
+            Vector2 size;
+            if (nodeSizes.TryGetValue(node, out size)) width = size.x;
+            else width = 200;
             Rect windowRect = new Rect(nodePos, new Vector2(width / zoom, 30 / zoom));
             return windowRect.Contains(mousePos);
         }

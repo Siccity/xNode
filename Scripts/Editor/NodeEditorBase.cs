@@ -16,14 +16,15 @@ namespace XNodeEditor.Internal {
 
 		public static T GetEditor(K target) {
 			if (target == null) return null;
-			if (!editors.ContainsKey(target)) {
+			T editor;
+			if (!editors.TryGetValue(target, out editor)) {
 				Type type = target.GetType();
 				Type editorType = GetEditorType(type);
-				editors.Add(target, Activator.CreateInstance(editorType) as T);
-				editors[target].target = target;
-				editors[target].serializedObject = new SerializedObject(target);
+				editor = Activator.CreateInstance(editorType) as T;
+				editor.target = target;
+				editor.serializedObject = new SerializedObject(target);
+				editors.Add(target, editor);
 			}
-			T editor = editors[target];
 			if (editor.target == null) editor.target = target;
 			if (editor.serializedObject == null) editor.serializedObject = new SerializedObject(target);
 			return editor;
@@ -32,7 +33,8 @@ namespace XNodeEditor.Internal {
 		private static Type GetEditorType(Type type) {
 			if (type == null) return null;
 			if (editorTypes == null) CacheCustomEditors();
-			if (editorTypes.ContainsKey(type)) return editorTypes[type];
+			Type result;
+			if (editorTypes.TryGetValue(type, out result)) return result;
 			//If type isn't found, try base type
 			return GetEditorType(type.BaseType);
 		}

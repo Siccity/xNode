@@ -26,6 +26,7 @@ namespace XNode {
         public bool IsConnected { get { return connections.Count != 0; } }
         public bool IsInput { get { return direction == IO.Input; } }
         public bool IsOutput { get { return direction == IO.Output; } }
+        public Delegate targetDelegate;
 
         public string fieldName { get { return _fieldName; } }
         public Node node { get { return _node; } }
@@ -88,6 +89,12 @@ namespace XNode {
             _connectionType = connectionType;
         }
 
+        /// <summary> Initialize the delegate for this NodePort. </summary>
+        /// <param name="initializer">Supply the GetDelegate method in the parent node. </param>
+        public void Initialize(Func<string, Delegate> initializer) {
+            targetDelegate = initializer(fieldName);
+        }
+
         /// <summary> Checks all connections for invalid references, and removes them. </summary>
         public void VerifyConnections() {
             for (int i = connections.Count - 1; i >= 0; i--) {
@@ -101,23 +108,23 @@ namespace XNode {
 
         /// <summary> Return the output value of this node through its parent nodes GetValue override method. </summary>
         /// <returns> <see cref="Node.GetValue(NodePort)"/> </returns>
-        public object GetOutputValue() {
-            if (direction == IO.Input) return null;
-            return node.GetValue(this);
+        public T GetOutputValue<T>() {
+            if (direction == IO.Input) return default(T);
+            return node.GetValue<T>(this);
         }
 
         /// <summary> Return the output value of the first connected port. Returns null if none found or invalid.</summary>
         /// <returns> <see cref="NodePort.GetOutputValue"/> </returns>
-        public object GetInputValue() {
+        public T GetInputValue<T>() {
             NodePort connectedPort = Connection;
-            if (connectedPort == null) return null;
-            return connectedPort.GetOutputValue();
+            if (connectedPort == null) return default(T);
+            return connectedPort.GetOutputValue<T>();
         }
 
         /// <summary> Return the output values of all connected ports. </summary>
         /// <returns> <see cref="NodePort.GetOutputValue"/> </returns>
-        public object[] GetInputValues() {
-            object[] objs = new object[ConnectionCount];
+        public T[] GetInputValues<T>() {
+            T[] ts = new T[ConnectionCount];
             for (int i = 0; i < ConnectionCount; i++) {
                 NodePort connectedPort = connections[i].Port;
                 if (connectedPort == null) { // if we happen to find a null port, remove it and look again
@@ -125,64 +132,9 @@ namespace XNode {
                     i--;
                     continue;
                 }
-                objs[i] = connectedPort.GetOutputValue();
-            }
-            return objs;
-        }
-
-        /// <summary> Return the output value of the first connected port. Returns null if none found or invalid. </summary>
-        /// <returns> <see cref="NodePort.GetOutputValue"/> </returns>
-        public T GetInputValue<T>() {
-            object obj = GetInputValue();
-            return obj is T ? (T) obj : default(T);
-        }
-
-        /// <summary> Return the output values of all connected ports. </summary>
-        /// <returns> <see cref="NodePort.GetOutputValue"/> </returns>
-        public T[] GetInputValues<T>() {
-            object[] objs = GetInputValues();
-            T[] ts = new T[objs.Length];
-            for (int i = 0; i < objs.Length; i++) {
-                if (objs[i] is T) ts[i] = (T) objs[i];
+                ts[i] = connectedPort.GetOutputValue<T>();
             }
             return ts;
-        }
-
-        /// <summary> Return true if port is connected and has a valid input. </summary>
-        /// <returns> <see cref="NodePort.GetOutputValue"/> </returns>
-        public bool TryGetInputValue<T>(out T value) {
-            object obj = GetInputValue();
-            if (obj is T) {
-                value = (T) obj;
-                return true;
-            } else {
-                value = default(T);
-                return false;
-            }
-        }
-
-        /// <summary> Return the sum of all inputs. </summary>
-        /// <returns> <see cref="NodePort.GetOutputValue"/> </returns>
-        public float GetInputSum(float fallback) {
-            object[] objs = GetInputValues();
-            if (objs.Length == 0) return fallback;
-            float result = 0;
-            for (int i = 0; i < objs.Length; i++) {
-                if (objs[i] is float) result += (float) objs[i];
-            }
-            return result;
-        }
-
-        /// <summary> Return the sum of all inputs. </summary>
-        /// <returns> <see cref="NodePort.GetOutputValue"/> </returns>
-        public int GetInputSum(int fallback) {
-            object[] objs = GetInputValues();
-            if (objs.Length == 0) return fallback;
-            int result = 0;
-            for (int i = 0; i < objs.Length; i++) {
-                if (objs[i] is int) result += (int) objs[i];
-            }
-            return result;
         }
 
         /// <summary> Connect this <see cref="NodePort"/> to another </summary>

@@ -220,7 +220,7 @@ namespace XNodeEditor {
             for (int i = 0; i < instancePorts.Count(); i++) {
                 GUILayout.BeginHorizontal();
                 // 'Remove' button
-                if (GUILayout.Button("-", GUILayout.Width(20))) {
+                if (GUILayout.Button("-", EditorStyles.miniButton, GUILayout.ExpandWidth(false))) {
                     // Clear the removed ports connections
                     instancePorts[i].ClearConnections();
                     // Move following connections one step up to replace the missing connection
@@ -270,7 +270,7 @@ namespace XNodeEditor {
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             // 'Add' button
-            if (GUILayout.Button("+", GUILayout.Width(20))) {
+            if (GUILayout.Button("+", EditorStyles.miniButton, GUILayout.ExpandWidth(false))) {
 
                 string newName = fieldName + " 0";
                 int i = 0;

@@ -41,8 +41,18 @@ namespace XNodeEditor {
                     // Get data from [Input] attribute
                     XNode.Node.ShowBackingValue showBacking = XNode.Node.ShowBackingValue.Unconnected;
                     XNode.Node.InputAttribute inputAttribute;
-                    if (NodeEditorUtilities.GetAttrib(port.node.GetType(), property.name, out inputAttribute)) showBacking = inputAttribute.backingValue;
+                    bool instancePortList = false;
+                    if (NodeEditorUtilities.GetAttrib(port.node.GetType(), property.name, out inputAttribute)) {
+                        instancePortList = inputAttribute.instancePortList;
+                        showBacking = inputAttribute.backingValue;
+                    }
 
+                    if (instancePortList) {
+                        Type type = GetType(property);
+                        XNode.Node.ConnectionType connectionType = inputAttribute != null ? inputAttribute.connectionType : XNode.Node.ConnectionType.Multiple;
+                        InstancePortList(property.name, type, property.serializedObject, port.direction, connectionType);
+                        return;
+                    }
                     switch (showBacking) {
                         case XNode.Node.ShowBackingValue.Unconnected:
                             // Display a label if port is connected
@@ -67,8 +77,18 @@ namespace XNodeEditor {
                     // Get data from [Output] attribute
                     XNode.Node.ShowBackingValue showBacking = XNode.Node.ShowBackingValue.Unconnected;
                     XNode.Node.OutputAttribute outputAttribute;
-                    if (NodeEditorUtilities.GetAttrib(port.node.GetType(), property.name, out outputAttribute)) showBacking = outputAttribute.backingValue;
+                    bool instancePortList = false;
+                    if (NodeEditorUtilities.GetAttrib(port.node.GetType(), property.name, out outputAttribute)) {
+                        instancePortList = outputAttribute.instancePortList;
+                        showBacking = outputAttribute.backingValue;
+                    }
 
+                    if (instancePortList) {
+                        Type type = GetType(property);
+                        XNode.Node.ConnectionType connectionType = outputAttribute != null ? outputAttribute.connectionType : XNode.Node.ConnectionType.Multiple;
+                        InstancePortList(property.name, type, property.serializedObject, port.direction, connectionType);
+                        return;
+                    }
                     switch (showBacking) {
                         case XNode.Node.ShowBackingValue.Unconnected:
                             // Display a label if port is connected
@@ -103,6 +123,12 @@ namespace XNodeEditor {
                 if (NodeEditor.portPositions.ContainsKey(port)) NodeEditor.portPositions[port] = portPos;
                 else NodeEditor.portPositions.Add(port, portPos);
             }
+        }
+
+        private static System.Type GetType(SerializedProperty property) {
+            System.Type parentType = property.serializedObject.targetObject.GetType();
+            System.Reflection.FieldInfo fi = parentType.GetField(property.propertyPath);
+            return fi.FieldType;
         }
 
         /// <summary> Make a simple port field. </summary>
@@ -259,7 +285,7 @@ namespace XNodeEditor {
                         } else EditorGUILayout.LabelField("[Out of bounds]");
 
                     } else {
-                        EditorGUILayout.LabelField(instancePorts[i].fieldName);
+                        EditorGUILayout.LabelField(ObjectNames.NicifyVariableName(instancePorts[i].fieldName));
                     }
 
                     GUILayout.EndHorizontal();

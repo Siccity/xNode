@@ -50,6 +50,7 @@ namespace XNodeEditor {
                     if (instancePortList) {
                         Type type = GetType(property);
                         XNode.Node.ConnectionType connectionType = inputAttribute != null ? inputAttribute.connectionType : XNode.Node.ConnectionType.Multiple;
+                        EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName));
                         InstancePortList(property.name, type, property.serializedObject, port.direction, connectionType);
                         return;
                     }
@@ -86,6 +87,7 @@ namespace XNodeEditor {
                     if (instancePortList) {
                         Type type = GetType(property);
                         XNode.Node.ConnectionType connectionType = outputAttribute != null ? outputAttribute.connectionType : XNode.Node.ConnectionType.Multiple;
+                        EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName));
                         InstancePortList(property.name, type, property.serializedObject, port.direction, connectionType);
                         return;
                     }

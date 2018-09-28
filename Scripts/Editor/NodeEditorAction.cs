@@ -279,6 +279,7 @@ namespace XNodeEditor {
                     break;
                 case EventType.ValidateCommand:
                     if (e.commandName == "SoftDelete") RemoveSelectedNodes();
+                    else if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX && e.commandName == "Delete") RemoveSelectedNodes();
                     else if (e.commandName == "Duplicate") DublicateSelectedNodes();
                     Repaint();
                     break;

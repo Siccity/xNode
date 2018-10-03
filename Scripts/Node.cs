@@ -220,6 +220,7 @@ namespace XNode {
             public InputAttribute(ShowBackingValue backingValue = ShowBackingValue.Unconnected, ConnectionType connectionType = ConnectionType.Multiple, bool instancePortList = false) {
                 this.backingValue = backingValue;
                 this.connectionType = connectionType;
+                this.instancePortList = instancePortList;
             }
         }
 
@@ -236,6 +237,7 @@ namespace XNode {
             public OutputAttribute(ShowBackingValue backingValue = ShowBackingValue.Never, ConnectionType connectionType = ConnectionType.Multiple, bool instancePortList = false) {
                 this.backingValue = backingValue;
                 this.connectionType = connectionType;
+                this.instancePortList = instancePortList;
             }
         }
 

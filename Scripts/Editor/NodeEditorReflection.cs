@@ -22,6 +22,18 @@ namespace XNodeEditor {
 
         [NonSerialized] private static Type[] _nodeTypes = null;
 
+        private Func<bool> isDocked {
+            get {
+                if (_isDocked == null) {
+                    BindingFlags fullBinding = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
+                    MethodInfo isDockedMethod = typeof(NodeEditorWindow).GetProperty("docked", fullBinding).GetGetMethod(true);
+                    _isDocked = (Func<bool>) Delegate.CreateDelegate(typeof(Func<bool>), this, isDockedMethod);
+                }
+                return _isDocked;
+            }
+        }
+        private Func<bool> _isDocked;
+
         public static Type[] GetNodeTypes() {
             //Get all classes deriving from Node via reflection
             return GetDerivedTypes(typeof(XNode.Node));

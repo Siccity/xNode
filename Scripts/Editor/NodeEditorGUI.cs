@@ -10,6 +10,7 @@ namespace XNodeEditor {
         public NodeGraphEditor graphEditor;
         private List<UnityEngine.Object> selectionCache;
         private List<XNode.Node> culledNodes;
+        private int topPadding { get { return isDocked() ? 19 : 22; } }
 
         private void OnGUI() {
             Event e = Event.current;
@@ -31,22 +32,22 @@ namespace XNodeEditor {
             GUI.matrix = m;
         }
 
-        public static void BeginZoomed(Rect rect, float zoom) {
+        public static void BeginZoomed(Rect rect, float zoom, float topPadding) {
             GUI.EndClip();
 
             GUIUtility.ScaleAroundPivot(Vector2.one / zoom, rect.size * 0.5f);
-            Vector4 padding = new Vector4(0, 22, 0, 0);
+            Vector4 padding = new Vector4(0, topPadding, 0, 0);
             padding *= zoom;
-            GUI.BeginClip(new Rect(-((rect.width * zoom) - rect.width) * 0.5f, -(((rect.height * zoom) - rect.height) * 0.5f) + (22 * zoom),
+            GUI.BeginClip(new Rect(-((rect.width * zoom) - rect.width) * 0.5f, -(((rect.height * zoom) - rect.height) * 0.5f) + (topPadding * zoom),
                 rect.width * zoom,
                 rect.height * zoom));
         }
 
-        public static void EndZoomed(Rect rect, float zoom) {
+        public static void EndZoomed(Rect rect, float zoom, float topPadding) {
             GUIUtility.ScaleAroundPivot(Vector2.one * zoom, rect.size * 0.5f);
             Vector3 offset = new Vector3(
                 (((rect.width * zoom) - rect.width) * 0.5f),
-                (((rect.height * zoom) - rect.height) * 0.5f) + (-22 * zoom) + 22,
+                (((rect.height * zoom) - rect.height) * 0.5f) + (-topPadding * zoom) + topPadding,
                 0);
             GUI.matrix = Matrix4x4.TRS(offset, Quaternion.identity, Vector3.one);
         }
@@ -294,7 +295,7 @@ namespace XNodeEditor {
                 if (onValidate != null) nodeHash = Selection.activeObject.GetHashCode();
             }
 
-            BeginZoomed(position, zoom);
+            BeginZoomed(position, zoom, topPadding);
 
             Vector2 mousePos = Event.current.mousePosition;
 
@@ -425,7 +426,7 @@ namespace XNodeEditor {
             }
 
             if (e.type != EventType.Layout && currentActivity == NodeActivity.DragGrid) Selection.objects = preSelection.ToArray();
-            EndZoomed(position, zoom);
+            EndZoomed(position, zoom, topPadding);
 
             //If a change in hash is detected in the selected node, call OnValidate method. 
             //This is done through reflection because OnValidate is only relevant in editor, 

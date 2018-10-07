@@ -110,7 +110,13 @@ namespace XNode {
         /// <returns> <see cref="Node.GetValue(NodePort)"/> </returns>
         public T GetOutputValue<T>() {
             if (direction == IO.Input) return default(T);
-            return node.GetValue<T>(this);
+            if (targetDelegate == null) Initialize(node.GetDelegate);
+            Func<T> func = targetDelegate as Func<T>;
+
+            if (func != null)
+                return func();
+
+            return default(T); //default
         }
 
         /// <summary> Return the output value of the first connected port. Returns null if none found or invalid.</summary>

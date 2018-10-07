@@ -182,25 +182,6 @@ namespace XNode {
             else return fallback;
         }
 
-        /// <summary> Returns a value based on requested port output. Should be overridden in all derived nodes with outputs. </summary>
-        /// <param name="port">The requested port.</param>
-        public object GetValue(NodePort port) {
-            if (port.targetDelegate == null) port.Initialize(GetDelegate);
-            return port.targetDelegate.DynamicInvoke();
-        }
-
-        /// <summary> Returns a value based on requested port output. Should be overridden in all derived nodes with outputs. </summary>
-        /// <param name="port">The requested port.</param>
-        public T GetValue<T>(NodePort port) {
-            if (port.targetDelegate == null) port.Initialize(GetDelegate);
-            Func<T> func = port.targetDelegate as Func<T>;
-
-            if (func != null)
-                return func();
-
-            return default(T); //default
-        }
-
         public abstract Delegate GetDelegate(string fieldName);
 #endregion
 

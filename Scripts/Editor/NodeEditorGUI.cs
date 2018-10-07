@@ -454,7 +454,8 @@ namespace XNodeEditor {
                 GUIContent content = new GUIContent();
                 content.text = type.PrettyName();
                 if (hoveredPort.IsOutput) {
-                    object obj = hoveredPort.node.GetValue(hoveredPort);
+                    if (hoveredPort.targetDelegate == null) hoveredPort.Initialize(hoveredPort.node.GetDelegate);
+                    object obj = hoveredPort.targetDelegate.DynamicInvoke();
                     content.text += " = " + (obj != null ? obj.ToString() : "null");
                 }
                 Vector2 size = NodeEditorResources.styles.tooltip.CalcSize(content);

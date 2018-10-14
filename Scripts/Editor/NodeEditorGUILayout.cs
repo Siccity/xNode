@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
+using UnityEditorInternal;
 using UnityEngine;
 
 namespace XNodeEditor {
     /// <summary> xNode-specific version of <see cref="EditorGUILayout"/> </summary>
     public static class NodeEditorGUILayout {
+
+        private static readonly Dictionary<UnityEngine.Object, Dictionary<string, ReorderableList>> reorderableListCache = new Dictionary<UnityEngine.Object, Dictionary<string, ReorderableList>>();
 
         /// <summary> Make a field for a serialized property. Automatically displays relevant node port. </summary>
         public static void PropertyField(SerializedProperty property, bool includeChildren = true, params GUILayoutOption[] options) {
@@ -244,6 +247,34 @@ namespace XNodeEditor {
                     else return false;
                 };
             List<XNode.NodePort> instancePorts = node.InstancePorts.Where(x => isMatchingInstancePort(x.fieldName)).OrderBy(x => x.fieldName).ToList();
+
+            ReorderableList list = null;
+            Dictionary<string, ReorderableList> rlc;
+            if (reorderableListCache.TryGetValue(serializedObject.targetObject, out rlc)) {
+                if (!rlc.TryGetValue(fieldName, out list)) list = null;
+            }
+            if (list == null) {
+                Debug.Log("Create List");
+                list = new ReorderableList(instancePorts, null, true, true, true, true);
+                if (reorderableListCache.TryGetValue(serializedObject.targetObject, out rlc)) rlc.Add(fieldName, list);
+                else reorderableListCache.Add(serializedObject.targetObject, new Dictionary<string, ReorderableList>() { { fieldName, list } });
+                list.drawElementCallback =
+                    (Rect rect, int index, bool isActive, bool isFocused) => {
+                        XNode.NodePort port = list.list[index] as XNode.NodePort;
+                        //SerializedProperty element = serializedObject.get(index);
+                        if (hasArrayData) {
+                            SerializedProperty itemData = arrayData.GetArrayElementAtIndex(index);
+                            EditorGUI.PropertyField(rect, itemData);
+                        } else EditorGUI.LabelField(rect, port.fieldName);
+                        NodeEditorGUILayout.PortField(node.GetPort(instancePorts[index].fieldName));
+                    };
+                list.onReorderCallback =
+                    (ReorderableList rl) => {
+
+                    };
+            }
+            list.list = instancePorts;
+            list.DoLayoutList();
 
             for (int i = 0; i < instancePorts.Count(); i++) {
                 GUILayout.BeginHorizontal();

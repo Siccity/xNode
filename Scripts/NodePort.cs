@@ -258,6 +258,12 @@ namespace XNode {
             }
         }
 
+        /// <summary> Potentially dangerous. Use only with instance ports </summary>
+        /// <param name="fieldName"></param>
+        public void Rename(string fieldName) {
+            _fieldName = fieldName;
+        }
+
         /// <summary> Get reroute points for a given connection. This is used for organization </summary>
         public List<Vector2> GetReroutePoints(int index) {
             return connections[index].reroutePoints;

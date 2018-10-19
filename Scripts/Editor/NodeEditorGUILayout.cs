@@ -11,7 +11,7 @@ namespace XNodeEditor {
     public static class NodeEditorGUILayout {
 
         private static readonly Dictionary<UnityEngine.Object, Dictionary<string, ReorderableList>> reorderableListCache = new Dictionary<UnityEngine.Object, Dictionary<string, ReorderableList>>();
-
+        private static int reorderableListIndex = -1;
         /// <summary> Make a field for a serialized property. Automatically displays relevant node port. </summary>
         public static void PropertyField(SerializedProperty property, bool includeChildren = true, params GUILayoutOption[] options) {
             PropertyField(property, (GUIContent) null, includeChildren, options);
@@ -278,17 +278,42 @@ namespace XNodeEditor {
                     (Rect rect) => {
                         EditorGUI.LabelField(rect, serializedObject.FindProperty(fieldName).displayName);
                     };
+                list.onSelectCallback =
+                    (ReorderableList rl) => {
+                        reorderableListIndex = rl.index;
+                    };
                 list.onReorderCallback =
                     (ReorderableList rl) => {
-                        for (int i = 0; i < rl.list.Count; i++) {
-                            XNode.NodePort port = rl.list[i] as XNode.NodePort;
-                            string[] name = port.fieldName.Split(' ');
-                            int newIndex = int.Parse(name[1]);
-                            if (i != newIndex) {
-                                //port.Rename(name[0] + " " + i);
-                                Debug.Log("Switch " + i + " and  " + newIndex + "!");
+                        if (hasArrayData) {
+                            SerializedProperty arrayDataOriginal = arrayData.Copy();
+                            arrayData.MoveArrayElement(reorderableListIndex, rl.index);
+
+                        }
+                        List<XNode.NodePort> fromConnections = (rl.list[reorderableListIndex] as XNode.NodePort).GetConnections();
+                        for (int i = 0; i < rl.list.Count - 1; ++i) {
+                            if (i >= reorderableListIndex) {
+                                XNode.NodePort port = rl.list[i] as XNode.NodePort;
+                                port.ClearConnections();
+                                List<XNode.NodePort> newConnections = (rl.list[i + 1] as XNode.NodePort).GetConnections();
+                                foreach (var c in newConnections) port.Connect(c);
+                            }
+
+                        }
+                        for (int i = rl.list.Count - 1; i > 0; --i) {
+                            if (i > rl.index) {
+                                XNode.NodePort port = rl.list[i] as XNode.NodePort;
+                                port.ClearConnections();
+                                List<XNode.NodePort> newConnections = (rl.list[i - 1] as XNode.NodePort).GetConnections();
+                                foreach (var c in newConnections) port.Connect(c);
                             }
                         }
+                        XNode.NodePort toPort = rl.list[rl.index] as XNode.NodePort;
+                        toPort.ClearConnections();
+                        foreach (var c in fromConnections) toPort.Connect(c);
+
+                        serializedObject.ApplyModifiedProperties();
+                        serializedObject.Update();
+                        NodeEditorWindow.current.Repaint();
                     };
                 list.onAddCallback =
                     (ReorderableList rl) => {

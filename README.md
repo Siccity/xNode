@@ -31,7 +31,7 @@ With a minimal footprint, it is ideal as a base for custom state machines, dialo
 
 ### Node example:
 ```csharp
-[System.Serializable]
+// public classes deriving from Node are registered as nodes for use within a graph
 public class MathNode : Node {
     // Adding [Input] or [Output] is all you need to do to register a field as a valid port on your node 
     [Input] public float a;

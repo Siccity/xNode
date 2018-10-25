@@ -296,29 +296,28 @@ namespace XNode {
             int aConnectionCount = connections.Count;
             int bConnectionCount = targetPort.connections.Count;
 
+            List<NodePort> portConnections = new List<NodePort>();
+            List<NodePort> targetPortConnections = new List<NodePort>();
+
+            // Cache port connections
+            for (int i = 0; i < aConnectionCount; i++)
+                portConnections.Add(connections[i].Port);
+
+            // Cache target port connections
+            for (int i = 0; i < bConnectionCount; i++)
+                targetPortConnections.Add(targetPort.connections[i].Port);
+
+            ClearConnections();
+            targetPort.ClearConnections();
+
+            // Add port connections to targetPort
+            for (int i = 0; i < portConnections.Count; i++)
+                targetPort.Connect(portConnections[i]);
+
             // Add target port connections to this one
-            for (int i = 0; i < aConnectionCount; i++) {
-                PortConnection connection = connections[i];
-                NodePort otherPort = connection.Port;
-                targetPort.Connect(otherPort);
-            }
+            for (int i = 0; i < targetPortConnections.Count; i++)
+                Connect(targetPortConnections[i]);
 
-            // Add connections to target port
-            for (int i = 0; i < bConnectionCount; i++) {
-                PortConnection connection = targetPort.connections[i];
-                NodePort otherPort = connection.Port;
-                Connect(otherPort);
-            }
-
-            // Remove starting connections on this port
-            for (int i = aConnectionCount - 1; i >= 0; i--) {
-                Disconnect(i);
-            }
-
-            // Remove starting connections on target port
-            for (int i = bConnectionCount - 1; i >= 0; i--) {
-                targetPort.Disconnect(i);
-            }
         }
 
         /// <summary> Copy all connections pointing to a node and add them to this one </summary>

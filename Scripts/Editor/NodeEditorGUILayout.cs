@@ -295,38 +295,42 @@ namespace XNodeEditor {
                 };
             list.onReorderCallback =
                 (ReorderableList rl) => {
+
+                    // Move up
+                    if (rl.index > reorderableListIndex) {
+                        for (int i = reorderableListIndex; i < rl.index; ++i) {
+                            XNode.NodePort port = node.GetPort(arrayData.name + " " + i);
+                            XNode.NodePort nextPort = node.GetPort(arrayData.name + " " + (i + 1));
+                            port.SwapConnections(nextPort);
+
+                            // Swap cached positions to mitigate twitching
+                            Rect rect = NodeEditorWindow.current.portConnectionPoints[port];
+                            NodeEditorWindow.current.portConnectionPoints[port] = NodeEditorWindow.current.portConnectionPoints[nextPort];
+                            NodeEditorWindow.current.portConnectionPoints[nextPort] = rect;
+                        }
+                    }
+                    // Move down
+                    else {
+                        for (int i = reorderableListIndex; i > rl.index; --i) {
+                            XNode.NodePort port = node.GetPort(arrayData.name + " " + i);
+                            XNode.NodePort nextPort = node.GetPort(arrayData.name + " " + (i - 1));
+                            port.SwapConnections(nextPort);
+
+                            // Swap cached positions to mitigate twitching
+                            Rect rect = NodeEditorWindow.current.portConnectionPoints[port];
+                            NodeEditorWindow.current.portConnectionPoints[port] = NodeEditorWindow.current.portConnectionPoints[nextPort];
+                            NodeEditorWindow.current.portConnectionPoints[nextPort] = rect;
+                        }
+                    }
+                    // Apply changes
+                    serializedObject.ApplyModifiedProperties();
+                    serializedObject.Update();
+
                     // Move array data if there is any
                     if (hasArrayData) {
                         SerializedProperty arrayDataOriginal = arrayData.Copy();
                         arrayData.MoveArrayElement(reorderableListIndex, rl.index);
                     }
-
-                    XNode.NodePort fromPort = node.GetPort(arrayData.name + " " + reorderableListIndex);
-                    // Move connections
-                    List<XNode.NodePort> fromConnections = fromPort.GetConnections();
-                    for (int i = 0; i < rl.list.Count - 1; ++i) {
-                        if (i >= reorderableListIndex) {
-                            XNode.NodePort port = node.GetPort(arrayData.name + " " + i);
-                            XNode.NodePort targetPort = node.GetPort(arrayData.name + " " + (i + 1));
-                            port.ClearConnections();
-                            Debug.Log("Move " + targetPort.fieldName + " to " + port.fieldName);
-                            List<XNode.NodePort> newConnections = targetPort.GetConnections();
-                            foreach (var c in newConnections) port.Connect(c);
-                        }
-                    }
-                    for (int i = rl.list.Count - 1; i > 0; --i) {
-                        if (i > rl.index) {
-                            XNode.NodePort port = node.GetPort(arrayData.name + " " + i);
-                            XNode.NodePort targetPort = node.GetPort(arrayData.name + " " + (i - 1));
-                            port.ClearConnections();
-                            Debug.Log("Move " + targetPort.fieldName + " to " + port.fieldName);
-                            List<XNode.NodePort> newConnections = targetPort.GetConnections();
-                            foreach (var c in newConnections) port.Connect(c);
-                        }
-                    }
-                    XNode.NodePort toPort = node.GetPort(arrayData.name + " " + rl.index);
-                    toPort.ClearConnections();
-                    foreach (var c in fromConnections) toPort.Connect(c);
 
                     // Apply changes
                     serializedObject.ApplyModifiedProperties();

@@ -261,21 +261,87 @@ namespace XNode {
             if (port != null) port.node.OnRemoveConnection(port);
         }
 
+        /// <summary> Disconnect this port from another port </summary>
+        public void Disconnect(int i) {
+            // Remove the other ports connection to this port
+            NodePort otherPort = connections[i].Port;
+            if (otherPort != null) {
+                for (int k = 0; k < otherPort.connections.Count; k++) {
+                    if (otherPort.connections[k].Port == this) {
+                        otherPort.connections.RemoveAt(i);
+                    }
+                }
+            }
+            // Remove this ports connection to the other
+            connections.RemoveAt(i);
+
+            // Trigger OnRemoveConnection
+            node.OnRemoveConnection(this);
+            if (otherPort != null) otherPort.node.OnRemoveConnection(otherPort);
+        }
+
         public void ClearConnections() {
             while (connections.Count > 0) {
                 Disconnect(connections[0].Port);
             }
         }
 
-        /// <summary> Potentially dangerous. Use only with instance ports </summary>
-        /// <param name="fieldName"></param>
-        public void Rename(string fieldName) {
-            _fieldName = fieldName;
-        }
-
         /// <summary> Get reroute points for a given connection. This is used for organization </summary>
         public List<Vector2> GetReroutePoints(int index) {
             return connections[index].reroutePoints;
+        }
+
+        /// <summary> Swap connections with another node </summary>
+        public void SwapConnections(NodePort targetPort) {
+            int aConnectionCount = connections.Count;
+            int bConnectionCount = targetPort.connections.Count;
+
+            // Add target port connections to this one
+            for (int i = 0; i < aConnectionCount; i++) {
+                PortConnection connection = connections[i];
+                NodePort otherPort = connection.Port;
+                targetPort.Connect(otherPort);
+            }
+
+            // Add connections to target port
+            for (int i = 0; i < bConnectionCount; i++) {
+                PortConnection connection = targetPort.connections[i];
+                NodePort otherPort = connection.Port;
+                Connect(otherPort);
+            }
+
+            // Remove starting connections on this port
+            for (int i = aConnectionCount - 1; i >= 0; i--) {
+                Disconnect(i);
+            }
+
+            // Remove starting connections on target port
+            for (int i = bConnectionCount - 1; i >= 0; i--) {
+                targetPort.Disconnect(i);
+            }
+        }
+
+        /// <summary> Copy all connections pointing to a node and add them to this one </summary>
+        public void AddConnections(NodePort targetPort) {
+            int connectionCount = targetPort.ConnectionCount;
+            for (int i = 0; i < connectionCount; i++) {
+                PortConnection connection = targetPort.connections[i];
+                NodePort otherPort = connection.Port;
+                Connect(otherPort);
+            }
+        }
+
+        /// <summary> Move all connections pointing to this node, to another node </summary>
+        public void MoveConnections(NodePort targetPort) {
+            int connectionCount = connections.Count;
+
+            // Add connections to target port
+            for (int i = 0; i < connectionCount; i++) {
+                PortConnection connection = targetPort.connections[i];
+                NodePort otherPort = connection.Port;
+                Connect(otherPort);
+            }
+            ClearConnections();
         }
 
         /// <summary> Swap connected nodes from the old list with nodes from the new list </summary>

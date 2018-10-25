@@ -79,24 +79,21 @@ namespace XNode {
         }
 
 #region Instance Ports
-        /// <summary> Convenience function.
-        /// </summary>
+        /// <summary> Convenience function. </summary>
         /// <seealso cref="AddInstancePort"/>
         /// <seealso cref="AddInstanceOutput"/>
         public NodePort AddInstanceInput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, string fieldName = null) {
             return AddInstancePort(type, NodePort.IO.Input, connectionType, fieldName);
         }
 
-        /// <summary> Convenience function.
-        /// </summary>
+        /// <summary> Convenience function. </summary>
         /// <seealso cref="AddInstancePort"/>
         /// <seealso cref="AddInstanceInput"/>
         public NodePort AddInstanceOutput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, string fieldName = null) {
             return AddInstancePort(type, NodePort.IO.Output, connectionType, fieldName);
         }
 
-        /// <summary> Add a dynamic, serialized port to this node.
-        /// </summary>
+        /// <summary> Add a dynamic, serialized port to this node. </summary>
         /// <seealso cref="AddInstanceInput"/>
         /// <seealso cref="AddInstanceOutput"/>
         private NodePort AddInstancePort(Type type, NodePort.IO direction, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, string fieldName = null) {

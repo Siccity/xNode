@@ -1,14 +1,18 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
+using UnityEditorInternal;
 using UnityEngine;
 
 namespace XNodeEditor {
     /// <summary> xNode-specific version of <see cref="EditorGUILayout"/> </summary>
     public static class NodeEditorGUILayout {
 
+        private static readonly Dictionary<UnityEngine.Object, Dictionary<string, ReorderableList>> reorderableListCache = new Dictionary<UnityEngine.Object, Dictionary<string, ReorderableList>>();
+        private static int reorderableListIndex = -1;
         /// <summary> Make a field for a serialized property. Automatically displays relevant node port. </summary>
         public static void PropertyField(SerializedProperty property, bool includeChildren = true, params GUILayoutOption[] options) {
             PropertyField(property, (GUIContent) null, includeChildren, options);
@@ -50,7 +54,6 @@ namespace XNodeEditor {
                     if (instancePortList) {
                         Type type = GetType(property);
                         XNode.Node.ConnectionType connectionType = inputAttribute != null ? inputAttribute.connectionType : XNode.Node.ConnectionType.Multiple;
-                        EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName));
                         InstancePortList(property.name, type, property.serializedObject, port.direction, connectionType);
                         return;
                     }
@@ -87,7 +90,6 @@ namespace XNodeEditor {
                     if (instancePortList) {
                         Type type = GetType(property);
                         XNode.Node.ConnectionType connectionType = outputAttribute != null ? outputAttribute.connectionType : XNode.Node.ConnectionType.Multiple;
-                        EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName));
                         InstancePortList(property.name, type, property.serializedObject, port.direction, connectionType);
                         return;
                     }
@@ -142,7 +144,7 @@ namespace XNodeEditor {
         public static void PortField(GUIContent label, XNode.NodePort port, params GUILayoutOption[] options) {
             if (port == null) return;
             if (options == null) options = new GUILayoutOption[] { GUILayout.MinWidth(30) };
-            Rect rect = new Rect();
+            Vector2 position = Vector3.zero;
             GUIContent content = label != null ? label : new GUIContent(ObjectNames.NicifyVariableName(port.fieldName));
 
             // If property is an input, display a regular property field and put a port handle on the left side
@@ -150,18 +152,26 @@ namespace XNodeEditor {
                 // Display a label
                 EditorGUILayout.LabelField(content, options);
 
-                rect = GUILayoutUtility.GetLastRect();
-                rect.position = rect.position - new Vector2(16, 0);
-                // If property is an output, display a text label and put a port handle on the right side
-            } else if (port.direction == XNode.NodePort.IO.Output) {
+                Rect rect = GUILayoutUtility.GetLastRect();
+                position = rect.position - new Vector2(16, 0);
+
+            }
+            // If property is an output, display a text label and put a port handle on the right side
+            else if (port.direction == XNode.NodePort.IO.Output) {
                 // Display a label
                 EditorGUILayout.LabelField(content, NodeEditorResources.OutputPort, options);
 
-                rect = GUILayoutUtility.GetLastRect();
-                rect.position = rect.position + new Vector2(rect.width, 0);
+                Rect rect = GUILayoutUtility.GetLastRect();
+                position = rect.position + new Vector2(rect.width, 0);
             }
+            PortField(position, port);
+        }
 
-            rect.size = new Vector2(16, 16);
+        /// <summary> Make a simple port field. </summary>
+        public static void PortField(Vector2 position, XNode.NodePort port) {
+            if (port == null) return;
+
+            Rect rect = new Rect(position, new Vector2(16, 16));
 
             Color backgroundColor = new Color32(90, 97, 105, 255);
             Color tint;
@@ -234,8 +244,6 @@ namespace XNodeEditor {
         public static void InstancePortList(string fieldName, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple) {
             XNode.Node node = serializedObject.targetObject as XNode.Node;
             SerializedProperty arrayData = serializedObject.FindProperty(fieldName);
-            bool hasArrayData = arrayData != null && arrayData.isArray;
-            int arraySize = hasArrayData ? arrayData.arraySize : 0;
 
             Predicate<string> isMatchingInstancePort =
                 x => {
@@ -245,14 +253,112 @@ namespace XNodeEditor {
                 };
             List<XNode.NodePort> instancePorts = node.InstancePorts.Where(x => isMatchingInstancePort(x.fieldName)).OrderBy(x => x.fieldName).ToList();
 
-            for (int i = 0; i < instancePorts.Count(); i++) {
-                GUILayout.BeginHorizontal();
-                // 'Remove' button
-                if (GUILayout.Button("-", EditorStyles.miniButton, GUILayout.ExpandWidth(false))) {
+            ReorderableList list = null;
+            Dictionary<string, ReorderableList> rlc;
+            if (reorderableListCache.TryGetValue(serializedObject.targetObject, out rlc)) {
+                if (!rlc.TryGetValue(fieldName, out list)) list = null;
+            }
+            // If a ReorderableList isn't cached for this array, do so.
+            if (list == null) {
+                string label = serializedObject.FindProperty(fieldName).displayName;
+                list = CreateReorderableList(instancePorts, arrayData, type, serializedObject, io, label, connectionType);
+                if (reorderableListCache.TryGetValue(serializedObject.targetObject, out rlc)) rlc.Add(fieldName, list);
+                else reorderableListCache.Add(serializedObject.targetObject, new Dictionary<string, ReorderableList>() { { fieldName, list } });
+            }
+            list.list = instancePorts;
+            list.DoLayoutList();
+        }
+
+        private static ReorderableList CreateReorderableList(List<XNode.NodePort> instancePorts, SerializedProperty arrayData, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, string label, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple) {
+            bool hasArrayData = arrayData != null && arrayData.isArray;
+            int arraySize = hasArrayData ? arrayData.arraySize : 0;
+            XNode.Node node = serializedObject.targetObject as XNode.Node;
+            ReorderableList list = new ReorderableList(instancePorts, null, true, true, true, true);
+
+            list.drawElementCallback =
+                (Rect rect, int index, bool isActive, bool isFocused) => {
+                    XNode.NodePort port = node.GetPort(arrayData.name + " " + index);
+                    if (hasArrayData) {
+                        SerializedProperty itemData = arrayData.GetArrayElementAtIndex(index);
+                        EditorGUI.PropertyField(rect, itemData);
+                    } else EditorGUI.LabelField(rect, port.fieldName);
+                    Vector2 pos = rect.position + (port.IsOutput?new Vector2(rect.width + 6, 0) : new Vector2(-36, 0));
+                    NodeEditorGUILayout.PortField(pos, port);
+                };
+            list.drawHeaderCallback =
+                (Rect rect) => {
+                    EditorGUI.LabelField(rect, label);
+                };
+            list.onSelectCallback =
+                (ReorderableList rl) => {
+                    reorderableListIndex = rl.index;
+                };
+            list.onReorderCallback =
+                (ReorderableList rl) => {
+
+                    // Move up
+                    if (rl.index > reorderableListIndex) {
+                        for (int i = reorderableListIndex; i < rl.index; ++i) {
+                            XNode.NodePort port = node.GetPort(arrayData.name + " " + i);
+                            XNode.NodePort nextPort = node.GetPort(arrayData.name + " " + (i + 1));
+                            port.SwapConnections(nextPort);
+
+                            // Swap cached positions to mitigate twitching
+                            Rect rect = NodeEditorWindow.current.portConnectionPoints[port];
+                            NodeEditorWindow.current.portConnectionPoints[port] = NodeEditorWindow.current.portConnectionPoints[nextPort];
+                            NodeEditorWindow.current.portConnectionPoints[nextPort] = rect;
+                        }
+                    }
+                    // Move down
+                    else {
+                        for (int i = reorderableListIndex; i > rl.index; --i) {
+                            XNode.NodePort port = node.GetPort(arrayData.name + " " + i);
+                            XNode.NodePort nextPort = node.GetPort(arrayData.name + " " + (i - 1));
+                            port.SwapConnections(nextPort);
+
+                            // Swap cached positions to mitigate twitching
+                            Rect rect = NodeEditorWindow.current.portConnectionPoints[port];
+                            NodeEditorWindow.current.portConnectionPoints[port] = NodeEditorWindow.current.portConnectionPoints[nextPort];
+                            NodeEditorWindow.current.portConnectionPoints[nextPort] = rect;
+                        }
+                    }
+                    // Apply changes
+                    serializedObject.ApplyModifiedProperties();
+                    serializedObject.Update();
+
+                    // Move array data if there is any
+                    if (hasArrayData) {
+                        SerializedProperty arrayDataOriginal = arrayData.Copy();
+                        arrayData.MoveArrayElement(reorderableListIndex, rl.index);
+                    }
+
+                    // Apply changes
+                    serializedObject.ApplyModifiedProperties();
+                    serializedObject.Update();
+                    NodeEditorWindow.current.Repaint();
+                    EditorApplication.delayCall += NodeEditorWindow.current.Repaint;
+                };
+            list.onAddCallback =
+                (ReorderableList rl) => {
+                    // Add instance port postfixed with an index number
+                    string newName = arrayData.name + " 0";
+                    int i = 0;
+                    while (node.HasPort(newName)) newName = arrayData.name + " " + (++i);
+
+                    if (io == XNode.NodePort.IO.Output) node.AddInstanceOutput(type, connectionType, newName);
+                    else node.AddInstanceInput(type, connectionType, newName);
+                    serializedObject.Update();
+                    EditorUtility.SetDirty(node);
+                    if (hasArrayData) arrayData.InsertArrayElementAtIndex(arraySize);
+                    serializedObject.ApplyModifiedProperties();
+                };
+            list.onRemoveCallback =
+                (ReorderableList rl) => {
+                    int index = rl.index;
                     // Clear the removed ports connections
-                    instancePorts[i].ClearConnections();
+                    instancePorts[index].ClearConnections();
                     // Move following connections one step up to replace the missing connection
-                    for (int k = i + 1; k < instancePorts.Count(); k++) {
+                    for (int k = index + 1; k < instancePorts.Count(); k++) {
                         for (int j = 0; j < instancePorts[k].ConnectionCount; j++) {
                             XNode.NodePort other = instancePorts[k].GetConnection(j);
                             instancePorts[k].Disconnect(other);
@@ -264,7 +370,7 @@ namespace XNodeEditor {
                     serializedObject.Update();
                     EditorUtility.SetDirty(node);
                     if (hasArrayData) {
-                        arrayData.DeleteArrayElementAtIndex(i);
+                        arrayData.DeleteArrayElementAtIndex(index);
                         arraySize--;
                         // Error handling. If the following happens too often, file a bug report at https://github.com/Siccity/xNode/issues
                         if (instancePorts.Count <= arraySize) {
@@ -276,42 +382,29 @@ namespace XNodeEditor {
                         serializedObject.ApplyModifiedProperties();
                         serializedObject.Update();
                     }
-                    i--;
-                    GUILayout.EndHorizontal();
-                } else {
-                    if (hasArrayData) {
-                        if (i < arraySize) {
-                            SerializedProperty itemData = arrayData.GetArrayElementAtIndex(i);
-                            if (itemData != null) EditorGUILayout.PropertyField(itemData, new GUIContent(ObjectNames.NicifyVariableName(fieldName) + " " + i), true);
-                            else EditorGUILayout.LabelField("[Missing array data]");
-                        } else EditorGUILayout.LabelField("[Out of bounds]");
 
-                    } else {
-                        EditorGUILayout.LabelField(ObjectNames.NicifyVariableName(instancePorts[i].fieldName));
-                    }
+                };
 
-                    GUILayout.EndHorizontal();
-                    NodeEditorGUILayout.AddPortField(node.GetPort(instancePorts[i].fieldName));
+            if (hasArrayData) {
+                int instancePortCount = instancePorts.Count;
+                while (instancePortCount < arraySize) {
+                    // Add instance port postfixed with an index number
+                    string newName = arrayData.name + " 0";
+                    int i = 0;
+                    while (node.HasPort(newName)) newName = arrayData.name + " " + (++i);
+                    if (io == XNode.NodePort.IO.Output) node.AddInstanceOutput(type, connectionType, newName);
+                    else node.AddInstanceInput(type, connectionType, newName);
+                    EditorUtility.SetDirty(node);
+                    instancePortCount++;
                 }
-                // GUILayout.EndHorizontal();
-            }
-            GUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-            // 'Add' button
-            if (GUILayout.Button("+", EditorStyles.miniButton, GUILayout.ExpandWidth(false))) {
-
-                string newName = fieldName + " 0";
-                int i = 0;
-                while (node.HasPort(newName)) newName = fieldName + " " + (++i);
-
-                if (io == XNode.NodePort.IO.Output) node.AddInstanceOutput(type, connectionType, newName);
-                else node.AddInstanceInput(type, connectionType, newName);
-                serializedObject.Update();
-                EditorUtility.SetDirty(node);
-                if (hasArrayData) arrayData.InsertArrayElementAtIndex(arraySize);
+                while (arraySize < instancePortCount) {
+                    arrayData.InsertArrayElementAtIndex(arraySize);
+                    arraySize++;
+                }
                 serializedObject.ApplyModifiedProperties();
+                serializedObject.Update();
             }
-            GUILayout.EndHorizontal();
+            return list;
         }
     }
 }

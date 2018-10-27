@@ -15,13 +15,6 @@ namespace XNodeEditor {
         public static Dictionary<XNode.NodePort, Vector2> portPositions;
         public static int renaming;
 
-        /// <summary> Draws the node GUI.</summary>
-        /// <param name="portPositions">Port handle positions need to be returned to the NodeEditorWindow </param>
-        public void OnNodeGUI() {
-            OnHeaderGUI();
-            OnBodyGUI();
-        }
-
         public virtual void OnHeaderGUI() {
             string title = target.name;
             if (renaming != 0 && Selection.Contains(target)) {

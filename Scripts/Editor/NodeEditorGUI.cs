@@ -366,7 +366,8 @@ namespace XNodeEditor {
                 EditorGUI.BeginChangeCheck();
 
                 //Draw node contents
-                nodeEditor.OnNodeGUI();
+                nodeEditor.OnHeaderGUI();
+                nodeEditor.OnBodyGUI();
 
                 //If user changed a value, notify other scripts through onUpdateNode
                 if (EditorGUI.EndChangeCheck()) {

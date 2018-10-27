@@ -75,6 +75,10 @@ namespace XNodeEditor {
             else return Color.white;
         }
 
+        public virtual GUIStyle GetBodyStyle() {
+            return NodeEditorResources.styles.nodeBody;
+        }
+
         public void InitiateRename() {
             renaming = 1;
         }

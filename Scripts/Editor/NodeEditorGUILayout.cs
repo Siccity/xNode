@@ -285,10 +285,13 @@ namespace XNodeEditor {
                     Vector2 pos = rect.position + (port.IsOutput?new Vector2(rect.width + 6, 0) : new Vector2(-36, 0));
                     NodeEditorGUILayout.PortField(pos, port);
                 };
-            list.elementHeightCallback = (int index) => {
-                SerializedProperty itemData = arrayData.GetArrayElementAtIndex(index);
-                return EditorGUI.GetPropertyHeight(itemData);
-            };
+            list.elementHeightCallback =
+                (int index) => {
+                    if (hasArrayData) {
+                        SerializedProperty itemData = arrayData.GetArrayElementAtIndex(index);
+                        return EditorGUI.GetPropertyHeight(itemData);
+                    } else return EditorGUIUtility.singleLineHeight;
+                };
             list.drawHeaderCallback =
                 (Rect rect) => {
                     EditorGUI.LabelField(rect, label);

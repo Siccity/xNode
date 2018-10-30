@@ -335,7 +335,6 @@ namespace XNodeEditor {
 
                     // Move array data if there is any
                     if (hasArrayData) {
-                        SerializedProperty arrayDataOriginal = arrayData.Copy();
                         arrayData.MoveArrayElement(reorderableListIndex, rl.index);
                     }
 

@@ -7,7 +7,10 @@ using UnityEngine;
 
 namespace XNodeEditor.Internal {
 	/// <summary> Handles caching of custom editor classes and their target types. Accessible with GetEditor(Type type) </summary>
-	public class NodeEditorBase<T, A, K> where A : Attribute, NodeEditorBase<T, A, K>.INodeEditorAttrib where T : NodeEditorBase<T, A, K> where K : ScriptableObject {
+	/// <typeparam name="T">Editor Type. Should be the type of the deriving script itself (eg. NodeEditor) </typeparam>
+	/// <typeparam name="A">Attribute Type. The attribute used to connect with the runtime type (eg. CustomNodeEditorAttribute) </typeparam>
+	/// <typeparam name="K">Runtime Type. The ScriptableObject this can be an editor for (eg. Node) </typeparam>
+	public abstract class NodeEditorBase<T, A, K> where A : Attribute, NodeEditorBase<T, A, K>.INodeEditorAttrib where T : NodeEditorBase<T, A, K> where K : ScriptableObject {
 		/// <summary> Custom editors defined with [CustomNodeEditor] </summary>
 		private static Dictionary<Type, Type> editorTypes;
 		private static Dictionary<K, T> editors = new Dictionary<K, T>();

@@ -11,8 +11,11 @@ namespace XNodeEditor {
     /// <summary> xNode-specific version of <see cref="EditorGUILayout"/> </summary>
     public static class NodeEditorGUILayout {
 
+        /// <summary> Listen for this event if you want to alter the default ReorderableList </summary>
+        public static Action<ReorderableList> onCreateReorderableList;
         private static readonly Dictionary<UnityEngine.Object, Dictionary<string, ReorderableList>> reorderableListCache = new Dictionary<UnityEngine.Object, Dictionary<string, ReorderableList>>();
         private static int reorderableListIndex = -1;
+
         /// <summary> Make a field for a serialized property. Automatically displays relevant node port. </summary>
         public static void PropertyField(SerializedProperty property, bool includeChildren = true, params GUILayoutOption[] options) {
             PropertyField(property, (GUIContent) null, includeChildren, options);
@@ -410,6 +413,7 @@ namespace XNodeEditor {
                 serializedObject.ApplyModifiedProperties();
                 serializedObject.Update();
             }
+            if (onCreateReorderableList != null) onCreateReorderableList(list);
             return list;
         }
     }

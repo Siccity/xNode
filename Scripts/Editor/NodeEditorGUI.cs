@@ -11,6 +11,8 @@ namespace XNodeEditor {
         private List<UnityEngine.Object> selectionCache;
         private List<XNode.Node> culledNodes;
         private int topPadding { get { return isDocked() ? 19 : 22; } }
+        /// <summary> Executed after all other window GUI. Useful if Zoom is ruining your day. Automatically resets after being run.</summary>
+        public event Action onLateGUI;
 
         private void OnGUI() {
             Event e = Event.current;
@@ -28,6 +30,12 @@ namespace XNodeEditor {
             DrawSelectionBox();
             DrawTooltip();
             graphEditor.OnGUI();
+
+            // Run and reset onLateGUI
+            if (onLateGUI != null) {
+                onLateGUI();
+                onLateGUI = null;
+            }
 
             GUI.matrix = m;
         }

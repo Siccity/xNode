@@ -102,11 +102,9 @@ namespace XNodeEditor {
         public static void OpenPreferences() {
             try {
 #if UNITY_2018_3_OR_NEWER
-                SettingsProvider[] providers = SettingsService.FetchSettingsProviders();
-
-                foreach (SettingsProvider settingsProvider in providers) {
+                foreach (SettingsProvider settingsProvider in SettingsService.FetchSettingsProviders()) {
                     if (settingsProvider.name == "Node Editor") {
-                        EditorPrefs.SetString("SettingsWindow_Settings_current_provider", settingsProvider.settingsPath);
+                        EditorPrefs.SetString("SettingsWindow_Preferences_current_provider", settingsProvider.settingsPath);
                         EditorApplication.ExecuteMenuItem("Edit/Preferences...");
                     }
                 }

@@ -13,19 +13,28 @@ namespace XNodeEditor {
         /// <summary> Fires every whenever a node was modified through the editor </summary>
         public static Action<XNode.Node> onUpdateNode;
         public static Dictionary<XNode.NodePort, Vector2> portPositions;
-        public static int renaming;
+        public int renaming;
 
         public virtual void OnHeaderGUI() {
             string title = target.name;
-            if (renaming != 0 && Selection.Contains(target)) {
-                int controlID = EditorGUIUtility.GetControlID(FocusType.Keyboard) + 1;
-                if (renaming == 1) {
-                    EditorGUIUtility.keyboardControl = controlID;
-                    EditorGUIUtility.editingTextField = true;
-                    renaming = 2;
+            if (renaming != 0) { 
+                if (Selection.Contains(target)) {
+                    int controlID = EditorGUIUtility.GetControlID(FocusType.Keyboard) + 1;
+                    if (renaming == 1) {
+                        EditorGUIUtility.keyboardControl = controlID;
+                        EditorGUIUtility.editingTextField = true;
+                        renaming = 2;
+                    }
+                    target.name = EditorGUILayout.TextField(target.name, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
+                    if (!EditorGUIUtility.editingTextField) {
+                        Debug.Log("Finish renaming");
+                        Rename(target.name);
+                        renaming = 0;
+                    }
                 }
-                target.name = EditorGUILayout.TextField(target.name, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
-                if (!EditorGUIUtility.editingTextField) {
+                else {
+                    // Selection changed, so stop renaming.
+                    GUILayout.Label(title, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
                     Rename(target.name);
                     renaming = 0;
                 }

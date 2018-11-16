@@ -63,6 +63,9 @@ namespace XNode {
         protected void OnEnable() {
             UpdateStaticPorts();
             Init();
+            if (graph != null && !graph.CopyInProgress) {
+                OnEnableOverride();
+            }
         }
 
         /// <summary> Update static ports to reflect class fields. This happens automatically on enable. </summary>
@@ -72,6 +75,18 @@ namespace XNode {
 
         /// <summary> Initialize node. Called on creation. </summary>
         protected virtual void Init() { }
+
+
+        /// <summary>
+        /// Initialize node. Called on creation and after clone in the correct order.  
+        /// </summary>
+        // Implementation note: This method is called after a node has been instantiated, and also
+        // called directly when cloning a full graph. This simply calls Init(), which cannot be
+        // called from outside, as it is protected, not public, and making it public would break
+        // existing code.
+        public virtual void OnEnableOverride() {
+            Init();
+        }
 
         /// <summary> Checks all connections for invalid references, and removes them. </summary>
         public void VerifyConnections() {

@@ -11,6 +11,11 @@ namespace XNode {
         /// See: <see cref="AddNode{T}"/> </summary>
         [SerializeField] public List<Node> nodes = new List<Node>();
 
+        // Non serialized flag to indicate a copy operation is currently underway.
+        // This stops nodes from calling OnEnableOverride before we updated the
+        // graph reference.
+        public bool CopyInProgress { get; protected set; }
+
         /// <summary> Add a node to the graph by type </summary>
         public T AddNode<T>() where T : Node {
             return AddNode(typeof(T)) as T;
@@ -21,16 +26,24 @@ namespace XNode {
             Node node = ScriptableObject.CreateInstance(type) as Node;
             nodes.Add(node);
             node.graph = this;
+            node.OnEnableOverride();
             return node;
         }
 
         /// <summary> Creates a copy of the original node in the graph </summary>
         public virtual Node CopyNode(Node original) {
-            Node node = ScriptableObject.Instantiate(original);
-            node.ClearConnections();
-            nodes.Add(node);
-            node.graph = this;
-            return node;
+            this.CopyInProgress = true;
+            try {
+                Node node = ScriptableObject.Instantiate(original);
+                node.ClearConnections();
+                nodes.Add(node);
+                node.graph = this;
+                node.OnEnableOverride();
+                return node;
+            }
+            finally {
+                this.CopyInProgress = false;
+            }
         }
 
         /// <summary> Safely remove a node and all its connections </summary>
@@ -55,20 +68,34 @@ namespace XNode {
         public XNode.NodeGraph Copy() {
             // Instantiate a new nodegraph instance
             NodeGraph graph = Instantiate(this);
-            // Instantiate all nodes inside the graph
-            for (int i = 0; i < nodes.Count; i++) {
-                if (nodes[i] == null) continue;
-                Node node = Instantiate(nodes[i]) as Node;
-                node.graph = graph;
-                graph.nodes[i] = node;
-            }
-
-            // Redirect all connections
-            for (int i = 0; i < graph.nodes.Count; i++) {
-                if (graph.nodes[i] == null) continue;
-                foreach (NodePort port in graph.nodes[i].Ports) {
-                    port.Redirect(nodes, graph.nodes);
+            graph.CopyInProgress = true;
+            try {
+                // Instantiate all nodes inside the graph
+                for (int i = 0; i < nodes.Count; i++) {
+                    if (nodes[i] == null) continue;
+                    Node node = Instantiate(nodes[i]) as Node;
+                    node.graph = graph;
+                    graph.nodes[i] = node;
                 }
+
+                // Redirect all connections
+                for (int i = 0; i < graph.nodes.Count; i++) {
+                    if (graph.nodes[i] == null) continue;
+                    foreach (NodePort port in graph.nodes[i].Ports) {
+                        port.Redirect(nodes, graph.nodes);
+                    }
+                }
+                
+                // Call the Enable notifier, which was not fired during the
+                // normal instantiation.
+                for (int i = 0; i < graph.nodes.Count; i++) {
+                    var node = graph.nodes[i];
+                    if (node == null) continue;
+                    node.OnEnableOverride();
+                }
+            }
+            finally {
+                graph.CopyInProgress = false;
             }
 
             return graph;

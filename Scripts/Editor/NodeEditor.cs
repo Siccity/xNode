@@ -40,18 +40,7 @@ namespace XNodeEditor {
                 }
             } else {
                 GUILayout.Label(title, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
-                if (HasFocus() && IsRenameKeyPressed()) {
-                    InitiateRename();
-                }
             }
-        }
-
-        bool HasFocus() {
-            return Selection.activeObject == this.target;
-        }
-
-        bool IsRenameKeyPressed() {
-            return (Event.current != null && Event.current.isKey && Event.current.keyCode == KeyCode.F2);
         }
 
         /// <summary> Draws standard field editors for all public fields </summary>

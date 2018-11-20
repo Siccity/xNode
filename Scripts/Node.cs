@@ -62,8 +62,8 @@ namespace XNode {
 
         protected void OnEnable() {
             UpdateStaticPorts();
-            Init();
-            if (graph != null && !graph.CopyInProgress) {
+
+            if (graph != null && !graph.copyInProgress) {
                 OnEnableOverride();
             }
         }
@@ -80,11 +80,12 @@ namespace XNode {
         /// <summary>
         /// Initialize node. Called on creation and after clone in the correct order.  
         /// </summary>
-        // Implementation note: This method is called after a node has been instantiated, and also
-        // called directly when cloning a full graph. This simply calls Init(), which cannot be
-        // called from outside, as it is protected, not public, and making it public would break
-        // existing code.
         public virtual void OnEnableOverride() {
+            // Implementation note: This method is called after a node has been instantiated, and also
+            // called directly when cloning a full graph. This simply calls Init(), which cannot be
+            // called from outside, as it is protected, not public, and making it public would break
+            // existing code.
+
             Init();
         }
 

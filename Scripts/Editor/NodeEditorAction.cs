@@ -282,14 +282,10 @@ namespace XNodeEditor {
                     if (e.commandName == "SoftDelete") {
                         if (e.type == EventType.ExecuteCommand) RemoveSelectedNodes();
                         e.Use();
-                    }
-                    else if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX && e.commandName == "Delete")
-                    {
+                    } else if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX && e.commandName == "Delete") {
                         if (e.type == EventType.ExecuteCommand) RemoveSelectedNodes();
                         e.Use();
-                    }
-                    else if (e.commandName == "Duplicate")
-                    {
+                    } else if (e.commandName == "Duplicate") {
                         if (e.type == EventType.ExecuteCommand) DuplicateSelectedNodes();
                         e.Use();
                     }

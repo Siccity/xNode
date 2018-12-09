@@ -397,7 +397,7 @@ namespace XNodeEditor {
             Selection.objects = newNodes;
         }
 
-        /// <summary> Draw this node on top of other nodes by placing it last in the graph.nodes list </summary>
+        /// <summary> Aligns selected nodes to either left/right/top/bottom edge of nodes </summary>
         public void AlignNodesTo(bool left, bool right, bool top, bool bottom) {
             float positionLeft = float.MaxValue;
             float positionRight = float.MinValue;

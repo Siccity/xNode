@@ -126,6 +126,13 @@ namespace XNodeEditor {
                 contextMenu.AddItem(new GUIContent("Rename"), false, RenameSelectedNode);
             }
 
+            if(Selection.objects.Length > 1) {
+                contextMenu.AddItem(new GUIContent("Align To/Left"), false, () => AlignNodesTo(true, false, false, false));
+                contextMenu.AddItem(new GUIContent("Align To/Right"), false, () => AlignNodesTo(false, true, false, false));
+                contextMenu.AddItem(new GUIContent("Align To/Top"), false, () => AlignNodesTo(false, false, true, false));
+                contextMenu.AddItem(new GUIContent("Align To/Bottom"), false, () => AlignNodesTo(false, false, false, true));
+            }
+
             contextMenu.AddItem(new GUIContent("Duplicate"), false, DublicateSelectedNodes);
             contextMenu.AddItem(new GUIContent("Remove"), false, RemoveSelectedNodes);
 

@@ -397,6 +397,48 @@ namespace XNodeEditor {
             Selection.objects = newNodes;
         }
 
+        /// <summary> Draw this node on top of other nodes by placing it last in the graph.nodes list </summary>
+        public void AlignNodesTo(bool left, bool right, bool top, bool bottom) {
+            float positionLeft = float.MaxValue;
+            float positionRight = float.MinValue;
+            float positionTop = float.MaxValue;
+            float positionBottom = float.MinValue;
+
+            for (int i = 0; i < Selection.objects.Length; i++) {
+                if (Selection.objects[i] is XNode.Node) {
+                    XNode.Node node = Selection.objects[i] as XNode.Node;
+                    float width = 200;
+                    float height = 200;
+                    Vector2 size;
+                    if (nodeSizes.TryGetValue(node, out size)) {
+                        width = size.x;
+                        height = size.y;
+                    }
+                    if (node.position.x < positionLeft) positionLeft = node.position.x;
+                    if (node.position.y < positionTop) positionTop = node.position.y;
+                    if (node.position.x + width > positionRight) positionRight = node.position.x + width;
+                    if (node.position.y + height > positionBottom) positionBottom = node.position.y + height;
+                }
+            }
+
+            for (int i = 0; i < Selection.objects.Length; i++) {
+                if (Selection.objects[i] is XNode.Node) {
+                    XNode.Node node = Selection.objects[i] as XNode.Node;
+                    float width = 200;
+                    float height = 200;
+                    Vector2 size;
+                    if (nodeSizes.TryGetValue(node, out size)) {
+                        width = size.x;
+                        height = size.y;
+                    }
+                    if (left) node.position.x = positionLeft;
+                    if (top) node.position.y = positionTop;
+                    if (right) node.position.x = positionRight - width;
+                    if (bottom) node.position.y = positionBottom - height;
+                }
+            }
+        }
+
         /// <summary> Draw a connection as we are dragging it </summary>
         public void DrawDraggedConnection() {
             if (IsDraggingPort) {

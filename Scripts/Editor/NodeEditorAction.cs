@@ -365,7 +365,7 @@ namespace XNodeEditor {
             }
         }
 
-        /// <summary> Aligns selected nodes to either left/right/top/bottom edge of nodes </summary>
+        /// <summary> Duplicate selected nodes and select the duplicates </summary>
         public void DuplicateSelectedNodes() {
             UnityEngine.Object[] newNodes = new UnityEngine.Object[Selection.objects.Length];
             Dictionary<XNode.Node, XNode.Node> substitutes = new Dictionary<XNode.Node, XNode.Node>();

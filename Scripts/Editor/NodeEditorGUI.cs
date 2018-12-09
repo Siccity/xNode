@@ -126,7 +126,7 @@ namespace XNodeEditor {
                 contextMenu.AddItem(new GUIContent("Rename"), false, RenameSelectedNode);
             }
 
-            contextMenu.AddItem(new GUIContent("Duplicate"), false, DublicateSelectedNodes);
+            contextMenu.AddItem(new GUIContent("Duplicate"), false, DuplicateSelectedNodes);
             contextMenu.AddItem(new GUIContent("Remove"), false, RemoveSelectedNodes);
 
             // If only one node is selected

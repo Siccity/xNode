@@ -278,9 +278,21 @@ namespace XNodeEditor {
                     }
                     break;
                 case EventType.ValidateCommand:
-                    if (e.commandName == "SoftDelete") RemoveSelectedNodes();
-                    else if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX && e.commandName == "Delete") RemoveSelectedNodes();
-                    else if (e.commandName == "Duplicate") DublicateSelectedNodes();
+                case EventType.ExecuteCommand:
+                    if (e.commandName == "SoftDelete") {
+                        if (e.type == EventType.ExecuteCommand) RemoveSelectedNodes();
+                        e.Use();
+                    }
+                    else if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX && e.commandName == "Delete")
+                    {
+                        if (e.type == EventType.ExecuteCommand) RemoveSelectedNodes();
+                        e.Use();
+                    }
+                    else if (e.commandName == "Duplicate")
+                    {
+                        if (e.type == EventType.ExecuteCommand) DuplicateSelectedNodes();
+                        e.Use();
+                    }
                     Repaint();
                     break;
                 case EventType.Ignore:
@@ -357,8 +369,8 @@ namespace XNodeEditor {
             }
         }
 
-        /// <summary> Dublicate selected nodes and select the dublicates </summary>
-        public void DublicateSelectedNodes() {
+        /// <summary> Aligns selected nodes to either left/right/top/bottom edge of nodes </summary>
+        public void DuplicateSelectedNodes() {
             UnityEngine.Object[] newNodes = new UnityEngine.Object[Selection.objects.Length];
             Dictionary<XNode.Node, XNode.Node> substitutes = new Dictionary<XNode.Node, XNode.Node>();
             for (int i = 0; i < Selection.objects.Length; i++) {

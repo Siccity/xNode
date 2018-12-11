@@ -64,7 +64,7 @@ namespace XNode {
         public static NodeGraph graphHotfix;
 
         protected void OnEnable() {
-            graph = graphHotfix;
+            if (graphHotFix != null) graph = graphHotfix;
             graphHotfix = null;
             UpdateStaticPorts();
             Init();

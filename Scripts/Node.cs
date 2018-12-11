@@ -63,8 +63,9 @@ namespace XNode {
         /// <summary> Used during node instantiation to fix null/misconfigured graph during OnEnable/Init. Set it before instantiating a node. Will automatically be unset during OnEnable </summary>
         public static NodeGraph graphHotfix;
 
+
         protected void OnEnable() {
-            if (graphHotFix != null) graph = graphHotfix;
+            if (graphHotfix != null) graph = graphHotfix;
             graphHotfix = null;
             UpdateStaticPorts();
             Init();

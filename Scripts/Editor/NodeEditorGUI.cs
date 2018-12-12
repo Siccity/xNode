@@ -116,28 +116,6 @@ namespace XNodeEditor {
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 
-        /// <summary> Show right-click context menu for selected nodes </summary>
-        public void ShowNodeContextMenu() {
-            GenericMenu contextMenu = new GenericMenu();
-            // If only one node is selected
-            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
-                XNode.Node node = Selection.activeObject as XNode.Node;
-                contextMenu.AddItem(new GUIContent("Move To Top"), false, () => MoveNodeToTop(node));
-                contextMenu.AddItem(new GUIContent("Rename"), false, RenameSelectedNode);
-            }
-
-            contextMenu.AddItem(new GUIContent("Duplicate"), false, DuplicateSelectedNodes);
-            contextMenu.AddItem(new GUIContent("Remove"), false, RemoveSelectedNodes);
-
-            // If only one node is selected
-            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
-                XNode.Node node = Selection.activeObject as XNode.Node;
-                AddCustomContextMenuItems(contextMenu, node);
-            }
-
-            contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
-        }
-
         /// <summary> Show right-click context menu for current graph </summary>
         void ShowGraphContextMenu() {
             GenericMenu contextMenu = new GenericMenu();
@@ -157,17 +135,6 @@ namespace XNodeEditor {
             contextMenu.AddItem(new GUIContent("Preferences"), false, () => OpenPreferences());
             AddCustomContextMenuItems(contextMenu, graph);
             contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
-        }
-
-        void AddCustomContextMenuItems(GenericMenu contextMenu, object obj) {
-            KeyValuePair<ContextMenu, System.Reflection.MethodInfo>[] items = GetContextMenuMethods(obj);
-            if (items.Length != 0) {
-                contextMenu.AddSeparator("");
-                for (int i = 0; i < items.Length; i++) {
-                    KeyValuePair<ContextMenu, System.Reflection.MethodInfo> kvp = items[i];
-                    contextMenu.AddItem(new GUIContent(kvp.Key.menuItem), false, () => kvp.Value.Invoke(obj, null));
-                }
-            }
         }
 
         /// <summary> Draw a bezier from startpoint to endpoint, both in grid coordinates </summary>

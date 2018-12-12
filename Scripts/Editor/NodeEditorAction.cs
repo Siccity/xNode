@@ -260,7 +260,7 @@ namespace XNodeEditor {
                                 ShowPortContextMenu(hoveredPort);
                             } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
                                 if (!Selection.Contains(hoveredNode)) SelectNode(hoveredNode, false);
-                                ShowNodeContextMenu();
+                                NodeEditor.GetEditor(hoveredNode).GetContextMenu().DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
                             } else if (!IsHoveringNode) {
                                 ShowGraphContextMenu();
                             }

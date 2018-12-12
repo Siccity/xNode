@@ -71,6 +71,17 @@ namespace XNodeEditor {
             return types.ToArray();
         }
 
+        public static void AddCustomContextMenuItems(GenericMenu contextMenu, object obj) {
+            KeyValuePair<ContextMenu, System.Reflection.MethodInfo>[] items = GetContextMenuMethods(obj);
+            if (items.Length != 0) {
+                contextMenu.AddSeparator("");
+                for (int i = 0; i < items.Length; i++) {
+                    KeyValuePair<ContextMenu, System.Reflection.MethodInfo> kvp = items[i];
+                    contextMenu.AddItem(new GUIContent(kvp.Key.menuItem), false, () => kvp.Value.Invoke(obj, null));
+                }
+            }
+        }
+
         public static KeyValuePair<ContextMenu, MethodInfo>[] GetContextMenuMethods(object obj) {
             Type type = obj.GetType();
             MethodInfo[] methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);

@@ -81,25 +81,24 @@ namespace XNodeEditor {
             return NodeEditorResources.styles.nodeBody;
         }
 
-        /// <summary> Show right-click context menu for selected nodes </summary>
-        public virtual GenericMenu GetContextMenu() {
-            GenericMenu contextMenu = new GenericMenu();
-            // If only one node is selected
+        /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>
+        public virtual void AddContextMenuItems(GenericMenu menu) {
+            // Actions if only one node is selected
             if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
                 XNode.Node node = Selection.activeObject as XNode.Node;
-                contextMenu.AddItem(new GUIContent("Move To Top"), false, () => NodeEditorWindow.current.MoveNodeToTop(node));
-                contextMenu.AddItem(new GUIContent("Rename"), false, NodeEditorWindow.current.RenameSelectedNode);
+                menu.AddItem(new GUIContent("Move To Top"), false, () => NodeEditorWindow.current.MoveNodeToTop(node));
+                menu.AddItem(new GUIContent("Rename"), false, NodeEditorWindow.current.RenameSelectedNode);
             }
 
-            contextMenu.AddItem(new GUIContent("Duplicate"), false, NodeEditorWindow.current.DuplicateSelectedNodes);
-            contextMenu.AddItem(new GUIContent("Remove"), false, NodeEditorWindow.current.RemoveSelectedNodes);
+            // Add actions to any number of selected nodes
+            menu.AddItem(new GUIContent("Duplicate"), false, NodeEditorWindow.current.DuplicateSelectedNodes);
+            menu.AddItem(new GUIContent("Remove"), false, NodeEditorWindow.current.RemoveSelectedNodes);
 
-            // If only one node is selected
+            // Custom sctions if only one node is selected
             if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
                 XNode.Node node = Selection.activeObject as XNode.Node;
-                NodeEditorWindow.AddCustomContextMenuItems(contextMenu, node);
+                NodeEditorWindow.AddCustomContextMenuItems(menu, node);
             }
-            return contextMenu;
         }
 
         public void InitiateRename() {

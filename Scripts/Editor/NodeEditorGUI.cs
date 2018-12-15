@@ -116,27 +116,6 @@ namespace XNodeEditor {
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 
-        /// <summary> Show right-click context menu for current graph </summary>
-        void ShowGraphContextMenu() {
-            GenericMenu contextMenu = new GenericMenu();
-            Vector2 pos = WindowToGridPosition(Event.current.mousePosition);
-            for (int i = 0; i < nodeTypes.Length; i++) {
-                Type type = nodeTypes[i];
-
-                //Get node context menu path
-                string path = graphEditor.GetNodeMenuName(type);
-                if (string.IsNullOrEmpty(path)) continue;
-
-                contextMenu.AddItem(new GUIContent(path), false, () => {
-                    CreateNode(type, pos);
-                });
-            }
-            contextMenu.AddSeparator("");
-            contextMenu.AddItem(new GUIContent("Preferences"), false, () => OpenPreferences());
-            AddCustomContextMenuItems(contextMenu, graph);
-            contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
-        }
-
         /// <summary> Draw a bezier from startpoint to endpoint, both in grid coordinates </summary>
         public void DrawConnection(Vector2 startPoint, Vector2 endPoint, Color col) {
             startPoint = GridToWindowPosition(startPoint);

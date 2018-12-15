@@ -43,6 +43,10 @@ namespace XNodeEditor {
             else {
                 Rect rect = new Rect();
 
+                float spacePadding = 0;
+                SpaceAttribute spaceAttribute;
+                if(NodeEditorUtilities.GetAttrib(port.node.GetType(), property.name, out spaceAttribute)) spacePadding = spaceAttribute.height;
+
                 // If property is an input, display a regular property field and put a port handle on the left side
                 if (port.direction == XNode.NodePort.IO.Input) {
                     // Get data from [Input] attribute
@@ -55,6 +59,7 @@ namespace XNodeEditor {
                     }
 
                     if (instancePortList) {
+                        if (spacePadding > 0) EditorGUILayout.Space();
                         Type type = GetType(property);
                         XNode.Node.ConnectionType connectionType = inputAttribute != null ? inputAttribute.connectionType : XNode.Node.ConnectionType.Multiple;
                         InstancePortList(property.name, type, property.serializedObject, port.direction, connectionType);
@@ -63,11 +68,14 @@ namespace XNodeEditor {
                     switch (showBacking) {
                         case XNode.Node.ShowBackingValue.Unconnected:
                             // Display a label if port is connected
-                            if (port.IsConnected) EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName));
+                            if (port.IsConnected) {
+                                if (spacePadding > 0) { EditorGUILayout.Space(); spacePadding = 0; }
+                                EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName));
                             // Display an editable property field if port is not connected
-                            else EditorGUILayout.PropertyField(property, label, includeChildren, GUILayout.MinWidth(30));
+                            } else EditorGUILayout.PropertyField(property, label, includeChildren, GUILayout.MinWidth(30));
                             break;
                         case XNode.Node.ShowBackingValue.Never:
+                            if (spacePadding > 0) { EditorGUILayout.Space(); spacePadding = 0; }
                             // Display a label
                             EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName));
                             break;
@@ -78,7 +86,7 @@ namespace XNodeEditor {
                     }
 
                     rect = GUILayoutUtility.GetLastRect();
-                    rect.position = rect.position - new Vector2(16, 0);
+                    rect.position = rect.position - new Vector2(16, -spacePadding);
                     // If property is an output, display a text label and put a port handle on the right side
                 } else if (port.direction == XNode.NodePort.IO.Output) {
                     // Get data from [Output] attribute
@@ -91,6 +99,7 @@ namespace XNodeEditor {
                     }
 
                     if (instancePortList) {
+                        if (spacePadding > 0) EditorGUILayout.Space();
                         Type type = GetType(property);
                         XNode.Node.ConnectionType connectionType = outputAttribute != null ? outputAttribute.connectionType : XNode.Node.ConnectionType.Multiple;
                         InstancePortList(property.name, type, property.serializedObject, port.direction, connectionType);
@@ -99,11 +108,14 @@ namespace XNodeEditor {
                     switch (showBacking) {
                         case XNode.Node.ShowBackingValue.Unconnected:
                             // Display a label if port is connected
-                            if (port.IsConnected) EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName), NodeEditorResources.OutputPort, GUILayout.MinWidth(30));
+                            if (port.IsConnected) {
+                                if (spacePadding > 0) { EditorGUILayout.Space(); spacePadding = 0; }
+                                EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName), NodeEditorResources.OutputPort, GUILayout.MinWidth(30));
                             // Display an editable property field if port is not connected
-                            else EditorGUILayout.PropertyField(property, label, includeChildren, GUILayout.MinWidth(30));
+                            } else EditorGUILayout.PropertyField(property, label, includeChildren, GUILayout.MinWidth(30));
                             break;
                         case XNode.Node.ShowBackingValue.Never:
+                            if (spacePadding > 0) { EditorGUILayout.Space(); spacePadding = 0; }
                             // Display a label
                             EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName), NodeEditorResources.OutputPort, GUILayout.MinWidth(30));
                             break;
@@ -114,7 +126,7 @@ namespace XNodeEditor {
                     }
 
                     rect = GUILayoutUtility.GetLastRect();
-                    rect.position = rect.position + new Vector2(rect.width, 0);
+                    rect.position = rect.position + new Vector2(rect.width, spacePadding);
                 }
 
                 rect.size = new Vector2(16, 16);

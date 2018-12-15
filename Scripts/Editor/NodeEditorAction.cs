@@ -260,9 +260,13 @@ namespace XNodeEditor {
                                 ShowPortContextMenu(hoveredPort);
                             } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
                                 if (!Selection.Contains(hoveredNode)) SelectNode(hoveredNode, false);
-                                ShowNodeContextMenu();
+                                GenericMenu menu = new GenericMenu();
+                                NodeEditor.GetEditor(hoveredNode).AddContextMenuItems(menu);
+                                menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
                             } else if (!IsHoveringNode) {
-                                ShowGraphContextMenu();
+                                GenericMenu menu = new GenericMenu();
+                                graphEditor.AddContextMenuItems(menu);
+                                menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
                             }
                         }
                         isPanning = false;
@@ -321,15 +325,6 @@ namespace XNodeEditor {
         public void Home() {
             zoom = 2;
             panOffset = Vector2.zero;
-        }
-
-        public void CreateNode(Type type, Vector2 position) {
-            XNode.Node node = graph.AddNode(type);
-            node.position = position;
-            node.name = UnityEditor.ObjectNames.NicifyVariableName(type.Name);
-            AssetDatabase.AddObjectToAsset(node, graph);
-            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
-            Repaint();
         }
 
         /// <summary> Remove nodes in the graph in Selection.objects</summary>

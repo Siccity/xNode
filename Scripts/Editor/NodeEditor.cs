@@ -81,6 +81,26 @@ namespace XNodeEditor {
             return NodeEditorResources.styles.nodeBody;
         }
 
+        /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>
+        public virtual void AddContextMenuItems(GenericMenu menu) {
+            // Actions if only one node is selected
+            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
+                XNode.Node node = Selection.activeObject as XNode.Node;
+                menu.AddItem(new GUIContent("Move To Top"), false, () => NodeEditorWindow.current.MoveNodeToTop(node));
+                menu.AddItem(new GUIContent("Rename"), false, NodeEditorWindow.current.RenameSelectedNode);
+            }
+
+            // Add actions to any number of selected nodes
+            menu.AddItem(new GUIContent("Duplicate"), false, NodeEditorWindow.current.DuplicateSelectedNodes);
+            menu.AddItem(new GUIContent("Remove"), false, NodeEditorWindow.current.RemoveSelectedNodes);
+
+            // Custom sctions if only one node is selected
+            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
+                XNode.Node node = Selection.activeObject as XNode.Node;
+                NodeEditorWindow.AddCustomContextMenuItems(menu, node);
+            }
+        }
+
         public void InitiateRename() {
             renaming = 1;
         }

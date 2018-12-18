@@ -58,8 +58,16 @@ namespace XNodeEditor {
                         showBacking = inputAttribute.backingValue;
                     }
 
+                    //Call GUILayout.Space if Space attribute is set and we are NOT drawing a PropertyField
+                    bool useLayoutSpace = instancePortList 
+                                            || showBacking == XNode.Node.ShowBackingValue.Never 
+                                            || (showBacking == XNode.Node.ShowBackingValue.Unconnected && port.IsConnected);
+                    if (spacePadding > 0 && useLayoutSpace) {
+                        GUILayout.Space(spacePadding);
+                        spacePadding = 0;
+                    }
+
                     if (instancePortList) {
-                        if (spacePadding > 0) GUILayout.Space(spacePadding);
                         Type type = GetType(property);
                         XNode.Node.ConnectionType connectionType = inputAttribute != null ? inputAttribute.connectionType : XNode.Node.ConnectionType.Multiple;
                         InstancePortList(property.name, type, property.serializedObject, port.direction, connectionType);
@@ -68,14 +76,11 @@ namespace XNodeEditor {
                     switch (showBacking) {
                         case XNode.Node.ShowBackingValue.Unconnected:
                             // Display a label if port is connected
-                            if (port.IsConnected) {
-                                if (spacePadding > 0) { GUILayout.Space(spacePadding); spacePadding = 0; }
-                                EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName));
+                            if (port.IsConnected) EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName));
                             // Display an editable property field if port is not connected
-                            } else EditorGUILayout.PropertyField(property, label, includeChildren, GUILayout.MinWidth(30));
+                            else EditorGUILayout.PropertyField(property, label, includeChildren, GUILayout.MinWidth(30));
                             break;
                         case XNode.Node.ShowBackingValue.Never:
-                            if (spacePadding > 0) { GUILayout.Space(spacePadding); spacePadding = 0; }
                             // Display a label
                             EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName));
                             break;
@@ -98,8 +103,17 @@ namespace XNodeEditor {
                         showBacking = outputAttribute.backingValue;
                     }
 
+                    //Call GUILayout.Space if Space attribute is set and we are NOT drawing a PropertyField
+                    bool useLayoutSpace = instancePortList
+                                            || showBacking == XNode.Node.ShowBackingValue.Never
+                                            || (showBacking == XNode.Node.ShowBackingValue.Unconnected && port.IsConnected);
+                    if (spacePadding > 0 && useLayoutSpace)
+                    {
+                        GUILayout.Space(spacePadding);
+                        spacePadding = 0;
+                    }
+
                     if (instancePortList) {
-                        if (spacePadding > 0) GUILayout.Space(spacePadding);
                         Type type = GetType(property);
                         XNode.Node.ConnectionType connectionType = outputAttribute != null ? outputAttribute.connectionType : XNode.Node.ConnectionType.Multiple;
                         InstancePortList(property.name, type, property.serializedObject, port.direction, connectionType);
@@ -108,14 +122,11 @@ namespace XNodeEditor {
                     switch (showBacking) {
                         case XNode.Node.ShowBackingValue.Unconnected:
                             // Display a label if port is connected
-                            if (port.IsConnected) {
-                                if (spacePadding > 0) { GUILayout.Space(spacePadding); spacePadding = 0; }
-                                EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName), NodeEditorResources.OutputPort, GUILayout.MinWidth(30));
+                            if (port.IsConnected) EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName), NodeEditorResources.OutputPort, GUILayout.MinWidth(30));
                             // Display an editable property field if port is not connected
-                            } else EditorGUILayout.PropertyField(property, label, includeChildren, GUILayout.MinWidth(30));
+                            else EditorGUILayout.PropertyField(property, label, includeChildren, GUILayout.MinWidth(30));
                             break;
                         case XNode.Node.ShowBackingValue.Never:
-                            if (spacePadding > 0) { GUILayout.Space(spacePadding); spacePadding = 0; }
                             // Display a label
                             EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName), NodeEditorResources.OutputPort, GUILayout.MinWidth(30));
                             break;

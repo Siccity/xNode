@@ -43,6 +43,10 @@ namespace XNodeEditor {
             else {
                 Rect rect = new Rect();
 
+                float spacePadding = 0;
+                SpaceAttribute spaceAttribute;
+                if(NodeEditorUtilities.GetAttrib(port.node.GetType(), property.name, out spaceAttribute)) spacePadding = spaceAttribute.height;
+
                 // If property is an input, display a regular property field and put a port handle on the left side
                 if (port.direction == XNode.NodePort.IO.Input) {
                     // Get data from [Input] attribute
@@ -52,6 +56,15 @@ namespace XNodeEditor {
                     if (NodeEditorUtilities.GetAttrib(port.node.GetType(), property.name, out inputAttribute)) {
                         instancePortList = inputAttribute.instancePortList;
                         showBacking = inputAttribute.backingValue;
+                    }
+
+                    //Call GUILayout.Space if Space attribute is set and we are NOT drawing a PropertyField
+                    bool useLayoutSpace = instancePortList 
+                                            || showBacking == XNode.Node.ShowBackingValue.Never 
+                                            || (showBacking == XNode.Node.ShowBackingValue.Unconnected && port.IsConnected);
+                    if (spacePadding > 0 && useLayoutSpace) {
+                        GUILayout.Space(spacePadding);
+                        spacePadding = 0;
                     }
 
                     if (instancePortList) {
@@ -78,7 +91,7 @@ namespace XNodeEditor {
                     }
 
                     rect = GUILayoutUtility.GetLastRect();
-                    rect.position = rect.position - new Vector2(16, 0);
+                    rect.position = rect.position - new Vector2(16, -spacePadding);
                     // If property is an output, display a text label and put a port handle on the right side
                 } else if (port.direction == XNode.NodePort.IO.Output) {
                     // Get data from [Output] attribute
@@ -88,6 +101,16 @@ namespace XNodeEditor {
                     if (NodeEditorUtilities.GetAttrib(port.node.GetType(), property.name, out outputAttribute)) {
                         instancePortList = outputAttribute.instancePortList;
                         showBacking = outputAttribute.backingValue;
+                    }
+
+                    //Call GUILayout.Space if Space attribute is set and we are NOT drawing a PropertyField
+                    bool useLayoutSpace = instancePortList
+                                            || showBacking == XNode.Node.ShowBackingValue.Never
+                                            || (showBacking == XNode.Node.ShowBackingValue.Unconnected && port.IsConnected);
+                    if (spacePadding > 0 && useLayoutSpace)
+                    {
+                        GUILayout.Space(spacePadding);
+                        spacePadding = 0;
                     }
 
                     if (instancePortList) {
@@ -114,7 +137,7 @@ namespace XNodeEditor {
                     }
 
                     rect = GUILayoutUtility.GetLastRect();
-                    rect.position = rect.position + new Vector2(rect.width, 0);
+                    rect.position = rect.position + new Vector2(rect.width, spacePadding);
                 }
 
                 rect.size = new Vector2(16, 16);

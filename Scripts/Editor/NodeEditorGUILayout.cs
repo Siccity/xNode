@@ -45,7 +45,7 @@ namespace XNodeEditor {
 
                 float spacePadding = 0;
                 SpaceAttribute spaceAttribute;
-                if(NodeEditorUtilities.GetAttrib(port.node.GetType(), property.name, out spaceAttribute)) spacePadding = spaceAttribute.height;
+				if (NodeEditorUtilities.GetCachedAttrib(port.node.GetType(), property.name, out spaceAttribute)) spacePadding = spaceAttribute.height;
 
                 // If property is an input, display a regular property field and put a port handle on the left side
                 if (port.direction == XNode.NodePort.IO.Input) {
@@ -53,7 +53,7 @@ namespace XNodeEditor {
                     XNode.Node.ShowBackingValue showBacking = XNode.Node.ShowBackingValue.Unconnected;
                     XNode.Node.InputAttribute inputAttribute;
                     bool instancePortList = false;
-                    if (NodeEditorUtilities.GetAttrib(port.node.GetType(), property.name, out inputAttribute)) {
+                    if (NodeEditorUtilities.GetCachedAttrib(port.node.GetType(), property.name, out inputAttribute)) {
                         instancePortList = inputAttribute.instancePortList;
                         showBacking = inputAttribute.backingValue;
                     }
@@ -98,7 +98,7 @@ namespace XNodeEditor {
                     XNode.Node.ShowBackingValue showBacking = XNode.Node.ShowBackingValue.Unconnected;
                     XNode.Node.OutputAttribute outputAttribute;
                     bool instancePortList = false;
-                    if (NodeEditorUtilities.GetAttrib(port.node.GetType(), property.name, out outputAttribute)) {
+                    if (NodeEditorUtilities.GetCachedAttrib(port.node.GetType(), property.name, out outputAttribute)) {
                         instancePortList = outputAttribute.instancePortList;
                         showBacking = outputAttribute.backingValue;
                     }

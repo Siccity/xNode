@@ -15,6 +15,9 @@ namespace XNodeEditor {
         /// <summary>C#'s Script Icon [The one MonoBhevaiour Scripts have].</summary>
         private static Texture2D scriptIcon = (EditorGUIUtility.IconContent("cs Script Icon").image as Texture2D);
 
+        /// Saves Attribute from Type+Field for faster lookup. Resets on recompiles.
+        private static Dictionary<Type, Dictionary<string, Dictionary<Type, Attribute>>> typeAttributes = new Dictionary<Type, Dictionary<string, Dictionary<Type, Attribute>>>();
+
         public static bool GetAttrib<T>(Type classType, out T attribOut) where T : Attribute {
             object[] attribs = classType.GetCustomAttributes(typeof(T), false);
             return GetAttrib(attribs, out attribOut);
@@ -43,6 +46,34 @@ namespace XNodeEditor {
                 }
             }
             return false;
+        }
+
+        public static bool GetCachedAttrib<T>(Type classType, string fieldName, out T attribOut) where T : Attribute {
+            Dictionary<string, Dictionary<Type, Attribute>> typeFields;
+            if (!typeAttributes.TryGetValue(classType, out typeFields)) {
+                typeFields = new Dictionary<string, Dictionary<Type, Attribute>>();
+                typeAttributes.Add(classType, typeFields);
+            }
+
+            Dictionary<Type, Attribute> typeTypes;
+            if(!typeFields.TryGetValue(fieldName, out typeTypes)) {
+                typeTypes = new Dictionary<Type, Attribute>();
+                typeFields.Add(fieldName, typeTypes);
+            }
+
+            Attribute attr;
+            if (!typeTypes.TryGetValue(typeof(T), out attr)) {
+                if (GetAttrib<T>(classType, fieldName, out attribOut)) typeTypes.Add(typeof(T), attribOut);
+                else typeTypes.Add(typeof(T), null);
+            }
+
+            if(attr == null) {
+                attribOut = null;
+                return false;
+            }
+
+            attribOut = attr as T;
+            return true;
         }
 
         /// <summary> Returns true if this can be casted to <see cref="Type"/></summary>

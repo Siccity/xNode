@@ -26,6 +26,7 @@ namespace XNodeEditor {
             public Color32 highlightColor = new Color32(255, 255, 255, 255);
             public bool gridSnap = true;
             public bool autoSave = true;
+            public bool zoomToMouse = true;
             [SerializeField] private string typeColorsData = "";
             [NonSerialized] public Dictionary<string, Color> typeColors = new Dictionary<string, Color>();
             public NoodleType noodleType = NoodleType.Curve;
@@ -98,6 +99,7 @@ namespace XNodeEditor {
             //Label
             EditorGUILayout.LabelField("Grid", EditorStyles.boldLabel);
             settings.gridSnap = EditorGUILayout.Toggle(new GUIContent("Snap", "Hold CTRL in editor to invert"), settings.gridSnap);
+            settings.zoomToMouse = EditorGUILayout.Toggle(new GUIContent("Zoom to Mouse", "Zooms towards mouse position"), settings.zoomToMouse);
 
             settings.gridLineColor = EditorGUILayout.ColorField("Color", settings.gridLineColor);
             settings.gridBgColor = EditorGUILayout.ColorField(" ", settings.gridBgColor);

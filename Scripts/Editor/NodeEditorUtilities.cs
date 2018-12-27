@@ -56,7 +56,7 @@ namespace XNodeEditor {
             }
 
             Dictionary<Type, Attribute> typeTypes;
-            if(!typeFields.TryGetValue(fieldName, out typeTypes)) {
+            if (!typeFields.TryGetValue(fieldName, out typeTypes)) {
                 typeTypes = new Dictionary<Type, Attribute>();
                 typeFields.Add(fieldName, typeTypes);
             }
@@ -67,7 +67,7 @@ namespace XNodeEditor {
                 else typeTypes.Add(typeof(T), null);
             }
 
-            if(attr == null) {
+            if (attr == null) {
                 attribOut = null;
                 return false;
             }

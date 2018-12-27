@@ -135,9 +135,9 @@ namespace XNodeEditor {
 
             //Display type colors. Save them if they are edited by the user
             foreach (var typeColor in typeColors) {
-				Type type = typeColor.Key;
-				string typeColorKey = NodeEditorUtilities.PrettyName(type);
-				Color col = typeColor.Value;
+                Type type = typeColor.Key;
+                string typeColorKey = NodeEditorUtilities.PrettyName(type);
+                Color col = typeColor.Value;
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.BeginHorizontal();
                 col = EditorGUILayout.ColorField(typeColorKey, col);
@@ -185,9 +185,9 @@ namespace XNodeEditor {
         public static Color GetTypeColor(System.Type type) {
             VerifyLoaded();
             if (type == null) return Color.gray;
-			Color col;
+            Color col;
             if (!typeColors.TryGetValue(type, out col)) {
-				string typeName = type.PrettyName();
+                string typeName = type.PrettyName();
                 if (settings[lastKey].typeColors.ContainsKey(typeName)) typeColors.Add(type, settings[lastKey].typeColors[typeName]);
                 else {
 #if UNITY_5_4_OR_NEWER
@@ -195,8 +195,8 @@ namespace XNodeEditor {
 #else
                     UnityEngine.Random.seed = typeName.GetHashCode();
 #endif
-					col = new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
-					typeColors.Add(type, col);
+                    col = new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
+                    typeColors.Add(type, col);
                 }
             }
             return col;

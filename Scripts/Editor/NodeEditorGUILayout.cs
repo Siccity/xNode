@@ -304,6 +304,10 @@ namespace XNodeEditor {
                 (Rect rect, int index, bool isActive, bool isFocused) => {
                     XNode.NodePort port = node.GetPort(arrayData.name + " " + index);
                     if (hasArrayData) {
+                        if (arrayData.arraySize <= index) {
+                            EditorGUI.LabelField(rect, "Invalid element " + index);
+                            return;
+                        }
                         SerializedProperty itemData = arrayData.GetArrayElementAtIndex(index);
                         EditorGUI.PropertyField(rect, itemData);
                     } else EditorGUI.LabelField(rect, port.fieldName);
@@ -313,6 +317,7 @@ namespace XNodeEditor {
             list.elementHeightCallback =
                 (int index) => {
                     if (hasArrayData) {
+                        if (arrayData.arraySize <= index) return EditorGUIUtility.singleLineHeight;
                         SerializedProperty itemData = arrayData.GetArrayElementAtIndex(index);
                         return EditorGUI.GetPropertyHeight(itemData);
                     } else return EditorGUIUtility.singleLineHeight;

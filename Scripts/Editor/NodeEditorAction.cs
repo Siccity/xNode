@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace XNodeEditor {
     public partial class NodeEditorWindow {
-        public enum NodeActivity { Idle, HoldNode, DragNode, HoldGrid, DragGrid }
+        public enum NodeActivity { Idle, HoldNode, DragNode, HoldGrid, DragGrid, HoldComment, ResizeComment }
         public static NodeActivity currentActivity = NodeActivity.Idle;
         public static bool isPanning { get; private set; }
         public static Vector2[] dragOffset;
@@ -15,11 +15,17 @@ namespace XNodeEditor {
         private bool IsHoveringPort { get { return hoveredPort != null; } }
         private bool IsHoveringNode { get { return hoveredNode != null; } }
         private bool IsHoveringReroute { get { return hoveredReroute.port != null; } }
+        private bool IsHoveringComment { get { return hoveredComment != null; } }
+        private bool IsResizingComment { get { return resizingComment != null; } }
         private XNode.Node hoveredNode = null;
         [NonSerialized] private XNode.NodePort hoveredPort = null;
         [NonSerialized] private XNode.NodePort draggedOutput = null;
         [NonSerialized] private XNode.NodePort draggedOutputTarget = null;
         [NonSerialized] private List<Vector2> draggedOutputReroutes = new List<Vector2>();
+        [NonSerialized] private XNode.NodeGraphComment hoveredComment = null;
+        [NonSerialized] private XNode.NodeGraphComment resizingComment = null;
+        public enum NodeGraphCommentSide { Top, TopRight, Right, BottomRight, Bottom, BottomLeft, Left, TopLeft }
+        public static NodeGraphCommentSide resizingCommentSide;
         private RerouteReference hoveredReroute = new RerouteReference();
         private List<RerouteReference> selectedReroutes = new List<RerouteReference>();
         private Rect nodeRects;
@@ -68,7 +74,7 @@ namespace XNodeEditor {
                                 draggedOutputTarget = null;
                             }
                             Repaint();
-                        } else if (currentActivity == NodeActivity.HoldNode) {
+                        } else if (currentActivity == NodeActivity.HoldNode || currentActivity == NodeActivity.HoldComment) {
                             RecalculateDragOffsets(e);
                             currentActivity = NodeActivity.DragNode;
                             Repaint();
@@ -110,6 +116,15 @@ namespace XNodeEditor {
                                         }
                                     }
                                 }
+                                else if(Selection.objects[i] is XNode.NodeGraphComment) {
+                                    XNode.NodeGraphComment comment = Selection.objects[i] as XNode.NodeGraphComment;
+                                    Vector2 initial = comment.position;
+                                    comment.position = mousePos + dragOffset[i];
+                                    if (gridSnap) {
+                                        comment.position.x = (Mathf.Round((comment.position.x + 8) / 16) * 16) - 8;
+                                        comment.position.y = (Mathf.Round((comment.position.y + 8) / 16) * 16) - 8;
+                                    }
+                                }
                             }
                             // Move selected reroutes with offset
                             for (int i = 0; i < selectedReroutes.Count; i++) {
@@ -133,6 +148,44 @@ namespace XNodeEditor {
                             if (boxSize.x < 0) { boxStartPos.x += boxSize.x; boxSize.x = Mathf.Abs(boxSize.x); }
                             if (boxSize.y < 0) { boxStartPos.y += boxSize.y; boxSize.y = Mathf.Abs(boxSize.y); }
                             selectionBox = new Rect(boxStartPos, boxSize);
+                            Repaint();
+                        } else if (currentActivity == NodeActivity.ResizeComment) {
+                            switch (resizingCommentSide) {
+                                case NodeGraphCommentSide.Top:
+                                    resizingComment.size.y -= e.delta.y;
+                                    resizingComment.position.y += e.delta.y;
+                                    break;
+                                case NodeGraphCommentSide.TopRight:
+                                    resizingComment.size.y -= e.delta.y;
+                                    resizingComment.position.y += e.delta.y;
+                                    resizingComment.size.x += e.delta.x;
+                                    break;
+                                case NodeGraphCommentSide.Right:
+                                    resizingComment.size.x += e.delta.x;
+                                    break;
+                                case NodeGraphCommentSide.BottomRight:
+                                    resizingComment.size += e.delta;
+                                    break;
+                                case NodeGraphCommentSide.Bottom:
+                                    resizingComment.size.y += e.delta.y;
+                                    break;
+                                case NodeGraphCommentSide.BottomLeft:
+                                    resizingComment.size.x -= e.delta.x;
+                                    resizingComment.position.x += e.delta.x;
+                                    resizingComment.size.y += e.delta.y;
+                                    break;
+                                case NodeGraphCommentSide.Left:
+                                    resizingComment.size.x -= e.delta.x;
+                                    resizingComment.position.x += e.delta.x;
+                                    break;
+                                case NodeGraphCommentSide.TopLeft:
+                                    resizingComment.size.x -= e.delta.x;
+                                    resizingComment.position.x += e.delta.x;
+                                    resizingComment.size.y -= e.delta.y;
+                                    resizingComment.position.y += e.delta.y;
+                                    break;
+                            }
+
                             Repaint();
                         }
                     } else if (e.button == 1 || e.button == 2) {
@@ -191,8 +244,33 @@ namespace XNodeEditor {
                             e.Use();
                             currentActivity = NodeActivity.HoldNode;
                         }
+                        else if (IsHoveringComment && !IsHoveringNode) {
+                            if (!Selection.Contains(hoveredComment)) {
+                                if (e.shift) {
+                                    SelectComment(hoveredComment, true);
+                                    SelectNodesInComment(hoveredComment);
+                                }
+                                else SelectComment(hoveredComment, e.control || e.shift);
+                            }
+                            else if (e.control || e.shift) {
+                                DeselectComment(hoveredComment);
+                                if (e.shift)
+                                {
+                                    DeselectNodesInComment(hoveredComment);
+                                }
+                            } else SelectComment(hoveredComment, false);
+
+                            e.Use();
+                            currentActivity = NodeActivity.HoldComment;
+                        } else if (IsResizingComment && !e.control && !e.shift) {
+                            selectedReroutes.Clear();
+                            Selection.activeObject = null;
+
+                            e.Use();
+                            currentActivity = NodeActivity.ResizeComment;
+                        }
                         // If mousedown on grid background, deselect all
-                        else if (!IsHoveringNode) {
+                        else if (!IsHoveringNode && !IsHoveringComment) {
                             currentActivity = NodeActivity.HoldGrid;
                             if (!e.control && !e.shift) {
                                 selectedReroutes.Clear();
@@ -227,7 +305,7 @@ namespace XNodeEditor {
                             IEnumerable<XNode.Node> nodes = Selection.objects.Where(x => x is XNode.Node).Select(x => x as XNode.Node);
                             foreach (XNode.Node node in nodes) EditorUtility.SetDirty(node);
                             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
-                        } else if (!IsHoveringNode) {
+                        } else if (!IsHoveringNode && !IsHoveringComment && !IsResizingComment) {
                             // If click outside node, release field focus
                             if (!isPanning) {
                                 EditorGUI.FocusTextInControl(null);
@@ -264,6 +342,11 @@ namespace XNodeEditor {
                                 if (!Selection.Contains(hoveredNode)) SelectNode(hoveredNode, false);
                                 GenericMenu menu = new GenericMenu();
                                 NodeEditor.GetEditor(hoveredNode).AddContextMenuItems(menu);
+                                menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
+                            } else if (IsHoveringComment && !IsHoveringNode) {
+                                if (!Selection.Contains(hoveredComment)) SelectComment(hoveredComment, false);
+                                GenericMenu menu = new GenericMenu();
+                                graphEditor.AddCommentContextMenuItems(menu);
                                 menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
                             } else if (!IsHoveringNode) {
                                 GenericMenu menu = new GenericMenu();
@@ -315,6 +398,11 @@ namespace XNodeEditor {
                     XNode.Node node = Selection.objects[i] as XNode.Node;
                     dragOffset[i] = node.position - WindowToGridPosition(current.mousePosition);
                 }
+                else if (Selection.objects[i] is XNode.NodeGraphComment)
+                {
+                    XNode.NodeGraphComment comment = Selection.objects[i] as XNode.NodeGraphComment;
+                    dragOffset[i] = comment.position - WindowToGridPosition(current.mousePosition);
+                }
             }
 
             // Selected reroutes
@@ -342,6 +430,10 @@ namespace XNodeEditor {
                     XNode.Node node = item as XNode.Node;
                     graphEditor.RemoveNode(node);
                 }
+                else if (item is XNode.NodeGraphComment) {
+                    XNode.NodeGraphComment comment = item as XNode.NodeGraphComment;
+                    graphEditor.RemoveComment(comment);
+                }
             }
         }
 
@@ -350,6 +442,15 @@ namespace XNodeEditor {
             if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
                 XNode.Node node = Selection.activeObject as XNode.Node;
                 NodeEditor.GetEditor(node).InitiateRename();
+            }
+        }
+
+        /// <summary> Initiate a rename on the currently selected comment </summary>
+        public void RenameSelectedComment()
+        {
+            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.NodeGraphComment)
+            {
+                renamingComment = Selection.activeObject as XNode.NodeGraphComment;
             }
         }
 
@@ -374,6 +475,12 @@ namespace XNodeEditor {
                     substitutes.Add(srcNode, newNode);
                     newNode.position = srcNode.position + new Vector2(30, 30);
                     newNodes[i] = newNode;
+                } else if (Selection.objects[i] is XNode.NodeGraphComment) {
+                    XNode.NodeGraphComment srcComment = Selection.objects[i] as XNode.NodeGraphComment;
+                    if (srcComment.graph != graph) continue; // ignore comments selected in another graph
+                    XNode.NodeGraphComment newComment = graphEditor.CopyComment(srcComment);
+                    newComment.position = srcComment.position + new Vector2(30, 30);
+                    newNodes[i] = newComment;
                 }
             }
 

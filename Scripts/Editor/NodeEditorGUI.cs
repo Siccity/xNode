@@ -13,6 +13,8 @@ namespace XNodeEditor {
         private int topPadding { get { return isDocked() ? 19 : 22; } }
         /// <summary> Executed after all other window GUI. Useful if Zoom is ruining your day. Automatically resets after being run.</summary>
         public event Action onLateGUI;
+        public XNode.NodeGraphComment renamingComment;
+        public bool renamingStarted = false;
 
         private void OnGUI() {
             Event e = Event.current;
@@ -23,7 +25,13 @@ namespace XNodeEditor {
 
             Controls();
 
+            if (e.type == EventType.Layout)
+            {
+                selectionCache = new List<UnityEngine.Object>(Selection.objects);
+            }
+
             DrawGrid(position, zoom, panOffset);
+            DrawComments();
             DrawConnections();
             DrawDraggedConnection();
             DrawNodes();
@@ -237,9 +245,6 @@ namespace XNodeEditor {
 
         private void DrawNodes() {
             Event e = Event.current;
-            if (e.type == EventType.Layout) {
-                selectionCache = new List<UnityEngine.Object>(Selection.objects);
-            }
 
             //Active node is hashed before and after node GUI to detect changes
             int nodeHash = 0;
@@ -418,6 +423,166 @@ namespace XNodeEditor {
                 EditorGUI.LabelField(rect, content, NodeEditorResources.styles.tooltip);
                 Repaint();
             }
+        }
+
+        private void DrawComments()
+        {
+            Event e = Event.current;
+
+            BeginZoomed(position, zoom, topPadding);
+            Vector2 mousePos = Event.current.mousePosition;
+
+            if (e.type != EventType.Layout) {
+                hoveredComment = null;
+                if (currentActivity != NodeActivity.ResizeComment) resizingComment = null;
+            }
+
+            List<UnityEngine.Object> preSelection = preBoxSelection != null ? new List<UnityEngine.Object>(preBoxSelection) : new List<UnityEngine.Object>();
+
+            Vector2 boxStartPos = GridToWindowPositionNoClipped(dragBoxStart);
+            Vector2 boxSize = mousePos - boxStartPos;
+            if (boxSize.x < 0) { boxStartPos.x += boxSize.x; boxSize.x = Mathf.Abs(boxSize.x); }
+            if (boxSize.y < 0) { boxStartPos.y += boxSize.y; boxSize.y = Mathf.Abs(boxSize.y); }
+            Rect selectionBox = new Rect(boxStartPos, boxSize);
+
+            for (int n = 0; n < graph.comments.Count; n++) {
+                XNode.NodeGraphComment comment = graph.comments[n];
+                if (comment == null) continue;
+
+                Vector2 commentPos = GridToWindowPositionNoClipped(comment.position);
+                GUILayout.BeginArea(new Rect(commentPos, new Vector2(comment.size.x, comment.size.y)));
+
+                bool selected = selectionCache.Contains(comment);
+
+                if (selected) {
+                    GUIStyle style = new GUIStyle(NodeEditorResources.styles.commentBody);
+                    GUIStyle highlightStyle = new GUIStyle(NodeEditorResources.styles.nodeHighlight);
+                    highlightStyle.padding = style.padding;
+                    style.padding = new RectOffset();
+                    GUI.color = Color.white;
+                    GUILayout.BeginVertical(style);
+                    GUI.color = NodeEditorPreferences.GetSettings().highlightColor;
+                    GUILayout.BeginVertical(new GUIStyle(highlightStyle));
+                } else {
+                    GUIStyle style = new GUIStyle(NodeEditorResources.styles.commentBody);
+                    GUI.color = Color.white;
+                    GUILayout.BeginVertical(style);
+                }
+
+                if (renamingComment == comment) {
+                    if (Selection.Contains(renamingComment)) {
+                        int controlID = EditorGUIUtility.GetControlID(FocusType.Keyboard) + 1;
+                        if (!renamingStarted) {
+                            EditorGUIUtility.keyboardControl = controlID;
+                            EditorGUIUtility.editingTextField = true;
+                            renamingStarted = true;
+                        }
+                        comment.comment = EditorGUILayout.TextField(comment.comment, NodeEditorResources.styles.commentHeader, GUILayout.Height(26));
+                        if (!EditorGUIUtility.editingTextField) {
+                            Debug.Log("Finish renaming");
+                            renamingComment = null;
+                            renamingStarted = false;
+                        }
+                    }
+                    else {
+                        // Selection changed, so stop renaming.
+                        GUILayout.Label(comment.comment, NodeEditorResources.styles.commentHeader, GUILayout.Height(26));
+                        renamingComment = null;
+                        renamingStarted = false;
+                    }
+                } else {
+                    GUIStyle blackStyle = new GUIStyle(NodeEditorResources.styles.commentHeader);
+                    blackStyle.normal.textColor = new Color(0.2f, 0.2f, 0.2f);
+
+                    GUILayout.Label(comment.comment, blackStyle, GUILayout.Height(26));
+
+                    Rect lastRect = GUILayoutUtility.GetLastRect();
+                    lastRect.x -= 0.5f;
+                    lastRect.y -= 1;
+                    GUI.Label(lastRect, comment.comment, NodeEditorResources.styles.commentHeader);
+                }
+
+
+                GUILayout.FlexibleSpace();
+
+                GUILayout.EndVertical();
+
+                if (selected) GUILayout.EndVertical();
+
+                if (e.type != EventType.Layout && currentActivity != NodeActivity.ResizeComment) {
+                    //Check if we are hovering this node
+                    Vector2 commentSize = GUILayoutUtility.GetLastRect().size;
+                    Rect windowRect = new Rect(commentPos, commentSize);
+
+                    float padding = 12;
+
+                    // Resizing areas
+                    // Follows the NodeGraphCommentSide order
+                    Rect[] resizeRects = new[] {
+                        new Rect(padding, 0, commentSize.x - padding * 2, padding),
+                        new Rect(commentSize.x - padding, 0, padding, padding),
+                        new Rect(commentSize.x - padding, padding, padding, commentSize.y - padding * 2),
+                        new Rect(commentSize.x - padding, commentSize.y - padding, padding, padding),
+                        new Rect(padding, commentSize.y - padding, commentSize.x - padding * 2, padding),
+                        new Rect(0, commentSize.y - padding, padding, padding),
+                        new Rect(0, padding, padding, commentSize.y - padding * 2),
+                        new Rect(0, 0, padding, padding),
+                    };
+
+                    // Icons for the resize area list
+                    MouseCursor[] resizeIcons = new[] {
+                        MouseCursor.ResizeVertical,
+                        MouseCursor.ResizeUpRight,
+                        MouseCursor.ResizeHorizontal,
+                        MouseCursor.ResizeUpLeft,
+                        MouseCursor.ResizeVertical,
+                        MouseCursor.ResizeUpRight,
+                        MouseCursor.ResizeHorizontal,
+                        MouseCursor.ResizeUpLeft,
+                    };
+
+                    for (int i = 0; i < resizeRects.Length; i++) {
+                        EditorGUIUtility.AddCursorRect(resizeRects[i], resizeIcons[i]);
+
+                        // Transform the locations now to gui space locations
+                        resizeRects[i].position += commentPos;
+                    }
+
+                    if (windowRect.Contains(mousePos)) {
+                        //If dragging a selection box, add nodes inside to selection
+                        if (currentActivity == NodeActivity.DragGrid) {
+                            if (windowRect.Overlaps(selectionBox)) preSelection.Add(comment);
+                        } else {
+                            // Check if we should resize or select
+                            bool resizeAreaClicked = false;
+                            for (int i = 0; i < resizeRects.Length; i++) {
+                                if (resizeRects[i].Contains(mousePos)) {
+                                    resizingComment = comment;
+                                    // i can be cast to NodeGraphCommentSide as resizeRects
+                                    // has one element per NodeGraphCommentSide value and
+                                    // uses the same order
+                                    resizingCommentSide = (NodeGraphCommentSide)i;
+                                    resizeAreaClicked = true;
+
+                                    break;
+                                }
+                            }
+
+                            if (!resizeAreaClicked) hoveredComment = comment;
+                        }
+                    }
+
+                    //If dragging a selection box, add nodes inside to selection
+                    if (currentActivity == NodeActivity.DragGrid) {
+                        if (windowRect.Overlaps(selectionBox)) preSelection.Add(comment);
+                    }
+                }
+
+                GUILayout.EndArea();
+            }
+
+            if (e.type != EventType.Layout && currentActivity == NodeActivity.DragGrid) Selection.objects = preSelection.ToArray();
+            EndZoomed(position, zoom, topPadding);
         }
     }
 }

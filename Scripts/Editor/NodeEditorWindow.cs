@@ -142,6 +142,46 @@ namespace XNodeEditor {
             Selection.objects = selection.ToArray();
         }
 
+        public void SelectComment(XNode.NodeGraphComment comment, bool add) {
+            if (add) {
+                List<Object> selection = new List<Object>(Selection.objects);
+                selection.Add(comment);
+                Selection.objects = selection.ToArray();
+            } else Selection.objects = new Object[] { comment };
+        }
+
+        public void DeselectComment(XNode.NodeGraphComment comment) {
+            List<Object> selection = new List<Object>(Selection.objects);
+            selection.Remove(comment);
+            Selection.objects = selection.ToArray();
+        }
+
+        public void SelectNodesInComment(XNode.NodeGraphComment comment) {
+            Rect commentRect = new Rect(comment.position, comment.size);
+            for (int i = 0; i < graph.nodes.Count; i++) {
+                XNode.Node node = graph.nodes[i];
+                if (!node) continue;
+
+                if (commentRect.Contains(node.position)) SelectNode(node, true);
+            }
+        }
+
+        public void DeselectNodesInComment(XNode.NodeGraphComment comment)
+        {
+            List<Object> selection = new List<Object>(Selection.objects);
+            
+
+            Rect commentRect = new Rect(comment.position, comment.size);
+            for (int i = 0; i < graph.nodes.Count; i++) {
+                XNode.Node node = graph.nodes[i];
+                if (!node) continue;
+
+                if (commentRect.Contains(node.position)) selection.Remove(node);
+            }
+
+            Selection.objects = selection.ToArray();
+        }
+
         [OnOpenAsset(0)]
         public static bool OnOpen(int instanceID, int line) {
             XNode.NodeGraph nodeGraph = EditorUtility.InstanceIDToObject(instanceID) as XNode.NodeGraph;

@@ -53,8 +53,39 @@ namespace XNodeEditor {
                 });
             }
             menu.AddSeparator("");
+            menu.AddItem(new GUIContent("Add comment"), false, () => CreateComment(pos));
+            menu.AddSeparator("");
             menu.AddItem(new GUIContent("Preferences"), false, () => NodeEditorWindow.OpenPreferences());
             NodeEditorWindow.AddCustomContextMenuItems(menu, target);
+        }
+
+        /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>
+        public virtual void AddCommentContextMenuItems(GenericMenu menu) {
+            Vector2 pos = NodeEditorWindow.current.WindowToGridPosition(Event.current.mousePosition);
+            for (int i = 0; i < NodeEditorWindow.nodeTypes.Length; i++) {
+                Type type = NodeEditorWindow.nodeTypes[i];
+
+                //Get node context menu path
+                string path = GetNodeMenuName(type);
+                if (string.IsNullOrEmpty(path)) continue;
+
+                menu.AddItem(new GUIContent(path), false, () => {
+                    CreateNode(type, pos);
+                });
+            }
+
+            menu.AddSeparator("");
+            menu.AddItem(new GUIContent("Add comment"), false, () => CreateComment(pos));
+            menu.AddSeparator("");
+            // Actions if only one node is selected
+            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.NodeGraphComment) {
+                XNode.NodeGraphComment comment = Selection.activeObject as XNode.NodeGraphComment;
+                menu.AddItem(new GUIContent("Rename"), false, NodeEditorWindow.current.RenameSelectedComment);
+            }
+
+            // Add actions to any number of selected nodes
+            menu.AddItem(new GUIContent("Duplicate"), false, NodeEditorWindow.current.DuplicateSelectedNodes);
+            menu.AddItem(new GUIContent("Remove"), false, NodeEditorWindow.current.RemoveSelectedNodes);
         }
 
         public virtual Color GetTypeColor(Type type) {
@@ -84,6 +115,32 @@ namespace XNodeEditor {
         public void RemoveNode(XNode.Node node) {
             UnityEngine.Object.DestroyImmediate(node, true);
             target.RemoveNode(node);
+            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+        }
+
+        /// <summary> Create a comment and save it in the graph asset </summary>
+        public void CreateComment(Vector2 position) {
+            XNode.NodeGraphComment comment = target.AddComment();
+            comment.position = position;
+            comment.comment = "New comment";
+            AssetDatabase.AddObjectToAsset(comment, target);
+            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+            NodeEditorWindow.RepaintAll();
+        }
+
+        /// <summary> Creates a copy of the original comment in the graph </summary>
+        public XNode.NodeGraphComment CopyComment(XNode.NodeGraphComment original) {
+            XNode.NodeGraphComment comment = target.CopyComment(original);
+            comment.name = original.name;
+            AssetDatabase.AddObjectToAsset(comment, target);
+            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+            return comment;
+        }
+
+        /// <summary> Safely remove a comment </summary>
+        public void RemoveComment(XNode.NodeGraphComment comment) {
+            UnityEngine.Object.DestroyImmediate(comment, true);
+            target.RemoveComment(comment);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 

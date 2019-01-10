@@ -10,6 +10,9 @@ namespace XNode {
         /// <summary> All nodes in the graph. <para/>
         /// See: <see cref="AddNode{T}"/> </summary>
         [SerializeField] public List<Node> nodes = new List<Node>();
+        /// <summary> All comments in the graph. <para/>
+        /// See: <see cref="AddComment"/> </summary>
+        [SerializeField] public List<NodeGraphComment> comments = new List<NodeGraphComment>();
 
         /// <summary> Add a node to the graph by type </summary>
         public T AddNode<T>() where T : Node {
@@ -51,6 +54,29 @@ namespace XNode {
                 }
             }
             nodes.Clear();
+        }
+
+        /// <summary> Add a comment to the graph</summary>
+        public NodeGraphComment AddComment() {
+            NodeGraphComment comment = ScriptableObject.CreateInstance<NodeGraphComment>();
+            comment.graph = this;
+            comments.Add(comment);
+
+            return comment;
+        }
+
+        /// <summary> Creates a copy of the comment node in the graph </summary>
+        public virtual NodeGraphComment CopyComment(NodeGraphComment original) {
+            NodeGraphComment comment = ScriptableObject.Instantiate(original);
+            comment.graph = this;
+            comments.Add(comment);
+            return comment;
+        }
+
+        /// <summary> Safely remove a comment </summary>
+        public void RemoveComment(NodeGraphComment comment) {
+            comments.Remove(comment);
+            if (Application.isPlaying) Destroy(comment);
         }
 
         /// <summary> Create a new deep copy of this graph </summary>

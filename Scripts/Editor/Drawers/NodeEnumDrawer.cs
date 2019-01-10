@@ -51,6 +51,7 @@ namespace XNodeEditor {
 		private void SetEnum(SerializedProperty property, int index) {
 			property.enumValueIndex = index;
 			property.serializedObject.ApplyModifiedProperties();
+			property.serializedObject.Update();
 		}
 	}
 }

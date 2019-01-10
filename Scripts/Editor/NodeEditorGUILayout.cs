@@ -11,8 +11,6 @@ namespace XNodeEditor {
     /// <summary> xNode-specific version of <see cref="EditorGUILayout"/> </summary>
     public static class NodeEditorGUILayout {
 
-        /// <summary> Listen for this event if you want to alter the default ReorderableList </summary>
-        public static Action<ReorderableList> onCreateReorderableList;
         private static readonly Dictionary<UnityEngine.Object, Dictionary<string, ReorderableList>> reorderableListCache = new Dictionary<UnityEngine.Object, Dictionary<string, ReorderableList>>();
         private static int reorderableListIndex = -1;
 
@@ -256,17 +254,13 @@ namespace XNodeEditor {
             GUI.color = col;
         }
 
-        [Obsolete("Use InstancePortList(string, Type, SerializedObject, NodePort.IO, Node.ConnectionType) instead")]
-        public static void InstancePortList(string fieldName, Type type, SerializedObject serializedObject, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple) {
-            InstancePortList(fieldName, type, serializedObject, XNode.NodePort.IO.Output, connectionType);
-        }
-
         /// <summary> Draw an editable list of instance ports. Port names are named as "[fieldName] [index]" </summary>
         /// <param name="fieldName">Supply a list for editable values</param>
         /// <param name="type">Value type of added instance ports</param>
         /// <param name="serializedObject">The serializedObject of the node</param>
         /// <param name="connectionType">Connection type of added instance ports</param>
-        public static void InstancePortList(string fieldName, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple) {
+        /// <param name="onCreation">Called on the list on creation. Use this if you want to customize the created ReorderableList</param>
+        public static void InstancePortList(string fieldName, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple, Action<ReorderableList> onCreation = null) {
             XNode.Node node = serializedObject.targetObject as XNode.Node;
             SerializedProperty arrayData = serializedObject.FindProperty(fieldName);
 
@@ -286,7 +280,7 @@ namespace XNodeEditor {
             // If a ReorderableList isn't cached for this array, do so.
             if (list == null) {
                 string label = serializedObject.FindProperty(fieldName).displayName;
-                list = CreateReorderableList(instancePorts, arrayData, type, serializedObject, io, label, connectionType);
+                list = CreateReorderableList(instancePorts, arrayData, type, serializedObject, io, label, connectionType, onCreation);
                 if (reorderableListCache.TryGetValue(serializedObject.targetObject, out rlc)) rlc.Add(fieldName, list);
                 else reorderableListCache.Add(serializedObject.targetObject, new Dictionary<string, ReorderableList>() { { fieldName, list } });
             }
@@ -294,7 +288,7 @@ namespace XNodeEditor {
             list.DoLayoutList();
         }
 
-        private static ReorderableList CreateReorderableList(List<XNode.NodePort> instancePorts, SerializedProperty arrayData, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, string label, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple) {
+        private static ReorderableList CreateReorderableList(List<XNode.NodePort> instancePorts, SerializedProperty arrayData, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, string label, XNode.Node.ConnectionType connectionType, Action<ReorderableList> onCreation) {
             bool hasArrayData = arrayData != null && arrayData.isArray;
             int arraySize = hasArrayData ? arrayData.arraySize : 0;
             XNode.Node node = serializedObject.targetObject as XNode.Node;
@@ -324,7 +318,7 @@ namespace XNodeEditor {
                 };
             list.drawHeaderCallback =
                 (Rect rect) => {
-                    EditorGUI.LabelField(rect, label);
+                    EditorGUI.LabelField(rect, label + "(" + serializedObject.targetObject.name + ")");
                 };
             list.onSelectCallback =
                 (ReorderableList rl) => {
@@ -413,7 +407,7 @@ namespace XNodeEditor {
                             while (instancePorts.Count <= arraySize) {
                                 arrayData.DeleteArrayElementAtIndex(--arraySize);
                             }
-                            Debug.LogWarning("Array size exceeded instance ports size. Excess items removed.");
+                            UnityEngine.Debug.LogWarning("Array size exceeded instance ports size. Excess items removed.");
                         }
                         serializedObject.ApplyModifiedProperties();
                         serializedObject.Update();
@@ -440,7 +434,7 @@ namespace XNodeEditor {
                 serializedObject.ApplyModifiedProperties();
                 serializedObject.Update();
             }
-            if (onCreateReorderableList != null) onCreateReorderableList(list);
+            if (onCreation != null) onCreation(list);
             return list;
         }
     }

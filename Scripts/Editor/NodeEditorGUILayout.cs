@@ -318,7 +318,7 @@ namespace XNodeEditor {
                 };
             list.drawHeaderCallback =
                 (Rect rect) => {
-                    EditorGUI.LabelField(rect, label + "(" + serializedObject.targetObject.name + ")");
+                    EditorGUI.LabelField(rect, label);
                 };
             list.onSelectCallback =
                 (ReorderableList rl) => {

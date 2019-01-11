@@ -262,7 +262,6 @@ namespace XNodeEditor {
         /// <param name="onCreation">Called on the list on creation. Use this if you want to customize the created ReorderableList</param>
         public static void InstancePortList(string fieldName, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple, Action<ReorderableList> onCreation = null) {
             XNode.Node node = serializedObject.targetObject as XNode.Node;
-            SerializedProperty arrayData = serializedObject.FindProperty(fieldName);
 
             Predicate<string> isMatchingInstancePort =
                 x => {
@@ -279,8 +278,8 @@ namespace XNodeEditor {
             }
             // If a ReorderableList isn't cached for this array, do so.
             if (list == null) {
-                string label = serializedObject.FindProperty(fieldName).displayName;
-                list = CreateReorderableList(instancePorts, arrayData, type, serializedObject, io, label, connectionType, onCreation);
+                SerializedProperty arrayData = serializedObject.FindProperty(fieldName);
+                list = CreateReorderableList(fieldName, instancePorts, arrayData, type, serializedObject, io, connectionType, onCreation);
                 if (reorderableListCache.TryGetValue(serializedObject.targetObject, out rlc)) rlc.Add(fieldName, list);
                 else reorderableListCache.Add(serializedObject.targetObject, new Dictionary<string, ReorderableList>() { { fieldName, list } });
             }
@@ -288,15 +287,16 @@ namespace XNodeEditor {
             list.DoLayoutList();
         }
 
-        private static ReorderableList CreateReorderableList(List<XNode.NodePort> instancePorts, SerializedProperty arrayData, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, string label, XNode.Node.ConnectionType connectionType, Action<ReorderableList> onCreation) {
+        private static ReorderableList CreateReorderableList(string fieldName, List<XNode.NodePort> instancePorts, SerializedProperty arrayData, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType, Action<ReorderableList> onCreation) {
             bool hasArrayData = arrayData != null && arrayData.isArray;
             int arraySize = hasArrayData ? arrayData.arraySize : 0;
             XNode.Node node = serializedObject.targetObject as XNode.Node;
             ReorderableList list = new ReorderableList(instancePorts, null, true, true, true, true);
+            string label = arrayData != null ? arrayData.displayName : ObjectNames.NicifyVariableName(fieldName);
 
             list.drawElementCallback =
                 (Rect rect, int index, bool isActive, bool isFocused) => {
-                    XNode.NodePort port = node.GetPort(arrayData.name + " " + index);
+                    XNode.NodePort port = node.GetPort(fieldName + " " + index);
                     if (hasArrayData) {
                         if (arrayData.arraySize <= index) {
                             EditorGUI.LabelField(rect, "Invalid element " + index);
@@ -330,8 +330,8 @@ namespace XNodeEditor {
                     // Move up
                     if (rl.index > reorderableListIndex) {
                         for (int i = reorderableListIndex; i < rl.index; ++i) {
-                            XNode.NodePort port = node.GetPort(arrayData.name + " " + i);
-                            XNode.NodePort nextPort = node.GetPort(arrayData.name + " " + (i + 1));
+                            XNode.NodePort port = node.GetPort(fieldName + " " + i);
+                            XNode.NodePort nextPort = node.GetPort(fieldName + " " + (i + 1));
                             port.SwapConnections(nextPort);
 
                             // Swap cached positions to mitigate twitching
@@ -343,8 +343,8 @@ namespace XNodeEditor {
                     // Move down
                     else {
                         for (int i = reorderableListIndex; i > rl.index; --i) {
-                            XNode.NodePort port = node.GetPort(arrayData.name + " " + i);
-                            XNode.NodePort nextPort = node.GetPort(arrayData.name + " " + (i - 1));
+                            XNode.NodePort port = node.GetPort(fieldName + " " + i);
+                            XNode.NodePort nextPort = node.GetPort(fieldName + " " + (i - 1));
                             port.SwapConnections(nextPort);
 
                             // Swap cached positions to mitigate twitching
@@ -371,9 +371,9 @@ namespace XNodeEditor {
             list.onAddCallback =
                 (ReorderableList rl) => {
                     // Add instance port postfixed with an index number
-                    string newName = arrayData.name + " 0";
+                    string newName = fieldName + " 0";
                     int i = 0;
-                    while (node.HasPort(newName)) newName = arrayData.name + " " + (++i);
+                    while (node.HasPort(newName)) newName = fieldName + " " + (++i);
 
                     if (io == XNode.NodePort.IO.Output) node.AddInstanceOutput(type, connectionType, newName);
                     else node.AddInstanceInput(type, connectionType, newName);

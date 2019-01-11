@@ -161,7 +161,6 @@ namespace XNodeEditor {
             for (int i = 0; i < graph.nodes.Count; i++) {
                 XNode.Node node = graph.nodes[i];
                 if (!node) continue;
-
                 if (commentRect.Contains(node.position)) SelectNode(node, true);
             }
         }
@@ -169,8 +168,6 @@ namespace XNodeEditor {
         public void DeselectNodesInComment(XNode.NodeGraphComment comment)
         {
             List<Object> selection = new List<Object>(Selection.objects);
-            
-
             Rect commentRect = new Rect(comment.position, comment.size);
             for (int i = 0; i < graph.nodes.Count; i++) {
                 XNode.Node node = graph.nodes[i];

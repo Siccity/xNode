@@ -26,8 +26,7 @@ namespace XNodeEditor {
 
             Controls();
 
-            if (e.type == EventType.Layout)
-            {
+            if (e.type == EventType.Layout) {
                 selectionCache = new List<UnityEngine.Object>(Selection.objects);
             }
 
@@ -500,8 +499,7 @@ namespace XNodeEditor {
                             renamingComment = null;
                             renamingStarted = false;
                         }
-                    }
-                    else {
+                    } else {
                         // Selection changed, so stop renaming.
                         GUILayout.Label(comment.comment, NodeEditorResources.styles.commentHeader, GUILayout.Height(26));
                         renamingComment = null;
@@ -587,7 +585,6 @@ namespace XNodeEditor {
                             if (!resizeAreaClicked) hoveredComment = comment;
                         }
                     }
-
                     //If dragging a selection box, add nodes inside to selection
                     if (currentActivity == NodeActivity.DragGrid) {
                         if (windowRect.Overlaps(selectionBox)) preSelection.Add(comment);

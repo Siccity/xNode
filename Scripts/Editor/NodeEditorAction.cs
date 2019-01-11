@@ -23,8 +23,8 @@ namespace XNodeEditor {
         [NonSerialized] private XNode.NodePort draggedOutputTarget = null;
         [NonSerialized] private List<Vector2> draggedOutputReroutes = new List<Vector2>();
         [NonSerialized] private XNode.NodeGraphComment hoveredComment = null;
-        [NonSerialized] private bool deselectingComment = false;
         [NonSerialized] private XNode.NodeGraphComment resizingComment = null;
+        private bool deselectingComment = false;
         public enum NodeGraphCommentSide { Top, TopRight, Right, BottomRight, Bottom, BottomLeft, Left, TopLeft }
         public static NodeGraphCommentSide resizingCommentSide;
         private RerouteReference hoveredReroute = new RerouteReference();
@@ -402,8 +402,7 @@ namespace XNodeEditor {
                     XNode.Node node = Selection.objects[i] as XNode.Node;
                     dragOffset[i] = node.position - WindowToGridPosition(current.mousePosition);
                 }
-                else if (Selection.objects[i] is XNode.NodeGraphComment)
-                {
+                else if (Selection.objects[i] is XNode.NodeGraphComment) {
                     XNode.NodeGraphComment comment = Selection.objects[i] as XNode.NodeGraphComment;
                     dragOffset[i] = comment.position - WindowToGridPosition(current.mousePosition);
                 }
@@ -450,10 +449,8 @@ namespace XNodeEditor {
         }
 
         /// <summary> Initiate a rename on the currently selected comment </summary>
-        public void RenameSelectedComment()
-        {
-            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.NodeGraphComment)
-            {
+        public void RenameSelectedComment() {
+            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.NodeGraphComment) {
                 renamingComment = Selection.activeObject as XNode.NodeGraphComment;
             }
         }

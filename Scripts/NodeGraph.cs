@@ -61,7 +61,6 @@ namespace XNode {
             NodeGraphComment comment = ScriptableObject.CreateInstance<NodeGraphComment>();
             comment.graph = this;
             comments.Add(comment);
-
             return comment;
         }
 

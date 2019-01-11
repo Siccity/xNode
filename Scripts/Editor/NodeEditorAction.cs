@@ -23,6 +23,7 @@ namespace XNodeEditor {
         [NonSerialized] private XNode.NodePort draggedOutputTarget = null;
         [NonSerialized] private List<Vector2> draggedOutputReroutes = new List<Vector2>();
         [NonSerialized] private XNode.NodeGraphComment hoveredComment = null;
+        [NonSerialized] private bool deselectingComment = false;
         [NonSerialized] private XNode.NodeGraphComment resizingComment = null;
         public enum NodeGraphCommentSide { Top, TopRight, Right, BottomRight, Bottom, BottomLeft, Left, TopLeft }
         public static NodeGraphCommentSide resizingCommentSide;
@@ -75,6 +76,7 @@ namespace XNodeEditor {
                             }
                             Repaint();
                         } else if (currentActivity == NodeActivity.HoldNode || currentActivity == NodeActivity.HoldComment) {
+                            deselectingComment = false;
                             RecalculateDragOffsets(e);
                             currentActivity = NodeActivity.DragNode;
                             Repaint();
@@ -251,14 +253,7 @@ namespace XNodeEditor {
                                     SelectNodesInComment(hoveredComment);
                                 }
                                 else SelectComment(hoveredComment, e.control || e.shift);
-                            }
-                            else if (e.control || e.shift) {
-                                DeselectComment(hoveredComment);
-                                if (e.shift)
-                                {
-                                    DeselectNodesInComment(hoveredComment);
-                                }
-                            } else SelectComment(hoveredComment, false);
+                            } else deselectingComment = true;
 
                             e.Use();
                             currentActivity = NodeActivity.HoldComment;
@@ -317,6 +312,15 @@ namespace XNodeEditor {
                         if (currentActivity == NodeActivity.HoldNode && !(e.control || e.shift)) {
                             selectedReroutes.Clear();
                             SelectNode(hoveredNode, false);
+                        }
+
+                        if (currentActivity == NodeActivity.HoldComment && deselectingComment) {
+                            DeselectComment(hoveredComment);
+                            if (e.shift) {
+                                DeselectNodesInComment(hoveredComment);
+                            }
+
+                            deselectingComment = false;
                         }
 
                         // If click reroute, select it.

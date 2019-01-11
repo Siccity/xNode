@@ -15,6 +15,7 @@ namespace XNodeEditor {
         public event Action onLateGUI;
         public XNode.NodeGraphComment renamingComment;
         public bool renamingStarted = false;
+        private Matrix4x4 _prevGuiMatrix;
 
         private void OnGUI() {
             Event e = Event.current;
@@ -48,24 +49,40 @@ namespace XNodeEditor {
             GUI.matrix = m;
         }
 
-        public static void BeginZoomed(Rect rect, float zoom, float topPadding) {
-            GUI.EndClip();
-
-            GUIUtility.ScaleAroundPivot(Vector2.one / zoom, rect.size * 0.5f);
-            Vector4 padding = new Vector4(0, topPadding, 0, 0);
-            padding *= zoom;
-            GUI.BeginClip(new Rect(-((rect.width * zoom) - rect.width) * 0.5f, -(((rect.height * zoom) - rect.height) * 0.5f) + (topPadding * zoom),
-                rect.width * zoom,
-                rect.height * zoom));
+        public static Rect ScaleSizeBy(Rect rect, float scale, Vector2 pivotPoint) {
+            Rect result = rect;
+            result.x -= pivotPoint.x;
+            result.y -= pivotPoint.y;
+            result.xMin *= scale;
+            result.xMax *= scale;
+            result.yMin *= scale;
+            result.yMax *= scale;
+            result.x += pivotPoint.x;
+            result.y += pivotPoint.y;
+            return result;
         }
 
-        public static void EndZoomed(Rect rect, float zoom, float topPadding) {
-            GUIUtility.ScaleAroundPivot(Vector2.one * zoom, rect.size * 0.5f);
-            Vector3 offset = new Vector3(
-                (((rect.width * zoom) - rect.width) * 0.5f),
-                (((rect.height * zoom) - rect.height) * 0.5f) + (-topPadding * zoom) + topPadding,
-                0);
-            GUI.matrix = Matrix4x4.TRS(offset, Quaternion.identity, Vector3.one);
+        public static Vector2 TopLeft(Rect rect) {
+            return new Vector2(rect.xMin, rect.yMin);
+        }
+
+        public void BeginZoomed() {
+            GUI.EndGroup();
+
+            Rect clippedArea = ScaleSizeBy(position, zoom, TopLeft(position));
+            GUI.BeginGroup(clippedArea);
+
+            _prevGuiMatrix = GUI.matrix;
+            Matrix4x4 translation = Matrix4x4.TRS(TopLeft(clippedArea), Quaternion.identity, Vector3.one);
+            Matrix4x4 scale = Matrix4x4.Scale(new Vector3(1.0f / zoom, 1.0f / zoom, 1.0f));
+            GUI.matrix = translation * scale * translation.inverse * GUI.matrix;
+
+        }
+
+        public void EndZoomed() {
+            GUI.matrix = _prevGuiMatrix;
+            GUI.EndGroup();
+            GUI.BeginGroup(new Rect(0.0f, topPadding, Screen.width, Screen.height));
         }
 
         public void DrawGrid(Rect rect, float zoom, Vector2 panOffset) {
@@ -254,7 +271,7 @@ namespace XNodeEditor {
                 if (onValidate != null) nodeHash = Selection.activeObject.GetHashCode();
             }
 
-            BeginZoomed(position, zoom, topPadding);
+            BeginZoomed();
 
             Vector2 mousePos = Event.current.mousePosition;
 
@@ -386,7 +403,7 @@ namespace XNodeEditor {
             }
 
             if (e.type != EventType.Layout && currentActivity == NodeActivity.DragGrid) Selection.objects = preSelection.ToArray();
-            EndZoomed(position, zoom, topPadding);
+            EndZoomed();
 
             //If a change in hash is detected in the selected node, call OnValidate method. 
             //This is done through reflection because OnValidate is only relevant in editor, 
@@ -429,7 +446,7 @@ namespace XNodeEditor {
         {
             Event e = Event.current;
 
-            BeginZoomed(position, zoom, topPadding);
+            BeginZoomed();
             Vector2 mousePos = Event.current.mousePosition;
 
             if (e.type != EventType.Layout) {
@@ -501,7 +518,6 @@ namespace XNodeEditor {
                     lastRect.y -= 1;
                     GUI.Label(lastRect, comment.comment, NodeEditorResources.styles.commentHeader);
                 }
-
 
                 GUILayout.FlexibleSpace();
 
@@ -582,7 +598,7 @@ namespace XNodeEditor {
             }
 
             if (e.type != EventType.Layout && currentActivity == NodeActivity.DragGrid) Selection.objects = preSelection.ToArray();
-            EndZoomed(position, zoom, topPadding);
+            EndZoomed();
         }
     }
 }

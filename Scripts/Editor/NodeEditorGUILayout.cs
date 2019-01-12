@@ -303,7 +303,7 @@ namespace XNodeEditor {
                             return;
                         }
                         SerializedProperty itemData = arrayData.GetArrayElementAtIndex(index);
-                        EditorGUI.PropertyField(rect, itemData);
+                        EditorGUI.PropertyField(rect, itemData, true);
                     } else EditorGUI.LabelField(rect, port.fieldName);
                     Vector2 pos = rect.position + (port.IsOutput?new Vector2(rect.width + 6, 0) : new Vector2(-36, 0));
                     NodeEditorGUILayout.PortField(pos, port);

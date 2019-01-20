@@ -35,7 +35,7 @@ namespace XNodeEditor {
         }
 
         public static bool GetAttrib<T>(Type classType, string fieldName, out T attribOut) where T : Attribute {
-            object[] attribs = classType.GetField(fieldName).GetCustomAttributes(typeof(T), false);
+            object[] attribs = classType.GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).GetCustomAttributes(typeof(T), false);
             return GetAttrib(attribs, out attribOut);
         }
 

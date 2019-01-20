@@ -69,7 +69,7 @@ namespace XNode {
         }
 
         private static void CachePorts(System.Type nodeType) {
-            System.Reflection.FieldInfo[] fieldInfo = nodeType.GetFields();
+            System.Reflection.FieldInfo[] fieldInfo = nodeType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             for (int i = 0; i < fieldInfo.Length; i++) {
 
                 //Get InputAttribute and OutputAttribute

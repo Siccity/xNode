@@ -142,38 +142,38 @@ namespace XNodeEditor {
             Selection.objects = selection.ToArray();
         }
 
-        public void SelectComment(XNode.NodeGraphComment comment, bool add) {
+        public void SelectGroup(XNode.NodeGroup group, bool add) {
             if (add) {
                 List<Object> selection = new List<Object>(Selection.objects);
-                selection.Add(comment);
+                selection.Add(group);
                 Selection.objects = selection.ToArray();
-            } else Selection.objects = new Object[] { comment };
+            } else Selection.objects = new Object[] { group };
         }
 
-        public void DeselectComment(XNode.NodeGraphComment comment) {
+        public void DeselectGroup(XNode.NodeGroup group) {
             List<Object> selection = new List<Object>(Selection.objects);
-            selection.Remove(comment);
+            selection.Remove(group);
             Selection.objects = selection.ToArray();
         }
 
-        public void SelectNodesInComment(XNode.NodeGraphComment comment) {
-            Rect commentRect = new Rect(comment.position, comment.size);
+        public void SelectNodesInGroup(XNode.NodeGroup group) {
+            Rect groupRect = new Rect(group.position, group.size);
             for (int i = 0; i < graph.nodes.Count; i++) {
                 XNode.Node node = graph.nodes[i];
                 if (!node) continue;
-                if (commentRect.Contains(node.position)) SelectNode(node, true);
+                if (groupRect.Contains(node.position)) SelectNode(node, true);
             }
         }
 
-        public void DeselectNodesInComment(XNode.NodeGraphComment comment)
+        public void DeselectNodesInGroup(XNode.NodeGroup group)
         {
             List<Object> selection = new List<Object>(Selection.objects);
-            Rect commentRect = new Rect(comment.position, comment.size);
+            Rect groupRect = new Rect(group.position, group.size);
             for (int i = 0; i < graph.nodes.Count; i++) {
                 XNode.Node node = graph.nodes[i];
                 if (!node) continue;
 
-                if (commentRect.Contains(node.position)) selection.Remove(node);
+                if (groupRect.Contains(node.position)) selection.Remove(node);
             }
 
             Selection.objects = selection.ToArray();

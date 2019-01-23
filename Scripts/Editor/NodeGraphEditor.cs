@@ -53,14 +53,14 @@ namespace XNodeEditor {
                 });
             }
             menu.AddSeparator("");
-            menu.AddItem(new GUIContent("Add comment"), false, () => CreateComment(pos));
+            menu.AddItem(new GUIContent("Add group"), false, () => CreateGroup(pos));
             menu.AddSeparator("");
             menu.AddItem(new GUIContent("Preferences"), false, () => NodeEditorWindow.OpenPreferences());
             NodeEditorWindow.AddCustomContextMenuItems(menu, target);
         }
 
         /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>
-        public virtual void AddCommentContextMenuItems(GenericMenu menu) {
+        public virtual void AddGroupContextMenuItems(GenericMenu menu) {
             Vector2 pos = NodeEditorWindow.current.WindowToGridPosition(Event.current.mousePosition);
             for (int i = 0; i < NodeEditorWindow.nodeTypes.Length; i++) {
                 Type type = NodeEditorWindow.nodeTypes[i];
@@ -75,12 +75,12 @@ namespace XNodeEditor {
             }
 
             menu.AddSeparator("");
-            menu.AddItem(new GUIContent("Add comment"), false, () => CreateComment(pos));
+            menu.AddItem(new GUIContent("Add group"), false, () => CreateGroup(pos));
             menu.AddSeparator("");
             // Actions if only one node is selected
-            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.NodeGraphComment) {
-                XNode.NodeGraphComment comment = Selection.activeObject as XNode.NodeGraphComment;
-                menu.AddItem(new GUIContent("Rename"), false, NodeEditorWindow.current.RenameSelectedComment);
+            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.NodeGroup) {
+                XNode.NodeGroup group = Selection.activeObject as XNode.NodeGroup;
+                menu.AddItem(new GUIContent("Rename"), false, NodeEditorWindow.current.RenameSelectedGroup);
             }
 
             // Add actions to any number of selected nodes
@@ -118,29 +118,29 @@ namespace XNodeEditor {
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 
-        /// <summary> Create a comment and save it in the graph asset </summary>
-        public void CreateComment(Vector2 position) {
-            XNode.NodeGraphComment comment = target.AddComment();
-            comment.position = position;
-            comment.comment = "New comment";
-            AssetDatabase.AddObjectToAsset(comment, target);
+        /// <summary> Create a group and save it in the graph asset </summary>
+        public void CreateGroup(Vector2 position) {
+            XNode.NodeGroup group = target.AddGroup();
+            group.position = position;
+            group.name = "New group";
+            AssetDatabase.AddObjectToAsset(group, target);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             NodeEditorWindow.RepaintAll();
         }
 
-        /// <summary> Creates a copy of the original comment in the graph </summary>
-        public XNode.NodeGraphComment CopyComment(XNode.NodeGraphComment original) {
-            XNode.NodeGraphComment comment = target.CopyComment(original);
-            comment.name = original.name;
-            AssetDatabase.AddObjectToAsset(comment, target);
+        /// <summary> Creates a copy of the original group in the graph </summary>
+        public XNode.NodeGroup CopyGroup(XNode.NodeGroup original) {
+            XNode.NodeGroup group = target.CopyGroup(original);
+            group.name = original.name;
+            AssetDatabase.AddObjectToAsset(group, target);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
-            return comment;
+            return group;
         }
 
-        /// <summary> Safely remove a comment </summary>
-        public void RemoveComment(XNode.NodeGraphComment comment) {
-            UnityEngine.Object.DestroyImmediate(comment, true);
-            target.RemoveComment(comment);
+        /// <summary> Safely remove a group </summary>
+        public void RemoveGroup(XNode.NodeGroup group) {
+            UnityEngine.Object.DestroyImmediate(group, true);
+            target.RemoveGroup(group);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 

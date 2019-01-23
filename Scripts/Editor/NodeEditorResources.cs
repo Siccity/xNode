@@ -12,15 +12,15 @@ namespace XNodeEditor {
         private static Texture2D _nodeBody;
         public static Texture2D nodeHighlight { get { return _nodeHighlight != null ? _nodeHighlight : _nodeHighlight = Resources.Load<Texture2D>("xnode_node_highlight"); } }
         private static Texture2D _nodeHighlight;
-        public static Texture2D commentBody { get { return _commentBody != null ? _commentBody : _commentBody = Resources.Load<Texture2D>("xnode_comment"); } }
-        private static Texture2D _commentBody;
+        public static Texture2D groupBody { get { return _groupBody != null ? _groupBody : _groupBody = Resources.Load<Texture2D>("xnode_group"); } }
+        private static Texture2D _groupBody;
 
         // Styles
         public static Styles styles { get { return _styles != null ? _styles : _styles = new Styles(); } }
         public static Styles _styles = null;
         public static GUIStyle OutputPort { get { return new GUIStyle(EditorStyles.label) { alignment = TextAnchor.UpperRight }; } }
         public class Styles {
-            public GUIStyle inputPort, nodeHeader, nodeBody, tooltip, nodeHighlight, commentHeader, commentBody;
+            public GUIStyle inputPort, nodeHeader, nodeBody, tooltip, nodeHighlight, groupHeader, groupBody;
             
             public Styles() {
                 GUIStyle baseStyle = new GUIStyle("Label");
@@ -47,16 +47,16 @@ namespace XNodeEditor {
                 tooltip = new GUIStyle("helpBox");
                 tooltip.alignment = TextAnchor.MiddleCenter;
 
-                commentHeader = new GUIStyle();
-                commentHeader.alignment = TextAnchor.MiddleCenter;
-                commentHeader.fontStyle = FontStyle.Bold;
-                commentHeader.fontSize = 20;
-                commentHeader.normal.textColor = new Color(0.93f, 0.93f, 0.93f);
+                groupHeader = new GUIStyle();
+                groupHeader.alignment = TextAnchor.MiddleCenter;
+                groupHeader.fontStyle = FontStyle.Bold;
+                groupHeader.fontSize = 20;
+                groupHeader.normal.textColor = new Color(0.93f, 0.93f, 0.93f);
 
-                commentBody = new GUIStyle();
-                commentBody.normal.background = NodeEditorResources.commentBody;
-                commentBody.border = new RectOffset(32, 32, 32, 32);
-                commentBody.padding = new RectOffset(16, 16, 4, 16);
+                groupBody = new GUIStyle();
+                groupBody.normal.background = NodeEditorResources.groupBody;
+                groupBody.border = new RectOffset(32, 32, 32, 32);
+                groupBody.padding = new RectOffset(16, 16, 4, 16);
             }
         }
 

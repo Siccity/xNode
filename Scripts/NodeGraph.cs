@@ -10,9 +10,9 @@ namespace XNode {
         /// <summary> All nodes in the graph. <para/>
         /// See: <see cref="AddNode{T}"/> </summary>
         [SerializeField] public List<Node> nodes = new List<Node>();
-        /// <summary> All comments in the graph. <para/>
-        /// See: <see cref="AddComment"/> </summary>
-        [SerializeField] public List<NodeGraphComment> comments = new List<NodeGraphComment>();
+        /// <summary> All groups in the graph. <para/>
+        /// See: <see cref="AddGroup"/> </summary>
+        [SerializeField] public List<NodeGroup> groups = new List<NodeGroup>();
 
         /// <summary> Add a node to the graph by type </summary>
         public T AddNode<T>() where T : Node {
@@ -56,26 +56,26 @@ namespace XNode {
             nodes.Clear();
         }
 
-        /// <summary> Add a comment to the graph</summary>
-        public NodeGraphComment AddComment() {
-            NodeGraphComment comment = ScriptableObject.CreateInstance<NodeGraphComment>();
-            comment.graph = this;
-            comments.Add(comment);
-            return comment;
+        /// <summary> Add a group to the graph</summary>
+        public NodeGroup AddGroup() {
+            NodeGroup group = ScriptableObject.CreateInstance<NodeGroup>();
+            group.graph = this;
+            groups.Add(group);
+            return group;
         }
 
-        /// <summary> Creates a copy of the comment node in the graph </summary>
-        public virtual NodeGraphComment CopyComment(NodeGraphComment original) {
-            NodeGraphComment comment = ScriptableObject.Instantiate(original);
-            comment.graph = this;
-            comments.Add(comment);
-            return comment;
+        /// <summary> Creates a copy of the group node in the graph </summary>
+        public virtual NodeGroup CopyGroup(NodeGroup original) {
+            NodeGroup group = ScriptableObject.Instantiate(original);
+            group.graph = this;
+            groups.Add(group);
+            return group;
         }
 
-        /// <summary> Safely remove a comment </summary>
-        public void RemoveComment(NodeGraphComment comment) {
-            comments.Remove(comment);
-            if (Application.isPlaying) Destroy(comment);
+        /// <summary> Safely remove a group </summary>
+        public void RemoveGroup(NodeGroup group) {
+            groups.Remove(group);
+            if (Application.isPlaying) Destroy(group);
         }
 
         /// <summary> Create a new deep copy of this graph </summary>
@@ -89,6 +89,14 @@ namespace XNode {
                 Node node = Instantiate(nodes[i]) as Node;
                 node.graph = graph;
                 graph.nodes[i] = node;
+            }
+
+            // Instantiate all groups inside the graph
+            for (int i = 0; i < groups.Count; i++) {
+                if (groups[i] == null) continue;
+                NodeGroup group = Instantiate(groups[i]) as NodeGroup;
+                group.graph = graph;
+                graph.groups[i] = group;
             }
 
             // Redirect all connections

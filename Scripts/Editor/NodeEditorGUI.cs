@@ -13,7 +13,7 @@ namespace XNodeEditor {
         private int topPadding { get { return isDocked() ? 19 : 22; } }
         /// <summary> Executed after all other window GUI. Useful if Zoom is ruining your day. Automatically resets after being run.</summary>
         public event Action onLateGUI;
-        public XNode.NodeGraphComment renamingComment;
+        public XNode.NodeGroup renamingGroup;
         public bool renamingStarted = false;
         private Matrix4x4 _prevGuiMatrix;
 
@@ -31,7 +31,7 @@ namespace XNodeEditor {
             }
 
             DrawGrid(position, zoom, panOffset);
-            DrawComments();
+            DrawGroups();
             DrawConnections();
             DrawDraggedConnection();
             DrawNodes();
@@ -441,7 +441,7 @@ namespace XNodeEditor {
             }
         }
 
-        private void DrawComments()
+        private void DrawGroups()
         {
             Event e = Event.current;
 
@@ -449,8 +449,8 @@ namespace XNodeEditor {
             Vector2 mousePos = Event.current.mousePosition;
 
             if (e.type != EventType.Layout) {
-                hoveredComment = null;
-                if (currentActivity != NodeActivity.ResizeComment) resizingComment = null;
+                hoveredGroup = null;
+                if (currentActivity != NodeActivity.ResizeGroup) resizingGroup = null;
             }
 
             List<UnityEngine.Object> preSelection = preBoxSelection != null ? new List<UnityEngine.Object>(preBoxSelection) : new List<UnityEngine.Object>();
@@ -461,17 +461,17 @@ namespace XNodeEditor {
             if (boxSize.y < 0) { boxStartPos.y += boxSize.y; boxSize.y = Mathf.Abs(boxSize.y); }
             Rect selectionBox = new Rect(boxStartPos, boxSize);
 
-            for (int n = 0; n < graph.comments.Count; n++) {
-                XNode.NodeGraphComment comment = graph.comments[n];
-                if (comment == null) continue;
+            for (int n = 0; n < graph.groups.Count; n++) {
+                XNode.NodeGroup group = graph.groups[n];
+                if (group == null) continue;
 
-                Vector2 commentPos = GridToWindowPositionNoClipped(comment.position);
-                GUILayout.BeginArea(new Rect(commentPos, new Vector2(comment.size.x, comment.size.y)));
+                Vector2 groupPos = GridToWindowPositionNoClipped(group.position);
+                GUILayout.BeginArea(new Rect(groupPos, new Vector2(group.size.x, group.size.y)));
 
-                bool selected = selectionCache.Contains(comment);
+                bool selected = selectionCache.Contains(group);
 
                 if (selected) {
-                    GUIStyle style = new GUIStyle(NodeEditorResources.styles.commentBody);
+                    GUIStyle style = new GUIStyle(NodeEditorResources.styles.groupBody);
                     GUIStyle highlightStyle = new GUIStyle(NodeEditorResources.styles.nodeHighlight);
                     highlightStyle.padding = style.padding;
                     style.padding = new RectOffset();
@@ -480,41 +480,41 @@ namespace XNodeEditor {
                     GUI.color = NodeEditorPreferences.GetSettings().highlightColor;
                     GUILayout.BeginVertical(new GUIStyle(highlightStyle));
                 } else {
-                    GUIStyle style = new GUIStyle(NodeEditorResources.styles.commentBody);
+                    GUIStyle style = new GUIStyle(NodeEditorResources.styles.groupBody);
                     GUI.color = Color.white;
                     GUILayout.BeginVertical(style);
                 }
 
-                if (renamingComment == comment) {
-                    if (Selection.Contains(renamingComment)) {
+                if (renamingGroup == group) {
+                    if (Selection.Contains(renamingGroup)) {
                         int controlID = EditorGUIUtility.GetControlID(FocusType.Keyboard) + 1;
                         if (!renamingStarted) {
                             EditorGUIUtility.keyboardControl = controlID;
                             EditorGUIUtility.editingTextField = true;
                             renamingStarted = true;
                         }
-                        comment.comment = EditorGUILayout.TextField(comment.comment, NodeEditorResources.styles.commentHeader, GUILayout.Height(26));
+                        group.name = EditorGUILayout.TextField(group.name, NodeEditorResources.styles.groupHeader, GUILayout.Height(26));
                         if (!EditorGUIUtility.editingTextField) {
                             Debug.Log("Finish renaming");
-                            renamingComment = null;
+                            renamingGroup = null;
                             renamingStarted = false;
                         }
                     } else {
                         // Selection changed, so stop renaming.
-                        GUILayout.Label(comment.comment, NodeEditorResources.styles.commentHeader, GUILayout.Height(26));
-                        renamingComment = null;
+                        GUILayout.Label(group.name, NodeEditorResources.styles.groupHeader, GUILayout.Height(26));
+                        renamingGroup = null;
                         renamingStarted = false;
                     }
                 } else {
-                    GUIStyle blackStyle = new GUIStyle(NodeEditorResources.styles.commentHeader);
+                    GUIStyle blackStyle = new GUIStyle(NodeEditorResources.styles.groupHeader);
                     blackStyle.normal.textColor = new Color(0.2f, 0.2f, 0.2f);
 
-                    GUILayout.Label(comment.comment, blackStyle, GUILayout.Height(26));
+                    GUILayout.Label(group.name, blackStyle, GUILayout.Height(26));
 
                     Rect lastRect = GUILayoutUtility.GetLastRect();
                     lastRect.x -= 0.5f;
                     lastRect.y -= 1;
-                    GUI.Label(lastRect, comment.comment, NodeEditorResources.styles.commentHeader);
+                    GUI.Label(lastRect, group.name, NodeEditorResources.styles.groupHeader);
                 }
 
                 GUILayout.FlexibleSpace();
@@ -523,23 +523,23 @@ namespace XNodeEditor {
 
                 if (selected) GUILayout.EndVertical();
 
-                if (e.type != EventType.Layout && currentActivity != NodeActivity.ResizeComment) {
+                if (e.type != EventType.Layout && currentActivity != NodeActivity.ResizeGroup) {
                     //Check if we are hovering this node
-                    Vector2 commentSize = GUILayoutUtility.GetLastRect().size;
-                    Rect windowRect = new Rect(commentPos, commentSize);
+                    Vector2 groupSize = GUILayoutUtility.GetLastRect().size;
+                    Rect windowRect = new Rect(groupPos, groupSize);
 
                     float padding = 12;
 
                     // Resizing areas
-                    // Follows the NodeGraphCommentSide order
+                    // Follows the NodeGroupSide order
                     Rect[] resizeRects = new[] {
-                        new Rect(padding, 0, commentSize.x - padding * 2, padding),
-                        new Rect(commentSize.x - padding, 0, padding, padding),
-                        new Rect(commentSize.x - padding, padding, padding, commentSize.y - padding * 2),
-                        new Rect(commentSize.x - padding, commentSize.y - padding, padding, padding),
-                        new Rect(padding, commentSize.y - padding, commentSize.x - padding * 2, padding),
-                        new Rect(0, commentSize.y - padding, padding, padding),
-                        new Rect(0, padding, padding, commentSize.y - padding * 2),
+                        new Rect(padding, 0, groupSize.x - padding * 2, padding),
+                        new Rect(groupSize.x - padding, 0, padding, padding),
+                        new Rect(groupSize.x - padding, padding, padding, groupSize.y - padding * 2),
+                        new Rect(groupSize.x - padding, groupSize.y - padding, padding, padding),
+                        new Rect(padding, groupSize.y - padding, groupSize.x - padding * 2, padding),
+                        new Rect(0, groupSize.y - padding, padding, padding),
+                        new Rect(0, padding, padding, groupSize.y - padding * 2),
                         new Rect(0, 0, padding, padding),
                     };
 
@@ -559,35 +559,35 @@ namespace XNodeEditor {
                         EditorGUIUtility.AddCursorRect(resizeRects[i], resizeIcons[i]);
 
                         // Transform the locations now to gui space locations
-                        resizeRects[i].position += commentPos;
+                        resizeRects[i].position += groupPos;
                     }
 
                     if (windowRect.Contains(mousePos)) {
                         //If dragging a selection box, add nodes inside to selection
                         if (currentActivity == NodeActivity.DragGrid) {
-                            if (windowRect.Overlaps(selectionBox)) preSelection.Add(comment);
+                            if (windowRect.Overlaps(selectionBox)) preSelection.Add(group);
                         } else {
                             // Check if we should resize or select
                             bool resizeAreaClicked = false;
                             for (int i = 0; i < resizeRects.Length; i++) {
                                 if (resizeRects[i].Contains(mousePos)) {
-                                    resizingComment = comment;
-                                    // i can be cast to NodeGraphCommentSide as resizeRects
-                                    // has one element per NodeGraphCommentSide value and
+                                    resizingGroup = group;
+                                    // i can be cast to NodeGroupSide as resizeRects
+                                    // has one element per NodeGroupSide value and
                                     // uses the same order
-                                    resizingCommentSide = (NodeGraphCommentSide)i;
+                                    resizingGroupSide = (NodeGroupSide)i;
                                     resizeAreaClicked = true;
 
                                     break;
                                 }
                             }
 
-                            if (!resizeAreaClicked) hoveredComment = comment;
+                            if (!resizeAreaClicked) hoveredGroup = group;
                         }
                     }
                     //If dragging a selection box, add nodes inside to selection
                     if (currentActivity == NodeActivity.DragGrid) {
-                        if (windowRect.Overlaps(selectionBox)) preSelection.Add(comment);
+                        if (windowRect.Overlaps(selectionBox)) preSelection.Add(group);
                     }
                 }
 

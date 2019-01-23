@@ -158,10 +158,17 @@ namespace XNodeEditor {
 
         public void SelectNodesInGroup(XNode.NodeGroup group) {
             Rect groupRect = new Rect(group.position, group.size);
+
             for (int i = 0; i < graph.nodes.Count; i++) {
                 XNode.Node node = graph.nodes[i];
                 if (!node) continue;
                 if (groupRect.Contains(node.position)) SelectNode(node, true);
+            }
+
+            for (int i = 0; i < graph.groups.Count; i++) {
+                XNode.NodeGroup otherGroup = graph.groups[i];
+                if (!otherGroup || group == otherGroup) continue;
+                if (groupRect.Contains(otherGroup.position)) SelectGroup(otherGroup, true);
             }
         }
 
@@ -174,6 +181,13 @@ namespace XNodeEditor {
                 if (!node) continue;
 
                 if (groupRect.Contains(node.position)) selection.Remove(node);
+            }
+
+            for (int i = 0; i < graph.groups.Count; i++) {
+                XNode.NodeGroup otherGroup = graph.groups[i];
+                if (!otherGroup || group == otherGroup) continue;
+
+                if (groupRect.Contains(otherGroup.position)) selection.Remove(otherGroup);
             }
 
             Selection.objects = selection.ToArray();

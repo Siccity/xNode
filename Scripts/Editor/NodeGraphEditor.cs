@@ -80,6 +80,7 @@ namespace XNodeEditor {
             // Actions if only one node is selected
             if (Selection.objects.Length == 1 && Selection.activeObject is XNode.NodeGroup) {
                 XNode.NodeGroup group = Selection.activeObject as XNode.NodeGroup;
+                menu.AddItem(new GUIContent("Move To Top"), false, () => NodeEditorWindow.current.MoveGroupToTop(group));
                 menu.AddItem(new GUIContent("Rename"), false, NodeEditorWindow.current.RenameSelectedGroup);
             }
 

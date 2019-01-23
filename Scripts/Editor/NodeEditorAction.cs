@@ -464,6 +464,15 @@ namespace XNodeEditor {
             }
         }
 
+        /// <summary> Draw this group on top of other group by placing it last in the graph.groups list </summary>
+        public void MoveGroupToTop(XNode.NodeGroup group) {
+            int index;
+            while ((index = graph.groups.IndexOf(group)) != graph.groups.Count - 1) {
+                graph.groups[index] = graph.groups[index + 1];
+                graph.groups[index + 1] = group;
+            }
+        }
+
         /// <summary> Duplicate selected nodes and select the duplicates </summary>
         public void DuplicateSelectedNodes() {
             UnityEngine.Object[] newNodes = new UnityEngine.Object[Selection.objects.Length];

@@ -68,11 +68,15 @@ namespace XNodeEditor {
         public void BeginZoomed() {
             GUI.EndGroup();
 
+            Rect position = new Rect(this.position);
+            position.x = 0;
+            position.y = topPadding;
+
             Rect clippedArea = ScaleSizeBy(position, zoom, TopLeft(position));
             GUI.BeginGroup(clippedArea);
 
             _prevGuiMatrix = GUI.matrix;
-            Matrix4x4 translation = Matrix4x4.TRS(TopLeft(clippedArea), Quaternion.identity, Vector3.one);
+            Matrix4x4 translation = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, Vector3.one);
             Matrix4x4 scale = Matrix4x4.Scale(new Vector3(1.0f / zoom, 1.0f / zoom, 1.0f));
             GUI.matrix = translation * scale * translation.inverse * GUI.matrix;
 

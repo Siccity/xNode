@@ -22,12 +22,11 @@ namespace XNodeEditor {
         [NonSerialized] private List<Vector2> draggedOutputReroutes = new List<Vector2>();
         private RerouteReference hoveredReroute = new RerouteReference();
         private List<RerouteReference> selectedReroutes = new List<RerouteReference>();
-        private Rect nodeRects; // Is this used?
         private Vector2 dragBoxStart;
         private UnityEngine.Object[] preBoxSelection;
         private RerouteReference[] preBoxSelectionReroute;
         private Rect selectionBox;
-        private bool isDoubleClick  = false;
+        private bool isDoubleClick = false;
 
         private struct RerouteReference {
             public XNode.NodePort port;
@@ -175,7 +174,7 @@ namespace XNodeEditor {
                             } else if (e.control || e.shift) DeselectNode(hoveredNode);
 
                             // Cache double click state, but only act on it in MouseUp - Except ClickCount only works in mouseDown.
-                            isDoubleClick = ( e.clickCount == 2 );
+                            isDoubleClick = (e.clickCount == 2);
 
                             e.Use();
                             currentActivity = NodeActivity.HoldNode;
@@ -246,9 +245,8 @@ namespace XNodeEditor {
                             SelectNode(hoveredNode, false);
 
                             // Double click to center node
-                            if ( isDoubleClick )
-                            {
-                                Vector2 nodeDimension = nodeSizes.ContainsKey( hoveredNode ) ? nodeSizes[ hoveredNode ] / 2 : new Vector2(0f, 0f);
+                            if (isDoubleClick) {
+                                Vector2 nodeDimension = nodeSizes.ContainsKey(hoveredNode) ? nodeSizes[hoveredNode] / 2 : Vector2.zero;
                                 panOffset = -hoveredNode.position - nodeDimension;
                             }
                         }

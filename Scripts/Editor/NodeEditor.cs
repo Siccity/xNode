@@ -106,6 +106,7 @@ namespace XNodeEditor {
         }
 
         public void Rename(string newName) {
+            if (string.IsNullOrWhiteSpace(newName)) newName = UnityEditor.ObjectNames.NicifyVariableName(target.GetType().Name);
             target.name = newName;
             AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
         }

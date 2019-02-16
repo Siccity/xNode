@@ -63,7 +63,6 @@ namespace XNode {
         /// <summary> Used during node instantiation to fix null/misconfigured graph during OnEnable/Init. Set it before instantiating a node. Will automatically be unset during OnEnable </summary>
         public static NodeGraph graphHotfix;
 
-
         protected void OnEnable() {
             if (graphHotfix != null) graph = graphHotfix;
             graphHotfix = null;
@@ -210,6 +209,7 @@ namespace XNode {
             return JsonUtility.ToJson(this).GetHashCode();
         }
 
+#region Attributes
         /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInputPort(string)"/> </summary>
         [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
         public class InputAttribute : Attribute {
@@ -255,19 +255,19 @@ namespace XNode {
         }
 
         [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-        public class NodeTint : Attribute {
+        public class NodeTintAttribute : Attribute {
             public Color color;
             /// <summary> Specify a color for this node type </summary>
             /// <param name="r"> Red [0.0f .. 1.0f] </param>
             /// <param name="g"> Green [0.0f .. 1.0f] </param>
             /// <param name="b"> Blue [0.0f .. 1.0f] </param>
-            public NodeTint(float r, float g, float b) {
+            public NodeTintAttribute(float r, float g, float b) {
                 color = new Color(r, g, b);
             }
 
             /// <summary> Specify a color for this node type </summary>
             /// <param name="hex"> HEX color value </param>
-            public NodeTint(string hex) {
+            public NodeTintAttribute(string hex) {
                 ColorUtility.TryParseHtmlString(hex, out color);
             }
 
@@ -275,20 +275,21 @@ namespace XNode {
             /// <param name="r"> Red [0 .. 255] </param>
             /// <param name="g"> Green [0 .. 255] </param>
             /// <param name="b"> Blue [0 .. 255] </param>
-            public NodeTint(byte r, byte g, byte b) {
+            public NodeTintAttribute(byte r, byte g, byte b) {
                 color = new Color32(r, g, b, byte.MaxValue);
             }
         }
 
         [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-        public class NodeWidth : Attribute {
+        public class NodeWidthAttribute : Attribute {
             public int width;
             /// <summary> Specify a width for this node type </summary>
             /// <param name="width"> Width </param>
-            public NodeWidth(int width) {
+            public NodeWidthAttribute(int width) {
                 this.width = width;
             }
         }
+#endregion
 
         [Serializable] private class NodePortDictionary : Dictionary<string, NodePort>, ISerializationCallbackReceiver {
             [SerializeField] private List<string> keys = new List<string>();

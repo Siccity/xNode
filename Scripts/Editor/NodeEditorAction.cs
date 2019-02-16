@@ -60,7 +60,7 @@ namespace XNodeEditor {
                 case EventType.MouseDrag:
                     if (e.button == 0) {
                         if (IsDraggingPort) {
-                            if (IsHoveringPort && hoveredPort.IsInput) {
+                            if (IsHoveringPort && hoveredPort.IsInput && draggedOutput.CanConnectTo(hoveredPort)) {
                                 if (!draggedOutput.IsConnectedTo(hoveredPort)) {
                                     draggedOutputTarget = hoveredPort;
                                 }
@@ -422,7 +422,7 @@ namespace XNodeEditor {
                 Rect fromRect;
                 if (!_portConnectionPoints.TryGetValue(draggedOutput, out fromRect)) return;
                 Vector2 from = fromRect.center;
-                col.a = 0.6f;
+                col.a = draggedOutputTarget != null ? 1.0f : 0.6f;
                 Vector2 to = Vector2.zero;
                 for (int i = 0; i < draggedOutputReroutes.Count; i++) {
                     to = draggedOutputReroutes[i];

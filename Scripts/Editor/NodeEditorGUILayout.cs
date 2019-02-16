@@ -260,7 +260,7 @@ namespace XNodeEditor {
         /// <param name="serializedObject">The serializedObject of the node</param>
         /// <param name="connectionType">Connection type of added instance ports</param>
         /// <param name="onCreation">Called on the list on creation. Use this if you want to customize the created ReorderableList</param>
-        public static void InstancePortList(string fieldName, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple, Action<ReorderableList> onCreation = null) {
+        public static void InstancePortList(string fieldName, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple, XNode.Node.TypeConstraint typeConstraint = XNode.Node.TypeConstraint.None, Action<ReorderableList> onCreation = null) {
             XNode.Node node = serializedObject.targetObject as XNode.Node;
 
             Predicate<string> isMatchingInstancePort =
@@ -279,7 +279,7 @@ namespace XNodeEditor {
             // If a ReorderableList isn't cached for this array, do so.
             if (list == null) {
                 SerializedProperty arrayData = serializedObject.FindProperty(fieldName);
-                list = CreateReorderableList(fieldName, instancePorts, arrayData, type, serializedObject, io, connectionType, onCreation);
+                list = CreateReorderableList(fieldName, instancePorts, arrayData, type, serializedObject, io, connectionType, typeConstraint, onCreation);
                 if (reorderableListCache.TryGetValue(serializedObject.targetObject, out rlc)) rlc.Add(fieldName, list);
                 else reorderableListCache.Add(serializedObject.targetObject, new Dictionary<string, ReorderableList>() { { fieldName, list } });
             }
@@ -287,7 +287,7 @@ namespace XNodeEditor {
             list.DoLayoutList();
         }
 
-        private static ReorderableList CreateReorderableList(string fieldName, List<XNode.NodePort> instancePorts, SerializedProperty arrayData, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType, Action<ReorderableList> onCreation) {
+        private static ReorderableList CreateReorderableList(string fieldName, List<XNode.NodePort> instancePorts, SerializedProperty arrayData, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType, XNode.Node.TypeConstraint typeConstraint, Action<ReorderableList> onCreation) {
             bool hasArrayData = arrayData != null && arrayData.isArray;
             int arraySize = hasArrayData ? arrayData.arraySize : 0;
             XNode.Node node = serializedObject.targetObject as XNode.Node;
@@ -375,8 +375,8 @@ namespace XNodeEditor {
                     int i = 0;
                     while (node.HasPort(newName)) newName = fieldName + " " + (++i);
 
-                    if (io == XNode.NodePort.IO.Output) node.AddInstanceOutput(type, connectionType, newName);
-                    else node.AddInstanceInput(type, connectionType, newName);
+                    if (io == XNode.NodePort.IO.Output) node.AddInstanceOutput(type, connectionType, XNode.Node.TypeConstraint.None, newName);
+                    else node.AddInstanceInput(type, connectionType, typeConstraint, newName);
                     serializedObject.Update();
                     EditorUtility.SetDirty(node);
                     if (hasArrayData) arrayData.InsertArrayElementAtIndex(arraySize);
@@ -422,8 +422,8 @@ namespace XNodeEditor {
                     string newName = arrayData.name + " 0";
                     int i = 0;
                     while (node.HasPort(newName)) newName = arrayData.name + " " + (++i);
-                    if (io == XNode.NodePort.IO.Output) node.AddInstanceOutput(type, connectionType, newName);
-                    else node.AddInstanceInput(type, connectionType, newName);
+                    if (io == XNode.NodePort.IO.Output) node.AddInstanceOutput(type, connectionType, typeConstraint, newName);
+                    else node.AddInstanceInput(type, connectionType, typeConstraint, newName);
                     EditorUtility.SetDirty(node);
                     instancePortCount++;
                 }

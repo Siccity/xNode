@@ -205,10 +205,6 @@ namespace XNode {
             foreach (NodePort port in Ports) port.ClearConnections();
         }
 
-        public override int GetHashCode() {
-            return JsonUtility.ToJson(this).GetHashCode();
-        }
-
 #region Attributes
         /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInputPort(string)"/> </summary>
         [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]

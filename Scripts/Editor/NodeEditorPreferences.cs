@@ -81,7 +81,20 @@ namespace XNodeEditor {
             return settings[lastKey];
         }
 
+#if UNITY_2019_1_OR_NEWER
+        [SettingsProvider]
+        public static SettingsProvider CreateXNodeSettingsProvider() {
+            SettingsProvider provider = new SettingsProvider("Preferences/Node Editor", SettingsScope.User) {
+                guiHandler = (searchContext) => { XNodeEditor.NodeEditorPreferences.PreferencesGUI(); },
+                keywords = new HashSet<string>(new [] { "xNode", "node", "editor", "graph", "connections", "noodles", "ports" })
+            };
+            return provider;
+        }
+#endif
+
+#if !UNITY_2019_1_OR_NEWER
         [PreferenceItem("Node Editor")]
+#endif
         private static void PreferencesGUI() {
             VerifyLoaded();
             Settings settings = NodeEditorPreferences.settings[lastKey];

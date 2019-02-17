@@ -235,6 +235,7 @@ namespace XNodeEditor {
                             // If click outside node, release field focus
                             if (!isPanning) {
                                 EditorGUI.FocusTextInControl(null);
+                                EditorGUIUtility.editingTextField = false;
                             }
                             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
                         }

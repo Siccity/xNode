@@ -60,7 +60,7 @@ namespace XNodeEditor {
                 case EventType.MouseDrag:
                     if (e.button == 0) {
                         if (IsDraggingPort) {
-                            if (IsHoveringPort && hoveredPort.IsInput) {
+                            if (IsHoveringPort && hoveredPort.IsInput && draggedOutput.CanConnectTo(hoveredPort)) {
                                 if (!draggedOutput.IsConnectedTo(hoveredPort)) {
                                     draggedOutputTarget = hoveredPort;
                                 }
@@ -290,7 +290,7 @@ namespace XNodeEditor {
                 case EventType.KeyDown:
                     if (EditorGUIUtility.editingTextField) break;
                     else if (e.keyCode == KeyCode.F) Home();
-                    if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX) {
+                    if (IsMac()) {
                         if (e.keyCode == KeyCode.Return) RenameSelectedNode();
                     } else {
                         if (e.keyCode == KeyCode.F2) RenameSelectedNode();
@@ -301,7 +301,7 @@ namespace XNodeEditor {
                     if (e.commandName == "SoftDelete") {
                         if (e.type == EventType.ExecuteCommand) RemoveSelectedNodes();
                         e.Use();
-                    } else if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX && e.commandName == "Delete") {
+                    } else if (IsMac() && e.commandName == "Delete") {
                         if (e.type == EventType.ExecuteCommand) RemoveSelectedNodes();
                         e.Use();
                     } else if (e.commandName == "Duplicate") {
@@ -318,6 +318,14 @@ namespace XNodeEditor {
                     }
                     break;
             }
+        }
+
+        public bool IsMac() {
+#if UNITY_2017_1_OR_NEWER
+            return SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX;
+#else
+            return SystemInfo.operatingSystem.StartsWith("Mac");
+#endif
         }
 
         private void RecalculateDragOffsets(Event current) {
@@ -423,7 +431,7 @@ namespace XNodeEditor {
                 Rect fromRect;
                 if (!_portConnectionPoints.TryGetValue(draggedOutput, out fromRect)) return;
                 Vector2 from = fromRect.center;
-                col.a = 0.6f;
+                col.a = draggedOutputTarget != null ? 1.0f : 0.6f;
                 Vector2 to = Vector2.zero;
                 for (int i = 0; i < draggedOutputReroutes.Count; i++) {
                     to = draggedOutputReroutes[i];

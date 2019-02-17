@@ -154,7 +154,7 @@ namespace XNodeEditor {
 
         private static System.Type GetType(SerializedProperty property) {
             System.Type parentType = property.serializedObject.targetObject.GetType();
-            System.Reflection.FieldInfo fi = parentType.GetField(property.propertyPath);
+            System.Reflection.FieldInfo fi = NodeEditorWindow.GetFieldInfo(property.serializedObject.targetObject.GetType(), property.name);
             return fi.FieldType;
         }
 

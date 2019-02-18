@@ -123,8 +123,9 @@ namespace XNodeEditor {
 
         public Vector2 GridToWindowPositionNoClipped(Vector2 gridPosition) {
             Vector2 center = position.size * 0.5f;
-            float xOffset = (center.x * zoom + (panOffset.x + gridPosition.x));
-            float yOffset = (center.y * zoom + (panOffset.y + gridPosition.y));
+            // UI Sharpness complete fix - Round final offset not panOffset
+            float xOffset = Mathf.Round(center.x * zoom + (panOffset.x + gridPosition.x));
+            float yOffset = Mathf.Round(center.y * zoom + (panOffset.y + gridPosition.y));
             return new Vector2(xOffset, yOffset);
         }
 

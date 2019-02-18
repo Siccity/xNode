@@ -22,12 +22,11 @@ namespace XNodeEditor {
         [NonSerialized] private List<Vector2> draggedOutputReroutes = new List<Vector2>();
         private RerouteReference hoveredReroute = new RerouteReference();
         private List<RerouteReference> selectedReroutes = new List<RerouteReference>();
-        private Rect nodeRects; // Is this used?
         private Vector2 dragBoxStart;
         private UnityEngine.Object[] preBoxSelection;
         private RerouteReference[] preBoxSelectionReroute;
         private Rect selectionBox;
-        private bool isDoubleClick  = false;
+        private bool isDoubleClick = false;
 
         private struct RerouteReference {
             public XNode.NodePort port;
@@ -61,7 +60,7 @@ namespace XNodeEditor {
                 case EventType.MouseDrag:
                     if (e.button == 0) {
                         if (IsDraggingPort) {
-                            if (IsHoveringPort && hoveredPort.IsInput) {
+                            if (IsHoveringPort && hoveredPort.IsInput && draggedOutput.CanConnectTo(hoveredPort)) {
                                 if (!draggedOutput.IsConnectedTo(hoveredPort)) {
                                     draggedOutputTarget = hoveredPort;
                                 }
@@ -170,7 +169,7 @@ namespace XNodeEditor {
                             } else if (e.control || e.shift) DeselectNode(hoveredNode);
 
                             // Cache double click state, but only act on it in MouseUp - Except ClickCount only works in mouseDown.
-                            isDoubleClick = ( e.clickCount == 2 );
+                            isDoubleClick = (e.clickCount == 2);
 
                             e.Use();
                             currentActivity = NodeActivity.HoldNode;
@@ -231,6 +230,7 @@ namespace XNodeEditor {
                             // If click outside node, release field focus
                             if (!isPanning) {
                                 EditorGUI.FocusTextInControl(null);
+                                EditorGUIUtility.editingTextField = false;
                             }
                             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
                         }
@@ -241,9 +241,8 @@ namespace XNodeEditor {
                             SelectNode(hoveredNode, false);
 
                             // Double click to center node
-                            if ( isDoubleClick )
-                            {
-                                Vector2 nodeDimension = nodeSizes.ContainsKey( hoveredNode ) ? nodeSizes[ hoveredNode ] / 2 : new Vector2(0f, 0f);
+                            if (isDoubleClick) {
+                                Vector2 nodeDimension = nodeSizes.ContainsKey(hoveredNode) ? nodeSizes[hoveredNode] / 2 : Vector2.zero;
                                 panOffset = -hoveredNode.position - nodeDimension;
                             }
                         }
@@ -287,7 +286,7 @@ namespace XNodeEditor {
                 case EventType.KeyDown:
                     if (EditorGUIUtility.editingTextField) break;
                     else if (e.keyCode == KeyCode.F) Home();
-                    if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX) {
+                    if (IsMac()) {
                         if (e.keyCode == KeyCode.Return) RenameSelectedNode();
                     } else {
                         if (e.keyCode == KeyCode.F2) RenameSelectedNode();
@@ -298,7 +297,7 @@ namespace XNodeEditor {
                     if (e.commandName == "SoftDelete") {
                         if (e.type == EventType.ExecuteCommand) RemoveSelectedNodes();
                         e.Use();
-                    } else if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX && e.commandName == "Delete") {
+                    } else if (IsMac() && e.commandName == "Delete") {
                         if (e.type == EventType.ExecuteCommand) RemoveSelectedNodes();
                         e.Use();
                     } else if (e.commandName == "Duplicate") {
@@ -315,6 +314,14 @@ namespace XNodeEditor {
                     }
                     break;
             }
+        }
+
+        public bool IsMac() {
+#if UNITY_2017_1_OR_NEWER
+            return SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX;
+#else
+            return SystemInfo.operatingSystem.StartsWith("Mac");
+#endif
         }
 
         private void RecalculateDragOffsets(Event current) {
@@ -420,7 +427,7 @@ namespace XNodeEditor {
                 Rect fromRect;
                 if (!_portConnectionPoints.TryGetValue(draggedOutput, out fromRect)) return;
                 Vector2 from = fromRect.center;
-                col.a = 0.6f;
+                col.a = draggedOutputTarget != null ? 1.0f : 0.6f;
                 Vector2 to = Vector2.zero;
                 for (int i = 0; i < draggedOutputReroutes.Count; i++) {
                     to = draggedOutputReroutes[i];

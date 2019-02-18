@@ -24,6 +24,7 @@ With a minimal footprint, it is ideal as a base for custom state machines, dialo
 * No runtime reflection (unless you need to edit/build node graphs at runtime. In this case, all reflection is cached.)
 * Does not rely on any 3rd party plugins
 * Custom node inspector code is very similar to regular custom inspector code
+* Supported from Unity 5.3 and up
 
 ### Wiki
 * [Getting started](https://github.com/Siccity/xNode/wiki/Getting%20Started) - create your very first node node and graph

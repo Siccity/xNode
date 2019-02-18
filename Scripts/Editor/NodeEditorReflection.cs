@@ -42,9 +42,9 @@ namespace XNodeEditor {
         public static Dictionary<Type, Color> GetNodeTint() {
             Dictionary<Type, Color> tints = new Dictionary<Type, Color>();
             for (int i = 0; i < nodeTypes.Length; i++) {
-                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.Node.NodeTint), true);
+                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.Node.NodeTintAttribute), true);
                 if (attribs == null || attribs.Length == 0) continue;
-                XNode.Node.NodeTint attrib = attribs[0] as XNode.Node.NodeTint;
+                XNode.Node.NodeTintAttribute attrib = attribs[0] as XNode.Node.NodeTintAttribute;
                 tints.Add(nodeTypes[i], attrib.color);
             }
             return tints;
@@ -53,12 +53,21 @@ namespace XNodeEditor {
         public static Dictionary<Type, int> GetNodeWidth() {
             Dictionary<Type, int> widths = new Dictionary<Type, int>();
             for (int i = 0; i < nodeTypes.Length; i++) {
-                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.Node.NodeWidth), true);
+                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.Node.NodeWidthAttribute), true);
                 if (attribs == null || attribs.Length == 0) continue;
-                XNode.Node.NodeWidth attrib = attribs[0] as XNode.Node.NodeWidth;
+                XNode.Node.NodeWidthAttribute attrib = attribs[0] as XNode.Node.NodeWidthAttribute;
                 widths.Add(nodeTypes[i], attrib.width);
             }
             return widths;
+        }
+
+        /// <summary> Get FieldInfo of a field, including those that are private and/or inherited </summary>
+        public static FieldInfo GetFieldInfo(Type type, string fieldName) {
+            // If we can't find field in the first run, it's probably a private field in a base class.
+            FieldInfo field = type.GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            // Search base classes for private fields only. Public fields are found above
+            while (field == null && (type = type.BaseType) != typeof(XNode.Node)) field = type.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
+            return field;
         }
 
         /// <summary> Get all classes deriving from baseType via reflection </summary>

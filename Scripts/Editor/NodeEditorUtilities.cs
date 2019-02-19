@@ -25,7 +25,7 @@ namespace XNodeEditor {
 
         public static bool GetAttrib<T>(object[] attribs, out T attribOut) where T : Attribute {
             for (int i = 0; i < attribs.Length; i++) {
-                if (attribs[i].GetType() == typeof(T)) {
+                if (attribs[i] is T){
                     attribOut = attribs[i] as T;
                     return true;
                 }
@@ -43,7 +43,7 @@ namespace XNodeEditor {
                 attribOut = null;
                 return false;
             }
-            object[] attribs = field.GetCustomAttributes(typeof(T), false);
+            object[] attribs = field.GetCustomAttributes(typeof(T), true);
             return GetAttrib(attribs, out attribOut);
         }
 

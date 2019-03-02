@@ -1,4 +1,4 @@
-![alt text](https://user-images.githubusercontent.com/37786733/41541140-71602302-731a-11e8-9434-79b3a57292b6.png)
+<img align="right" width="100" height="100" src="https://user-images.githubusercontent.com/37786733/41541140-71602302-731a-11e8-9434-79b3a57292b6.png">
 
 [![Discord](https://img.shields.io/discord/361769369404964864.svg)](https://discord.gg/qgPrHv4)
 [![GitHub issues](https://img.shields.io/github/issues/Siccity/xNode.svg)](https://github.com/Siccity/xNode/issues)
@@ -15,7 +15,9 @@ Thinking of developing a node-based plugin? Then this is for you. You can downlo
 xNode is super userfriendly, intuitive and will help you reap the benefits of node graphs in no time.
 With a minimal footprint, it is ideal as a base for custom state machines, dialogue systems, decision makers etc.
 
-![editor](https://user-images.githubusercontent.com/6402525/33150712-01d60602-cfd5-11e7-83b4-eb008fd9d711.png)
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/6402525/53689100-3821e680-3d4e-11e9-8440-e68bd802bfd9.png">
+</p>
 
 ### Key features
 * Lightweight in runtime

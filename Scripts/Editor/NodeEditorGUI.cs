@@ -117,20 +117,25 @@ namespace XNodeEditor {
         }
 
         /// <summary> Draw a bezier from startpoint to endpoint, both in grid coordinates </summary>
-        public void DrawConnection(Vector2 startPoint, Vector2 endPoint, Color col) {
+        public void DrawNoodle(Vector2 startPoint, XNode.NodePort startPort, Vector2 endPoint, XNode.NodePort endPort, Color col) {
             startPoint = GridToWindowPosition(startPoint);
             endPoint = GridToWindowPosition(endPoint);
 
             switch (NodeEditorPreferences.GetSettings().noodleType) {
                 case NodeEditorPreferences.NoodleType.Curve:
-                    Vector2 startTangent = startPoint;
-                    if (startPoint.x < endPoint.x) startTangent.x = Mathf.LerpUnclamped(startPoint.x, endPoint.x, 0.7f);
-                    else startTangent.x = Mathf.LerpUnclamped(startPoint.x, endPoint.x, -0.7f);
+                    float minTangent = Vector2.Distance(endPoint, startPoint)*0.5f;
 
-                    Vector2 endTangent = endPoint;
-                    if (startPoint.x > endPoint.x) endTangent.x = Mathf.LerpUnclamped(endPoint.x, startPoint.x, -0.7f);
-                    else endTangent.x = Mathf.LerpUnclamped(endPoint.x, startPoint.x, 0.7f);
-                    Handles.DrawBezier(startPoint, endPoint, startTangent, endTangent, col, null, 4);
+                    Vector2 startTangent = Vector2.zero;
+                    startTangent.x = (endPoint.x - startPoint.x) * 0.7f;
+                    startTangent.x = Mathf.Sign(startTangent.x) * Mathf.Max(Mathf.Abs(startTangent.x), minTangent);
+                    if (startPort != null) startTangent.x = Mathf.Abs(startTangent.x);
+
+                    Vector2 endTangent = Vector2.zero;
+                    endTangent.x = (startPoint.x - endPoint.x) * 0.7f;
+                    endTangent.x = Mathf.Sign(endTangent.x) * Mathf.Max(Mathf.Abs(endTangent.x), minTangent);
+                    if (endPort != null) endTangent.x = -Mathf.Abs(endTangent.x);
+
+                    Handles.DrawBezier(startPoint, endPoint, startPoint + startTangent, endPoint + endTangent, col, null, 4);
                     break;
                 case NodeEditorPreferences.NoodleType.Line:
                     Handles.color = col;
@@ -201,12 +206,12 @@ namespace XNodeEditor {
                         // Loop through reroute points and draw the path
                         for (int i = 0; i < reroutePoints.Count; i++) {
                             to = reroutePoints[i];
-                            DrawConnection(from, to, connectionColor);
+                            DrawNoodle(from, i == 0 ? output : null, to, null, connectionColor);
                             from = to;
                         }
                         to = toRect.center;
 
-                        DrawConnection(from, to, connectionColor);
+                        DrawNoodle(from, reroutePoints.Any() ? null : output, to, input, connectionColor);
 
                         // Loop through reroute points again and draw the points
                         for (int i = 0; i < reroutePoints.Count; i++) {

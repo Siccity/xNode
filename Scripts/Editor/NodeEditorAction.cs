@@ -431,11 +431,11 @@ namespace XNodeEditor {
                 Vector2 to = Vector2.zero;
                 for (int i = 0; i < draggedOutputReroutes.Count; i++) {
                     to = draggedOutputReroutes[i];
-                    DrawConnection(from, to, col);
+                    DrawNoodle(from, i == 0 ? draggedOutput : null, to, null, col);
                     from = to;
                 }
                 to = draggedOutputTarget != null ? portConnectionPoints[draggedOutputTarget].center : WindowToGridPosition(Event.current.mousePosition);
-                DrawConnection(from, to, col);
+                DrawNoodle(from, draggedOutputReroutes.Any() ? null : draggedOutput, to, draggedOutputTarget, col);
 
                 Color bgcol = Color.black;
                 Color frcol = col;

@@ -64,6 +64,7 @@ namespace XNodeEditor {
 
             // Iterate through instance ports and draw them in the order in which they are serialized
             foreach(XNode.NodePort instancePort in target.InstancePorts) {
+                if (NodeEditorGUILayout.IsInstancePortListPort(instancePort)) continue;
                 NodeEditorGUILayout.PortField(instancePort);
             }
 

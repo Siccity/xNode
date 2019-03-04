@@ -254,6 +254,18 @@ namespace XNodeEditor {
             GUI.color = col;
         }
 
+        /// <summary> Is this port part of an InstancePortList? </summary>
+        public static bool IsInstancePortListPort(XNode.NodePort port) {
+            string[] parts = port.fieldName.Split(' ');
+            if (parts.Length != 2) return false;
+            Dictionary<string, ReorderableList> cache;
+            if (reorderableListCache.TryGetValue(port.node, out cache)) {
+                ReorderableList list;
+                if (cache.TryGetValue(parts[0], out list)) return true;
+            }
+            return false;
+        }
+
         /// <summary> Draw an editable list of instance ports. Port names are named as "[fieldName] [index]" </summary>
         /// <param name="fieldName">Supply a list for editable values</param>
         /// <param name="type">Value type of added instance ports</param>

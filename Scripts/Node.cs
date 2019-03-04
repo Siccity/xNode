@@ -127,6 +127,8 @@ namespace XNode {
 
         /// <summary> Remove an instance port from the node </summary>
         public void RemoveInstancePort(string fieldName) {
+            NodePort instancePort = GetPort(fieldName);
+            if (instancePort == null) throw new ArgumentException("port " + fieldName + " doesn't exist");
             RemoveInstancePort(GetPort(fieldName));
         }
 

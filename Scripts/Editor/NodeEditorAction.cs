@@ -366,7 +366,12 @@ namespace XNodeEditor {
         public void RenameSelectedNode() {
             if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
                 XNode.Node node = Selection.activeObject as XNode.Node;
-                NodeEditor.GetEditor(node).InitiateRename();
+                Vector2 size;
+                if (nodeSizes.TryGetValue(node, out size)) {
+                    RenamePopup.Show(Selection.activeObject, size.x);
+                } else {
+                    RenamePopup.Show(Selection.activeObject);
+                }
             }
         }
 

@@ -23,6 +23,7 @@ namespace XNodeEditor {
             [SerializeField] private Color32 _gridBgColor = new Color(0.18f, 0.18f, 0.18f);
             public Color32 gridBgColor { get { return _gridBgColor; } set { _gridBgColor = value; _gridTexture = null; } }
 
+            public float zoomOutLimit = 5f;
             public Color32 highlightColor = new Color32(255, 255, 255, 255);
             public bool gridSnap = true;
             public bool autoSave = true;
@@ -113,7 +114,7 @@ namespace XNodeEditor {
             EditorGUILayout.LabelField("Grid", EditorStyles.boldLabel);
             settings.gridSnap = EditorGUILayout.Toggle(new GUIContent("Snap", "Hold CTRL in editor to invert"), settings.gridSnap);
             settings.zoomToMouse = EditorGUILayout.Toggle(new GUIContent("Zoom to Mouse", "Zooms towards mouse position"), settings.zoomToMouse);
-
+            settings.zoomOutLimit = EditorGUILayout.FloatField(new GUIContent("Zoom out Limit", "Upper limit to zoom"), settings.zoomOutLimit);
             settings.gridLineColor = EditorGUILayout.ColorField("Color", settings.gridLineColor);
             settings.gridBgColor = EditorGUILayout.ColorField(" ", settings.gridBgColor);
             if (GUI.changed) {

@@ -275,13 +275,17 @@ namespace XNodeEditor {
         public static void InstancePortList(string fieldName, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple, XNode.Node.TypeConstraint typeConstraint = XNode.Node.TypeConstraint.None, Action<ReorderableList> onCreation = null) {
             XNode.Node node = serializedObject.targetObject as XNode.Node;
 
-            Predicate<string> isMatchingInstancePort =
-                x => {
-                    string[] split = x.Split(' ');
-                    if (split != null && split.Length == 2) return split[0] == fieldName;
-                    else return false;
-                };
-            List<XNode.NodePort> instancePorts = node.InstancePorts.Where(x => isMatchingInstancePort(x.fieldName)).OrderBy(x => x.fieldName).ToList();
+            var indexedPorts = node.InstancePorts.Select(x => {
+                string[] split = x.fieldName.Split(' ');
+                if (split != null && split.Length == 2 && split[0] == fieldName) {
+                    int i = -1;
+                    if (int.TryParse(split[1], out i)) {
+                        return new { index = i, port = x };
+                    }
+                }
+                return new { index = -1, port = (XNode.NodePort) null };
+            });
+            List<XNode.NodePort> instancePorts = indexedPorts.OrderBy(x => x.index).Select(x => x.port).ToList();
 
             ReorderableList list = null;
             Dictionary<string, ReorderableList> rlc;
@@ -400,13 +404,17 @@ namespace XNodeEditor {
             list.onRemoveCallback =
                 (ReorderableList rl) => {
 
-                    Predicate<string> isMatchingInstancePort =
-                        x => {
-                            string[] split = x.Split(' ');
-                            if (split != null && split.Length == 2) return split[0] == fieldName;
-                            else return false;
-                        };
-                    instancePorts = node.InstancePorts.Where(x => isMatchingInstancePort(x.fieldName)).OrderBy(x => x.fieldName).ToList();
+                    var indexedPorts = node.InstancePorts.Select(x => {
+                        string[] split = x.fieldName.Split(' ');
+                        if (split != null && split.Length == 2 && split[0] == fieldName) {
+                            int i = -1;
+                            if (int.TryParse(split[1], out i)) {
+                                return new { index = i, port = x };
+                            }
+                        }
+                        return new { index = -1, port = (XNode.NodePort) null };
+                    });
+                    instancePorts = indexedPorts.OrderBy(x => x.index).Select(x => x.port).ToList();
 
                     int index = rl.index;
                     // Clear the removed ports connections

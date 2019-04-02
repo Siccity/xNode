@@ -72,11 +72,8 @@ namespace XNodeEditor {
 
         /// <summary> Handle Selection Change events</summary>
         private void OnSelectionChange() {
-            if (!EditorApplication.isPlaying)
-                return;
-
             var nodeGraph = Selection.activeObject as XNode.NodeGraph;
-            if (nodeGraph) {
+            if (nodeGraph && !AssetDatatbase.Contains(nodeGraph)) {
                 Open(nodeGraph);
             }
         }

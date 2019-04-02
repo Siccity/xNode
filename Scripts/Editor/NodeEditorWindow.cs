@@ -70,6 +70,17 @@ namespace XNodeEditor {
             if (graphEditor != null && NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 
+        /// <summary> Handle Selection Change events</summary>
+        private void OnSelectionChange() {
+            if (!EditorApplication.isPlaying)
+                return;
+
+            var nodeGraph = Selection.activeObject as XNode.NodeGraph;
+            if (nodeGraph) {
+                Open(nodeGraph);
+            }
+        }
+
         /// <summary> Create editor window </summary>
         public static NodeEditorWindow Init() {
             NodeEditorWindow w = CreateInstance<NodeEditorWindow>();
@@ -147,12 +158,19 @@ namespace XNodeEditor {
         public static bool OnOpen(int instanceID, int line) {
             XNode.NodeGraph nodeGraph = EditorUtility.InstanceIDToObject(instanceID) as XNode.NodeGraph;
             if (nodeGraph != null) {
-                NodeEditorWindow w = GetWindow(typeof(NodeEditorWindow), false, "xNode", true) as NodeEditorWindow;
-                w.wantsMouseMove = true;
-                w.graph = nodeGraph;
+                Open(nodeGraph);
                 return true;
             }
             return false;
+        }
+
+        public static void Open(XNode.NodeGraph graph) {
+            if (!graph)
+                return;
+
+            NodeEditorWindow w = GetWindow(typeof(NodeEditorWindow), false, "xNode", true) as NodeEditorWindow;
+            w.wantsMouseMove = true;
+            w.graph = graph;
         }
 
         /// <summary> Repaint all open NodeEditorWindows. </summary>

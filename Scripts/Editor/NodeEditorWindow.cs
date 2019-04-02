@@ -164,6 +164,7 @@ namespace XNodeEditor {
             return false;
         }
 
+        /// <summary>Open the provided graph in the NodeEditor</summary>
         public static void Open(XNode.NodeGraph graph) {
             if (!graph)
                 return;

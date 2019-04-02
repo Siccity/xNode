@@ -73,7 +73,7 @@ namespace XNodeEditor {
         /// <summary> Handle Selection Change events</summary>
         private void OnSelectionChange() {
             var nodeGraph = Selection.activeObject as XNode.NodeGraph;
-            if (nodeGraph && !AssetDatatbase.Contains(nodeGraph)) {
+            if (nodeGraph && !AssetDatabase.Contains(nodeGraph)) {
                 Open(nodeGraph);
             }
         }

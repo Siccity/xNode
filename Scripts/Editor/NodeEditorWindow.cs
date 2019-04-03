@@ -70,9 +70,15 @@ namespace XNodeEditor {
             if (graphEditor != null && NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 
+        [InitializeOnLoadMethod]
+        private static void OnLoad() {
+            Selection.selectionChanged -= OnSelectionChanged;
+            Selection.selectionChanged += OnSelectionChanged;
+        }
+
         /// <summary> Handle Selection Change events</summary>
-        private void OnSelectionChange() {
-            var nodeGraph = Selection.activeObject as XNode.NodeGraph;
+        private static void OnSelectionChanged() {
+            XNode.NodeGraph nodeGraph = Selection.activeObject as XNode.NodeGraph;
             if (nodeGraph && !AssetDatabase.Contains(nodeGraph)) {
                 Open(nodeGraph);
             }
@@ -163,8 +169,7 @@ namespace XNodeEditor {
 
         /// <summary>Open the provided graph in the NodeEditor</summary>
         public static void Open(XNode.NodeGraph graph) {
-            if (!graph)
-                return;
+            if (!graph) return;
 
             NodeEditorWindow w = GetWindow(typeof(NodeEditorWindow), false, "xNode", true) as NodeEditorWindow;
             w.wantsMouseMove = true;

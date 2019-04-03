@@ -57,6 +57,10 @@ namespace XNodeEditor {
             NodeEditorWindow.AddCustomContextMenuItems(menu, target);
         }
 
+        public virtual Color GetPortColor(XNode.NodePort port) {
+            return GetTypeColor(port.ValueType);
+        }
+
         public virtual Color GetTypeColor(Type type) {
             return NodeEditorPreferences.GetTypeColor(type);
         }

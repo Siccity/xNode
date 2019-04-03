@@ -70,6 +70,20 @@ namespace XNodeEditor {
             if (graphEditor != null && NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 
+        [InitializeOnLoadMethod]
+        private static void OnLoad() {
+            Selection.selectionChanged -= OnSelectionChanged;
+            Selection.selectionChanged += OnSelectionChanged;
+        }
+
+        /// <summary> Handle Selection Change events</summary>
+        private static void OnSelectionChanged() {
+            XNode.NodeGraph nodeGraph = Selection.activeObject as XNode.NodeGraph;
+            if (nodeGraph && !AssetDatabase.Contains(nodeGraph)) {
+                Open(nodeGraph);
+            }
+        }
+
         /// <summary> Create editor window </summary>
         public static NodeEditorWindow Init() {
             NodeEditorWindow w = CreateInstance<NodeEditorWindow>();
@@ -147,12 +161,19 @@ namespace XNodeEditor {
         public static bool OnOpen(int instanceID, int line) {
             XNode.NodeGraph nodeGraph = EditorUtility.InstanceIDToObject(instanceID) as XNode.NodeGraph;
             if (nodeGraph != null) {
-                NodeEditorWindow w = GetWindow(typeof(NodeEditorWindow), false, "xNode", true) as NodeEditorWindow;
-                w.wantsMouseMove = true;
-                w.graph = nodeGraph;
+                Open(nodeGraph);
                 return true;
             }
             return false;
+        }
+
+        /// <summary>Open the provided graph in the NodeEditor</summary>
+        public static void Open(XNode.NodeGraph graph) {
+            if (!graph) return;
+
+            NodeEditorWindow w = GetWindow(typeof(NodeEditorWindow), false, "xNode", true) as NodeEditorWindow;
+            w.wantsMouseMove = true;
+            w.graph = graph;
         }
 
         /// <summary> Repaint all open NodeEditorWindows. </summary>

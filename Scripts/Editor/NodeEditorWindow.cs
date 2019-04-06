@@ -66,7 +66,7 @@ namespace XNodeEditor {
 
         void OnFocus() {
             current = this;
-            graphEditor = NodeGraphEditor.GetEditor(graph);
+            ValidateGraphEditor();
             if (graphEditor != null && NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 
@@ -81,6 +81,15 @@ namespace XNodeEditor {
             XNode.NodeGraph nodeGraph = Selection.activeObject as XNode.NodeGraph;
             if (nodeGraph && !AssetDatabase.Contains(nodeGraph)) {
                 Open(nodeGraph);
+            }
+        }
+
+        /// <summary> Make sure the graph editor is assigned and to the right object </summary>
+        private void ValidateGraphEditor() {
+            NodeGraphEditor graphEditor = NodeGraphEditor.GetEditor(graph, this);
+            if (this.graphEditor != graphEditor) {
+                this.graphEditor = graphEditor;
+                graphEditor.OnOpen();
             }
         }
 

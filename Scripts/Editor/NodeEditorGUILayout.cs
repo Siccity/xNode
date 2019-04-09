@@ -117,18 +117,15 @@ namespace XNodeEditor {
                     }
                     switch (showBacking) {
                         case XNode.Node.ShowBackingValue.Unconnected:
-                            // Display a label if port is connected
-                            if (port.IsConnected) EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName), NodeEditorResources.OutputPort, GUILayout.MinWidth(30));
-                            // Display an editable property field if port is not connected
-                            else EditorGUILayout.PropertyField(property, label, includeChildren, GUILayout.MinWidth(30));
+                            DrawStyledPropertyField(property, label, NodeEditorResources.OutputPort, showBacking: !port.IsConnected, includeChildren);
                             break;
                         case XNode.Node.ShowBackingValue.Never:
                             // Display a label
                             EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName), NodeEditorResources.OutputPort, GUILayout.MinWidth(30));
                             break;
                         case XNode.Node.ShowBackingValue.Always:
+                            DrawStyledPropertyField(property, label, NodeEditorResources.OutputPort, showBacking: true, includeChildren);
                             // Display an editable property field
-                            EditorGUILayout.PropertyField(property, label, includeChildren, GUILayout.MinWidth(30));
                             break;
                     }
 

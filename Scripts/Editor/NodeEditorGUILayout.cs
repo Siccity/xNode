@@ -76,14 +76,14 @@ namespace XNodeEditor {
                     GUIStyle inputStyle = NodeEditorResources.styles.inputPort;
                     switch (showBacking) {
                         case XNode.Node.ShowBackingValue.Unconnected:
-                            DrawStyledPropertyField(property, label, inputStyle, showBacking: !port.IsConnected, includeChildren);
+                            DrawStyledPropertyField(property, label, inputStyle, !port.IsConnected, includeChildren);
                             break;
                         case XNode.Node.ShowBackingValue.Never:
                             // Display a label
                             EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName), inputStyle);
                             break;
                         case XNode.Node.ShowBackingValue.Always:
-                            DrawStyledPropertyField(property, label, inputStyle, showBacking: true, includeChildren);
+                            DrawStyledPropertyField(property, label, inputStyle, true, includeChildren);
                             break;
                     }
 
@@ -117,14 +117,14 @@ namespace XNodeEditor {
                     }
                     switch (showBacking) {
                         case XNode.Node.ShowBackingValue.Unconnected:
-                            DrawStyledPropertyField(property, label, NodeEditorResources.OutputPort, showBacking: !port.IsConnected, includeChildren);
+                            DrawStyledPropertyField(property, label, NodeEditorResources.OutputPort, !port.IsConnected, includeChildren);
                             break;
                         case XNode.Node.ShowBackingValue.Never:
                             // Display a label
                             EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName), NodeEditorResources.OutputPort, GUILayout.MinWidth(30));
                             break;
                         case XNode.Node.ShowBackingValue.Always:
-                            DrawStyledPropertyField(property, label, NodeEditorResources.OutputPort, showBacking: true, includeChildren);
+                            DrawStyledPropertyField(property, label, NodeEditorResources.OutputPort, true, includeChildren);
                             // Display an editable property field
                             break;
                     }

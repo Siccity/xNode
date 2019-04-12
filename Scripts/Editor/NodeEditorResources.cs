@@ -16,9 +16,9 @@ namespace XNodeEditor {
         // Styles
         public static Styles styles { get { return _styles != null ? _styles : _styles = new Styles(); } }
         public static Styles _styles = null;
-        public static GUIStyle OutputPort { get { return new GUIStyle(EditorStyles.label) { alignment = TextAnchor.UpperRight }; } }
+        public static GUIStyle OutputPort { get { return styles.outputPort;} }
         public class Styles {
-            public GUIStyle inputPort, nodeHeader, nodeBody, tooltip, nodeHighlight, nodeProperty;
+            public GUIStyle inputPort, nodeHeader, nodeBody, tooltip, nodeHighlight, nodeProperty, outputPort, foldout;
 
             public Styles() {
                 GUIStyle baseStyle = new GUIStyle(EditorStyles.label);
@@ -26,8 +26,14 @@ namespace XNodeEditor {
                 baseStyle.normal.textColor = Color.white;
                 baseStyle.onNormal.textColor = Color.white;
 
-                inputPort = new GUIStyle(baseStyle);
+                outputPort = new GUIStyle(baseStyle);
+
+                inputPort = new GUIStyle(EditorStyles.label);
                 inputPort.alignment = TextAnchor.UpperLeft;
+
+                foldout = new GUIStyle(EditorStyles.foldout);
+                foldout.normal.textColor = baseStyle.normal.textColor;
+                foldout.onNormal.textColor = baseStyle.onNormal.textColor;
 
                 nodeProperty = new GUIStyle(baseStyle);
 

@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -300,13 +299,26 @@ namespace XNodeEditor {
         }
 
         private static void DrawStyledPropertyField(SerializedProperty property, GUIContent label, GUIStyle style, bool showBacking = true, bool includeChildren = false) {
+            label = label != null ? label : new GUIContent(property.displayName);
+
+            GUIStyle oldFoldout = EditorStylesHacks.Foldout;
+            GUIStyle oldLabel = EditorStylesHacks.Label;
+
+            EditorStylesHacks.Label = style;
+            EditorStylesHacks.Foldout = NodeEditorResources.styles.foldout;
+
             EditorGUILayout.BeginHorizontal();
-            // Display a label
-            EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName), style, GUILayout.MaxWidth(70));
-            // Display an editable property field
-            if(showBacking)
-                EditorGUILayout.PropertyField(property, emptyLabel, includeChildren, GUILayout.MinWidth(30));
+
+            if (showBacking) {
+                EditorGUILayout.PropertyField(property, label, includeChildren, GUILayout.MinWidth(30));
+            } else {
+                EditorGUILayout.LabelField(label, style, GUILayout.MinWidth(30));
+            }
+
             EditorGUILayout.EndHorizontal();
+
+            EditorStylesHacks.Label = oldLabel;
+            EditorStylesHacks.Foldout = oldFoldout;
         }
 
         private static ReorderableList CreateReorderableList(string fieldName, List<XNode.NodePort> instancePorts, SerializedProperty arrayData, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType, XNode.Node.TypeConstraint typeConstraint, Action<ReorderableList> onCreation) {

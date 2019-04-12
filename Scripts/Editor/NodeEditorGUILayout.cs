@@ -38,7 +38,7 @@ namespace XNodeEditor {
             if (property == null) throw new NullReferenceException();
 
             // If property is not a port, display a regular property field
-            if (port == null) EditorGUILayout.PropertyField(property, label, includeChildren, GUILayout.MinWidth(30));
+            if (port == null) DrawStyledPropertyField(property, label, NodeEditorResources.styles.nodeProperty, true, includeChildren);
             else {
                 Rect rect = new Rect();
 

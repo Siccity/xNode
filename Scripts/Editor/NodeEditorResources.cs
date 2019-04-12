@@ -21,7 +21,7 @@ namespace XNodeEditor {
             public GUIStyle inputPort, nodeHeader, nodeBody, tooltip, nodeHighlight, nodeProperty;
 
             public Styles() {
-                GUIStyle baseStyle = new GUIStyle("Label");
+                GUIStyle baseStyle = new GUIStyle(EditorStyles.label);
                 baseStyle.fixedHeight = 18;
 
                 inputPort = new GUIStyle(baseStyle);

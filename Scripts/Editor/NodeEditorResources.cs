@@ -23,6 +23,8 @@ namespace XNodeEditor {
             public Styles() {
                 GUIStyle baseStyle = new GUIStyle(EditorStyles.label);
                 baseStyle.fixedHeight = 18;
+                baseStyle.normal.textColor = Color.white;
+                baseStyle.onNormal.textColor = Color.white;
 
                 inputPort = new GUIStyle(baseStyle);
                 inputPort.alignment = TextAnchor.UpperLeft;

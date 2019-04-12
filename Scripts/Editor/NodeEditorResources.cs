@@ -26,7 +26,6 @@ namespace XNodeEditor {
 
                 inputPort = new GUIStyle(baseStyle);
                 inputPort.alignment = TextAnchor.UpperLeft;
-                inputPort.padding.left = 10;
 
                 nodeHeader = new GUIStyle();
                 nodeHeader.alignment = TextAnchor.MiddleCenter;

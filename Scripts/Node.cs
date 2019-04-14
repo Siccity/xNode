@@ -41,6 +41,16 @@ namespace XNode {
             Override,
         }
 
+        /// <summary> Tells which types of input to allow </summary>
+        public enum TypeConstraint {
+            /// <summary> Allow all types of input</summary>
+            None,
+            /// <summary> Allow similar and inherited types </summary>
+            Inherited,
+            /// <summary> Allow only similar types </summary>
+            Strict,
+        }
+
         /// <summary> Iterate over all ports on this node. </summary>
         public IEnumerable<NodePort> Ports { get { foreach (NodePort port in ports.Values) yield return port; } }
         /// <summary> Iterate over all outputs on this node. </summary>
@@ -60,7 +70,12 @@ namespace XNode {
         /// <summary> It is recommended not to modify these at hand. Instead, see <see cref="InputAttribute"/> and <see cref="OutputAttribute"/> </summary>
         [SerializeField] private NodePortDictionary ports = new NodePortDictionary();
 
+        /// <summary> Used during node instantiation to fix null/misconfigured graph during OnEnable/Init. Set it before instantiating a node. Will automatically be unset during OnEnable </summary>
+        public static NodeGraph graphHotfix;
+
         protected void OnEnable() {
+            if (graphHotfix != null) graph = graphHotfix;
+            graphHotfix = null;
             UpdateStaticPorts();
             Init();
         }
@@ -70,7 +85,7 @@ namespace XNode {
             NodeDataCache.UpdatePorts(this, ports);
         }
 
-        /// <summary> Initialize node. Called on creation. </summary>
+        /// <summary> Initialize node. Called on enable. </summary>
         protected virtual void Init() { }
 
         /// <summary> Checks all connections for invalid references, and removes them. </summary>
@@ -79,27 +94,24 @@ namespace XNode {
         }
 
 #region Instance Ports
-        /// <summary> Convenience function.
-        /// </summary>
+        /// <summary> Convenience function. </summary>
         /// <seealso cref="AddInstancePort"/>
         /// <seealso cref="AddInstanceOutput"/>
-        public NodePort AddInstanceInput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, string fieldName = null) {
-            return AddInstancePort(type, NodePort.IO.Input, connectionType, fieldName);
+        public NodePort AddInstanceInput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = TypeConstraint.None, string fieldName = null) {
+            return AddInstancePort(type, NodePort.IO.Input, connectionType, typeConstraint, fieldName);
         }
 
-        /// <summary> Convenience function.
-        /// </summary>
+        /// <summary> Convenience function. </summary>
         /// <seealso cref="AddInstancePort"/>
         /// <seealso cref="AddInstanceInput"/>
-        public NodePort AddInstanceOutput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, string fieldName = null) {
-            return AddInstancePort(type, NodePort.IO.Output, connectionType, fieldName);
+        public NodePort AddInstanceOutput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = TypeConstraint.None, string fieldName = null) {
+            return AddInstancePort(type, NodePort.IO.Output, connectionType, typeConstraint, fieldName);
         }
 
-        /// <summary> Add a dynamic, serialized port to this node.
-        /// </summary>
+        /// <summary> Add a dynamic, serialized port to this node. </summary>
         /// <seealso cref="AddInstanceInput"/>
         /// <seealso cref="AddInstanceOutput"/>
-        private NodePort AddInstancePort(Type type, NodePort.IO direction, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, string fieldName = null) {
+        private NodePort AddInstancePort(Type type, NodePort.IO direction, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = TypeConstraint.None, string fieldName = null) {
             if (fieldName == null) {
                 fieldName = "instanceInput_0";
                 int i = 0;
@@ -108,13 +120,15 @@ namespace XNode {
                 Debug.LogWarning("Port '" + fieldName + "' already exists in " + name, this);
                 return ports[fieldName];
             }
-            NodePort port = new NodePort(fieldName, type, direction, connectionType, this);
+            NodePort port = new NodePort(fieldName, type, direction, connectionType, typeConstraint, this);
             ports.Add(fieldName, port);
             return port;
         }
 
         /// <summary> Remove an instance port from the node </summary>
         public void RemoveInstancePort(string fieldName) {
+            NodePort instancePort = GetPort(fieldName);
+            if (instancePort == null) throw new ArgumentException("port " + fieldName + " doesn't exist");
             RemoveInstancePort(GetPort(fieldName));
         }
 
@@ -198,22 +212,25 @@ namespace XNode {
             foreach (NodePort port in Ports) port.ClearConnections();
         }
 
-        public override int GetHashCode() {
-            return JsonUtility.ToJson(this).GetHashCode();
-        }
-
+#region Attributes
         /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInputPort(string)"/> </summary>
         [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
         public class InputAttribute : Attribute {
             public ShowBackingValue backingValue;
             public ConnectionType connectionType;
+            public bool instancePortList;
+            public TypeConstraint typeConstraint;
 
             /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInputPort(string)"/> </summary>
             /// <param name="backingValue">Should we display the backing value for this port as an editor field? </param>
             /// <param name="connectionType">Should we allow multiple connections? </param>
-            public InputAttribute(ShowBackingValue backingValue = ShowBackingValue.Unconnected, ConnectionType connectionType = ConnectionType.Multiple) {
+            /// <param name="typeConstraint">Constrains which input connections can be made to this port </param>
+            /// <param name="instancePortList">If true, will display a reorderable list of inputs instead of a single port. Will automatically add and display values for lists and arrays </param>
+            public InputAttribute(ShowBackingValue backingValue = ShowBackingValue.Unconnected, ConnectionType connectionType = ConnectionType.Multiple, TypeConstraint typeConstraint = TypeConstraint.None, bool instancePortList = false) {
                 this.backingValue = backingValue;
                 this.connectionType = connectionType;
+                this.instancePortList = instancePortList;
+                this.typeConstraint = typeConstraint;
             }
         }
 
@@ -222,13 +239,16 @@ namespace XNode {
         public class OutputAttribute : Attribute {
             public ShowBackingValue backingValue;
             public ConnectionType connectionType;
+            public bool instancePortList;
 
             /// <summary> Mark a serializable field as an output port. You can access this through <see cref="GetOutputPort(string)"/> </summary>
             /// <param name="backingValue">Should we display the backing value for this port as an editor field? </param>
             /// <param name="connectionType">Should we allow multiple connections? </param>
-            public OutputAttribute(ShowBackingValue backingValue = ShowBackingValue.Never, ConnectionType connectionType = ConnectionType.Multiple) {
+            /// <param name="instancePortList">If true, will display a reorderable list of outputs instead of a single port. Will automatically add and display values for lists and arrays </param>
+            public OutputAttribute(ShowBackingValue backingValue = ShowBackingValue.Never, ConnectionType connectionType = ConnectionType.Multiple, bool instancePortList = false) {
                 this.backingValue = backingValue;
                 this.connectionType = connectionType;
+                this.instancePortList = instancePortList;
             }
         }
 
@@ -243,19 +263,19 @@ namespace XNode {
         }
 
         [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-        public class NodeTint : Attribute {
+        public class NodeTintAttribute : Attribute {
             public Color color;
             /// <summary> Specify a color for this node type </summary>
             /// <param name="r"> Red [0.0f .. 1.0f] </param>
             /// <param name="g"> Green [0.0f .. 1.0f] </param>
             /// <param name="b"> Blue [0.0f .. 1.0f] </param>
-            public NodeTint(float r, float g, float b) {
+            public NodeTintAttribute(float r, float g, float b) {
                 color = new Color(r, g, b);
             }
 
             /// <summary> Specify a color for this node type </summary>
             /// <param name="hex"> HEX color value </param>
-            public NodeTint(string hex) {
+            public NodeTintAttribute(string hex) {
                 ColorUtility.TryParseHtmlString(hex, out color);
             }
 
@@ -263,20 +283,21 @@ namespace XNode {
             /// <param name="r"> Red [0 .. 255] </param>
             /// <param name="g"> Green [0 .. 255] </param>
             /// <param name="b"> Blue [0 .. 255] </param>
-            public NodeTint(byte r, byte g, byte b) {
+            public NodeTintAttribute(byte r, byte g, byte b) {
                 color = new Color32(r, g, b, byte.MaxValue);
             }
         }
 
         [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-        public class NodeWidth : Attribute {
+        public class NodeWidthAttribute : Attribute {
             public int width;
             /// <summary> Specify a width for this node type </summary>
             /// <param name="width"> Width </param>
-            public NodeWidth(int width) {
+            public NodeWidthAttribute(int width) {
                 this.width = width;
             }
         }
+#endregion
 
         [Serializable] private class NodePortDictionary : Dictionary<string, NodePort>, ISerializationCallbackReceiver {
             [SerializeField] private List<string> keys = new List<string>();

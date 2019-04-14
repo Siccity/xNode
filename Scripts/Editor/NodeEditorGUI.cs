@@ -10,14 +10,15 @@ namespace XNodeEditor {
         public NodeGraphEditor graphEditor;
         private List<UnityEngine.Object> selectionCache;
         private List<XNode.Node> culledNodes;
+        private int topPadding { get { return isDocked() ? 19 : 22; } }
+        /// <summary> Executed after all other window GUI. Useful if Zoom is ruining your day. Automatically resets after being run.</summary>
+        public event Action onLateGUI;
 
         private void OnGUI() {
             Event e = Event.current;
             Matrix4x4 m = GUI.matrix;
             if (graph == null) return;
-            graphEditor = NodeGraphEditor.GetEditor(graph);
-            graphEditor.position = position;
-
+            ValidateGraphEditor();
             Controls();
 
             DrawGrid(position, zoom, panOffset);
@@ -28,25 +29,31 @@ namespace XNodeEditor {
             DrawTooltip();
             graphEditor.OnGUI();
 
+            // Run and reset onLateGUI
+            if (onLateGUI != null) {
+                onLateGUI();
+                onLateGUI = null;
+            }
+
             GUI.matrix = m;
         }
 
-        public static void BeginZoomed(Rect rect, float zoom) {
+        public static void BeginZoomed(Rect rect, float zoom, float topPadding) {
             GUI.EndClip();
 
             GUIUtility.ScaleAroundPivot(Vector2.one / zoom, rect.size * 0.5f);
-            Vector4 padding = new Vector4(0, 22, 0, 0);
+            Vector4 padding = new Vector4(0, topPadding, 0, 0);
             padding *= zoom;
-            GUI.BeginClip(new Rect(-((rect.width * zoom) - rect.width) * 0.5f, -(((rect.height * zoom) - rect.height) * 0.5f) + (22 * zoom),
+            GUI.BeginClip(new Rect(-((rect.width * zoom) - rect.width) * 0.5f, -(((rect.height * zoom) - rect.height) * 0.5f) + (topPadding * zoom),
                 rect.width * zoom,
                 rect.height * zoom));
         }
 
-        public static void EndZoomed(Rect rect, float zoom) {
+        public static void EndZoomed(Rect rect, float zoom, float topPadding) {
             GUIUtility.ScaleAroundPivot(Vector2.one * zoom, rect.size * 0.5f);
             Vector3 offset = new Vector3(
                 (((rect.width * zoom) - rect.width) * 0.5f),
-                (((rect.height * zoom) - rect.height) * 0.5f) + (-22 * zoom) + 22,
+                (((rect.height * zoom) - rect.height) * 0.5f) + (-topPadding * zoom) + topPadding,
                 0);
             GUI.matrix = Matrix4x4.TRS(offset, Quaternion.identity, Vector3.one);
         }
@@ -105,60 +112,6 @@ namespace XNodeEditor {
             contextMenu.AddItem(new GUIContent("Clear Connections"), false, () => hoveredPort.ClearConnections());
             contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
-        }
-
-        /// <summary> Show right-click context menu for selected nodes </summary>
-        public void ShowNodeContextMenu() {
-            GenericMenu contextMenu = new GenericMenu();
-            // If only one node is selected
-            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
-                XNode.Node node = Selection.activeObject as XNode.Node;
-                contextMenu.AddItem(new GUIContent("Move To Top"), false, () => MoveNodeToTop(node));
-                contextMenu.AddItem(new GUIContent("Rename"), false, RenameSelectedNode);
-            }
-
-            contextMenu.AddItem(new GUIContent("Duplicate"), false, DublicateSelectedNodes);
-            contextMenu.AddItem(new GUIContent("Remove"), false, RemoveSelectedNodes);
-
-            // If only one node is selected
-            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
-                XNode.Node node = Selection.activeObject as XNode.Node;
-                AddCustomContextMenuItems(contextMenu, node);
-            }
-
-            contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
-        }
-
-        /// <summary> Show right-click context menu for current graph </summary>
-        void ShowGraphContextMenu() {
-            GenericMenu contextMenu = new GenericMenu();
-            Vector2 pos = WindowToGridPosition(Event.current.mousePosition);
-            for (int i = 0; i < nodeTypes.Length; i++) {
-                Type type = nodeTypes[i];
-
-                //Get node context menu path
-                string path = graphEditor.GetNodeMenuName(type);
-                if (string.IsNullOrEmpty(path)) continue;
-
-                contextMenu.AddItem(new GUIContent(path), false, () => {
-                    CreateNode(type, pos);
-                });
-            }
-            contextMenu.AddSeparator("");
-            contextMenu.AddItem(new GUIContent("Preferences"), false, () => OpenPreferences());
-            AddCustomContextMenuItems(contextMenu, graph);
-            contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
-        }
-
-        void AddCustomContextMenuItems(GenericMenu contextMenu, object obj) {
-            KeyValuePair<ContextMenu, System.Reflection.MethodInfo>[] items = GetContextMenuMethods(obj);
-            if (items.Length != 0) {
-                contextMenu.AddSeparator("");
-                for (int i = 0; i < items.Length; i++) {
-                    KeyValuePair<ContextMenu, System.Reflection.MethodInfo> kvp = items[i];
-                    contextMenu.AddItem(new GUIContent(kvp.Key.menuItem), false, () => kvp.Value.Invoke(obj, null));
-                }
-            }
         }
 
         /// <summary> Draw a bezier from startpoint to endpoint, both in grid coordinates </summary>
@@ -229,7 +182,7 @@ namespace XNodeEditor {
                     Rect fromRect;
                     if (!_portConnectionPoints.TryGetValue(output, out fromRect)) continue;
 
-                    Color connectionColor = graphEditor.GetTypeColor(output.ValueType);
+                    Color connectionColor = graphEditor.GetPortColor(output);
 
                     for (int k = 0; k < output.ConnectionCount; k++) {
                         XNode.NodePort input = output.GetConnection(k);
@@ -286,15 +239,13 @@ namespace XNodeEditor {
                 selectionCache = new List<UnityEngine.Object>(Selection.objects);
             }
 
-            //Active node is hashed before and after node GUI to detect changes
-            int nodeHash = 0;
             System.Reflection.MethodInfo onValidate = null;
             if (Selection.activeObject != null && Selection.activeObject is XNode.Node) {
                 onValidate = Selection.activeObject.GetType().GetMethod("OnValidate");
-                if (onValidate != null) nodeHash = Selection.activeObject.GetHashCode();
+                if (onValidate != null) EditorGUI.BeginChangeCheck();
             }
 
-            BeginZoomed(position, zoom);
+            BeginZoomed(position, zoom, topPadding);
 
             Vector2 mousePos = Event.current.mousePosition;
 
@@ -335,7 +286,7 @@ namespace XNodeEditor {
                     _portConnectionPoints = _portConnectionPoints.Where(x => x.Key.node != node).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
                 }
 
-                NodeEditor nodeEditor = NodeEditor.GetEditor(node);
+                NodeEditor nodeEditor = NodeEditor.GetEditor(node, this);
 
                 NodeEditor.portPositions = new Dictionary<XNode.NodePort, Vector2>();
 
@@ -347,25 +298,26 @@ namespace XNodeEditor {
                 bool selected = selectionCache.Contains(graph.nodes[n]);
 
                 if (selected) {
-                    GUIStyle style = new GUIStyle(NodeEditorResources.styles.nodeBody);
+                    GUIStyle style = new GUIStyle(nodeEditor.GetBodyStyle());
                     GUIStyle highlightStyle = new GUIStyle(NodeEditorResources.styles.nodeHighlight);
                     highlightStyle.padding = style.padding;
                     style.padding = new RectOffset();
                     GUI.color = nodeEditor.GetTint();
-                    GUILayout.BeginVertical(new GUIStyle(style));
+                    GUILayout.BeginVertical(style);
                     GUI.color = NodeEditorPreferences.GetSettings().highlightColor;
                     GUILayout.BeginVertical(new GUIStyle(highlightStyle));
                 } else {
-                    GUIStyle style = NodeEditorResources.styles.nodeBody;
+                    GUIStyle style = new GUIStyle(nodeEditor.GetBodyStyle());
                     GUI.color = nodeEditor.GetTint();
-                    GUILayout.BeginVertical(new GUIStyle(style));
+                    GUILayout.BeginVertical(style);
                 }
 
                 GUI.color = guiColor;
                 EditorGUI.BeginChangeCheck();
 
                 //Draw node contents
-                nodeEditor.OnNodeGUI();
+                nodeEditor.OnHeaderGUI();
+                nodeEditor.OnBodyGUI();
 
                 //If user changed a value, notify other scripts through onUpdateNode
                 if (EditorGUI.EndChangeCheck()) {
@@ -425,14 +377,12 @@ namespace XNodeEditor {
             }
 
             if (e.type != EventType.Layout && currentActivity == NodeActivity.DragGrid) Selection.objects = preSelection.ToArray();
-            EndZoomed(position, zoom);
+            EndZoomed(position, zoom, topPadding);
 
-            //If a change in hash is detected in the selected node, call OnValidate method. 
+            //If a change in is detected in the selected node, call OnValidate method. 
             //This is done through reflection because OnValidate is only relevant in editor, 
             //and thus, the code should not be included in build.
-            if (nodeHash != 0) {
-                if (onValidate != null && nodeHash != Selection.activeObject.GetHashCode()) onValidate.Invoke(Selection.activeObject, null);
-            }
+            if (onValidate != null && EditorGUI.EndChangeCheck()) onValidate.Invoke(Selection.activeObject, null);
         }
 
         private bool ShouldBeCulled(XNode.Node node) {

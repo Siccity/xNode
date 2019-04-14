@@ -22,11 +22,11 @@ namespace XNodeEditor {
         [NonSerialized] private List<Vector2> draggedOutputReroutes = new List<Vector2>();
         private RerouteReference hoveredReroute = new RerouteReference();
         private List<RerouteReference> selectedReroutes = new List<RerouteReference>();
-        private Rect nodeRects;
         private Vector2 dragBoxStart;
         private UnityEngine.Object[] preBoxSelection;
         private RerouteReference[] preBoxSelectionReroute;
         private Rect selectionBox;
+        private bool isDoubleClick = false;
 
         private struct RerouteReference {
             public XNode.NodePort port;
@@ -52,13 +52,15 @@ namespace XNodeEditor {
                 case EventType.MouseMove:
                     break;
                 case EventType.ScrollWheel:
+                    float oldZoom = zoom;
                     if (e.delta.y > 0) zoom += 0.1f * zoom;
                     else zoom -= 0.1f * zoom;
+                    if (NodeEditorPreferences.GetSettings().zoomToMouse) panOffset += (1 - oldZoom / zoom) * (WindowToGridPosition(e.mousePosition) + panOffset);
                     break;
                 case EventType.MouseDrag:
                     if (e.button == 0) {
                         if (IsDraggingPort) {
-                            if (IsHoveringPort && hoveredPort.IsInput) {
+                            if (IsHoveringPort && hoveredPort.IsInput && draggedOutput.CanConnectTo(hoveredPort)) {
                                 if (!draggedOutput.IsConnectedTo(hoveredPort)) {
                                     draggedOutputTarget = hoveredPort;
                                 }
@@ -134,12 +136,7 @@ namespace XNodeEditor {
                             Repaint();
                         }
                     } else if (e.button == 1 || e.button == 2) {
-                        Vector2 tempOffset = panOffset;
-                        tempOffset += e.delta * zoom;
-                        // Round value to increase crispyness of UI text
-                        tempOffset.x = Mathf.Round(tempOffset.x);
-                        tempOffset.y = Mathf.Round(tempOffset.y);
-                        panOffset = tempOffset;
+                        panOffset += e.delta * zoom;
                         isPanning = true;
                     }
                     break;
@@ -170,6 +167,10 @@ namespace XNodeEditor {
                                 SelectNode(hoveredNode, e.control || e.shift);
                                 if (!e.control && !e.shift) selectedReroutes.Clear();
                             } else if (e.control || e.shift) DeselectNode(hoveredNode);
+
+                            // Cache double click state, but only act on it in MouseUp - Except ClickCount only works in mouseDown.
+                            isDoubleClick = (e.clickCount == 2);
+
                             e.Use();
                             currentActivity = NodeActivity.HoldNode;
                         } else if (IsHoveringReroute) {
@@ -229,6 +230,7 @@ namespace XNodeEditor {
                             // If click outside node, release field focus
                             if (!isPanning) {
                                 EditorGUI.FocusTextInControl(null);
+                                EditorGUIUtility.editingTextField = false;
                             }
                             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
                         }
@@ -237,6 +239,12 @@ namespace XNodeEditor {
                         if (currentActivity == NodeActivity.HoldNode && !(e.control || e.shift)) {
                             selectedReroutes.Clear();
                             SelectNode(hoveredNode, false);
+
+                            // Double click to center node
+                            if (isDoubleClick) {
+                                Vector2 nodeDimension = nodeSizes.ContainsKey(hoveredNode) ? nodeSizes[hoveredNode] / 2 : Vector2.zero;
+                                panOffset = -hoveredNode.position - nodeDimension;
+                            }
                         }
 
                         // If click reroute, select it.
@@ -260,26 +268,42 @@ namespace XNodeEditor {
                                 ShowPortContextMenu(hoveredPort);
                             } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
                                 if (!Selection.Contains(hoveredNode)) SelectNode(hoveredNode, false);
-                                ShowNodeContextMenu();
+                                GenericMenu menu = new GenericMenu();
+                                NodeEditor.GetEditor(hoveredNode, this).AddContextMenuItems(menu);
+                                menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
+                                e.Use(); // Fixes copy/paste context menu appearing in Unity 5.6.6f2 - doesn't occur in 2018.3.2f1 Probably needs to be used in other places.
                             } else if (!IsHoveringNode) {
-                                ShowGraphContextMenu();
+                                GenericMenu menu = new GenericMenu();
+                                graphEditor.AddContextMenuItems(menu);
+                                menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
                             }
                         }
                         isPanning = false;
                     }
+                    // Reset DoubleClick
+                    isDoubleClick = false;
                     break;
                 case EventType.KeyDown:
                     if (EditorGUIUtility.editingTextField) break;
                     else if (e.keyCode == KeyCode.F) Home();
-                    if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX) {
+                    if (IsMac()) {
                         if (e.keyCode == KeyCode.Return) RenameSelectedNode();
                     } else {
                         if (e.keyCode == KeyCode.F2) RenameSelectedNode();
                     }
                     break;
                 case EventType.ValidateCommand:
-                    if (e.commandName == "SoftDelete") RemoveSelectedNodes();
-                    else if (e.commandName == "Duplicate") DublicateSelectedNodes();
+                case EventType.ExecuteCommand:
+                    if (e.commandName == "SoftDelete") {
+                        if (e.type == EventType.ExecuteCommand) RemoveSelectedNodes();
+                        e.Use();
+                    } else if (IsMac() && e.commandName == "Delete") {
+                        if (e.type == EventType.ExecuteCommand) RemoveSelectedNodes();
+                        e.Use();
+                    } else if (e.commandName == "Duplicate") {
+                        if (e.type == EventType.ExecuteCommand) DuplicateSelectedNodes();
+                        e.Use();
+                    }
                     Repaint();
                     break;
                 case EventType.Ignore:
@@ -290,6 +314,14 @@ namespace XNodeEditor {
                     }
                     break;
             }
+        }
+
+        public bool IsMac() {
+#if UNITY_2017_1_OR_NEWER
+            return SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX;
+#else
+            return SystemInfo.operatingSystem.StartsWith("Mac");
+#endif
         }
 
         private void RecalculateDragOffsets(Event current) {
@@ -314,15 +346,6 @@ namespace XNodeEditor {
             panOffset = Vector2.zero;
         }
 
-        public void CreateNode(Type type, Vector2 position) {
-            XNode.Node node = graph.AddNode(type);
-            node.position = position;
-            node.name = UnityEditor.ObjectNames.NicifyVariableName(type.Name);
-            AssetDatabase.AddObjectToAsset(node, graph);
-            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
-            Repaint();
-        }
-
         /// <summary> Remove nodes in the graph in Selection.objects</summary>
         public void RemoveSelectedNodes() {
             // We need to delete reroutes starting at the highest point index to avoid shifting indices
@@ -343,7 +366,12 @@ namespace XNodeEditor {
         public void RenameSelectedNode() {
             if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
                 XNode.Node node = Selection.activeObject as XNode.Node;
-                NodeEditor.GetEditor(node).InitiateRename();
+                Vector2 size;
+                if (nodeSizes.TryGetValue(node, out size)) {
+                    RenamePopup.Show(Selection.activeObject, size.x);
+                } else {
+                    RenamePopup.Show(Selection.activeObject);
+                }
             }
         }
 
@@ -356,8 +384,8 @@ namespace XNodeEditor {
             }
         }
 
-        /// <summary> Dublicate selected nodes and select the dublicates </summary>
-        public void DublicateSelectedNodes() {
+        /// <summary> Duplicate selected nodes and select the duplicates </summary>
+        public void DuplicateSelectedNodes() {
             UnityEngine.Object[] newNodes = new UnityEngine.Object[Selection.objects.Length];
             Dictionary<XNode.Node, XNode.Node> substitutes = new Dictionary<XNode.Node, XNode.Node>();
             for (int i = 0; i < Selection.objects.Length; i++) {
@@ -404,7 +432,7 @@ namespace XNodeEditor {
                 Rect fromRect;
                 if (!_portConnectionPoints.TryGetValue(draggedOutput, out fromRect)) return;
                 Vector2 from = fromRect.center;
-                col.a = 0.6f;
+                col.a = draggedOutputTarget != null ? 1.0f : 0.6f;
                 Vector2 to = Vector2.zero;
                 for (int i = 0; i < draggedOutputReroutes.Count; i++) {
                     to = draggedOutputReroutes[i];

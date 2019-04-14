@@ -12,7 +12,7 @@ namespace XNodeEditor {
         /// <summary> The last key we checked. This should be the one we modify </summary>
         private static string lastKey = "xNode.Settings";
 
-        private static Dictionary<string, Color> typeColors = new Dictionary<string, Color>();
+        private static Dictionary<Type, Color> typeColors = new Dictionary<Type, Color>();
         private static Dictionary<string, Settings> settings = new Dictionary<string, Settings>();
 
         [System.Serializable]
@@ -23,9 +23,11 @@ namespace XNodeEditor {
             [SerializeField] private Color32 _gridBgColor = new Color(0.18f, 0.18f, 0.18f);
             public Color32 gridBgColor { get { return _gridBgColor; } set { _gridBgColor = value; _gridTexture = null; } }
 
+            public float zoomOutLimit = 5f;
             public Color32 highlightColor = new Color32(255, 255, 255, 255);
             public bool gridSnap = true;
             public bool autoSave = true;
+            public bool zoomToMouse = true;
             [SerializeField] private string typeColorsData = "";
             [NonSerialized] public Dictionary<string, Color> typeColors = new Dictionary<string, Color>();
             public NoodleType noodleType = NoodleType.Curve;
@@ -80,7 +82,20 @@ namespace XNodeEditor {
             return settings[lastKey];
         }
 
+#if UNITY_2019_1_OR_NEWER
+        [SettingsProvider]
+        public static SettingsProvider CreateXNodeSettingsProvider() {
+            SettingsProvider provider = new SettingsProvider("Preferences/Node Editor", SettingsScope.User) {
+                guiHandler = (searchContext) => { XNodeEditor.NodeEditorPreferences.PreferencesGUI(); },
+                keywords = new HashSet<string>(new [] { "xNode", "node", "editor", "graph", "connections", "noodles", "ports" })
+            };
+            return provider;
+        }
+#endif
+
+#if !UNITY_2019_1_OR_NEWER
         [PreferenceItem("Node Editor")]
+#endif
         private static void PreferencesGUI() {
             VerifyLoaded();
             Settings settings = NodeEditorPreferences.settings[lastKey];
@@ -98,7 +113,8 @@ namespace XNodeEditor {
             //Label
             EditorGUILayout.LabelField("Grid", EditorStyles.boldLabel);
             settings.gridSnap = EditorGUILayout.Toggle(new GUIContent("Snap", "Hold CTRL in editor to invert"), settings.gridSnap);
-
+            settings.zoomToMouse = EditorGUILayout.Toggle(new GUIContent("Zoom to Mouse", "Zooms towards mouse position"), settings.zoomToMouse);
+            settings.zoomOutLimit = EditorGUILayout.FloatField(new GUIContent("Zoom out Limit", "Upper limit to zoom"), settings.zoomOutLimit);
             settings.gridLineColor = EditorGUILayout.ColorField("Color", settings.gridLineColor);
             settings.gridBgColor = EditorGUILayout.ColorField(" ", settings.gridBgColor);
             if (GUI.changed) {
@@ -134,15 +150,16 @@ namespace XNodeEditor {
             EditorGUILayout.LabelField("Types", EditorStyles.boldLabel);
 
             //Display type colors. Save them if they are edited by the user
-            List<string> typeColorKeys = new List<string>(typeColors.Keys);
-            foreach (string typeColorKey in typeColorKeys) {
-                Color col = typeColors[typeColorKey];
+            foreach (var typeColor in typeColors) {
+                Type type = typeColor.Key;
+                string typeColorKey = NodeEditorUtilities.PrettyName(type);
+                Color col = typeColor.Value;
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.BeginHorizontal();
                 col = EditorGUILayout.ColorField(typeColorKey, col);
                 EditorGUILayout.EndHorizontal();
                 if (EditorGUI.EndChangeCheck()) {
-                    typeColors[typeColorKey] = col;
+                    typeColors[type] = col;
                     if (settings.typeColors.ContainsKey(typeColorKey)) settings.typeColors[typeColorKey] = col;
                     else settings.typeColors.Add(typeColorKey, col);
                     SavePrefs(typeColorKey, settings);
@@ -165,7 +182,7 @@ namespace XNodeEditor {
         public static void ResetPrefs() {
             if (EditorPrefs.HasKey(lastKey)) EditorPrefs.DeleteKey(lastKey);
             if (settings.ContainsKey(lastKey)) settings.Remove(lastKey);
-            typeColors = new Dictionary<string, Color>();
+            typeColors = new Dictionary<Type, Color>();
             VerifyLoaded();
             NodeEditorWindow.RepaintAll();
         }
@@ -184,19 +201,21 @@ namespace XNodeEditor {
         public static Color GetTypeColor(System.Type type) {
             VerifyLoaded();
             if (type == null) return Color.gray;
-            string typeName = type.PrettyName();
-            if (!typeColors.ContainsKey(typeName)) {
-                if (settings[lastKey].typeColors.ContainsKey(typeName)) typeColors.Add(typeName, settings[lastKey].typeColors[typeName]);
+            Color col;
+            if (!typeColors.TryGetValue(type, out col)) {
+                string typeName = type.PrettyName();
+                if (settings[lastKey].typeColors.ContainsKey(typeName)) typeColors.Add(type, settings[lastKey].typeColors[typeName]);
                 else {
 #if UNITY_5_4_OR_NEWER
                     UnityEngine.Random.InitState(typeName.GetHashCode());
 #else
                     UnityEngine.Random.seed = typeName.GetHashCode();
 #endif
-                    typeColors.Add(typeName, new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value));
+                    col = new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
+                    typeColors.Add(type, col);
                 }
             }
-            return typeColors[typeName];
+            return col;
         }
     }
 }

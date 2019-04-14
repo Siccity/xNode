@@ -18,18 +18,20 @@ namespace XNode {
 
         /// <summary> Add a node to the graph by type </summary>
         public virtual Node AddNode(Type type) {
+            Node.graphHotfix = this;
             Node node = ScriptableObject.CreateInstance(type) as Node;
-            nodes.Add(node);
             node.graph = this;
+            nodes.Add(node);
             return node;
         }
 
         /// <summary> Creates a copy of the original node in the graph </summary>
         public virtual Node CopyNode(Node original) {
+            Node.graphHotfix = this;
             Node node = ScriptableObject.Instantiate(original);
+            node.graph = this;
             node.ClearConnections();
             nodes.Add(node);
-            node.graph = this;
             return node;
         }
 
@@ -58,6 +60,7 @@ namespace XNode {
             // Instantiate all nodes inside the graph
             for (int i = 0; i < nodes.Count; i++) {
                 if (nodes[i] == null) continue;
+                Node.graphHotfix = graph;
                 Node node = Instantiate(nodes[i]) as Node;
                 node.graph = graph;
                 graph.nodes[i] = node;

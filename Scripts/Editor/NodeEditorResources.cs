@@ -1,4 +1,6 @@
-﻿using UnityEditor;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 namespace XNodeEditor {
@@ -19,6 +21,7 @@ namespace XNodeEditor {
         public static GUIStyle OutputPort { get { return styles.outputPort;} }
         public class Styles {
             public GUIStyle inputPort, nodeHeader, nodeBody, tooltip, nodeHighlight, nodeProperty, outputPort, foldout;
+            public GUISkin skin;
 
             public Styles() {
                 GUIStyle baseStyle = new GUIStyle(EditorStyles.label);
@@ -53,6 +56,16 @@ namespace XNodeEditor {
 
                 tooltip = new GUIStyle("helpBox");
                 tooltip.alignment = TextAnchor.MiddleCenter;
+
+                skin = GUISkin.Instantiate(EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector));
+                List<GUIStyle> custom = skin.customStyles == null ? new List<GUIStyle>() : skin.customStyles.ToList();
+
+                GUIStyle controlLabel = new GUIStyle(baseStyle);
+                controlLabel.name = "ControlLabel";
+                custom.Add(controlLabel);
+                custom.Add(foldout);
+                skin.customStyles = custom.ToArray();
+
             }
         }
 

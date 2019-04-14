@@ -45,5 +45,22 @@ namespace XNodeEditor {
                 EditorStylesInstance = EditorStylesInstanceField.GetValue(null) as EditorStyles;
             }
         }
+
+        public static void SetSkin(GUISkin skin)
+        {
+            InvalidateCache();
+            GUI.skin = skin;
+        }
+
+        private static void InvalidateCache()
+        {
+            var field = typeof(EditorStyles).GetField("s_CachedStyles", EditorStylesBindingFlags);
+            if (field == null)
+            {
+                Debug.LogError("No CachedStyles!");
+                return;
+            }
+            field.SetValue(null, new EditorStyles[] { null, null });
+        }
     }
 }

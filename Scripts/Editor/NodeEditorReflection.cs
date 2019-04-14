@@ -75,7 +75,9 @@ namespace XNodeEditor {
             List<System.Type> types = new List<System.Type>();
             System.Reflection.Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
             foreach (Assembly assembly in assemblies) {
-                types.AddRange(assembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray());
+                try {
+                    types.AddRange(assembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray());
+                } catch(ReflectionTypeLoadException) {}
             }
             return types.ToArray();
         }

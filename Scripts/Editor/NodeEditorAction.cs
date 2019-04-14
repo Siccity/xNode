@@ -269,7 +269,7 @@ namespace XNodeEditor {
                             } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
                                 if (!Selection.Contains(hoveredNode)) SelectNode(hoveredNode, false);
                                 GenericMenu menu = new GenericMenu();
-                                NodeEditor.GetEditor(hoveredNode).AddContextMenuItems(menu);
+                                NodeEditor.GetEditor(hoveredNode, this).AddContextMenuItems(menu);
                                 menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
                                 e.Use(); // Fixes copy/paste context menu appearing in Unity 5.6.6f2 - doesn't occur in 2018.3.2f1 Probably needs to be used in other places.
                             } else if (!IsHoveringNode) {
@@ -366,7 +366,12 @@ namespace XNodeEditor {
         public void RenameSelectedNode() {
             if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
                 XNode.Node node = Selection.activeObject as XNode.Node;
-                NodeEditor.GetEditor(node).InitiateRename();
+                Vector2 size;
+                if (nodeSizes.TryGetValue(node, out size)) {
+                    RenamePopup.Show(Selection.activeObject, size.x);
+                } else {
+                    RenamePopup.Show(Selection.activeObject);
+                }
             }
         }
 

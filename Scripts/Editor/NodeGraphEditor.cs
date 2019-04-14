@@ -8,12 +8,15 @@ namespace XNodeEditor {
     /// <summary> Base class to derive custom Node Graph editors from. Use this to override how graphs are drawn in the editor. </summary>
     [CustomNodeGraphEditor(typeof(XNode.NodeGraph))]
     public class NodeGraphEditor : XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph> {
-        /// <summary> The position of the window in screen space. </summary>
-        public Rect position;
+        [Obsolete("Use window.position instead")]
+        public Rect position { get { return window.position; } set { window.position = value; } }
         /// <summary> Are we currently renaming a node? </summary>
         protected bool isRenaming;
 
         public virtual void OnGUI() { }
+
+        /// <summary> Called when opened by NodeEditorWindow </summary>
+        public virtual void OnOpen() { }
 
         public virtual Texture2D GetGridTexture() {
             return NodeEditorPreferences.GetSettings().gridTexture;
@@ -55,6 +58,10 @@ namespace XNodeEditor {
             menu.AddSeparator("");
             menu.AddItem(new GUIContent("Preferences"), false, () => NodeEditorWindow.OpenPreferences());
             NodeEditorWindow.AddCustomContextMenuItems(menu, target);
+        }
+
+        public virtual Color GetPortColor(XNode.NodePort port) {
+            return GetTypeColor(port.ValueType);
         }
 
         public virtual Color GetTypeColor(Type type) {

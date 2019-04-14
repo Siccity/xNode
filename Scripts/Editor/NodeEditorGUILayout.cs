@@ -417,20 +417,26 @@ namespace XNodeEditor {
                     instancePorts = indexedPorts.OrderBy(x => x.index).Select(x => x.port).ToList();
 
                     int index = rl.index;
-                    // Clear the removed ports connections
-                    instancePorts[index].ClearConnections();
-                    // Move following connections one step up to replace the missing connection
-                    for (int k = index + 1; k < instancePorts.Count(); k++) {
-                        for (int j = 0; j < instancePorts[k].ConnectionCount; j++) {
-                            XNode.NodePort other = instancePorts[k].GetConnection(j);
-                            instancePorts[k].Disconnect(other);
-                            instancePorts[k - 1].Connect(other);
+
+                    if (instancePorts.Count > index) {
+                        // Clear the removed ports connections
+                        instancePorts[index].ClearConnections();
+                        // Move following connections one step up to replace the missing connection
+                        for (int k = index + 1; k < instancePorts.Count(); k++) {
+                            for (int j = 0; j < instancePorts[k].ConnectionCount; j++) {
+                                XNode.NodePort other = instancePorts[k].GetConnection(j);
+                                instancePorts[k].Disconnect(other);
+                                instancePorts[k - 1].Connect(other);
+                            }
                         }
+                        // Remove the last instance port, to avoid messing up the indexing
+                        node.RemoveInstancePort(instancePorts[instancePorts.Count() - 1].fieldName);
+                        serializedObject.Update();
+                        EditorUtility.SetDirty(node);
+                    } else {
+                        Debug.LogWarning("InstancePorts[" + index + "] out of range. Length was " + instancePorts.Count + ". Skipping.");
                     }
-                    // Remove the last instance port, to avoid messing up the indexing
-                    node.RemoveInstancePort(instancePorts[instancePorts.Count() - 1].fieldName);
-                    serializedObject.Update();
-                    EditorUtility.SetDirty(node);
+
                     if (hasArrayData) {
                         arrayData.DeleteArrayElementAtIndex(index);
                         // Error handling. If the following happens too often, file a bug report at https://github.com/Siccity/xNode/issues

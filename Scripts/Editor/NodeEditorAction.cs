@@ -428,19 +428,19 @@ namespace XNodeEditor {
         public void DrawDraggedConnection() {
             if (IsDraggingPort) {
                 Color col = NodeEditorPreferences.GetTypeColor(draggedOutput.ValueType);
+                col.a = draggedOutputTarget != null ? 1.0f : 0.6f;
 
                 Rect fromRect;
                 if (!_portConnectionPoints.TryGetValue(draggedOutput, out fromRect)) return;
-                Vector2 from = fromRect.center;
-                col.a = draggedOutputTarget != null ? 1.0f : 0.6f;
-                Vector2 to = Vector2.zero;
+                List<Vector2> gridPoints = new List<Vector2>();
+                gridPoints.Add(fromRect.center);
                 for (int i = 0; i < draggedOutputReroutes.Count; i++) {
-                    to = draggedOutputReroutes[i];
-                    DrawConnection(from, to, col);
-                    from = to;
+                    gridPoints.Add(draggedOutputReroutes[i]);
                 }
-                to = draggedOutputTarget != null ? portConnectionPoints[draggedOutputTarget].center : WindowToGridPosition(Event.current.mousePosition);
-                DrawConnection(from, to, col);
+                if (draggedOutputTarget != null) gridPoints.Add(portConnectionPoints[draggedOutputTarget].center);
+                else gridPoints.Add(WindowToGridPosition(Event.current.mousePosition));
+
+                DrawNoodle(col, gridPoints);
 
                 Color bgcol = Color.black;
                 Color frcol = col;

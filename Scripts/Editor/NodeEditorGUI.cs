@@ -114,52 +114,70 @@ namespace XNodeEditor {
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 
-        /// <summary> Draw a bezier from startpoint to endpoint, both in grid coordinates </summary>
-        public void DrawConnection(Vector2 startPoint, Vector2 endPoint, Color col) {
-            startPoint = GridToWindowPosition(startPoint);
-            endPoint = GridToWindowPosition(endPoint);
-
+        /// <summary> Draw a bezier from output to input in grid coordinates </summary>
+        public void DrawNoodle(Color col, List<Vector2> gridPoints) {
+            Vector2[] windowPoints = gridPoints.Select(x => GridToWindowPosition(x)).ToArray();
+            Handles.color = col;
+            int length = gridPoints.Count;
             switch (NodeEditorPreferences.GetSettings().noodleType) {
                 case NodeEditorPreferences.NoodleType.Curve:
-                    Vector2 startTangent = startPoint;
-                    if (startPoint.x < endPoint.x) startTangent.x = Mathf.LerpUnclamped(startPoint.x, endPoint.x, 0.7f);
-                    else startTangent.x = Mathf.LerpUnclamped(startPoint.x, endPoint.x, -0.7f);
+                    Vector2 outputTangent = Vector2.right;
+                    for (int i = 0; i < length - 1; i++) {
+                        Vector2 inputTangent = Vector2.left;
 
-                    Vector2 endTangent = endPoint;
-                    if (startPoint.x > endPoint.x) endTangent.x = Mathf.LerpUnclamped(endPoint.x, startPoint.x, -0.7f);
-                    else endTangent.x = Mathf.LerpUnclamped(endPoint.x, startPoint.x, 0.7f);
-                    Handles.DrawBezier(startPoint, endPoint, startTangent, endTangent, col, null, 4);
+                        if (i == 0) outputTangent = Vector2.right * Vector2.Distance(windowPoints[i], windowPoints[i + 1]) * 0.01f * zoom;
+                        if (i < length - 2) {
+                            Vector2 ab = (windowPoints[i + 1] - windowPoints[i]).normalized;
+                            Vector2 cb = (windowPoints[i + 1] - windowPoints[i + 2]).normalized;
+                            Vector2 ac = (windowPoints[i + 2] - windowPoints[i]).normalized;
+                            Vector2 p = (ab + cb) * 0.5f;
+                            float tangentLength = (Vector2.Distance(windowPoints[i], windowPoints[i + 1]) + Vector2.Distance(windowPoints[i + 1], windowPoints[i + 2])) * 0.005f * zoom;
+                            float side = ((ac.x * (windowPoints[i + 1].y - windowPoints[i].y)) - (ac.y * (windowPoints[i + 1].x - windowPoints[i].x)));
+
+                            p = new Vector2(-p.y, p.x) * Mathf.Sign(side) * tangentLength;
+                            inputTangent = p;
+                        }
+                        else {
+                            inputTangent = Vector2.left * Vector2.Distance(windowPoints[i], windowPoints[i + 1]) * 0.01f * zoom;
+                        }
+
+                        Handles.DrawBezier(windowPoints[i], windowPoints[i + 1], windowPoints[i] + ((outputTangent * 50) / zoom), windowPoints[i + 1] + ((inputTangent * 50) / zoom), col, null, 4);
+                        outputTangent = -inputTangent;
+                    }
                     break;
                 case NodeEditorPreferences.NoodleType.Line:
-                    Handles.color = col;
-                    Handles.DrawAAPolyLine(5, startPoint, endPoint);
+                    for (int i = 0; i < length - 1; i++) {
+                        Handles.DrawAAPolyLine(5, windowPoints[i], windowPoints[i + 1]);
+                    }
                     break;
                 case NodeEditorPreferences.NoodleType.Angled:
-                    Handles.color = col;
-                    if (startPoint.x <= endPoint.x - (50 / zoom)) {
-                        float midpoint = (startPoint.x + endPoint.x) * 0.5f;
-                        Vector2 start_1 = startPoint;
-                        Vector2 end_1 = endPoint;
-                        start_1.x = midpoint;
-                        end_1.x = midpoint;
-                        Handles.DrawAAPolyLine(5, startPoint, start_1);
-                        Handles.DrawAAPolyLine(5, start_1, end_1);
-                        Handles.DrawAAPolyLine(5, end_1, endPoint);
-                    } else {
-                        float midpoint = (startPoint.y + endPoint.y) * 0.5f;
-                        Vector2 start_1 = startPoint;
-                        Vector2 end_1 = endPoint;
-                        start_1.x += 25 / zoom;
-                        end_1.x -= 25 / zoom;
-                        Vector2 start_2 = start_1;
-                        Vector2 end_2 = end_1;
-                        start_2.y = midpoint;
-                        end_2.y = midpoint;
-                        Handles.DrawAAPolyLine(5, startPoint, start_1);
-                        Handles.DrawAAPolyLine(5, start_1, start_2);
-                        Handles.DrawAAPolyLine(5, start_2, end_2);
-                        Handles.DrawAAPolyLine(5, end_2, end_1);
-                        Handles.DrawAAPolyLine(5, end_1, endPoint);
+                    for (int i = 0; i < length - 1; i++) {
+                        if (i == length - 1) continue; // Skip last index
+                        if (windowPoints[i].x <= windowPoints[i + 1].x - (50 / zoom)) {
+                            float midpoint = (windowPoints[i].x + windowPoints[i + 1].x) * 0.5f;
+                            Vector2 start_1 = windowPoints[i];
+                            Vector2 end_1 = windowPoints[i + 1];
+                            start_1.x = midpoint;
+                            end_1.x = midpoint;
+                            Handles.DrawAAPolyLine(5, windowPoints[i], start_1);
+                            Handles.DrawAAPolyLine(5, start_1, end_1);
+                            Handles.DrawAAPolyLine(5, end_1, windowPoints[i + 1]);
+                        } else {
+                            float midpoint = (windowPoints[i].y + windowPoints[i + 1].y) * 0.5f;
+                            Vector2 start_1 = windowPoints[i];
+                            Vector2 end_1 = windowPoints[i + 1];
+                            start_1.x += 25 / zoom;
+                            end_1.x -= 25 / zoom;
+                            Vector2 start_2 = start_1;
+                            Vector2 end_2 = end_1;
+                            start_2.y = midpoint;
+                            end_2.y = midpoint;
+                            Handles.DrawAAPolyLine(5, windowPoints[i], start_1);
+                            Handles.DrawAAPolyLine(5, start_1, start_2);
+                            Handles.DrawAAPolyLine(5, start_2, end_2);
+                            Handles.DrawAAPolyLine(5, end_2, end_1);
+                            Handles.DrawAAPolyLine(5, end_1, windowPoints[i + 1]);
+                        }
                     }
                     break;
             }
@@ -193,18 +211,13 @@ namespace XNodeEditor {
                         Rect toRect;
                         if (!_portConnectionPoints.TryGetValue(input, out toRect)) continue;
 
-                        Vector2 from = fromRect.center;
-                        Vector2 to = Vector2.zero;
                         List<Vector2> reroutePoints = output.GetReroutePoints(k);
-                        // Loop through reroute points and draw the path
-                        for (int i = 0; i < reroutePoints.Count; i++) {
-                            to = reroutePoints[i];
-                            DrawConnection(from, to, connectionColor);
-                            from = to;
-                        }
-                        to = toRect.center;
 
-                        DrawConnection(from, to, connectionColor);
+                        List<Vector2> gridPoints = new List<Vector2>();
+                        gridPoints.Add(fromRect.center);
+                        gridPoints.AddRange(reroutePoints);
+                        gridPoints.Add(toRect.center);
+                        DrawNoodle(connectionColor, gridPoints);
 
                         // Loop through reroute points again and draw the points
                         for (int i = 0; i < reroutePoints.Count; i++) {

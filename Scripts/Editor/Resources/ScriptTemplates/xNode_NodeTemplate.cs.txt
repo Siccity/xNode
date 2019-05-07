@@ -5,9 +5,8 @@ using XNode;
 
 public class #SCRIPTNAME# : Node {
 
-	// Use this for initialization
-	protected override void Init() {
-		base.Init();
+	// Use OnEnable for initialization
+	private void OnEnable() {
 		#NOTRIM#
 	}
 

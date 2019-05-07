@@ -34,6 +34,25 @@ namespace XNodeEditor {
         }
         private Func<bool> _isDocked;
 
+        /// <summary>
+        /// This method is called automatically on script reload, and ensures that 
+        /// all static ports in all nodes match their Node's class' port attributes 
+        /// </summary>
+        [InitializeOnLoadMethod]
+        private static void UpdateAllStaticNodePorts() {
+            // Find all Graphs in the project
+            string[] guids = AssetDatabase.FindAssets("t:" + typeof(XNode.NodeGraph).Name);
+            for (int i = 0; i < guids.Length; i++) {
+                string assetpath = AssetDatabase.GUIDToAssetPath(guids[i]);
+                UnityEngine.Object[] objs = AssetDatabase.LoadAllAssetRepresentationsAtPath(assetpath);
+                // Loop through graph asset and search for nodes (nodes exist inside the graph asset as sub-assets)
+                for (int k = 0; k < objs.Length; k++) {
+                    XNode.Node node = objs[k] as XNode.Node;
+                    if (node != null) node.UpdateStaticPorts();
+                }
+            }
+        }
+
         public static Type[] GetNodeTypes() {
             //Get all classes deriving from Node via reflection
             return GetDerivedTypes(typeof(XNode.Node));

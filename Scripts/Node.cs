@@ -114,20 +114,15 @@ namespace XNode {
         /// <summary> Used during node instantiation to fix null/misconfigured graph during OnEnable/Init. Set it before instantiating a node. Will automatically be unset during OnEnable </summary>
         public static NodeGraph graphHotfix;
 
-        protected void OnEnable() {
+        private void Awake() {
             if (graphHotfix != null) graph = graphHotfix;
             graphHotfix = null;
-            UpdateStaticPorts();
-            Init();
         }
 
         /// <summary> Update static ports to reflect class fields. This happens automatically on enable. </summary>
         public void UpdateStaticPorts() {
             NodeDataCache.UpdatePorts(this, ports);
         }
-
-        /// <summary> Initialize node. Called on enable. </summary>
-        protected virtual void Init() { }
 
         /// <summary> Checks all connections for invalid references, and removes them. </summary>
         public void VerifyConnections() {

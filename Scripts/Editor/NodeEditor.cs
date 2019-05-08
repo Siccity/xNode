@@ -12,7 +12,7 @@ namespace XNodeEditor {
 
         /// <summary> Fires every whenever a node was modified through the editor </summary>
         public static Action<XNode.Node> onUpdateNode;
-        public static Dictionary<XNode.NodePort, Vector2> portPositions;
+        public readonly static Dictionary<XNode.NodePort, Vector2> portPositions = new Dictionary<XNode.NodePort, Vector2>();
 
         public virtual void OnHeaderGUI() {
             GUILayout.Label(target.name, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
@@ -25,7 +25,6 @@ namespace XNodeEditor {
             // serializedObject.ApplyModifiedProperties(); goes at the end.
             serializedObject.Update();
             string[] excludes = { "m_Script", "graph", "position", "ports" };
-            portPositions = new Dictionary<XNode.NodePort, Vector2>();
 
             // Iterate through serialized properties and draw them like the Inspector (But with ports)
             SerializedProperty iterator = serializedObject.GetIterator();

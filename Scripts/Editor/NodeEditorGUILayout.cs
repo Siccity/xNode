@@ -147,8 +147,7 @@ namespace XNodeEditor {
 
                 // Register the handle position
                 Vector2 portPos = rect.center;
-                if (NodeEditor.portPositions.ContainsKey(port)) NodeEditor.portPositions[port] = portPos;
-                else NodeEditor.portPositions.Add(port, portPos);
+                NodeEditor.portPositions[port] = portPos;
             }
         }
 
@@ -204,8 +203,7 @@ namespace XNodeEditor {
 
             // Register the handle position
             Vector2 portPos = rect.center;
-            if (NodeEditor.portPositions.ContainsKey(port)) NodeEditor.portPositions[port] = portPos;
-            else NodeEditor.portPositions.Add(port, portPos);
+            NodeEditor.portPositions[port] = portPos;
         }
 
         /// <summary> Add a port field to previous layout element. </summary>
@@ -233,8 +231,7 @@ namespace XNodeEditor {
 
             // Register the handle position
             Vector2 portPos = rect.center;
-            if (NodeEditor.portPositions.ContainsKey(port)) NodeEditor.portPositions[port] = portPos;
-            else NodeEditor.portPositions.Add(port, portPos);
+            NodeEditor.portPositions[port] = portPos;
         }
 
         /// <summary> Draws an input and an output port on the same line </summary>

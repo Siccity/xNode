@@ -15,7 +15,7 @@ namespace XNodeEditor {
         [SerializeField] private Rect[] _rects = new Rect[0];
 
         [System.Serializable] private class NodePortReference {
-            [SerializeField] private XNode.Node _node;
+            [SerializeField] private UnityEngine.Object _node;
             [SerializeField] private string _name;
 
             public NodePortReference(XNode.NodePort nodePort) {
@@ -27,7 +27,7 @@ namespace XNodeEditor {
                 if (_node == null) {
                     return null;
                 }
-                return _node.GetPort(_name);
+                return (_node as XNode.INode).GetPort(_name);
             }
         }
 

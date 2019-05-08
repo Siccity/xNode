@@ -23,7 +23,7 @@ namespace XNode {
     /// </code>
     /// </example>
     [Serializable]
-    public abstract class Node : ScriptableObject {
+    public abstract class Node : ScriptableObject, XNode.INode {
         /// <summary> Used by <see cref="InputAttribute"/> and <see cref="OutputAttribute"/> to determine when to display the field value associated with a <see cref="NodePort"/> </summary>
         public enum ShowBackingValue {
             /// <summary> Never show the backing value </summary>
@@ -105,7 +105,9 @@ namespace XNode {
         /// <summary> Iterate over all dynamic inputs on this node. </summary>
         public IEnumerable<NodePort> DynamicInputs { get { foreach (NodePort port in Ports) { if (port.IsDynamic && port.IsInput) yield return port; } } }
         /// <summary> Parent <see cref="NodeGraph"/> </summary>
-        [SerializeField] public NodeGraph graph;
+        public NodeGraph Graph { get { return graph; } }
+        /// <summary> Parent <see cref="NodeGraph"/> </summary>
+        [SerializeField] private NodeGraph graph;
         /// <summary> Position on the <see cref="NodeGraph"/> </summary>
         [SerializeField] public Vector2 position;
         /// <summary> It is recommended not to modify these at hand. Instead, see <see cref="InputAttribute"/> and <see cref="OutputAttribute"/> </summary>

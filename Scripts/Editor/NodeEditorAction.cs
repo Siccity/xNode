@@ -15,7 +15,7 @@ namespace XNodeEditor {
         private bool IsHoveringPort { get { return hoveredPort != null; } }
         private bool IsHoveringNode { get { return hoveredNode != null; } }
         private bool IsHoveringReroute { get { return hoveredReroute.port != null; } }
-        private XNode.Node hoveredNode = null;
+        private XNode.INode hoveredNode = null;
         [NonSerialized] private XNode.NodePort hoveredPort = null;
         [NonSerialized] private XNode.NodePort draggedOutput = null;
         [NonSerialized] private XNode.NodePort draggedOutputTarget = null;
@@ -81,8 +81,8 @@ namespace XNodeEditor {
                             Vector2 mousePos = WindowToGridPosition(e.mousePosition);
                             // Move selected nodes with offset
                             for (int i = 0; i < Selection.objects.Length; i++) {
-                                if (Selection.objects[i] is XNode.Node) {
-                                    XNode.Node node = Selection.objects[i] as XNode.Node;
+                                if (Selection.objects[i] is XNode.INode) {
+                                    XNode.INode node = Selection.objects[i] as XNode.INode;
                                     Vector2 initial = node.position;
                                     node.position = mousePos + dragOffset[i];
                                     if (gridSnap) {
@@ -151,7 +151,7 @@ namespace XNodeEditor {
                             } else {
                                 hoveredPort.VerifyConnections();
                                 if (hoveredPort.IsConnected) {
-                                    XNode.Node node = hoveredPort.node;
+                                    XNode.INode node = hoveredPort.node;
                                     XNode.NodePort output = hoveredPort.Connection;
                                     int outputConnectionIndex = output.GetConnectionIndex(hoveredPort);
                                     draggedOutputReroutes = output.GetReroutePoints(outputConnectionIndex);
@@ -206,7 +206,7 @@ namespace XNodeEditor {
                         if (IsDraggingPort) {
                             //If connection is valid, save it
                             if (draggedOutputTarget != null) {
-                                XNode.Node node = draggedOutputTarget.node;
+                                XNode.INode node = draggedOutputTarget.node;
                                 if (graph.nodes.Count != 0) draggedOutput.Connect(draggedOutputTarget);
 
                                 // ConnectionIndex can be -1 if the connection is removed instantly after creation
@@ -223,8 +223,8 @@ namespace XNodeEditor {
                             EditorUtility.SetDirty(graph);
                             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
                         } else if (currentActivity == NodeActivity.DragNode) {
-                            IEnumerable<XNode.Node> nodes = Selection.objects.Where(x => x is XNode.Node).Select(x => x as XNode.Node);
-                            foreach (XNode.Node node in nodes) EditorUtility.SetDirty(node);
+                            IEnumerable<XNode.INode> nodes = Selection.objects.Where(x => x is XNode.INode).Select(x => x as XNode.INode);
+                            foreach (XNode.INode node in nodes) EditorUtility.SetDirty(node);
                             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
                         } else if (!IsHoveringNode) {
                             // If click outside node, release field focus
@@ -328,8 +328,8 @@ namespace XNodeEditor {
             dragOffset = new Vector2[Selection.objects.Length + selectedReroutes.Count];
             // Selected nodes
             for (int i = 0; i < Selection.objects.Length; i++) {
-                if (Selection.objects[i] is XNode.Node) {
-                    XNode.Node node = Selection.objects[i] as XNode.Node;
+                if (Selection.objects[i] is XNode.INode) {
+                    XNode.INode node = Selection.objects[i] as XNode.INode;
                     dragOffset[i] = node.position - WindowToGridPosition(current.mousePosition);
                 }
             }

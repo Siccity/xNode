@@ -7,11 +7,11 @@ using UnityEngine;
 namespace XNodeEditor {
     /// <summary> Base class to derive custom Node editors from. Use this to create your own custom inspectors and editors for your nodes. </summary>
 
-    [CustomNodeEditor(typeof(XNode.Node))]
-    public class NodeEditor : XNodeEditor.Internal.NodeEditorBase<NodeEditor, NodeEditor.CustomNodeEditorAttribute, XNode.Node> {
+    [CustomNodeEditor(typeof(XNode.INode))]
+    public class NodeEditor : XNodeEditor.Internal.NodeEditorBase<NodeEditor, NodeEditor.CustomNodeEditorAttribute, XNode.INode> {
 
         /// <summary> Fires every whenever a node was modified through the editor </summary>
-        public static Action<XNode.Node> onUpdateNode;
+        public static Action<XNode.INode> onUpdateNode;
         public static Dictionary<XNode.NodePort, Vector2> portPositions;
 
         public virtual void OnHeaderGUI() {
@@ -67,9 +67,9 @@ namespace XNodeEditor {
         /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>
         public virtual void AddContextMenuItems(GenericMenu menu) {
             // Actions if only one node is selected
-            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
-                XNode.Node node = Selection.activeObject as XNode.Node;
-                menu.AddItem(new GUIContent("Move To Top"), false, () => NodeEditorWindow.current.MoveNodeToTop(node));
+            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.INode) {
+                XNode.INode node = Selection.activeObject as XNode.INode;
+                menu.AddItem(new GUIContent("Move To Top"), false, () => node.Graph.MoveNodeToTop(node));
                 menu.AddItem(new GUIContent("Rename"), false, NodeEditorWindow.current.RenameSelectedNode);
             }
 
@@ -78,8 +78,8 @@ namespace XNodeEditor {
             menu.AddItem(new GUIContent("Remove"), false, NodeEditorWindow.current.RemoveSelectedNodes);
 
             // Custom sctions if only one node is selected
-            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
-                XNode.Node node = Selection.activeObject as XNode.Node;
+            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.INode) {
+                XNode.INode node = Selection.activeObject as XNode.INode;
                 NodeEditorWindow.AddCustomContextMenuItems(menu, node);
             }
         }
@@ -93,7 +93,7 @@ namespace XNodeEditor {
 
         [AttributeUsage(AttributeTargets.Class)]
         public class CustomNodeEditorAttribute : Attribute,
-        XNodeEditor.Internal.NodeEditorBase<NodeEditor, NodeEditor.CustomNodeEditorAttribute, XNode.Node>.INodeEditorAttrib {
+        XNodeEditor.Internal.NodeEditorBase<NodeEditor, NodeEditor.CustomNodeEditorAttribute, XNode.INode>.INodeEditorAttrib {
             private Type inspectedType;
             /// <summary> Tells a NodeEditor which Node type it is an editor for </summary>
             /// <param name="inspectedType">Type that this editor can edit</param>

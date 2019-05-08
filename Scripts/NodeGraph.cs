@@ -11,9 +11,26 @@ namespace XNode {
         /// See: <see cref="AddNode{T}"/> </summary>
         [SerializeField] public List<Node> nodes = new List<Node>();
 
+#region Interface implementation
+        IEnumerable<INode> INodeGraph.Nodes { get { foreach (Node node in nodes) yield return node; } }
+        INode INodeGraph.AddNode(Type type) { return AddNode(type); }
+        void INodeGraph.MoveNodeToTop(INode node) { MoveNodeToTop(node as Node); }
+        INode INodeGraph.CopyNode(INode original) { return CopyNode(original as Node); }
+        void INodeGraph.RemoveNode(INode node) { RemoveNode(node as Node); }
+#endregion
+
         /// <summary> Add a node to the graph by type (convenience method - will call the System.Type version) </summary>
         public T AddNode<T>() where T : Node {
             return AddNode(typeof(T)) as T;
+        }
+
+        /// <summary> Draw this node on top of other nodes by placing it last in the graph.nodes list </summary>
+        public void MoveNodeToTop(XNode.Node node) {
+            int index;
+            while ((index = nodes.IndexOf(node as Node)) != nodes.Count - 1) {
+                nodes[index] = nodes[index + 1];
+                nodes[index + 1] = node as Node;
+            }
         }
 
         /// <summary> Add a node to the graph by type </summary>

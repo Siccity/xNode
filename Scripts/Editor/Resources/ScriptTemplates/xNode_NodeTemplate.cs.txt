@@ -5,7 +5,12 @@ using XNode;
 
 public class #SCRIPTNAME# : Node {
 
-	// Use OnEnable for initialization
+	// Reset is called on creation
+	private void Reset() {
+		#NOTRIM#
+	}
+
+	// OnEnable is called on load
 	private void OnEnable() {
 		#NOTRIM#
 	}

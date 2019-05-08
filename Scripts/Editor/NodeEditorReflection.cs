@@ -47,7 +47,7 @@ namespace XNodeEditor {
                 UnityEngine.Object[] objs = AssetDatabase.LoadAllAssetRepresentationsAtPath(assetpath);
                 // Loop through graph asset and search for nodes (nodes exist inside the graph asset as sub-assets)
                 for (int k = 0; k < objs.Length; k++) {
-                    XNode.Node node = objs[k] as XNode.Node;
+                    XNode.INode node = objs[k] as XNode.INode;
                     if (node != null) node.UpdateStaticPorts();
                 }
             }
@@ -55,15 +55,15 @@ namespace XNodeEditor {
 
         public static Type[] GetNodeTypes() {
             //Get all classes deriving from Node via reflection
-            return GetDerivedTypes(typeof(XNode.Node));
+            return GetDerivedTypes(typeof(XNode.INode));
         }
 
         public static Dictionary<Type, Color> GetNodeTint() {
             Dictionary<Type, Color> tints = new Dictionary<Type, Color>();
             for (int i = 0; i < nodeTypes.Length; i++) {
-                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.Node.NodeTintAttribute), true);
+                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.INode.NodeTintAttribute), true);
                 if (attribs == null || attribs.Length == 0) continue;
-                XNode.Node.NodeTintAttribute attrib = attribs[0] as XNode.Node.NodeTintAttribute;
+                XNode.INode.NodeTintAttribute attrib = attribs[0] as XNode.INode.NodeTintAttribute;
                 tints.Add(nodeTypes[i], attrib.color);
             }
             return tints;
@@ -72,9 +72,9 @@ namespace XNodeEditor {
         public static Dictionary<Type, int> GetNodeWidth() {
             Dictionary<Type, int> widths = new Dictionary<Type, int>();
             for (int i = 0; i < nodeTypes.Length; i++) {
-                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.Node.NodeWidthAttribute), true);
+                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.INode.NodeWidthAttribute), true);
                 if (attribs == null || attribs.Length == 0) continue;
-                XNode.Node.NodeWidthAttribute attrib = attribs[0] as XNode.Node.NodeWidthAttribute;
+                XNode.INode.NodeWidthAttribute attrib = attribs[0] as XNode.INode.NodeWidthAttribute;
                 widths.Add(nodeTypes[i], attrib.width);
             }
             return widths;
@@ -85,7 +85,7 @@ namespace XNodeEditor {
             // If we can't find field in the first run, it's probably a private field in a base class.
             FieldInfo field = type.GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             // Search base classes for private fields only. Public fields are found above
-            while (field == null && (type = type.BaseType) != typeof(XNode.Node)) field = type.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
+            while (field == null && (type = type.BaseType) != typeof(XNode.INode)) field = type.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
             return field;
         }
 

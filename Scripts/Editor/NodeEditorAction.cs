@@ -83,15 +83,17 @@ namespace XNodeEditor {
                             for (int i = 0; i < Selection.objects.Length; i++) {
                                 if (Selection.objects[i] is XNode.INode) {
                                     XNode.INode node = Selection.objects[i] as XNode.INode;
-                                    Vector2 initial = node.position;
-                                    node.position = mousePos + dragOffset[i];
+                                    Vector2 initial = node.Position;
+                                    node.Position = mousePos + dragOffset[i];
                                     if (gridSnap) {
-                                        node.position.x = (Mathf.Round((node.position.x + 8) / 16) * 16) - 8;
-                                        node.position.y = (Mathf.Round((node.position.y + 8) / 16) * 16) - 8;
+                                        Vector2 position = node.Position;
+                                        position.x = (Mathf.Round((node.Position.x + 8) / 16) * 16) - 8;
+                                        position.y = (Mathf.Round((node.Position.y + 8) / 16) * 16) - 8;
+                                        node.Position = position;
                                     }
 
                                     // Offset portConnectionPoints instantly if a node is dragged so they aren't delayed by a frame.
-                                    Vector2 offset = node.position - initial;
+                                    Vector2 offset = node.Position - initial;
                                     if (offset.sqrMagnitude > 0) {
                                         foreach (XNode.NodePort output in node.Outputs) {
                                             Rect rect;
@@ -163,7 +165,7 @@ namespace XNodeEditor {
                             }
                         } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
                             // If mousedown on node header, select or deselect
-                            if (!Selection.Contains(hoveredNode)) {
+                            if (!Selection.Contains((UnityEngine.Object)hoveredNode)) {
                                 SelectNode(hoveredNode, e.control || e.shift);
                                 if (!e.control && !e.shift) selectedReroutes.Clear();
                             } else if (e.control || e.shift) DeselectNode(hoveredNode);
@@ -243,7 +245,7 @@ namespace XNodeEditor {
                             // Double click to center node
                             if (isDoubleClick) {
                                 Vector2 nodeDimension = nodeSizes.ContainsKey(hoveredNode) ? nodeSizes[hoveredNode] / 2 : Vector2.zero;
-                                panOffset = -hoveredNode.position - nodeDimension;
+                                panOffset = -hoverednode.Position - nodeDimension;
                             }
                         }
 
@@ -267,7 +269,7 @@ namespace XNodeEditor {
                             } else if (IsHoveringPort) {
                                 ShowPortContextMenu(hoveredPort);
                             } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
-                                if (!Selection.Contains(hoveredNode)) SelectNode(hoveredNode, false);
+                                if (!Selection.Contains((UnityEngine.Object)hoveredNode)) SelectNode(hoveredNode, false);
                                 GenericMenu menu = new GenericMenu();
                                 NodeEditor.GetEditor(hoveredNode, this).AddContextMenuItems(menu);
                                 menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
@@ -330,7 +332,7 @@ namespace XNodeEditor {
             for (int i = 0; i < Selection.objects.Length; i++) {
                 if (Selection.objects[i] is XNode.INode) {
                     XNode.INode node = Selection.objects[i] as XNode.INode;
-                    dragOffset[i] = node.position - WindowToGridPosition(current.mousePosition);
+                    dragOffset[i] = node.Position - WindowToGridPosition(current.mousePosition);
                 }
             }
 
@@ -355,8 +357,8 @@ namespace XNodeEditor {
             }
             selectedReroutes.Clear();
             foreach (UnityEngine.Object item in Selection.objects) {
-                if (item is XNode.Node) {
-                    XNode.Node node = item as XNode.Node;
+                if (item is XNode.INode) {
+                    XNode.INode node = item as XNode.INode;
                     graphEditor.RemoveNode(node);
                 }
             }
@@ -364,8 +366,8 @@ namespace XNodeEditor {
 
         /// <summary> Initiate a rename on the currently selected node </summary>
         public void RenameSelectedNode() {
-            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
-                XNode.Node node = Selection.activeObject as XNode.Node;
+            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.INode) {
+                XNode.INode node = Selection.activeObject as XNode.INode;
                 Vector2 size;
                 if (nodeSizes.TryGetValue(node, out size)) {
                     RenamePopup.Show(Selection.activeObject, size.x);
@@ -375,41 +377,32 @@ namespace XNodeEditor {
             }
         }
 
-        /// <summary> Draw this node on top of other nodes by placing it last in the graph.nodes list </summary>
-        public void MoveNodeToTop(XNode.Node node) {
-            int index;
-            while ((index = graph.nodes.IndexOf(node)) != graph.nodes.Count - 1) {
-                graph.nodes[index] = graph.nodes[index + 1];
-                graph.nodes[index + 1] = node;
-            }
-        }
-
         /// <summary> Duplicate selected nodes and select the duplicates </summary>
         public void DuplicateSelectedNodes() {
             UnityEngine.Object[] newNodes = new UnityEngine.Object[Selection.objects.Length];
-            Dictionary<XNode.Node, XNode.Node> substitutes = new Dictionary<XNode.Node, XNode.Node>();
+            Dictionary<XNode.INode, XNode.INode> substitutes = new Dictionary<XNode.INode, XNode.INode>();
             for (int i = 0; i < Selection.objects.Length; i++) {
-                if (Selection.objects[i] is XNode.Node) {
-                    XNode.Node srcNode = Selection.objects[i] as XNode.Node;
-                    if (srcNode.graph != graph) continue; // ignore nodes selected in another graph
-                    XNode.Node newNode = graphEditor.CopyNode(srcNode);
+                if (Selection.objects[i] is XNode.INode) {
+                    XNode.INode srcNode = Selection.objects[i] as XNode.INode;
+                    if (srcNode.Graph != graph) continue; // ignore nodes selected in another graph
+                    XNode.INode newNode = graphEditor.CopyNode(srcNode);
                     substitutes.Add(srcNode, newNode);
-                    newNode.position = srcNode.position + new Vector2(30, 30);
+                    newnode.Position = srcnode.Position + new Vector2(30, 30);
                     newNodes[i] = newNode;
                 }
             }
 
             // Walk through the selected nodes again, recreate connections, using the new nodes
             for (int i = 0; i < Selection.objects.Length; i++) {
-                if (Selection.objects[i] is XNode.Node) {
-                    XNode.Node srcNode = Selection.objects[i] as XNode.Node;
+                if (Selection.objects[i] is XNode.INode) {
+                    XNode.INode srcNode = Selection.objects[i] as XNode.INode;
                     if (srcNode.graph != graph) continue; // ignore nodes selected in another graph
                     foreach (XNode.NodePort port in srcNode.Ports) {
                         for (int c = 0; c < port.ConnectionCount; c++) {
                             XNode.NodePort inputPort = port.direction == XNode.NodePort.IO.Input ? port : port.GetConnection(c);
                             XNode.NodePort outputPort = port.direction == XNode.NodePort.IO.Output ? port : port.GetConnection(c);
 
-                            XNode.Node newNodeIn, newNodeOut;
+                            XNode.INode newNodeIn, newNodeOut;
                             if (substitutes.TryGetValue(inputPort.node, out newNodeIn) && substitutes.TryGetValue(outputPort.node, out newNodeOut)) {
                                 newNodeIn.UpdateStaticPorts();
                                 newNodeOut.UpdateStaticPorts();
@@ -459,10 +452,10 @@ namespace XNodeEditor {
             }
         }
 
-        bool IsHoveringTitle(XNode.Node node) {
+        bool IsHoveringTitle(XNode.INode node) {
             Vector2 mousePos = Event.current.mousePosition;
             //Get node position
-            Vector2 nodePos = GridToWindowPosition(node.position);
+            Vector2 nodePos = GridToWindowPosition(node.Position);
             float width;
             Vector2 size;
             if (nodeSizes.TryGetValue(node, out size)) width = size.x;

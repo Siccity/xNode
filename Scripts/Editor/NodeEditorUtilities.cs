@@ -134,7 +134,7 @@ namespace XNodeEditor {
         }
 
         /// <summary>Creates a new C# Class.</summary>
-        [MenuItem("Assets/Create/xNode/Node C# Script", false, 89)]
+        [MenuItem("Assets/Create/XNode.INode C# Script", false, 89)]
         private static void CreateNode() {
             string[] guids = AssetDatabase.FindAssets("xNode_NodeTemplate.cs");
             if (guids.Length == 0) {

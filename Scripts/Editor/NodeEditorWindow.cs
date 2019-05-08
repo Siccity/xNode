@@ -8,7 +8,7 @@ namespace XNodeEditor {
     public partial class NodeEditorWindow : EditorWindow {
         public static NodeEditorWindow current;
 
-        /// <summary> Stores node positions for all nodePorts. </summary>
+        /// <summary> Stores node.Positions for all nodePorts. </summary>
         public Dictionary<XNode.NodePort, Rect> portConnectionPoints { get { return _portConnectionPoints; } }
         private Dictionary<XNode.NodePort, Rect> _portConnectionPoints = new Dictionary<XNode.NodePort, Rect>();
         [SerializeField] private NodePortReference[] _references = new NodePortReference[0];
@@ -56,9 +56,9 @@ namespace XNodeEditor {
             }
         }
 
-        public Dictionary<XNode.Node, Vector2> nodeSizes { get { return _nodeSizes; } }
-        private Dictionary<XNode.Node, Vector2> _nodeSizes = new Dictionary<XNode.Node, Vector2>();
-        public XNode.NodeGraph graph;
+        public Dictionary<XNode.INode, Vector2> nodeSizes { get { return _nodeSizes; } }
+        private Dictionary<XNode.INode, Vector2> _nodeSizes = new Dictionary<XNode.INode, Vector2>();
+        public XNode.INodeGraph graph;
         public Vector2 panOffset { get { return _panOffset; } set { _panOffset = value; Repaint(); } }
         private Vector2 _panOffset;
         public float zoom { get { return _zoom; } set { _zoom = Mathf.Clamp(value, 1f, NodeEditorPreferences.GetSettings().zoomOutLimit); Repaint(); } }
@@ -78,7 +78,7 @@ namespace XNodeEditor {
 
         /// <summary> Handle Selection Change events</summary>
         private static void OnSelectionChanged() {
-            XNode.NodeGraph nodeGraph = Selection.activeObject as XNode.NodeGraph;
+            XNode.INodeGraph nodeGraph = Selection.activeObject as XNode.INodeGraph;
             if (nodeGraph && !AssetDatabase.Contains(nodeGraph)) {
                 Open(nodeGraph);
             }
@@ -113,7 +113,7 @@ namespace XNodeEditor {
             string path = EditorUtility.SaveFilePanelInProject("Save NodeGraph", "NewNodeGraph", "asset", "");
             if (string.IsNullOrEmpty(path)) return;
             else {
-                XNode.NodeGraph existingGraph = AssetDatabase.LoadAssetAtPath<XNode.NodeGraph>(path);
+                XNode.INodeGraph existingGraph = AssetDatabase.LoadAssetAtPath<XNode.INodeGraph>(path);
                 if (existingGraph != null) AssetDatabase.DeleteAsset(path);
                 AssetDatabase.CreateAsset(graph, path);
                 EditorUtility.SetDirty(graph);
@@ -152,7 +152,7 @@ namespace XNodeEditor {
             return new Vector2(xOffset, yOffset);
         }
 
-        public void SelectNode(XNode.Node node, bool add) {
+        public void SelectNode(XNode.INode node, bool add) {
             if (add) {
                 List<Object> selection = new List<Object>(Selection.objects);
                 selection.Add(node);
@@ -160,7 +160,7 @@ namespace XNodeEditor {
             } else Selection.objects = new Object[] { node };
         }
 
-        public void DeselectNode(XNode.Node node) {
+        public void DeselectNode(XNode.INode node) {
             List<Object> selection = new List<Object>(Selection.objects);
             selection.Remove(node);
             Selection.objects = selection.ToArray();
@@ -168,7 +168,7 @@ namespace XNodeEditor {
 
         [OnOpenAsset(0)]
         public static bool OnOpen(int instanceID, int line) {
-            XNode.NodeGraph nodeGraph = EditorUtility.InstanceIDToObject(instanceID) as XNode.NodeGraph;
+            XNode.INodeGraph nodeGraph = EditorUtility.InstanceIDToObject(instanceID) as XNode.INodeGraph;
             if (nodeGraph != null) {
                 Open(nodeGraph);
                 return true;
@@ -177,7 +177,7 @@ namespace XNodeEditor {
         }
 
         /// <summary>Open the provided graph in the NodeEditor</summary>
-        public static void Open(XNode.NodeGraph graph) {
+        public static void Open(XNode.INodeGraph graph) {
             if (!graph) return;
 
             NodeEditorWindow w = GetWindow(typeof(NodeEditorWindow), false, "xNode", true) as NodeEditorWindow;

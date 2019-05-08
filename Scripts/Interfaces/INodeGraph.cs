@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace XNode {
 	/// <summary> Used by advanced extensions that need to alter the base classes of NodeGraphs </summary>
 	public interface INodeGraph {
-		int NodesCount { get; }
 		void MoveNodeToTop(INode node);
-		INode[] GetNodes();
+		IEnumerable<INode> Nodes { get; }
 		INode AddNode(Type type);
 		INode CopyNode(INode original);
 		void RemoveNode(INode node);

@@ -10,13 +10,13 @@ namespace XNodeEditor.Internal {
 	/// <typeparam name="T">Editor Type. Should be the type of the deriving script itself (eg. NodeEditor) </typeparam>
 	/// <typeparam name="A">Attribute Type. The attribute used to connect with the runtime type (eg. CustomNodeEditorAttribute) </typeparam>
 	/// <typeparam name="K">Runtime Type. The ScriptableObject this can be an editor for (eg. Node) </typeparam>
-	public abstract class NodeEditorBase<T, A, K> where A : Attribute, NodeEditorBase<T, A, K>.INodeEditorAttrib where T : NodeEditorBase<T, A, K> where K : ScriptableObject {
+	public abstract class NodeEditorBase<T, A, K> : Editor where A : Attribute, NodeEditorBase<T, A, K>.INodeEditorAttrib where T : NodeEditorBase<T, A, K> where K : ScriptableObject {
 		/// <summary> Custom editors defined with [CustomNodeEditor] </summary>
 		private static Dictionary<Type, Type> editorTypes;
 		private static Dictionary<K, T> editors = new Dictionary<K, T>();
 		public NodeEditorWindow window;
-		public K target;
-		public SerializedObject serializedObject;
+		public new K target { get { return _target == base.target ? _target : _target = (K) base.target; } set { base.target = value; } }
+		private K _target;
 
 		public static T GetEditor(K target, NodeEditorWindow window) {
 			if (target == null) return null;
@@ -24,16 +24,12 @@ namespace XNodeEditor.Internal {
 			if (!editors.TryGetValue(target, out editor)) {
 				Type type = target.GetType();
 				Type editorType = GetEditorType(type);
-				editor = Activator.CreateInstance(editorType) as T;
-				editor.target = target;
-				editor.serializedObject = new SerializedObject(target);
+				editor = (T) Editor.CreateEditor(target, editorType);
 				editor.window = window;
-				editor.OnCreate();
 				editors.Add(target, editor);
 			}
-			if (editor.target == null) editor.target = target;
+			if (editor.target == null) editor.Initialize(new UnityEngine.Object[] { target });
 			if (editor.window != window) editor.window = window;
-			if (editor.serializedObject == null) editor.serializedObject = new SerializedObject(target);
 			return editor;
 		}
 
@@ -59,9 +55,6 @@ namespace XNodeEditor.Internal {
 				editorTypes.Add(attrib.GetInspectedType(), nodeEditors[i]);
 			}
 		}
-
-		/// <summary> Called on creation, after references have been set </summary>
-		public virtual void OnCreate() { }
 
 		public interface INodeEditorAttrib {
 			Type GetInspectedType();

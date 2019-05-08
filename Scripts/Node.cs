@@ -105,7 +105,7 @@ namespace XNode {
         /// <summary> Iterate over all dynamic inputs on this node. </summary>
         public IEnumerable<NodePort> DynamicInputs { get { foreach (NodePort port in Ports) { if (port.IsDynamic && port.IsInput) yield return port; } } }
         /// <summary> Parent <see cref="NodeGraph"/> </summary>
-        public NodeGraph Graph { get { return graph; } }
+        public INodeGraph Graph { get { return graph; } }
         /// <summary> Parent <see cref="NodeGraph"/> </summary>
         [SerializeField] private NodeGraph graph;
         /// <summary> Position on the <see cref="NodeGraph"/> </summary>

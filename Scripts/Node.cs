@@ -51,47 +51,6 @@ namespace XNode {
             Strict,
         }
 
-#region Obsolete
-        [Obsolete("Use DynamicPorts instead")]
-        public IEnumerable<NodePort> InstancePorts { get { return DynamicPorts; } }
-
-        [Obsolete("Use DynamicOutputs instead")]
-        public IEnumerable<NodePort> InstanceOutputs { get { return DynamicOutputs; } }
-
-        [Obsolete("Use DynamicInputs instead")]
-        public IEnumerable<NodePort> InstanceInputs { get { return DynamicInputs; } }
-
-        [Obsolete("Use AddDynamicInput instead")]
-        public NodePort AddInstanceInput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = TypeConstraint.None, string fieldName = null) {
-            return AddInstanceInput(type, connectionType, typeConstraint, fieldName);
-        }
-
-        [Obsolete("Use AddDynamicOutput instead")]
-        public NodePort AddInstanceOutput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = TypeConstraint.None, string fieldName = null) {
-            return AddDynamicOutput(type, connectionType, typeConstraint, fieldName);
-        }
-
-        [Obsolete("Use AddDynamicPort instead")]
-        private NodePort AddInstancePort(Type type, NodePort.IO direction, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = TypeConstraint.None, string fieldName = null) {
-            return AddDynamicPort(type, direction, connectionType, typeConstraint, fieldName);
-        }
-
-        [Obsolete("Use RemoveDynamicPort instead")]
-        public void RemoveInstancePort(string fieldName) {
-            RemoveDynamicPort(fieldName);
-        }
-
-        [Obsolete("Use RemoveDynamicPort instead")]
-        public void RemoveInstancePort(NodePort port) {
-            RemoveDynamicPort(port);
-        }
-
-        [Obsolete("Use ClearDynamicPorts instead")]
-        public void ClearInstancePorts() {
-            ClearDynamicPorts();
-        }
-#endregion
-
 #region Interface implementation
         string INode.Name { get { return name; } set { name = value; } }
         INodeGraph INode.Graph { get { return graph; } }
@@ -140,14 +99,14 @@ namespace XNode {
         /// <seealso cref="AddInstancePort"/>
         /// <seealso cref="AddInstanceOutput"/>
         public NodePort AddDynamicInput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = TypeConstraint.None, string fieldName = null) {
-            return ((INode)this).AddDynamicPort(type, NodePort.IO.Input, connectionType, typeConstraint, fieldName);
+            return ((INode) this).AddDynamicPort(type, NodePort.IO.Input, connectionType, typeConstraint, fieldName);
         }
 
         /// <summary> Convenience function. </summary>
         /// <seealso cref="AddInstancePort"/>
         /// <seealso cref="AddInstanceInput"/>
         public NodePort AddDynamicOutput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = TypeConstraint.None, string fieldName = null) {
-            return ((INode)this).AddDynamicPort(type, NodePort.IO.Output, connectionType, typeConstraint, fieldName);
+            return ((INode) this).AddDynamicPort(type, NodePort.IO.Output, connectionType, typeConstraint, fieldName);
         }
 
         /// <summary> Add a dynamic, serialized port to this node. </summary>
@@ -265,8 +224,6 @@ namespace XNode {
         public class InputAttribute : Attribute {
             public ShowBackingValue backingValue;
             public ConnectionType connectionType;
-            [Obsolete("Use dynamicPortList instead")]
-            public bool instancePortList { get { return dynamicPortList; } set { dynamicPortList = value; } }
             public bool dynamicPortList;
             public TypeConstraint typeConstraint;
 
@@ -288,8 +245,6 @@ namespace XNode {
         public class OutputAttribute : Attribute {
             public ShowBackingValue backingValue;
             public ConnectionType connectionType;
-            [Obsolete("Use dynamicPortList instead")]
-            public bool instancePortList { get { return dynamicPortList; } set { dynamicPortList = value; } }
             public bool dynamicPortList;
 
             /// <summary> Mark a serializable field as an output port. You can access this through <see cref="GetOutputPort(string)"/> </summary>

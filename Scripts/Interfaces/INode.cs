@@ -14,14 +14,13 @@ namespace XNode {
         IEnumerable<NodePort> Ports { get; }
         IEnumerable<NodePort> Outputs { get; }
         IEnumerable<NodePort> Inputs { get; }
-        IEnumerable<NodePort> InstancePorts { get; }
+        IEnumerable<NodePort> DynamicPorts { get; }
         NodePort AddDynamicPort(Type type, NodePort.IO direction, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = Node.TypeConstraint.None, string fieldName = null);
-        NodePort RemoveDynamicPort(string fieldName);
+        void RemoveDynamicPort(string fieldName);
         NodePort GetInputPort(string fieldName);
         NodePort GetOutputPort(string fieldName);
         void OnCreateConnection(NodePort from, NodePort to);
         void OnRemoveConnection(NodePort port);
         void ClearConnections();
-        void RemoveInstancePort(string fieldName);
     }
 }

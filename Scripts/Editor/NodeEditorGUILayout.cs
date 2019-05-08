@@ -315,7 +315,7 @@ namespace XNodeEditor {
             list.DoLayoutList();
         }
 
-        private static ReorderableList CreateReorderableList(string fieldName, List<XNode.NodePort> dynamicPorts, SerializedProperty arrayData, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.INode.ConnectionType connectionType, XNode.INode.TypeConstraint typeConstraint, Action<ReorderableList> onCreation) {
+        private static ReorderableList CreateReorderableList(string fieldName, List<XNode.NodePort> dynamicPorts, SerializedProperty arrayData, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType, XNode.Node.TypeConstraint typeConstraint, Action<ReorderableList> onCreation) {
             bool hasArrayData = arrayData != null && arrayData.isArray;
             XNode.INode node = serializedObject.targetObject as XNode.INode;
             ReorderableList list = new ReorderableList(dynamicPorts, null, true, true, true, true);
@@ -404,10 +404,10 @@ namespace XNodeEditor {
                     int i = 0;
                     while (node.HasPort(newName)) newName = fieldName + " " + (++i);
 
-                    if (io == XNode.NodePort.IO.Output) node.AddDynamicOutput(type, connectionType, XNode.INode.TypeConstraint.None, newName);
-                    else node.AddDynamicInput(type, connectionType, typeConstraint, newName);
+                    if (io == XNode.NodePort.IO.Output) node.AddDynamicPort(type, XNode.NodePort.IO.Output, connectionType, XNode.Node.TypeConstraint.None, newName);
+                    else node.AddDynamicPort(type, XNode.NodePort.IO.Input, connectionType, typeConstraint, newName);
                     serializedObject.Update();
-                    EditorUtility.SetDirty(node);
+                    EditorUtility.SetDirty((UnityEngine.Object) node);
                     if (hasArrayData) {
                         arrayData.InsertArrayElementAtIndex(arrayData.arraySize);
                     }
@@ -444,7 +444,7 @@ namespace XNodeEditor {
                         // Remove the last dynamic port, to avoid messing up the indexing
                         node.RemoveDynamicPort(dynamicPorts[dynamicPorts.Count() - 1].fieldName);
                         serializedObject.Update();
-                        EditorUtility.SetDirty(node);
+                        EditorUtility.SetDirty((UnityEngine.Object) node);
                     } else {
                         Debug.LogWarning("DynamicPorts[" + index + "] out of range. Length was " + dynamicPorts.Count + ". Skipping.");
                     }
@@ -470,9 +470,9 @@ namespace XNodeEditor {
                     string newName = arrayData.name + " 0";
                     int i = 0;
                     while (node.HasPort(newName)) newName = arrayData.name + " " + (++i);
-                    if (io == XNode.NodePort.IO.Output) node.AddDynamicOutput(type, connectionType, typeConstraint, newName);
-                    else node.AddDynamicInput(type, connectionType, typeConstraint, newName);
-                    EditorUtility.SetDirty(node);
+                    if (io == XNode.NodePort.IO.Output) node.AddDynamicPort(type, XNode.NodePort.IO.Output, connectionType, typeConstraint, newName);
+                    else node.AddDynamicPort(type, XNode.NodePort.IO.Input, connectionType, typeConstraint, newName);
+                    EditorUtility.SetDirty((UnityEngine.Object) node);
                     dynamicPortCount++;
                 }
                 while (arrayData.arraySize < dynamicPortCount) {

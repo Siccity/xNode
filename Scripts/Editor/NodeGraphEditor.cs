@@ -34,7 +34,7 @@ namespace XNodeEditor {
         /// <summary> Returns context node menu path. Null or empty strings for hidden nodes. </summary>
         public virtual string GetNodeMenuName(Type type) {
             //Check if type has the CreateNodeMenuAttribute
-            XNode.INode.CreateNodeMenuAttribute attrib;
+            XNode.Node.CreateNodeMenuAttribute attrib;
             if (NodeEditorUtilities.GetAttrib(type, out attrib)) // Return custom path
                 return attrib.menuName;
             else // Return generated path
@@ -70,8 +70,8 @@ namespace XNodeEditor {
 
         /// <summary> Create a node and save it in the graph asset </summary>
         public virtual void CreateNode(Type type, Vector2 position) {
-            XNode.INode node = target.AddNode(type);
-            node.Position = position;
+            XNode.Node node = target.AddNode(type);
+            node.position = position;
             if (string.IsNullOrEmpty(node.name)) node.name = UnityEditor.ObjectNames.NicifyVariableName(type.Name);
             AssetDatabase.AddObjectToAsset(node, target);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
@@ -79,8 +79,8 @@ namespace XNodeEditor {
         }
 
         /// <summary> Creates a copy of the original node in the graph </summary>
-        public XNode.INode CopyNode(XNode.INode original) {
-            XNode.INode node = target.CopyNode(original);
+        public XNode.INode CopyNode(XNode.Node original) {
+            XNode.Node node = target.CopyNode( original);
             node.name = original.name;
             AssetDatabase.AddObjectToAsset(node, target);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
@@ -88,7 +88,7 @@ namespace XNodeEditor {
         }
 
         /// <summary> Safely remove a node and all its connections. </summary>
-        public void RemoveNode(XNode.INode node) {
+        public void RemoveNode(XNode.Node node) {
             UnityEngine.Object.DestroyImmediate(node, true);
             target.RemoveNode(node);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
@@ -96,7 +96,7 @@ namespace XNodeEditor {
 
         [AttributeUsage(AttributeTargets.Class)]
         public class CustomNodeGraphEditorAttribute : Attribute,
-            XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph>.INodeEditorAttrib {
+        XNodeEditor.Internal.INodeEditorAttrib {
             private Type inspectedType;
             public string editorPrefsKey;
             /// <summary> Tells a NodeGraphEditor which Graph type it is an editor for </summary>

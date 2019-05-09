@@ -165,7 +165,7 @@ namespace XNodeEditor {
                             }
                         } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
                             // If mousedown on node header, select or deselect
-                            if (!Selection.Contains((UnityEngine.Object)hoveredNode)) {
+                            if (!Selection.Contains((UnityEngine.Object) hoveredNode)) {
                                 SelectNode(hoveredNode, e.control || e.shift);
                                 if (!e.control && !e.shift) selectedReroutes.Clear();
                             } else if (e.control || e.shift) DeselectNode(hoveredNode);
@@ -209,24 +209,24 @@ namespace XNodeEditor {
                             //If connection is valid, save it
                             if (draggedOutputTarget != null) {
                                 XNode.INode node = draggedOutputTarget.node;
-                                if (graph.nodes.Count != 0) draggedOutput.Connect(draggedOutputTarget);
+                                if (graph.Nodes.Any()) draggedOutput.Connect(draggedOutputTarget);
 
                                 // ConnectionIndex can be -1 if the connection is removed instantly after creation
                                 int connectionIndex = draggedOutput.GetConnectionIndex(draggedOutputTarget);
                                 if (connectionIndex != -1) {
                                     draggedOutput.GetReroutePoints(connectionIndex).AddRange(draggedOutputReroutes);
                                     if (NodeEditor.onUpdateNode != null) NodeEditor.onUpdateNode(node);
-                                    EditorUtility.SetDirty(graph);
+                                    EditorUtility.SetDirty((UnityEngine.Object) graph);
                                 }
                             }
                             //Release dragged connection
                             draggedOutput = null;
                             draggedOutputTarget = null;
-                            EditorUtility.SetDirty(graph);
+                            EditorUtility.SetDirty((UnityEngine.Object) graph);
                             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
                         } else if (currentActivity == NodeActivity.DragNode) {
                             IEnumerable<XNode.INode> nodes = Selection.objects.Where(x => x is XNode.INode).Select(x => x as XNode.INode);
-                            foreach (XNode.INode node in nodes) EditorUtility.SetDirty(node);
+                            foreach (XNode.INode node in nodes) EditorUtility.SetDirty((UnityEngine.Object) node);
                             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
                         } else if (!IsHoveringNode) {
                             // If click outside node, release field focus
@@ -245,7 +245,7 @@ namespace XNodeEditor {
                             // Double click to center node
                             if (isDoubleClick) {
                                 Vector2 nodeDimension = nodeSizes.ContainsKey(hoveredNode) ? nodeSizes[hoveredNode] / 2 : Vector2.zero;
-                                panOffset = -hoverednode.Position - nodeDimension;
+                                panOffset = -hoveredNode.Position - nodeDimension;
                             }
                         }
 
@@ -269,7 +269,7 @@ namespace XNodeEditor {
                             } else if (IsHoveringPort) {
                                 ShowPortContextMenu(hoveredPort);
                             } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
-                                if (!Selection.Contains((UnityEngine.Object)hoveredNode)) SelectNode(hoveredNode, false);
+                                if (!Selection.Contains((UnityEngine.Object) hoveredNode)) SelectNode(hoveredNode, false);
                                 GenericMenu menu = new GenericMenu();
                                 NodeEditor.GetEditor(hoveredNode, this).AddContextMenuItems(menu);
                                 menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));

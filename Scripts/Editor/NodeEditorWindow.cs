@@ -61,7 +61,7 @@ namespace XNodeEditor {
         public XNode.NodeGraph graph;
         public Vector2 panOffset { get { return _panOffset; } set { _panOffset = value; Repaint(); } }
         private Vector2 _panOffset;
-        public float zoom { get { return _zoom; } set { _zoom = Mathf.Clamp(value, 1f, NodeEditorPreferences.GetSettings().zoomOutLimit); Repaint(); } }
+        public float zoom { get { return _zoom; } set { _zoom = Mathf.Clamp(value, NodeEditorPreferences.GetSettings().minZoom, NodeEditorPreferences.GetSettings().maxZoom); Repaint(); } }
         private float _zoom = 1;
 
         void OnFocus() {

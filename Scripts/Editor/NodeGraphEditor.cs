@@ -93,9 +93,9 @@ namespace XNodeEditor {
         }
 
         /// <summary> Safely remove a node and all its connections. </summary>
-        public void RemoveNode(XNode.Node node) {
-            UnityEngine.Object.DestroyImmediate(node, true);
+        public virtual void RemoveNode(XNode.Node node) {
             target.RemoveNode(node);
+            UnityEngine.Object.DestroyImmediate(node, true);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 

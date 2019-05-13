@@ -16,9 +16,10 @@ namespace XNode {
             Dictionary<string, NodePort> staticPorts = new Dictionary<string, NodePort>();
             System.Type nodeType = node.GetType();
 
-            if (portDataCache.ContainsKey(nodeType)) {
-                for (int i = 0; i < portDataCache[nodeType].Count; i++) {
-                    staticPorts.Add(portDataCache[nodeType][i].fieldName, portDataCache[nodeType][i]);
+            List<NodePort> typePortCache;
+            if (portDataCache.TryGetValue(nodeType, out typePortCache)) {
+                for (int i = 0; i < typePortCache.Count; i++) {
+                    staticPorts.Add(typePortCache[i].fieldName, portDataCache[nodeType][i]);
                 }
             }
 
@@ -26,10 +27,10 @@ namespace XNode {
             // Loop through current node ports
             foreach (NodePort port in ports.Values.ToList()) {
                 // If port still exists, check it it has been changed
-                if (staticPorts.ContainsKey(port.fieldName)) {
-                    NodePort staticPort = staticPorts[port.fieldName];
+                NodePort staticPort;
+                if (staticPorts.TryGetValue(port.fieldName, out staticPort)) {
                     // If port exists but with wrong settings, remove it. Re-add it later.
-                    if (port.connectionType != staticPort.connectionType || port.IsDynamic || port.direction != staticPort.direction) ports.Remove(port.fieldName);
+                    if (port.connectionType != staticPort.connectionType || port.IsDynamic || port.direction != staticPort.direction || port.typeConstraint != staticPort.typeConstraint) ports.Remove(port.fieldName);
                     else port.ValueType = staticPort.ValueType;
                 }
                 // If port doesn't exist anymore, remove it
@@ -67,12 +68,24 @@ namespace XNode {
             }
         }
 
+        public static List<FieldInfo> GetNodeFields(System.Type nodeType) {
+            List<System.Reflection.FieldInfo> fieldInfo = new List<System.Reflection.FieldInfo>(nodeType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance));
+
+            // GetFields doesnt return inherited private fields, so walk through base types and pick those up
+            System.Type tempType = nodeType;
+            while ((tempType = tempType.BaseType) != typeof(XNode.Node)) {
+                fieldInfo.AddRange(tempType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance));
+            }
+            return fieldInfo;
+        }
+
         private static void CachePorts(System.Type nodeType) {
-            System.Reflection.FieldInfo[] fieldInfo = nodeType.GetFields();
-            for (int i = 0; i < fieldInfo.Length; i++) {
+            List<System.Reflection.FieldInfo> fieldInfo = GetNodeFields(nodeType);
+
+            for (int i = 0; i < fieldInfo.Count; i++) {
 
                 //Get InputAttribute and OutputAttribute
-                object[] attribs = fieldInfo[i].GetCustomAttributes(false);
+                object[] attribs = fieldInfo[i].GetCustomAttributes(true);
                 Node.InputAttribute inputAttrib = attribs.FirstOrDefault(x => x is Node.InputAttribute) as Node.InputAttribute;
                 Node.OutputAttribute outputAttrib = attribs.FirstOrDefault(x => x is Node.OutputAttribute) as Node.OutputAttribute;
 

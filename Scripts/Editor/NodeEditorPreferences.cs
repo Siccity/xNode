@@ -158,11 +158,13 @@ namespace XNodeEditor {
             //Label
             EditorGUILayout.LabelField("Types", EditorStyles.boldLabel);
 
+            //Clone keys so we can enumerate the dictionary and make changes.
+            var typeColorKeys = new List<Type>(typeColors.Keys);
+
             //Display type colors. Save them if they are edited by the user
-            foreach (var typeColor in typeColors) {
-                Type type = typeColor.Key;
+            foreach (var type in typeColorKeys) {
                 string typeColorKey = NodeEditorUtilities.PrettyName(type);
-                Color col = typeColor.Value;
+                Color col = typeColors[type];
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.BeginHorizontal();
                 col = EditorGUILayout.ColorField(typeColorKey, col);

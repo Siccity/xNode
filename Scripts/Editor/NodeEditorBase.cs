@@ -9,13 +9,13 @@ namespace XNodeEditor.Internal {
 	/// <summary> Handles caching of custom editor classes and their target types. Accessible with GetEditor(Type type) </summary>
 	/// <typeparam name="T">Editor Type. Should be the type of the deriving script itself (eg. NodeEditor) </typeparam>
 	/// <typeparam name="A">Attribute Type. The attribute used to connect with the runtime type (eg. CustomNodeEditorAttribute) </typeparam>
-	/// <typeparam name="K">Runtime Type. The Object this can be an editor for (eg. Node) </typeparam>
-	public abstract class NodeEditorBase<T, A, K> : Editor where A : Attribute, INodeEditorAttrib where T : NodeEditorBase<T, A, K> where K : UnityEngine.Object {
+	/// <typeparam name="K">Runtime Type. The Object this can be an editor for (eg. INode ) </typeparam>
+	public abstract class NodeEditorBase<T, A, K> : Editor where T : NodeEditorBase<T, A, K>, ICustomEditor<K> where A : Attribute, INodeEditorAttrib where K : class {
 		/// <summary> Custom editors defined with [CustomNodeEditor] </summary>
 		private static Dictionary<Type, Type> editorTypes;
 		private static Dictionary<K, T> editors = new Dictionary<K, T>();
 		public NodeEditorWindow window;
-		public new K target { get { return _target == base.target ? _target : _target = (K) base.target; } set { base.target = value; } }
+		public new K target { get { return _target as UnityEngine.Object == base.target ? _target : _target = base.target as K; } set { base.target = value as UnityEngine.Object; } }
 		private K _target;
 
 		public static T GetEditor<Q>(Q target, NodeEditorWindow window) where Q : class {

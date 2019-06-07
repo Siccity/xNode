@@ -72,7 +72,12 @@ namespace XNodeEditor {
         public virtual void CreateNode(Type type, Vector2 position) {
             XNode.Node node = target.AddNode(type);
             node.position = position;
-            if (string.IsNullOrEmpty(node.name)) node.name = UnityEditor.ObjectNames.NicifyVariableName(type.Name);
+            if (string.IsNullOrEmpty(node.name)) {
+                // Automatically remove redundant 'Node' postfix
+                string typeName = type.Name;
+                if (typeName.EndsWith("Node")) typeName = typeName.Substring(0, typeName.LastIndexOf("Node"));
+                node.name = UnityEditor.ObjectNames.NicifyVariableName(typeName);
+            }
             AssetDatabase.AddObjectToAsset(node, target);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             NodeEditorWindow.RepaintAll();
@@ -88,9 +93,9 @@ namespace XNodeEditor {
         }
 
         /// <summary> Safely remove a node and all its connections. </summary>
-        public void RemoveNode(XNode.Node node) {
-            UnityEngine.Object.DestroyImmediate(node, true);
+        public virtual void RemoveNode(XNode.Node node) {
             target.RemoveNode(node);
+            UnityEngine.Object.DestroyImmediate(node, true);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 

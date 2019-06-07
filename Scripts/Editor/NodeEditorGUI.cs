@@ -301,7 +301,7 @@ namespace XNodeEditor {
 
                 NodeEditor nodeEditor = NodeEditor.GetEditor(node, this);
 
-                NodeEditor.portPositions = new Dictionary<XNode.NodePort, Vector2>();
+                NodeEditor.portPositions.Clear();
 
                 //Get node position
                 Vector2 nodePos = GridToWindowPositionNoClipped(node.position);
@@ -351,8 +351,7 @@ namespace XNodeEditor {
                         Vector2 portHandlePos = kvp.Value;
                         portHandlePos += node.position;
                         Rect rect = new Rect(portHandlePos.x - 8, portHandlePos.y - 8, 16, 16);
-                        if (portConnectionPoints.ContainsKey(kvp.Key)) portConnectionPoints[kvp.Key] = rect;
-                        else portConnectionPoints.Add(kvp.Key, rect);
+                        portConnectionPoints[kvp.Key] = rect;
                     }
                 }
 

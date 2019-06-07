@@ -57,7 +57,7 @@ namespace XNodeEditor {
 			else {
 				if (GUILayout.Button("Apply") || (e.isKey && e.keyCode == KeyCode.Return)) {
 					target.name = input;
-					AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
+					AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(target), input);
 					Close();
 				}
 			}

@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace XNode {
     [Serializable]
-    public class NodePort {
+    public class NodePort : ISerializationCallbackReceiver {
         public enum IO { Input, Output }
 
-        public int ConnectionCount { get { return connections.Count; } }
+        public int ConnectionCount { get { return connectionCache.Count; } }
         /// <summary> Return the first non-null connection </summary>
         public NodePort Connection {
             get {
-                for (int i = 0; i < connections.Count; i++) {
-                    if (connections[i] != null) return connections[i].Port;
+                for (int i = 0; i < connectionCache.Count; i++) {
+                    if (connectionCache[i] != null) return connectionCache[i];
                 }
                 return null;
             }
@@ -22,9 +24,10 @@ namespace XNode {
         public IO direction { get { return _direction; } }
         public Node.ConnectionType connectionType { get { return _connectionType; } }
         public Node.TypeConstraint typeConstraint { get { return _typeConstraint; } }
+        public ReadOnlyCollection<NodePort> Connections { get; private set; }
 
         /// <summary> Is this port connected to anytihng? </summary>
-        public bool IsConnected { get { return connections.Count != 0; } }
+        public bool IsConnected { get { return connectionCache.Count != 0; } }
         public bool IsInput { get { return direction == IO.Input; } }
         public bool IsOutput { get { return direction == IO.Output; } }
 
@@ -53,8 +56,12 @@ namespace XNode {
         [SerializeField] private Node.TypeConstraint _typeConstraint;
         [SerializeField] private bool _dynamic;
 
+        public List<NodePort> connectionCache = new List<NodePort>();
+        public Dictionary<NodePort, List<Vector2>> rerouteCache = new Dictionary<NodePort, List<Vector2>>();
+
         /// <summary> Construct a static targetless nodeport. Used as a template. </summary>
         public NodePort(FieldInfo fieldInfo) {
+            Debug.Log("Create, " + connectionCache + ", " + rerouteCache, node);
             _fieldName = fieldInfo.Name;
             ValueType = fieldInfo.FieldType;
             _dynamic = false;
@@ -73,6 +80,7 @@ namespace XNode {
 
         /// <summary> Copy a nodePort but assign it to another node. </summary>
         public NodePort(NodePort nodePort, Node node) {
+            Debug.Log("Create");
             _fieldName = nodePort._fieldName;
             ValueType = nodePort.valueType;
             _direction = nodePort.direction;
@@ -84,6 +92,7 @@ namespace XNode {
 
         /// <summary> Construct a dynamic port. Dynamic ports are not forgotten on reimport, and is ideal for runtime-created ports. </summary>
         public NodePort(string fieldName, Type type, IO direction, Node.ConnectionType connectionType, Node.TypeConstraint typeConstraint, Node node) {
+            Debug.Log("Create");
             _fieldName = fieldName;
             this.ValueType = type;
             _direction = direction;
@@ -93,14 +102,37 @@ namespace XNode {
             _typeConstraint = typeConstraint;
         }
 
+        public void OnBeforeSerialize() {
+            connections = new List<PortConnection>();
+            for (int i = 0; i < connectionCache.Count; i++) {
+                List<Vector2> reroutes;
+                if (rerouteCache.TryGetValue(connectionCache[i], out reroutes)) {
+                    connections.Add(new PortConnection(connectionCache[i], reroutes));
+                } else {
+                    connections.Add(new PortConnection(connectionCache[i]));
+                }
+            }
+        }
+
+        public void OnAfterDeserialize() {
+            connectionCache.Clear();
+            rerouteCache.Clear();
+            for (int i = 0; i < connections.Count; i++) {
+                NodePort port = connections[i].GetPort();
+                connectionCache.Add(port);
+                rerouteCache.Add(port, connections[i].reroutePoints);
+            }
+            Connections = new ReadOnlyCollection<NodePort>(connectionCache);
+        }
+
         /// <summary> Checks all connections for invalid references, and removes them. </summary>
         public void VerifyConnections() {
-            for (int i = connections.Count - 1; i >= 0; i--) {
-                if (connections[i].node != null &&
-                    !string.IsNullOrEmpty(connections[i].fieldName) &&
-                    connections[i].node.GetPort(connections[i].fieldName) != null)
+            for (int i = connectionCache.Count - 1; i >= 0; i--) {
+                if (connectionCache[i].node != null &&
+                    !string.IsNullOrEmpty(connectionCache[i].fieldName) &&
+                    connectionCache[i].node.GetPort(connectionCache[i].fieldName) != null)
                     continue;
-                connections.RemoveAt(i);
+                connectionCache.RemoveAt(i);
             }
         }
 
@@ -124,9 +156,9 @@ namespace XNode {
         public object[] GetInputValues() {
             object[] objs = new object[ConnectionCount];
             for (int i = 0; i < ConnectionCount; i++) {
-                NodePort connectedPort = connections[i].Port;
+                NodePort connectedPort = connectionCache[i];
                 if (connectedPort == null) { // if we happen to find a null port, remove it and look again
-                    connections.RemoveAt(i);
+                    connectionCache.RemoveAt(i);
                     i--;
                     continue;
                 }
@@ -193,56 +225,41 @@ namespace XNode {
         /// <summary> Connect this <see cref="NodePort"/> to another </summary>
         /// <param name="port">The <see cref="NodePort"/> to connect to</param>
         public void Connect(NodePort port) {
-            if (connections == null) connections = new List<PortConnection>();
             if (port == null) { Debug.LogWarning("Cannot connect to null port"); return; }
             if (port == this) { Debug.LogWarning("Cannot connect port to self."); return; }
             if (IsConnectedTo(port)) { Debug.LogWarning("Port already connected. "); return; }
             if (direction == port.direction) { Debug.LogWarning("Cannot connect two " + (direction == IO.Input ? "input" : "output") + " connections"); return; }
             if (port.connectionType == Node.ConnectionType.Override && port.ConnectionCount != 0) { port.ClearConnections(); }
             if (connectionType == Node.ConnectionType.Override && ConnectionCount != 0) { ClearConnections(); }
-            connections.Add(new PortConnection(port));
-            if (port.connections == null) port.connections = new List<PortConnection>();
-            if (!port.IsConnectedTo(this)) port.connections.Add(new PortConnection(this));
+            connectionCache.Add(port);
+            port.connectionCache.Add(this);
             node.OnCreateConnection(this, port);
             port.node.OnCreateConnection(this, port);
         }
 
+        [Obsolete("Use Connections property instead")]
         public List<NodePort> GetConnections() {
             List<NodePort> result = new List<NodePort>();
-            for (int i = 0; i < connections.Count; i++) {
-                NodePort port = GetConnection(i);
-                if (port != null) result.Add(port);
+            for (int i = 0; i < connectionCache.Count; i++) {
+                NodePort port = connectionCache[i];
+                result.Add(port);
             }
             return result;
         }
 
+        [Obsolete("Use Connections[i] instead")]
         public NodePort GetConnection(int i) {
-            //If the connection is broken for some reason, remove it.
-            if (connections[i].node == null || string.IsNullOrEmpty(connections[i].fieldName)) {
-                connections.RemoveAt(i);
-                return null;
-            }
-            NodePort port = connections[i].node.GetPort(connections[i].fieldName);
-            if (port == null) {
-                connections.RemoveAt(i);
-                return null;
-            }
-            return port;
+            return connectionCache[i];
         }
 
+        [Obsolete("Use Connections.IndexOf(port) instead")]
         /// <summary> Get index of the connection connecting this and specified ports </summary>
         public int GetConnectionIndex(NodePort port) {
-            for (int i = 0; i < ConnectionCount; i++) {
-                if (connections[i].Port == port) return i;
-            }
-            return -1;
+            return connectionCache.IndexOf(port);
         }
 
         public bool IsConnectedTo(NodePort port) {
-            for (int i = 0; i < connections.Count; i++) {
-                if (connections[i].Port == port) return true;
-            }
-            return false;
+            return connectionCache.Contains(port);
         }
 
         /// <summary> Returns true if this port can connect to specified port </summary>
@@ -265,17 +282,13 @@ namespace XNode {
         /// <summary> Disconnect this port from another port </summary>
         public void Disconnect(NodePort port) {
             // Remove this ports connection to the other
-            for (int i = connections.Count - 1; i >= 0; i--) {
-                if (connections[i].Port == port) {
-                    connections.RemoveAt(i);
-                }
+            for (int i = connectionCache.Count - 1; i >= 0; i--) {
+                connectionCache.Remove(port);
             }
             if (port != null) {
                 // Remove the other ports connection to this port
-                for (int i = 0; i < port.connections.Count; i++) {
-                    if (port.connections[i].Port == this) {
-                        port.connections.RemoveAt(i);
-                    }
+                for (int i = 0; i < port.connectionCache.Count; i++) {
+                    port.connectionCache.Remove(this);
                 }
             }
             // Trigger OnRemoveConnection
@@ -285,49 +298,44 @@ namespace XNode {
 
         /// <summary> Disconnect this port from another port </summary>
         public void Disconnect(int i) {
-            // Remove the other ports connection to this port
-            NodePort otherPort = connections[i].Port;
-            if (otherPort != null) {
-                for (int k = 0; k < otherPort.connections.Count; k++) {
-                    if (otherPort.connections[k].Port == this) {
-                        otherPort.connections.RemoveAt(i);
-                    }
-                }
-            }
-            // Remove this ports connection to the other
-            connections.RemoveAt(i);
-
-            // Trigger OnRemoveConnection
-            node.OnRemoveConnection(this);
-            if (otherPort != null) otherPort.node.OnRemoveConnection(otherPort);
+            Disconnect(connectionCache[i]);
         }
 
+        /// <summary> Disconnect all ports from this port </summary>
         public void ClearConnections() {
-            while (connections.Count > 0) {
-                Disconnect(connections[0].Port);
+            for (int i = connectionCache.Count - 1; i >= 0; i--) {
+                Disconnect(connectionCache[i]);
             }
         }
 
         /// <summary> Get reroute points for a given connection. This is used for organization </summary>
+        public List<Vector2> GetReroutePoints(NodePort port) {
+            List<Vector2> reroutes = new List<Vector2>();
+            Debug.Log(port + " " + rerouteCache, node);
+            rerouteCache.TryGetValue(port, out reroutes);
+            return reroutes;
+        }
+
+        /// <summary> Get reroute points for a given connection. This is used for organization </summary>
         public List<Vector2> GetReroutePoints(int index) {
-            return connections[index].reroutePoints;
+            return GetReroutePoints(connectionCache[index]);
         }
 
         /// <summary> Swap connections with another node </summary>
         public void SwapConnections(NodePort targetPort) {
-            int aConnectionCount = connections.Count;
-            int bConnectionCount = targetPort.connections.Count;
+            int aConnectionCount = connectionCache.Count;
+            int bConnectionCount = targetPort.connectionCache.Count;
 
             List<NodePort> portConnections = new List<NodePort>();
             List<NodePort> targetPortConnections = new List<NodePort>();
 
             // Cache port connections
             for (int i = 0; i < aConnectionCount; i++)
-                portConnections.Add(connections[i].Port);
+                portConnections.Add(connectionCache[i]);
 
             // Cache target port connections
             for (int i = 0; i < bConnectionCount; i++)
-                targetPortConnections.Add(targetPort.connections[i].Port);
+                targetPortConnections.Add(targetPort.connectionCache[i]);
 
             ClearConnections();
             targetPort.ClearConnections();
@@ -346,20 +354,18 @@ namespace XNode {
         public void AddConnections(NodePort targetPort) {
             int connectionCount = targetPort.ConnectionCount;
             for (int i = 0; i < connectionCount; i++) {
-                PortConnection connection = targetPort.connections[i];
-                NodePort otherPort = connection.Port;
+                NodePort otherPort = targetPort.connectionCache[i];
                 Connect(otherPort);
             }
         }
 
         /// <summary> Move all connections pointing to this node, to another node </summary>
         public void MoveConnections(NodePort targetPort) {
-            int connectionCount = connections.Count;
+            int connectionCount = connectionCache.Count;
 
             // Add connections to target port
             for (int i = 0; i < connectionCount; i++) {
-                PortConnection connection = targetPort.connections[i];
-                NodePort otherPort = connection.Port;
+                NodePort otherPort = targetPort.connectionCache[i];
                 Connect(otherPort);
             }
             ClearConnections();
@@ -367,31 +373,31 @@ namespace XNode {
 
         /// <summary> Swap connected nodes from the old list with nodes from the new list </summary>
         public void Redirect(List<Node> oldNodes, List<Node> newNodes) {
-            foreach (PortConnection connection in connections) {
-                int index = oldNodes.IndexOf(connection.node);
-                if (index >= 0) connection.node = newNodes[index];
+            foreach (NodePort port in connectionCache) {
+                int index = oldNodes.IndexOf(port._node);
+                if (index >= 0) port._node = newNodes[index];
             }
         }
 
         [Serializable]
         private class PortConnection {
-            [SerializeField] public string fieldName;
-            [SerializeField] public Node node;
-            public NodePort Port { get { return port != null ? port : port = GetPort(); } }
-
-            [NonSerialized] private NodePort port;
+            [SerializeField] private string fieldName;
+            [SerializeField] private Node node;
             /// <summary> Extra connection path points for organization </summary>
             [SerializeField] public List<Vector2> reroutePoints = new List<Vector2>();
 
             public PortConnection(NodePort port) {
-                this.port = port;
                 node = port.node;
                 fieldName = port.fieldName;
             }
 
-            /// <summary> Returns the port that this <see cref="PortConnection"/> points to </summary>
-            private NodePort GetPort() {
-                if (node == null || string.IsNullOrEmpty(fieldName)) return null;
+            public PortConnection(NodePort port, List<Vector2> reroutePoints) {
+                node = port.node;
+                fieldName = port.fieldName;
+                this.reroutePoints = reroutePoints;
+            }
+
+            public NodePort GetPort() {
                 return node.GetPort(fieldName);
             }
         }

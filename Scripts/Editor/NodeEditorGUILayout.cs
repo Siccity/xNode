@@ -147,8 +147,7 @@ namespace XNodeEditor {
 
                 // Register the handle position
                 Vector2 portPos = rect.center;
-                if (NodeEditor.portPositions.ContainsKey(port)) NodeEditor.portPositions[port] = portPos;
-                else NodeEditor.portPositions.Add(port, portPos);
+                NodeEditor.portPositions[port] = portPos;
             }
         }
 
@@ -204,8 +203,7 @@ namespace XNodeEditor {
 
             // Register the handle position
             Vector2 portPos = rect.center;
-            if (NodeEditor.portPositions.ContainsKey(port)) NodeEditor.portPositions[port] = portPos;
-            else NodeEditor.portPositions.Add(port, portPos);
+            NodeEditor.portPositions[port] = portPos;
         }
 
         /// <summary> Add a port field to previous layout element. </summary>
@@ -233,8 +231,7 @@ namespace XNodeEditor {
 
             // Register the handle position
             Vector2 portPos = rect.center;
-            if (NodeEditor.portPositions.ContainsKey(port)) NodeEditor.portPositions[port] = portPos;
-            else NodeEditor.portPositions.Add(port, portPos);
+            NodeEditor.portPositions[port] = portPos;
         }
 
         /// <summary> Draws an input and an output port on the same line </summary>
@@ -326,12 +323,13 @@ namespace XNodeEditor {
                     XNode.NodePort port = node.GetPort(fieldName + " " + index);
                     if (hasArrayData) {
                         if (arrayData.arraySize <= index) {
-                            EditorGUI.LabelField(rect, "Invalid element " + index);
+                            string portInfo = port != null ? port.fieldName : "";
+                            EditorGUI.LabelField(rect, "Array[" + index + "] data out of range");
                             return;
                         }
                         SerializedProperty itemData = arrayData.GetArrayElementAtIndex(index);
                         EditorGUI.PropertyField(rect, itemData, true);
-                    } else EditorGUI.LabelField(rect, port.fieldName);
+                    } else EditorGUI.LabelField(rect, port != null ? port.fieldName : "");
                     if (port != null) {
                         Vector2 pos = rect.position + (port.IsOutput?new Vector2(rect.width + 6, 0) : new Vector2(-36, 0));
                         NodeEditorGUILayout.PortField(pos, port);
@@ -430,7 +428,11 @@ namespace XNodeEditor {
 
                     int index = rl.index;
 
-                    if (dynamicPorts.Count > index) {
+                    if (dynamicPorts.Count <= index) {
+                        Debug.LogWarning("DynamicPorts[" + index + "] out of range. Length was " + dynamicPorts.Count + " - Skipped");
+                    } else if (dynamicPorts[index] == null) {
+                        Debug.LogWarning("No port found at index " + index + " - Skipped");
+                    } else {
                         // Clear the removed ports connections
                         dynamicPorts[index].ClearConnections();
                         // Move following connections one step up to replace the missing connection
@@ -445,11 +447,14 @@ namespace XNodeEditor {
                         node.RemoveDynamicPort(dynamicPorts[dynamicPorts.Count() - 1].fieldName);
                         serializedObject.Update();
                         EditorUtility.SetDirty((UnityEngine.Object) node);
-                    } else {
-                        Debug.LogWarning("DynamicPorts[" + index + "] out of range. Length was " + dynamicPorts.Count + ". Skipping.");
                     }
 
                     if (hasArrayData) {
+                        if (arrayData.arraySize <= index) {
+                            Debug.LogWarning("Attempted to remove array index " + index + " where only " + arrayData.arraySize + " exist - Skipped");
+                            Debug.Log(rl.list[0]);
+                            return;
+                        }
                         arrayData.DeleteArrayElementAtIndex(index);
                         // Error handling. If the following happens too often, file a bug report at https://github.com/Siccity/xNode/issues
                         if (dynamicPorts.Count <= arrayData.arraySize) {

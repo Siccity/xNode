@@ -80,7 +80,11 @@ namespace XNodeEditor {
         public virtual XNode.INode CreateNode(Type type, Vector2 position) {
             XNode.INode node = ((INodeGraph) target).AddNode(type);
             node.Position = position;
-            if (string.IsNullOrEmpty(node.Name)) node.Name = UnityEditor.ObjectNames.NicifyVariableName(type.Name);
+            if (string.IsNullOrEmpty(node.Name)) {
+                string typeName = type.Name;
+                if (typeName.EndsWith("Node")) typeName = typeName.Substring(0, typeName.LastIndexOf("Node"));
+                node.Name = UnityEditor.ObjectNames.NicifyVariableName(typeName);
+            }
             if (node is ScriptableObject) AssetDatabase.AddObjectToAsset(node as ScriptableObject, target);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             NodeEditorWindow.RepaintAll();
@@ -97,9 +101,9 @@ namespace XNodeEditor {
         }
 
         /// <summary> Safely remove a node and all its connections. </summary>
-        public void RemoveNode(XNode.INode node) {
-            UnityEngine.Object.DestroyImmediate(node as UnityEngine.Object, true);
+        public virtual void RemoveNode(XNode.INode node) {
             ((INodeGraph) target).RemoveNode(node);
+            UnityEngine.Object.DestroyImmediate(node as UnityEngine.Object, true);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 

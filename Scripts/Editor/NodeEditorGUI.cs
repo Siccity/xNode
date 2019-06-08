@@ -429,7 +429,7 @@ namespace XNodeEditor {
         }
 
         private void DrawTooltip() {
-            if (hoveredPort != null) {
+            if (hoveredPort != null && NodeEditorPreferences.GetSettings().portTooltips) {
                 Type type = hoveredPort.ValueType;
                 GUIContent content = new GUIContent();
                 content.text = type.PrettyName();

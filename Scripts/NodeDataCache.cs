@@ -56,10 +56,14 @@ namespace XNode {
             } else {
                 // Else, check all relevant DDLs (slower)
                 // ignore all unity related assemblies
+                // never ignore current executing assembly
                 foreach (Assembly assembly in assemblies) {
-                    if (assembly.FullName.StartsWith("Unity")) continue;
-                    // unity created assemblies always have version 0.0.0
-                    if (!assembly.FullName.Contains("Version=0.0.0")) continue;
+                    if(assembly != Assembly.GetExecutingAssembly())
+					{
+                        if (assembly.FullName.StartsWith("Unity")) continue;
+                        // unity created assemblies always have version 0.0.0
+                        if (!assembly.FullName.Contains("Version=0.0.0")) continue;
+                    }
                     nodeTypes.AddRange(assembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray());
                 }
             }

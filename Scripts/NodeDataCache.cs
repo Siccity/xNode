@@ -57,8 +57,9 @@ namespace XNode {
                 // Else, check all relevant DDLs (slower)
                 // ignore all unity related assemblies
                 // never ignore current executing assembly
+                Assembly executingAssembly = Assembly.GetExecutingAssembly();
                 foreach (Assembly assembly in assemblies) {
-                    if(assembly != Assembly.GetExecutingAssembly()) {
+                    if(assembly != executingAssembly) {
                         if (assembly.FullName.StartsWith("Unity")) continue;
                         // unity created assemblies always have version 0.0.0
                         if (!assembly.FullName.Contains("Version=0.0.0")) continue;

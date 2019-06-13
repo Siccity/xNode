@@ -56,6 +56,8 @@ namespace XNodeEditor {
                 });
             }
             menu.AddSeparator("");
+            if (NodeEditorWindow.copyBuffer != null && NodeEditorWindow.copyBuffer.Length > 0) menu.AddItem(new GUIContent("Paste"), false, () => NodeEditorWindow.current.PasteNodes(pos));
+            else menu.AddDisabledItem(new GUIContent("Paste"));
             menu.AddItem(new GUIContent("Preferences"), false, () => NodeEditorWindow.OpenPreferences());
             NodeEditorWindow.AddCustomContextMenuItems(menu, target);
         }

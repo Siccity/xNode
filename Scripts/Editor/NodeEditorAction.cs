@@ -11,6 +11,8 @@ namespace XNodeEditor {
         public static bool isPanning { get; private set; }
         public static Vector2[] dragOffset;
 
+        public static XNode.Node[] copyBuffer = null;
+
         private bool IsDraggingPort { get { return draggedOutput != null; } }
         private bool IsHoveringPort { get { return hoveredPort != null; } }
         private bool IsHoveringNode { get { return hoveredNode != null; } }
@@ -27,6 +29,7 @@ namespace XNodeEditor {
         private RerouteReference[] preBoxSelectionReroute;
         private Rect selectionBox;
         private bool isDoubleClick = false;
+        private Vector2 lastMousePosition;
 
         private struct RerouteReference {
             public XNode.NodePort port;
@@ -50,6 +53,8 @@ namespace XNodeEditor {
             Event e = Event.current;
             switch (e.type) {
                 case EventType.MouseMove:
+                    //Keyboard commands will not get correct mouse position from Event
+                    lastMousePosition = e.mousePosition;
                     break;
                 case EventType.ScrollWheel:
                     float oldZoom = zoom;
@@ -303,6 +308,12 @@ namespace XNodeEditor {
                     } else if (e.commandName == "Duplicate") {
                         if (e.type == EventType.ExecuteCommand) DuplicateSelectedNodes();
                         e.Use();
+                    } else if (e.commandName == "Copy") {
+                        if (e.type == EventType.ExecuteCommand) CopySelectedNodes();
+                        e.Use();
+                    } else if (e.commandName == "Paste") {
+                        if (e.type == EventType.ExecuteCommand) PasteNodes(WindowToGridPosition(lastMousePosition));
+                        e.Use();
                     }
                     Repaint();
                     break;
@@ -418,6 +429,50 @@ namespace XNodeEditor {
                             }
                             if (!inputPort.IsConnectedTo(outputPort)) inputPort.Connect(outputPort);
                         }
+                    }
+                }
+            }
+            Selection.objects = newNodes;
+        }
+
+        public void CopySelectedNodes() {
+            copyBuffer = Selection.objects.Where((o) => o != null && o is XNode.Node).Cast<XNode.Node>().ToArray();
+        }
+
+        public void PasteNodes(Vector2 pos) {
+            if (copyBuffer == null || copyBuffer.Length == 0) return;
+
+            //Center paste around first node in list
+            Vector2 offset = pos - copyBuffer[0].position;
+
+            UnityEngine.Object[] newNodes = new UnityEngine.Object[copyBuffer.Length];
+            Dictionary<XNode.Node, XNode.Node> substitutes = new Dictionary<XNode.Node, XNode.Node>();
+            for (int i = 0; i < copyBuffer.Length; i++) {
+                XNode.Node srcNode = copyBuffer[i] as XNode.Node;
+                if (srcNode == null) continue;
+                XNode.Node newNode = graphEditor.CopyNode(srcNode);
+                substitutes.Add(srcNode, newNode);
+                newNode.position = srcNode.position + offset;
+                newNodes[i] = newNode;
+            }
+
+            // Walk through the selected nodes again, recreate connections, using the new nodes
+            for (int i = 0; i < copyBuffer.Length; i++) {
+                XNode.Node srcNode = copyBuffer[i] as XNode.Node;
+                if (srcNode == null) continue;
+                foreach (XNode.NodePort port in srcNode.Ports) {
+                    for (int c = 0; c < port.ConnectionCount; c++) {
+                        XNode.NodePort inputPort = port.direction == XNode.NodePort.IO.Input ? port : port.GetConnection(c);
+                        XNode.NodePort outputPort = port.direction == XNode.NodePort.IO.Output ? port : port.GetConnection(c);
+
+                        XNode.Node newNodeIn, newNodeOut;
+                        if (substitutes.TryGetValue(inputPort.node, out newNodeIn) && substitutes.TryGetValue(outputPort.node, out newNodeOut)) {
+                            newNodeIn.UpdateStaticPorts();
+                            newNodeOut.UpdateStaticPorts();
+                            inputPort = newNodeIn.GetInputPort(inputPort.fieldName);
+                            outputPort = newNodeOut.GetOutputPort(outputPort.fieldName);
+                        }
+                        if (!inputPort.IsConnectedTo(outputPort)) inputPort.Connect(outputPort);
                     }
                 }
             }

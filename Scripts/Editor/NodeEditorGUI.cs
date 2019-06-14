@@ -30,7 +30,7 @@ namespace XNodeEditor {
             DrawNodes();
             DrawSelectionBox();
             DrawTooltip();
-            graphEditor.OnGUI();
+            DrawOnGUI();
 
             // Run and reset onLateGUI
             if (onLateGUI != null) {
@@ -442,6 +442,16 @@ namespace XNodeEditor {
                 EditorGUI.LabelField(rect, content, NodeEditorResources.styles.tooltip);
                 Repaint();
             }
+        }
+
+        private void DrawOnGUI() // Ends the GUI Group temporarily to draw any additional elements in the NodeGraphEditor.
+        {
+            GUI.EndGroup();
+            Rect rect = new Rect(new Vector2(-1f, 20f), new Vector2(Screen.width, Screen.height));
+            GUI.BeginGroup(rect);
+            graphEditor.OnGUI();
+            GUI.EndGroup();
+            GUI.BeginGroup(new Rect(0.0f, topPadding - (topPadding * zoom), Screen.width, Screen.height));
         }
     }
 }

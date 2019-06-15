@@ -2,22 +2,26 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace XNode {
+namespace XNode
+{
     /// <summary> Base class for all node graphs </summary>
     [Serializable]
-    public abstract class NodeGraph : ScriptableObject {
+    public abstract class NodeGraph : ScriptableObject
+    {
 
         /// <summary> All nodes in the graph. <para/>
         /// See: <see cref="AddNode{T}"/> </summary>
         [SerializeField] public List<Node> nodes = new List<Node>();
 
         /// <summary> Add a node to the graph by type (convenience method - will call the System.Type version) </summary>
-        public T AddNode<T>() where T : Node {
+        public T AddNode<T>() where T : Node
+        {
             return AddNode(typeof(T)) as T;
         }
 
         /// <summary> Add a node to the graph by type </summary>
-        public virtual Node AddNode(Type type) {
+        public virtual Node AddNode(Type type)
+        {
             Node.graphHotfix = this;
             Node node = ScriptableObject.CreateInstance(type) as Node;
             node.graph = this;
@@ -26,7 +30,8 @@ namespace XNode {
         }
 
         /// <summary> Creates a copy of the original node in the graph </summary>
-        public virtual Node CopyNode(Node original) {
+        public virtual Node CopyNode(Node original)
+        {
             Node.graphHotfix = this;
             Node node = ScriptableObject.Instantiate(original);
             node.graph = this;
@@ -37,16 +42,20 @@ namespace XNode {
 
         /// <summary> Safely remove a node and all its connections </summary>
         /// <param name="node"> The node to remove </param>
-        public virtual void RemoveNode(Node node) {
+        public virtual void RemoveNode(Node node)
+        {
             node.ClearConnections();
             nodes.Remove(node);
             if (Application.isPlaying) Destroy(node);
         }
 
         /// <summary> Remove all nodes and connections from the graph </summary>
-        public virtual void Clear() {
-            if (Application.isPlaying) {
-                for (int i = 0; i < nodes.Count; i++) {
+        public virtual void Clear()
+        {
+            if (Application.isPlaying)
+            {
+                for (int i = 0; i < nodes.Count; i++)
+                {
                     Destroy(nodes[i]);
                 }
             }
@@ -54,11 +63,13 @@ namespace XNode {
         }
 
         /// <summary> Create a new deep copy of this graph </summary>
-        public virtual XNode.NodeGraph Copy() {
+        public virtual XNode.NodeGraph Copy()
+        {
             // Instantiate a new nodegraph instance
             NodeGraph graph = Instantiate(this);
             // Instantiate all nodes inside the graph
-            for (int i = 0; i < nodes.Count; i++) {
+            for (int i = 0; i < nodes.Count; i++)
+            {
                 if (nodes[i] == null) continue;
                 Node.graphHotfix = graph;
                 Node node = Instantiate(nodes[i]) as Node;
@@ -67,9 +78,11 @@ namespace XNode {
             }
 
             // Redirect all connections
-            for (int i = 0; i < graph.nodes.Count; i++) {
+            for (int i = 0; i < graph.nodes.Count; i++)
+            {
                 if (graph.nodes[i] == null) continue;
-                foreach (NodePort port in graph.nodes[i].Ports) {
+                foreach (NodePort port in graph.nodes[i].Ports)
+                {
                     port.Redirect(nodes, graph.nodes);
                 }
             }
@@ -77,9 +90,19 @@ namespace XNode {
             return graph;
         }
 
-        protected virtual void OnDestroy() {
+        protected virtual void OnDestroy()
+        {
             // Remove all nodes prior to graph destruction
             Clear();
         }
+
+
+        /// <summary> Is called when something is dragged in the editor </summary>
+        /// <param name="droppedObject">The dropped object</param>
+        public virtual void OnDrop(object droppedObject, Vector2 dropPosition)
+        {
+            Debug.LogWarning("No OnDrop(NodePort port) override defined for " + GetType());
+        }
+
     }
 }

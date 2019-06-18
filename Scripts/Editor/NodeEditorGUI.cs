@@ -12,6 +12,8 @@ namespace XNodeEditor {
         private List<XNode.Node> culledNodes;
         /// <summary> 19 if docked, 22 if not </summary>
         private int topPadding { get { return isDocked() ? 19 : 22; } }
+        /// <summary> 0 if docked, 3 if not </summary>
+        private int leftPadding { get { return isDocked() ? 2 : 0; } }
         /// <summary> Executed after all other window GUI. Useful if Zoom is ruining your day. Automatically resets after being run.</summary>
         public event Action onLateGUI;
 
@@ -30,7 +32,7 @@ namespace XNodeEditor {
             DrawNodes();
             DrawSelectionBox();
             DrawTooltip();
-            DrawOnGUI();
+            DrawGraphOnGUI();
 
             // Run and reset onLateGUI
             if (onLateGUI != null) {
@@ -60,6 +62,16 @@ namespace XNodeEditor {
 
         public void EndZoomed() {
             GUI.matrix = prevGuiMatrix;
+            GUI.EndGroup();
+            GUI.BeginGroup(new Rect(0.0f, topPadding - (topPadding * zoom), Screen.width, Screen.height));
+        }
+
+        /// <summary> Ends the GUI Group temporarily to draw any additional elements in the NodeGraphEditor. </summary>
+        private void DrawGraphOnGUI() {
+            GUI.EndGroup();
+            Rect rect = new Rect(new Vector2(leftPadding, topPadding), new Vector2(Screen.width, Screen.height));
+            GUI.BeginGroup(rect);
+            graphEditor.OnGUI();
             GUI.EndGroup();
             GUI.BeginGroup(new Rect(0.0f, topPadding - (topPadding * zoom), Screen.width, Screen.height));
         }
@@ -442,16 +454,6 @@ namespace XNodeEditor {
                 EditorGUI.LabelField(rect, content, NodeEditorResources.styles.tooltip);
                 Repaint();
             }
-        }
-
-        private void DrawOnGUI() // Ends the GUI Group temporarily to draw any additional elements in the NodeGraphEditor.
-        {
-            GUI.EndGroup();
-            Rect rect = new Rect(new Vector2(-1f, 20f), new Vector2(Screen.width, Screen.height));
-            GUI.BeginGroup(rect);
-            graphEditor.OnGUI();
-            GUI.EndGroup();
-            GUI.BeginGroup(new Rect(0.0f, topPadding - (topPadding * zoom), Screen.width, Screen.height));
         }
     }
 }

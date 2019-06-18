@@ -397,42 +397,11 @@ namespace XNodeEditor {
 
         /// <summary> Duplicate selected nodes and select the duplicates </summary>
         public void DuplicateSelectedNodes() {
-            UnityEngine.Object[] newNodes = new UnityEngine.Object[Selection.objects.Length];
-            Dictionary<XNode.Node, XNode.Node> substitutes = new Dictionary<XNode.Node, XNode.Node>();
-            for (int i = 0; i < Selection.objects.Length; i++) {
-                if (Selection.objects[i] is XNode.Node) {
-                    XNode.Node srcNode = Selection.objects[i] as XNode.Node;
-                    if (srcNode.graph != graph) continue; // ignore nodes selected in another graph
-                    XNode.Node newNode = graphEditor.CopyNode(srcNode);
-                    substitutes.Add(srcNode, newNode);
-                    newNode.position = srcNode.position + new Vector2(30, 30);
-                    newNodes[i] = newNode;
-                }
-            }
-
-            // Walk through the selected nodes again, recreate connections, using the new nodes
-            for (int i = 0; i < Selection.objects.Length; i++) {
-                if (Selection.objects[i] is XNode.Node) {
-                    XNode.Node srcNode = Selection.objects[i] as XNode.Node;
-                    if (srcNode.graph != graph) continue; // ignore nodes selected in another graph
-                    foreach (XNode.NodePort port in srcNode.Ports) {
-                        for (int c = 0; c < port.ConnectionCount; c++) {
-                            XNode.NodePort inputPort = port.direction == XNode.NodePort.IO.Input ? port : port.GetConnection(c);
-                            XNode.NodePort outputPort = port.direction == XNode.NodePort.IO.Output ? port : port.GetConnection(c);
-
-                            XNode.Node newNodeIn, newNodeOut;
-                            if (substitutes.TryGetValue(inputPort.node, out newNodeIn) && substitutes.TryGetValue(outputPort.node, out newNodeOut)) {
-                                newNodeIn.UpdateStaticPorts();
-                                newNodeOut.UpdateStaticPorts();
-                                inputPort = newNodeIn.GetInputPort(inputPort.fieldName);
-                                outputPort = newNodeOut.GetOutputPort(outputPort.fieldName);
-                            }
-                            if (!inputPort.IsConnectedTo(outputPort)) inputPort.Connect(outputPort);
-                        }
-                    }
-                }
-            }
-            Selection.objects = newNodes;
+            // Get selected nodes which are part of this graph
+            XNode.Node[] selectedNodes = Selection.objects.Select(x => x as XNode.Node).Where(x => x != null && x.graph == graph).ToArray();
+            // Get top left node position
+            Vector2 topLeftNode = selectedNodes.Select(x => x.position).Aggregate((x, y) => new Vector2(Mathf.Min(x.x, y.x), Mathf.Min(x.y, y.y)));
+            InsertDuplicateNodes(selectedNodes, topLeftNode + new Vector2(30, 30));
         }
 
         public void CopySelectedNodes() {
@@ -440,15 +409,20 @@ namespace XNodeEditor {
         }
 
         public void PasteNodes(Vector2 pos) {
-            if (copyBuffer == null || copyBuffer.Length == 0) return;
+            InsertDuplicateNodes(copyBuffer, pos);
+        }
 
-            //Center paste around first node in list
-            Vector2 offset = pos - copyBuffer[0].position;
+        private void InsertDuplicateNodes(XNode.Node[] nodes, Vector2 topLeft) {
+            if (nodes == null || nodes.Length == 0) return;
 
-            UnityEngine.Object[] newNodes = new UnityEngine.Object[copyBuffer.Length];
+            // Get top-left node
+            Vector2 topLeftNode = nodes.Select(x => x.position).Aggregate((x, y) => new Vector2(Mathf.Min(x.x, y.x), Mathf.Min(x.y, y.y)));
+            Vector2 offset = topLeft - topLeftNode;
+
+            UnityEngine.Object[] newNodes = new UnityEngine.Object[nodes.Length];
             Dictionary<XNode.Node, XNode.Node> substitutes = new Dictionary<XNode.Node, XNode.Node>();
-            for (int i = 0; i < copyBuffer.Length; i++) {
-                XNode.Node srcNode = copyBuffer[i] as XNode.Node;
+            for (int i = 0; i < nodes.Length; i++) {
+                XNode.Node srcNode = nodes[i];
                 if (srcNode == null) continue;
                 XNode.Node newNode = graphEditor.CopyNode(srcNode);
                 substitutes.Add(srcNode, newNode);
@@ -457,8 +431,8 @@ namespace XNodeEditor {
             }
 
             // Walk through the selected nodes again, recreate connections, using the new nodes
-            for (int i = 0; i < copyBuffer.Length; i++) {
-                XNode.Node srcNode = copyBuffer[i] as XNode.Node;
+            for (int i = 0; i < nodes.Length; i++) {
+                XNode.Node srcNode = nodes[i];
                 if (srcNode == null) continue;
                 foreach (XNode.NodePort port in srcNode.Ports) {
                     for (int c = 0; c < port.ConnectionCount; c++) {
@@ -476,6 +450,7 @@ namespace XNodeEditor {
                     }
                 }
             }
+            // Select the new nodes
             Selection.objects = newNodes;
         }
 

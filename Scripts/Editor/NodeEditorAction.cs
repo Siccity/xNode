@@ -405,7 +405,7 @@ namespace XNodeEditor {
         }
 
         public void CopySelectedNodes() {
-            copyBuffer = Selection.objects.Where((o) => o != null && o is XNode.Node).Cast<XNode.Node>().ToArray();
+            copyBuffer = Selection.objects.Select(x => x as XNode.Node).Where(x => x != null && x.graph == graph).ToArray();
         }
 
         public void PasteNodes(Vector2 pos) {

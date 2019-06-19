@@ -40,6 +40,12 @@ namespace XNode {
             /// <summary> always override the current connection </summary>
             Override,
         }
+        protected virtual void Reset()
+        {
+            name = this.GetType().ToString();
+            var idx = name.LastIndexOf(".")+1;
+            name = name.Substring(idx, name.Length - idx);
+        }
 
         /// <summary> Tells which types of input to allow </summary>
         public enum TypeConstraint {

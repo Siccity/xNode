@@ -133,6 +133,15 @@ namespace XNodeEditor {
             } else return type.ToString();
         }
 
+        /// <summary> Returns the default name for the node type. </summary>
+        public static string NodeDefaultName(Type type) {
+            string typeName = type.Name;
+            // Automatically remove redundant 'Node' postfix
+            if (typeName.EndsWith("Node")) typeName = typeName.Substring(0, typeName.LastIndexOf("Node"));
+            typeName = UnityEditor.ObjectNames.NicifyVariableName(typeName);
+            return typeName;
+        }
+
         /// <summary>Creates a new C# Class.</summary>
         [MenuItem("Assets/Create/xNode/Node C# Script", false, 89)]
         private static void CreateNode() {

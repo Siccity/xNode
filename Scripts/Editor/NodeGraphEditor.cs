@@ -74,7 +74,7 @@ namespace XNodeEditor {
         public virtual void CreateNode(Type type, Vector2 position) {
             XNode.Node node = target.AddNode(type);
             node.position = position;
-            if (string.IsNullOrEmpty(node.name)) node.name = NodeEditorUtilities.NodeDefaultName(type);
+            if (node.name == null || node.name.Trim() == "") node.name = NodeEditorUtilities.NodeDefaultName(type);
             AssetDatabase.AddObjectToAsset(node, target);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             NodeEditorWindow.RepaintAll();

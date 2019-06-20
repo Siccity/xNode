@@ -48,7 +48,7 @@ namespace XNodeEditor {
 			// If input is empty, revert name to default instead
 			if (input == null || input.Trim() == "") {
 				if (GUILayout.Button("Revert to default") || (e.isKey && e.keyCode == KeyCode.Return)) {
-					target.name = UnityEditor.ObjectNames.NicifyVariableName(target.GetType().Name);
+                    target.name = NodeEditorUtilities.NodeDefaultName(target.GetType());
 					AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
 					Close();
 				}

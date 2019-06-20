@@ -86,7 +86,7 @@ namespace XNodeEditor {
 
         /// <summary> Rename the node asset. This will trigger a reimport of the node. </summary>
         public void Rename(string newName) {
-            if (newName == null || newName.Trim() == "") newName = UnityEditor.ObjectNames.NicifyVariableName(target.GetType().Name);
+            if (newName == null || newName.Trim() == "") newName = NodeEditorUtilities.NodeDefaultName(target.GetType());
             target.name = newName;
             AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
         }

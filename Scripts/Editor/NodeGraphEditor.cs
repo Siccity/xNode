@@ -74,12 +74,7 @@ namespace XNodeEditor {
         public virtual void CreateNode(Type type, Vector2 position) {
             XNode.Node node = target.AddNode(type);
             node.position = position;
-            if (string.IsNullOrEmpty(node.name)) {
-                // Automatically remove redundant 'Node' postfix
-                string typeName = type.Name;
-                if (typeName.EndsWith("Node")) typeName = typeName.Substring(0, typeName.LastIndexOf("Node"));
-                node.name = UnityEditor.ObjectNames.NicifyVariableName(typeName);
-            }
+            if (string.IsNullOrEmpty(node.name)) node.name = NodeEditorUtilities.NodeDefaultName(type);
             AssetDatabase.AddObjectToAsset(node, target);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             NodeEditorWindow.RepaintAll();

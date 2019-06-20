@@ -88,7 +88,7 @@ namespace XNodeEditor {
         public void Rename(string newName) {
             if (newName == null || newName.Trim() == "") newName = NodeEditorUtilities.NodeDefaultName(target.GetType());
             target.name = newName;
-            AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
+            AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(target), target.name);
         }
 
         [AttributeUsage(AttributeTargets.Class)]

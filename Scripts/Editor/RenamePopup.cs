@@ -49,7 +49,7 @@ namespace XNodeEditor {
 			if (input == null || input.Trim() == "") {
 				if (GUILayout.Button("Revert to default") || (e.isKey && e.keyCode == KeyCode.Return)) {
                     target.name = NodeEditorUtilities.NodeDefaultName(target.GetType());
-					AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
+                    AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(target), target.name);
 					Close();
 				}
 			}
@@ -57,7 +57,7 @@ namespace XNodeEditor {
 			else {
 				if (GUILayout.Button("Apply") || (e.isKey && e.keyCode == KeyCode.Return)) {
 					target.name = input;
-					AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(target), input);
+					AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(target), target.name);
 					Close();
 				}
 			}

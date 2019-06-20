@@ -220,12 +220,19 @@ namespace XNodeEditor {
                 if (settings[lastKey].typeColors.ContainsKey(typeName)) typeColors.Add(type, settings[lastKey].typeColors[typeName]);
                 else {
 #if UNITY_5_4_OR_NEWER
+                    UnityEngine.Random.State oldState = UnityEngine.Random.state;
                     UnityEngine.Random.InitState(typeName.GetHashCode());
 #else
+                    int oldSeed = UnityEngine.Random.seed;
                     UnityEngine.Random.seed = typeName.GetHashCode();
 #endif
                     col = new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
                     typeColors.Add(type, col);
+#if UNITY_5_4_OR_NEWER
+                    UnityEngine.Random.state = oldState;
+#else
+                    UnityEngine.Random.seed = oldSeed;
+#endif
                 }
             }
             return col;

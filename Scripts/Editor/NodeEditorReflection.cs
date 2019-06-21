@@ -86,9 +86,24 @@ namespace XNodeEditor {
             KeyValuePair<ContextMenu, System.Reflection.MethodInfo>[] items = GetContextMenuMethods(obj);
             if (items.Length != 0) {
                 contextMenu.AddSeparator("");
+                List<ContextMenu> invalidatedEntries = new List<ContextMenu>();
+                foreach (var checkValidate in items) {
+                    if (checkValidate.Key.validate && !(bool) checkValidate.Value.Invoke(obj, null))
+                    {
+                        invalidatedEntries.Add(checkValidate.Key);
+                    }
+                }
                 for (int i = 0; i < items.Length; i++) {
                     KeyValuePair<ContextMenu, System.Reflection.MethodInfo> kvp = items[i];
-                    contextMenu.AddItem(new GUIContent(kvp.Key.menuItem), false, () => kvp.Value.Invoke(obj, null));
+                    if (invalidatedEntries.Contains(kvp.Key))
+                    {
+                        contextMenu.AddDisabledItem(new GUIContent(kvp.Key.menuItem));
+                    }
+                    else
+                    {
+                        contextMenu.AddItem(new GUIContent(kvp.Key.menuItem), false, () => kvp.Value.Invoke(obj, null));
+
+                    }
                 }
             }
         }

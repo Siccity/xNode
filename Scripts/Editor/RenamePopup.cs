@@ -48,8 +48,8 @@ namespace XNodeEditor {
 			// If input is empty, revert name to default instead
 			if (input == null || input.Trim() == "") {
 				if (GUILayout.Button("Revert to default") || (e.isKey && e.keyCode == KeyCode.Return)) {
-                    target.name = NodeEditorUtilities.NodeDefaultName(target.GetType());
-                    AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(target), target.name);
+					target.name = NodeEditorUtilities.NodeDefaultName(target.GetType());
+					AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(target), target.name);
 					Close();
 				}
 			}

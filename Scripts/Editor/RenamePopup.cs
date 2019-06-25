@@ -49,16 +49,16 @@ namespace XNodeEditor {
 			if (input == null || input.Trim() == "") {
 				if (GUILayout.Button("Revert to default") || (e.isKey && e.keyCode == KeyCode.Return)) {
 					target.name = NodeEditorUtilities.NodeDefaultName(target.GetType());
-					AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(target), target.name);
-					Close();
+                    AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
+                    Close();
 				}
 			}
 			// Rename asset to input text
 			else {
 				if (GUILayout.Button("Apply") || (e.isKey && e.keyCode == KeyCode.Return)) {
 					target.name = input;
-					AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(target), target.name);
-					Close();
+                    AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
+                    Close();
 				}
 			}
 		}

@@ -41,7 +41,7 @@ To install this project as a dependency using the Unity Package Manager,
 add the following line to your project's `manifest.json`:
 
 ```
-"com.github.siccity.xnode": "git+https://github.com/siccity/xNode"
+"com.github.siccity.xnode": "git+https://github.com/siccity/xNode.git"
 ```
 
 Then, to access the `XNode` namespace from your code, make sure you have a valid [Assembly Definition](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html) set up,

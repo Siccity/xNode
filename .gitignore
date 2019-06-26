@@ -21,6 +21,9 @@
 sysinfo.txt
 
 /Examples/
+README.md.meta
+LICENSE.md.meta
+CONTRIBUTING.md.meta
 
 .git.meta
 .gitignore.meta

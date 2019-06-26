@@ -32,6 +32,16 @@ With a minimal footprint, it is ideal as a base for custom state machines, dialo
 * [Getting started](https://github.com/Siccity/xNode/wiki/Getting%20Started) - create your very first node node and graph
 * [Examples branch](https://github.com/Siccity/xNode/tree/examples) - look at other small projects
 
+### Installing with Unity Package Manager
+To install this project as a dependency using the Unity Package Manager,
+add the following line to your project's `manifest.json`:
+
+```
+"com.github.siccity.xnode": "git+https://github.com/siccity/xNode.git"
+```
+
+If you are using [Assembly Definitions](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html) in your project, you will need to add `XNode` and/or `XNodeEditor` as Assembly Definition References.
+
 ### Node example:
 ```csharp
 // public classes deriving from Node are registered as nodes for use within a graph

@@ -20,18 +20,6 @@ With a minimal footprint, it is ideal as a base for custom state machines, dialo
   <img src="https://user-images.githubusercontent.com/6402525/53689100-3821e680-3d4e-11e9-8440-e68bd802bfd9.png">
 </p>
 
-### Installing with Unity Package Manager
-
-To install this project as a dependency using the Unity Package Manager,
-add the following line to your project's `manifest.json`:
-
-```
-"com.github.siccity.xnode": "git+https://github.com/siccity/xNode",
-```
-
-Then, to access the `XNode` namespace from your code, make sure you have a valid [Assembly Definition](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html) set up,
-with `xNode` set as an Assembly Reference.
-
 ### Key features
 
 - Lightweight in runtime
@@ -46,6 +34,18 @@ with `xNode` set as an Assembly Reference.
 
 - [Getting started](https://github.com/Siccity/xNode/wiki/Getting%20Started) - create your very first node node and graph
 - [Examples branch](https://github.com/Siccity/xNode/tree/examples) - look at other small projects
+
+### Installing with Unity Package Manager
+
+To install this project as a dependency using the Unity Package Manager,
+add the following line to your project's `manifest.json`:
+
+```
+"com.github.siccity.xnode": "git+https://github.com/siccity/xNode",
+```
+
+Then, to access the `XNode` namespace from your code, make sure you have a valid [Assembly Definition](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html) set up,
+with `xNode` set as an Assembly Reference.
 
 ### Node example:
 

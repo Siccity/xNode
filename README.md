@@ -44,8 +44,7 @@ add the following line to your project's `manifest.json`:
 "com.github.siccity.xnode": "git+https://github.com/siccity/xNode.git"
 ```
 
-Then, to access the `XNode` namespace from your code, make sure you have a valid [Assembly Definition](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html) set up,
-then add `XNode` as an Assembly Definition Reference.
+If you are using [Assembly Definitions](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html) in your project, you will need to add `XNode` and/or `XNodeEditor` as Assembly Definition References.
 
 ### Node example:
 

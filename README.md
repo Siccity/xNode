@@ -45,7 +45,7 @@ add the following line to your project's `manifest.json`:
 ```
 
 Then, to access the `XNode` namespace from your code, make sure you have a valid [Assembly Definition](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html) set up,
-with `xNode` set as an Assembly Reference.
+then add `XNode` as an Assembly Definition Reference.
 
 ### Node example:
 

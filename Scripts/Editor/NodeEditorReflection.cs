@@ -77,7 +77,7 @@ namespace XNodeEditor {
             foreach (Assembly assembly in assemblies) {
                 try {
                     types.AddRange(assembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray());
-                } catch(ReflectionTypeLoadException) {}
+                } catch (ReflectionTypeLoadException) { }
             }
             return types.ToArray();
         }
@@ -88,21 +88,16 @@ namespace XNodeEditor {
                 contextMenu.AddSeparator("");
                 List<string> invalidatedEntries = new List<string>();
                 foreach (var checkValidate in items) {
-                    if (checkValidate.Key.validate && !(bool) checkValidate.Value.Invoke(obj, null))
-                    {
+                    if (checkValidate.Key.validate && !(bool) checkValidate.Value.Invoke(obj, null)) {
                         invalidatedEntries.Add(checkValidate.Key.menuItem);
                     }
                 }
                 for (int i = 0; i < items.Length; i++) {
                     KeyValuePair<ContextMenu, System.Reflection.MethodInfo> kvp = items[i];
-                    if (invalidatedEntries.Contains(kvp.Key.menuItem))
-                    {
+                    if (invalidatedEntries.Contains(kvp.Key.menuItem)) {
                         contextMenu.AddDisabledItem(new GUIContent(kvp.Key.menuItem));
-                    }
-                    else
-                    {
+                    } else {
                         contextMenu.AddItem(new GUIContent(kvp.Key.menuItem), false, () => kvp.Value.Invoke(obj, null));
-
                     }
                 }
             }

@@ -68,8 +68,9 @@ namespace XNodeEditor {
             return NodeEditorPreferences.GetTypeColor(type);
         }
 
-        public virtual void DropItem(object droppedItem) {
-            target.OnDrop(droppedItem, NodeEditorWindow.current.WindowToGridPosition(Event.current.mousePosition));
+        /// <summary> Deal with objects dropped into the graph through DragAndDrop </summary>
+        public virtual void OnDropObjects(UnityEngine.Object[] objects) {
+            Debug.Log("No OnDropItems override defined for " + GetType());
         }
 
         /// <summary> Create a node and save it in the graph asset </summary>

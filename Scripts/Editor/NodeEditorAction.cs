@@ -49,21 +49,14 @@ namespace XNodeEditor {
             wantsMouseMove = true;
             Event e = Event.current;
             switch (e.type) {
-
                 case EventType.DragUpdated:
                 case EventType.DragPerform:
-
-                    DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
-
+                    DragAndDrop.visualMode = DragAndDropVisualMode.Generic;
                     if (e.type == EventType.DragPerform) {
                         DragAndDrop.AcceptDrag();
-
-                        foreach (object droppedItem in DragAndDrop.objectReferences) {
-                            graphEditor.DropItem(droppedItem);
-                        }
+                        graphEditor.OnDropObjects(DragAndDrop.objectReferences);
                     }
                     break;
-
                 case EventType.MouseMove:
                     break;
                 case EventType.ScrollWheel:

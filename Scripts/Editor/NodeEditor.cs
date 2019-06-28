@@ -6,10 +6,11 @@ using UnityEngine;
 
 namespace XNodeEditor {
     /// <summary> Base class to derive custom Node editors from. Use this to create your own custom inspectors and editors for your nodes. </summary>
-
     [CustomNodeEditor(typeof(XNode.Node))]
     public class NodeEditor : XNodeEditor.Internal.NodeEditorBase<NodeEditor, NodeEditor.CustomNodeEditorAttribute, XNode.Node> {
 
+        private readonly Color DEFAULTCOLOR = new Color32(90, 97, 105, 255);
+        
         /// <summary> Fires every whenever a node was modified through the editor </summary>
         public static Action<XNode.Node> onUpdateNode;
         public readonly static Dictionary<XNode.NodePort, Vector2> portPositions = new Dictionary<XNode.NodePort, Vector2>();
@@ -52,11 +53,14 @@ namespace XNodeEditor {
             else return 208;
         }
 
+        /// <summary> Returns color for target node </summary>
         public virtual Color GetTint() {
+            // Try get color from [NodeTint] attribute
             Type type = target.GetType();
             Color color;
             if (NodeEditorWindow.nodeTint.TryGetValue(type, out color)) return color;
-            else return Color.white;
+            // Return default color (grey)
+            else return DEFAULTCOLOR;
         }
 
         public virtual GUIStyle GetBodyStyle() {

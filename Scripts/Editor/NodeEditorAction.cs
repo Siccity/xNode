@@ -52,6 +52,14 @@ namespace XNodeEditor {
             wantsMouseMove = true;
             Event e = Event.current;
             switch (e.type) {
+                case EventType.DragUpdated:
+                case EventType.DragPerform:
+                    DragAndDrop.visualMode = DragAndDropVisualMode.Generic;
+                    if (e.type == EventType.DragPerform) {
+                        DragAndDrop.AcceptDrag();
+                        graphEditor.OnDropObjects(DragAndDrop.objectReferences);
+                    }
+                    break;
                 case EventType.MouseMove:
                     //Keyboard commands will not get correct mouse position from Event
                     lastMousePosition = e.mousePosition;

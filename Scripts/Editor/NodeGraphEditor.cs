@@ -70,6 +70,11 @@ namespace XNodeEditor {
             return NodeEditorPreferences.GetTypeColor(type);
         }
 
+        /// <summary> Deal with objects dropped into the graph through DragAndDrop </summary>
+        public virtual void OnDropObjects(UnityEngine.Object[] objects) {
+            Debug.Log("No OnDropItems override defined for " + GetType());
+        }
+
         /// <summary> Create a node and save it in the graph asset </summary>
         public virtual void CreateNode(Type type, Vector2 position) {
             XNode.Node node = target.AddNode(type);

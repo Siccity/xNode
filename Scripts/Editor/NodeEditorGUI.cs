@@ -441,14 +441,10 @@ namespace XNodeEditor {
         }
 
         private void DrawTooltip() {
-            if (hoveredPort != null && NodeEditorPreferences.GetSettings().portTooltips) {
-                Type type = hoveredPort.ValueType;
-                GUIContent content = new GUIContent();
-                content.text = type.PrettyName();
-                if (hoveredPort.IsOutput) {
-                    object obj = hoveredPort.node.GetValue(hoveredPort);
-                    content.text += " = " + (obj != null ? obj.ToString() : "null");
-                }
+            if (hoveredPort != null && NodeEditorPreferences.GetSettings().portTooltips && graphEditor != null) {
+                string tooltip = graphEditor.GetPortTooltip(hoveredPort);
+                if (string.IsNullOrEmpty(tooltip)) return;
+                GUIContent content = new GUIContent(tooltip);
                 Vector2 size = NodeEditorResources.styles.tooltip.CalcSize(content);
                 Rect rect = new Rect(Event.current.mousePosition - (size), size);
                 EditorGUI.LabelField(rect, content, NodeEditorResources.styles.tooltip);

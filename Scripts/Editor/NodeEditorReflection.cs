@@ -103,6 +103,15 @@ namespace XNodeEditor {
             }
         }
 
+        /// <summary> Call OnValidate on target </summary>
+        public static void TriggerOnValidate(UnityEngine.Object target) {
+            System.Reflection.MethodInfo onValidate = null;
+            if (target != null) {
+                onValidate = target.GetType().GetMethod("OnValidate", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                if (onValidate != null) onValidate.Invoke(target, null);
+            }
+        }
+
         public static KeyValuePair<ContextMenu, MethodInfo>[] GetContextMenuMethods(object obj) {
             Type type = obj.GetType();
             MethodInfo[] methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);

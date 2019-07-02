@@ -42,9 +42,9 @@ namespace XNodeEditor {
         public static Dictionary<Type, Color> GetNodeTint() {
             Dictionary<Type, Color> tints = new Dictionary<Type, Color>();
             for (int i = 0; i < nodeTypes.Length; i++) {
-                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.Node.NodeTint), true);
+                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.Node.NodeTintAttribute), true);
                 if (attribs == null || attribs.Length == 0) continue;
-                XNode.Node.NodeTint attrib = attribs[0] as XNode.Node.NodeTint;
+                XNode.Node.NodeTintAttribute attrib = attribs[0] as XNode.Node.NodeTintAttribute;
                 tints.Add(nodeTypes[i], attrib.color);
             }
             return tints;
@@ -53,12 +53,21 @@ namespace XNodeEditor {
         public static Dictionary<Type, int> GetNodeWidth() {
             Dictionary<Type, int> widths = new Dictionary<Type, int>();
             for (int i = 0; i < nodeTypes.Length; i++) {
-                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.Node.NodeWidth), true);
+                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.Node.NodeWidthAttribute), true);
                 if (attribs == null || attribs.Length == 0) continue;
-                XNode.Node.NodeWidth attrib = attribs[0] as XNode.Node.NodeWidth;
+                XNode.Node.NodeWidthAttribute attrib = attribs[0] as XNode.Node.NodeWidthAttribute;
                 widths.Add(nodeTypes[i], attrib.width);
             }
             return widths;
+        }
+
+        /// <summary> Get FieldInfo of a field, including those that are private and/or inherited </summary>
+        public static FieldInfo GetFieldInfo(Type type, string fieldName) {
+            // If we can't find field in the first run, it's probably a private field in a base class.
+            FieldInfo field = type.GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            // Search base classes for private fields only. Public fields are found above
+            while (field == null && (type = type.BaseType) != typeof(XNode.Node)) field = type.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
+            return field;
         }
 
         /// <summary> Get all classes deriving from baseType via reflection </summary>
@@ -66,19 +75,40 @@ namespace XNodeEditor {
             List<System.Type> types = new List<System.Type>();
             System.Reflection.Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
             foreach (Assembly assembly in assemblies) {
-                types.AddRange(assembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray());
+                try {
+                    types.AddRange(assembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray());
+                } catch (ReflectionTypeLoadException) { }
             }
             return types.ToArray();
         }
 
         public static void AddCustomContextMenuItems(GenericMenu contextMenu, object obj) {
-            KeyValuePair<ContextMenu, System.Reflection.MethodInfo>[] items = GetContextMenuMethods(obj);
+            KeyValuePair<ContextMenu, MethodInfo>[] items = GetContextMenuMethods(obj);
             if (items.Length != 0) {
                 contextMenu.AddSeparator("");
-                for (int i = 0; i < items.Length; i++) {
-                    KeyValuePair<ContextMenu, System.Reflection.MethodInfo> kvp = items[i];
-                    contextMenu.AddItem(new GUIContent(kvp.Key.menuItem), false, () => kvp.Value.Invoke(obj, null));
+                List<string> invalidatedEntries = new List<string>();
+                foreach (KeyValuePair<ContextMenu, MethodInfo> checkValidate in items) {
+                    if (checkValidate.Key.validate && !(bool) checkValidate.Value.Invoke(obj, null)) {
+                        invalidatedEntries.Add(checkValidate.Key.menuItem);
+                    }
                 }
+                for (int i = 0; i < items.Length; i++) {
+                    KeyValuePair<ContextMenu, MethodInfo> kvp = items[i];
+                    if (invalidatedEntries.Contains(kvp.Key.menuItem)) {
+                        contextMenu.AddDisabledItem(new GUIContent(kvp.Key.menuItem));
+                    } else {
+                        contextMenu.AddItem(new GUIContent(kvp.Key.menuItem), false, () => kvp.Value.Invoke(obj, null));
+                    }
+                }
+            }
+        }
+
+        /// <summary> Call OnValidate on target </summary>
+        public static void TriggerOnValidate(UnityEngine.Object target) {
+            System.Reflection.MethodInfo onValidate = null;
+            if (target != null) {
+                onValidate = target.GetType().GetMethod("OnValidate", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                if (onValidate != null) onValidate.Invoke(target, null);
             }
         }
 

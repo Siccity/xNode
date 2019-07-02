@@ -24,12 +24,21 @@ namespace XNodeEditor {
 			string enumName = "";
 			if (property.enumValueIndex >= 0 && property.enumValueIndex < property.enumDisplayNames.Length) enumName = property.enumDisplayNames[property.enumValueIndex];
 
+#if UNITY_2017_1_OR_NEWER
 			// Display dropdown
 			if (EditorGUI.DropdownButton(position, new GUIContent(enumName), FocusType.Passive)) {
 				// Position is all wrong if we show the dropdown during the node draw phase.
 				// Instead, add it to onLateGUI to display it later.
 				NodeEditorWindow.current.onLateGUI += () => ShowContextMenuAtMouse(property);
 			}
+#else
+			// Display dropdown
+			if (GUI.Button(position, new GUIContent(enumName), "MiniPopup")) {
+				// Position is all wrong if we show the dropdown during the node draw phase.
+				// Instead, add it to onLateGUI to display it later.
+				NodeEditorWindow.current.onLateGUI += () => ShowContextMenuAtMouse(property);
+			}
+#endif
 			EditorGUI.EndProperty();
 		}
 

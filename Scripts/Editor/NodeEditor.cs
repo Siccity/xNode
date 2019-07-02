@@ -6,41 +6,17 @@ using UnityEngine;
 
 namespace XNodeEditor {
     /// <summary> Base class to derive custom Node editors from. Use this to create your own custom inspectors and editors for your nodes. </summary>
-
     [CustomNodeEditor(typeof(XNode.Node))]
     public class NodeEditor : XNodeEditor.Internal.NodeEditorBase<NodeEditor, NodeEditor.CustomNodeEditorAttribute, XNode.Node> {
 
+        private readonly Color DEFAULTCOLOR = new Color32(90, 97, 105, 255);
+        
         /// <summary> Fires every whenever a node was modified through the editor </summary>
         public static Action<XNode.Node> onUpdateNode;
-        public static Dictionary<XNode.NodePort, Vector2> portPositions;
-        public int renaming;
+        public readonly static Dictionary<XNode.NodePort, Vector2> portPositions = new Dictionary<XNode.NodePort, Vector2>();
 
         public virtual void OnHeaderGUI() {
-            string title = target.name;
-            if (renaming != 0) { 
-                if (Selection.Contains(target)) {
-                    int controlID = EditorGUIUtility.GetControlID(FocusType.Keyboard) + 1;
-                    if (renaming == 1) {
-                        EditorGUIUtility.keyboardControl = controlID;
-                        EditorGUIUtility.editingTextField = true;
-                        renaming = 2;
-                    }
-                    target.name = EditorGUILayout.TextField(target.name, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
-                    if (!EditorGUIUtility.editingTextField) {
-                        Debug.Log("Finish renaming");
-                        Rename(target.name);
-                        renaming = 0;
-                    }
-                }
-                else {
-                    // Selection changed, so stop renaming.
-                    GUILayout.Label(title, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
-                    Rename(target.name);
-                    renaming = 0;
-                }
-            } else {
-                GUILayout.Label(title, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
-            }
+            GUILayout.Label(target.name, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
         }
 
         /// <summary> Draws standard field editors for all public fields </summary>
@@ -50,8 +26,8 @@ namespace XNodeEditor {
             // serializedObject.ApplyModifiedProperties(); goes at the end.
             serializedObject.Update();
             string[] excludes = { "m_Script", "graph", "position", "ports" };
-            portPositions = new Dictionary<XNode.NodePort, Vector2>();
 
+            // Iterate through serialized properties and draw them like the Inspector (But with ports)
             SerializedProperty iterator = serializedObject.GetIterator();
             bool enterChildren = true;
             EditorGUIUtility.labelWidth = 84;
@@ -60,6 +36,13 @@ namespace XNodeEditor {
                 if (excludes.Contains(iterator.name)) continue;
                 NodeEditorGUILayout.PropertyField(iterator, true);
             }
+
+            // Iterate through dynamic ports and draw them in the order in which they are serialized
+            foreach (XNode.NodePort dynamicPort in target.DynamicPorts) {
+                if (NodeEditorGUILayout.IsDynamicPortListPort(dynamicPort)) continue;
+                NodeEditorGUILayout.PortField(dynamicPort);
+            }
+
             serializedObject.ApplyModifiedProperties();
         }
 
@@ -70,11 +53,14 @@ namespace XNodeEditor {
             else return 208;
         }
 
+        /// <summary> Returns color for target node </summary>
         public virtual Color GetTint() {
+            // Try get color from [NodeTint] attribute
             Type type = target.GetType();
             Color color;
             if (NodeEditorWindow.nodeTint.TryGetValue(type, out color)) return color;
-            else return Color.white;
+            // Return default color (grey)
+            else return DEFAULTCOLOR;
         }
 
         public virtual GUIStyle GetBodyStyle() {
@@ -91,6 +77,7 @@ namespace XNodeEditor {
             }
 
             // Add actions to any number of selected nodes
+            menu.AddItem(new GUIContent("Copy"), false, NodeEditorWindow.current.CopySelectedNodes);
             menu.AddItem(new GUIContent("Duplicate"), false, NodeEditorWindow.current.DuplicateSelectedNodes);
             menu.AddItem(new GUIContent("Remove"), false, NodeEditorWindow.current.RemoveSelectedNodes);
 
@@ -101,11 +88,9 @@ namespace XNodeEditor {
             }
         }
 
-        public void InitiateRename() {
-            renaming = 1;
-        }
-
+        /// <summary> Rename the node asset. This will trigger a reimport of the node. </summary>
         public void Rename(string newName) {
+            if (newName == null || newName.Trim() == "") newName = NodeEditorUtilities.NodeDefaultName(target.GetType());
             target.name = newName;
             AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
         }

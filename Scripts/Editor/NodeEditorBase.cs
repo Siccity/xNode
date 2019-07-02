@@ -14,10 +14,11 @@ namespace XNodeEditor.Internal {
 		/// <summary> Custom editors defined with [CustomNodeEditor] </summary>
 		private static Dictionary<Type, Type> editorTypes;
 		private static Dictionary<K, T> editors = new Dictionary<K, T>();
+		public NodeEditorWindow window;
 		public K target;
 		public SerializedObject serializedObject;
 
-		public static T GetEditor(K target) {
+		public static T GetEditor(K target, NodeEditorWindow window) {
 			if (target == null) return null;
 			T editor;
 			if (!editors.TryGetValue(target, out editor)) {
@@ -26,9 +27,12 @@ namespace XNodeEditor.Internal {
 				editor = Activator.CreateInstance(editorType) as T;
 				editor.target = target;
 				editor.serializedObject = new SerializedObject(target);
+				editor.window = window;
+				editor.OnCreate();
 				editors.Add(target, editor);
 			}
 			if (editor.target == null) editor.target = target;
+			if (editor.window != window) editor.window = window;
 			if (editor.serializedObject == null) editor.serializedObject = new SerializedObject(target);
 			return editor;
 		}
@@ -55,6 +59,9 @@ namespace XNodeEditor.Internal {
 				editorTypes.Add(attrib.GetInspectedType(), nodeEditors[i]);
 			}
 		}
+
+		/// <summary> Called on creation, after references have been set </summary>
+		public virtual void OnCreate() { }
 
 		public interface INodeEditorAttrib {
 			Type GetInspectedType();

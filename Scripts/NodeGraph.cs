@@ -14,7 +14,7 @@ namespace XNode {
         /// See: <see cref="AddGroup"/> </summary>
         [SerializeField] public List<NodeGroup> groups = new List<NodeGroup>();
 
-        /// <summary> Add a node to the graph by type </summary>
+        /// <summary> Add a node to the graph by type (convenience method - will call the System.Type version) </summary>
         public T AddNode<T>() where T : Node {
             return AddNode(typeof(T)) as T;
         }
@@ -40,14 +40,14 @@ namespace XNode {
 
         /// <summary> Safely remove a node and all its connections </summary>
         /// <param name="node"> The node to remove </param>
-        public void RemoveNode(Node node) {
+        public virtual void RemoveNode(Node node) {
             node.ClearConnections();
             nodes.Remove(node);
             if (Application.isPlaying) Destroy(node);
         }
 
         /// <summary> Remove all nodes and connections from the graph </summary>
-        public void Clear() {
+        public virtual void Clear() {
             if (Application.isPlaying) {
                 for (int i = 0; i < nodes.Count; i++) {
                     Destroy(nodes[i]);
@@ -79,7 +79,7 @@ namespace XNode {
         }
 
         /// <summary> Create a new deep copy of this graph </summary>
-        public XNode.NodeGraph Copy() {
+        public virtual XNode.NodeGraph Copy() {
             // Instantiate a new nodegraph instance
             NodeGraph graph = Instantiate(this);
             // Instantiate all nodes inside the graph
@@ -110,7 +110,7 @@ namespace XNode {
             return graph;
         }
 
-        private void OnDestroy() {
+        protected virtual void OnDestroy() {
             // Remove all nodes prior to graph destruction
             Clear();
         }

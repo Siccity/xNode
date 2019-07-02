@@ -25,7 +25,7 @@ namespace XNodeEditor {
 
         public static bool GetAttrib<T>(object[] attribs, out T attribOut) where T : Attribute {
             for (int i = 0; i < attribs.Length; i++) {
-                if (attribs[i].GetType() == typeof(T)) {
+                if (attribs[i] is T){
                     attribOut = attribs[i] as T;
                     return true;
                 }
@@ -35,7 +35,15 @@ namespace XNodeEditor {
         }
 
         public static bool GetAttrib<T>(Type classType, string fieldName, out T attribOut) where T : Attribute {
-            object[] attribs = classType.GetField(fieldName).GetCustomAttributes(typeof(T), false);
+            // If we can't find field in the first run, it's probably a private field in a base class.
+            FieldInfo field = NodeEditorWindow.GetFieldInfo(classType, fieldName);
+            // This shouldn't happen. Ever.
+            if (field == null) {
+                Debug.LogWarning("Field " + fieldName + " couldnt be found");
+                attribOut = null;
+                return false;
+            }
+            object[] attribs = field.GetCustomAttributes(typeof(T), true);
             return GetAttrib(attribs, out attribOut);
         }
 
@@ -123,6 +131,15 @@ namespace XNodeEditor {
                     return s.Substring(0, i) + "[" + rank + "]" + s.Substring(i);
                 }
             } else return type.ToString();
+        }
+
+        /// <summary> Returns the default name for the node type. </summary>
+        public static string NodeDefaultName(Type type) {
+            string typeName = type.Name;
+            // Automatically remove redundant 'Node' postfix
+            if (typeName.EndsWith("Node")) typeName = typeName.Substring(0, typeName.LastIndexOf("Node"));
+            typeName = UnityEditor.ObjectNames.NicifyVariableName(typeName);
+            return typeName;
         }
 
         /// <summary>Creates a new C# Class.</summary>

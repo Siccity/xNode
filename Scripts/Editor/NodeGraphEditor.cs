@@ -8,12 +8,15 @@ namespace XNodeEditor {
     /// <summary> Base class to derive custom Node Graph editors from. Use this to override how graphs are drawn in the editor. </summary>
     [CustomNodeGraphEditor(typeof(XNode.NodeGraph))]
     public class NodeGraphEditor : XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph> {
-        /// <summary> The position of the window in screen space. </summary>
-        public Rect position;
+        [Obsolete("Use window.position instead")]
+        public Rect position { get { return window.position; } set { window.position = value; } }
         /// <summary> Are we currently renaming a node? </summary>
         protected bool isRenaming;
 
         public virtual void OnGUI() { }
+
+        /// <summary> Called when opened by NodeEditorWindow </summary>
+        public virtual void OnOpen() { }
 
         public virtual Texture2D GetGridTexture() {
             return NodeEditorPreferences.GetSettings().gridTexture;
@@ -55,6 +58,8 @@ namespace XNodeEditor {
             menu.AddSeparator("");
             menu.AddItem(new GUIContent("Add group"), false, () => CreateGroup(pos));
             menu.AddSeparator("");
+            if (NodeEditorWindow.copyBuffer != null && NodeEditorWindow.copyBuffer.Length > 0) menu.AddItem(new GUIContent("Paste"), false, () => NodeEditorWindow.current.PasteNodes(pos));
+            else menu.AddDisabledItem(new GUIContent("Paste"));
             menu.AddItem(new GUIContent("Preferences"), false, () => NodeEditorWindow.OpenPreferences());
             NodeEditorWindow.AddCustomContextMenuItems(menu, target);
         }
@@ -89,15 +94,35 @@ namespace XNodeEditor {
             menu.AddItem(new GUIContent("Remove"), false, NodeEditorWindow.current.RemoveSelectedNodes);
         }
 
+        public virtual Color GetPortColor(XNode.NodePort port) {
+            return GetTypeColor(port.ValueType);
+        }
+
         public virtual Color GetTypeColor(Type type) {
             return NodeEditorPreferences.GetTypeColor(type);
+        }
+
+        public virtual string GetPortTooltip(XNode.NodePort port) {
+            Type portType = port.ValueType;
+            string tooltip = "";
+            tooltip = portType.PrettyName();
+            if (port.IsOutput) {
+                object obj = port.node.GetValue(port);
+                tooltip += " = " + (obj != null ? obj.ToString() : "null");
+            }
+            return tooltip;
+        }
+
+        /// <summary> Deal with objects dropped into the graph through DragAndDrop </summary>
+        public virtual void OnDropObjects(UnityEngine.Object[] objects) {
+            Debug.Log("No OnDropItems override defined for " + GetType());
         }
 
         /// <summary> Create a node and save it in the graph asset </summary>
         public virtual void CreateNode(Type type, Vector2 position) {
             XNode.Node node = target.AddNode(type);
             node.position = position;
-            node.name = UnityEditor.ObjectNames.NicifyVariableName(type.Name);
+            if (node.name == null || node.name.Trim() == "") node.name = NodeEditorUtilities.NodeDefaultName(type);
             AssetDatabase.AddObjectToAsset(node, target);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             NodeEditorWindow.RepaintAll();
@@ -113,9 +138,9 @@ namespace XNodeEditor {
         }
 
         /// <summary> Safely remove a node and all its connections. </summary>
-        public void RemoveNode(XNode.Node node) {
-            UnityEngine.Object.DestroyImmediate(node, true);
+        public virtual void RemoveNode(XNode.Node node) {
             target.RemoveNode(node);
+            UnityEngine.Object.DestroyImmediate(node, true);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 
@@ -147,7 +172,7 @@ namespace XNodeEditor {
 
         [AttributeUsage(AttributeTargets.Class)]
         public class CustomNodeGraphEditorAttribute : Attribute,
-            XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph>.INodeEditorAttrib {
+        XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph>.INodeEditorAttrib {
             private Type inspectedType;
             public string editorPrefsKey;
             /// <summary> Tells a NodeGraphEditor which Graph type it is an editor for </summary>

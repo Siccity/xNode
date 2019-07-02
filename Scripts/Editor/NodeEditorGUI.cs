@@ -446,8 +446,7 @@ namespace XNodeEditor {
             }
         }
 
-        private void DrawGroups()
-        {
+        private void DrawGroups() {
             Event e = Event.current;
 
             BeginZoomed();
@@ -535,37 +534,10 @@ namespace XNodeEditor {
 
                     float padding = 12;
 
-                    // Resizing areas
-                    // Follows the NodeGroupSide order
-                    Rect[] resizeRects = new[] {
-                        new Rect(padding, 0, groupSize.x - padding * 2, padding),
-                        new Rect(groupSize.x - padding, 0, padding, padding),
-                        new Rect(groupSize.x - padding, padding, padding, groupSize.y - padding * 2),
-                        new Rect(groupSize.x - padding, groupSize.y - padding, padding, padding),
-                        new Rect(padding, groupSize.y - padding, groupSize.x - padding * 2, padding),
-                        new Rect(0, groupSize.y - padding, padding, padding),
-                        new Rect(0, padding, padding, groupSize.y - padding * 2),
-                        new Rect(0, 0, padding, padding),
-                    };
-
-                    // Icons for the resize area list
-                    MouseCursor[] resizeIcons = new[] {
-                        MouseCursor.ResizeVertical,
-                        MouseCursor.ResizeUpRight,
-                        MouseCursor.ResizeHorizontal,
-                        MouseCursor.ResizeUpLeft,
-                        MouseCursor.ResizeVertical,
-                        MouseCursor.ResizeUpRight,
-                        MouseCursor.ResizeHorizontal,
-                        MouseCursor.ResizeUpLeft,
-                    };
-
-                    for (int i = 0; i < resizeRects.Length; i++) {
-                        EditorGUIUtility.AddCursorRect(resizeRects[i], resizeIcons[i]);
-
-                        // Transform the locations now to gui space locations
-                        resizeRects[i].position += groupPos;
-                    }
+                    // Define resize are in the bottom right corner of the NodeGroup
+                    Rect resizeRect = new Rect(groupSize.x - padding, groupSize.y - padding, padding, padding);
+                    EditorGUIUtility.AddCursorRect(resizeRect, MouseCursor.ResizeUpLeft);
+                    resizeRect.position += groupPos;
 
                     if (windowRect.Contains(mousePos)) {
                         //If dragging a selection box, add nodes inside to selection
@@ -574,17 +546,10 @@ namespace XNodeEditor {
                         } else {
                             // Check if we should resize or select
                             bool resizeAreaClicked = false;
-                            for (int i = 0; i < resizeRects.Length; i++) {
-                                if (resizeRects[i].Contains(mousePos)) {
-                                    resizingGroup = group;
-                                    // i can be cast to NodeGroupSide as resizeRects
-                                    // has one element per NodeGroupSide value and
-                                    // uses the same order
-                                    resizingGroupSide = (NodeGroupSide)i;
-                                    resizeAreaClicked = true;
-
-                                    break;
-                                }
+                            if (resizeRect.Contains(mousePos)) {
+                                resizingGroup = group;
+                                resizeAreaClicked = true;
+                                break;
                             }
 
                             if (!resizeAreaClicked) hoveredGroup = group;

@@ -27,8 +27,6 @@ namespace XNodeEditor {
         [NonSerialized] private XNode.NodeGroup hoveredGroup = null;
         [NonSerialized] private XNode.NodeGroup resizingGroup = null;
         private bool deselectingGroup = false;
-        public enum NodeGroupSide { Top, TopRight, Right, BottomRight, Bottom, BottomLeft, Left, TopLeft }
-        public static NodeGroupSide resizingGroupSide;
         private RerouteReference hoveredReroute = new RerouteReference();
         private List<RerouteReference> selectedReroutes = new List<RerouteReference>();
         private Vector2 dragBoxStart;
@@ -130,8 +128,7 @@ namespace XNodeEditor {
                                             }
                                         }
                                     }
-                                }
-                                else if(Selection.objects[i] is XNode.NodeGroup) {
+                                } else if (Selection.objects[i] is XNode.NodeGroup) {
                                     XNode.NodeGroup group = Selection.objects[i] as XNode.NodeGroup;
                                     Vector2 initial = group.position;
                                     group.position = mousePos + dragOffset[i];
@@ -165,42 +162,7 @@ namespace XNodeEditor {
                             selectionBox = new Rect(boxStartPos, boxSize);
                             Repaint();
                         } else if (currentActivity == NodeActivity.ResizeGroup) {
-                            switch (resizingGroupSide) {
-                                case NodeGroupSide.Top:
-                                    resizingGroup.size.y -= e.delta.y;
-                                    resizingGroup.position.y += e.delta.y;
-                                    break;
-                                case NodeGroupSide.TopRight:
-                                    resizingGroup.size.y -= e.delta.y;
-                                    resizingGroup.position.y += e.delta.y;
-                                    resizingGroup.size.x += e.delta.x;
-                                    break;
-                                case NodeGroupSide.Right:
-                                    resizingGroup.size.x += e.delta.x;
-                                    break;
-                                case NodeGroupSide.BottomRight:
-                                    resizingGroup.size += e.delta;
-                                    break;
-                                case NodeGroupSide.Bottom:
-                                    resizingGroup.size.y += e.delta.y;
-                                    break;
-                                case NodeGroupSide.BottomLeft:
-                                    resizingGroup.size.x -= e.delta.x;
-                                    resizingGroup.position.x += e.delta.x;
-                                    resizingGroup.size.y += e.delta.y;
-                                    break;
-                                case NodeGroupSide.Left:
-                                    resizingGroup.size.x -= e.delta.x;
-                                    resizingGroup.position.x += e.delta.x;
-                                    break;
-                                case NodeGroupSide.TopLeft:
-                                    resizingGroup.size.x -= e.delta.x;
-                                    resizingGroup.position.x += e.delta.x;
-                                    resizingGroup.size.y -= e.delta.y;
-                                    resizingGroup.position.y += e.delta.y;
-                                    break;
-                            }
-
+                            resizingGroup.size += e.delta;
                             Repaint();
                         }
                     } else if (e.button == 1 || e.button == 2) {
@@ -257,14 +219,12 @@ namespace XNodeEditor {
                             else if (e.control || e.shift) selectedReroutes.Remove(hoveredReroute);
                             e.Use();
                             currentActivity = NodeActivity.HoldNode;
-                        }
-                        else if (IsHoveringGroup && !IsHoveringNode) {
+                        } else if (IsHoveringGroup && !IsHoveringNode) {
                             if (!Selection.Contains(hoveredGroup)) {
                                 if (e.shift) {
                                     SelectGroup(hoveredGroup, true);
                                     SelectNodesInGroup(hoveredGroup);
-                                }
-                                else SelectGroup(hoveredGroup, e.control || e.shift);
+                                } else SelectGroup(hoveredGroup, e.control || e.shift);
                             } else deselectingGroup = true;
 
                             e.Use();
@@ -437,8 +397,7 @@ namespace XNodeEditor {
                 if (Selection.objects[i] is XNode.Node) {
                     XNode.Node node = Selection.objects[i] as XNode.Node;
                     dragOffset[i] = node.position - WindowToGridPosition(current.mousePosition);
-                }
-                else if (Selection.objects[i] is XNode.NodeGroup) {
+                } else if (Selection.objects[i] is XNode.NodeGroup) {
                     XNode.NodeGroup group = Selection.objects[i] as XNode.NodeGroup;
                     dragOffset[i] = group.position - WindowToGridPosition(current.mousePosition);
                 }
@@ -468,8 +427,7 @@ namespace XNodeEditor {
                 if (item is XNode.Node) {
                     XNode.Node node = item as XNode.Node;
                     graphEditor.RemoveNode(node);
-                }
-                else if (item is XNode.NodeGroup) {
+                } else if (item is XNode.NodeGroup) {
                     XNode.NodeGroup group = item as XNode.NodeGroup;
                     graphEditor.RemoveGroup(group);
                 }

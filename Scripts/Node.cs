@@ -303,6 +303,13 @@ namespace XNode {
                 this.dynamicPortList = dynamicPortList;
                 this.typeConstraint = typeConstraint;
             }
+
+            /// <summary> Mark a serializable field as an output port. You can access this through <see cref="GetOutputPort(string)"/> </summary>
+            /// <param name="backingValue">Should we display the backing value for this port as an editor field? </param>
+            /// <param name="connectionType">Should we allow multiple connections? </param>
+            /// <param name="dynamicPortList">If true, will display a reorderable list of outputs instead of a single port. Will automatically add and display values for lists and arrays </param>
+            [Obsolete("Use constructor with TypeConstraint")]
+            public OutputAttribute(ShowBackingValue backingValue, ConnectionType connectionType, bool dynamicPortList) : this(backingValue, connectionType, TypeConstraint.None, dynamicPortList) { }
         }
 
         [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]

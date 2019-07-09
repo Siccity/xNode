@@ -30,11 +30,16 @@ namespace XNode {
                 NodePort staticPort;
                 if (staticPorts.TryGetValue(port.fieldName, out staticPort)) {
                     // If port exists but with wrong settings, remove it. Re-add it later.
-                    if (port.connectionType != staticPort.connectionType || port.IsDynamic || port.direction != staticPort.direction || port.typeConstraint != staticPort.typeConstraint) ports.Remove(port.fieldName);
-                    else port.ValueType = staticPort.ValueType;
+                    if (port.IsDynamic || port.direction != staticPort.direction || port.connectionType != staticPort.connectionType || port.typeConstraint != staticPort.typeConstraint) {
+                        port.ClearConnections();
+                        ports.Remove(port.fieldName);
+                    } else port.ValueType = staticPort.ValueType;
                 }
                 // If port doesn't exist anymore, remove it
-                else if (port.IsStatic) ports.Remove(port.fieldName);
+                else if (port.IsStatic) {
+                    port.ClearConnections();
+                    ports.Remove(port.fieldName);
+                }
             }
             // Add missing ports
             foreach (NodePort staticPort in staticPorts.Values) {

@@ -14,6 +14,7 @@ namespace XNode {
             if (!Initialized) BuildCache();
 
             Dictionary<string, NodePort> staticPorts = new Dictionary<string, NodePort>();
+            Dictionary<string, List<NodePort>> removedPorts = new Dictionary<string, List<NodePort>>();
             System.Type nodeType = node.GetType();
 
             List<NodePort> typePortCache;
@@ -31,6 +32,8 @@ namespace XNode {
                 if (staticPorts.TryGetValue(port.fieldName, out staticPort)) {
                     // If port exists but with wrong settings, remove it. Re-add it later.
                     if (port.IsDynamic || port.direction != staticPort.direction || port.connectionType != staticPort.connectionType || port.typeConstraint != staticPort.typeConstraint) {
+                        // If port is not dynamic and direction hasn't changed, add it to the list so we can try reconnecting the ports connections.
+                        if (!port.IsDynamic && port.direction == staticPort.direction) removedPorts.Add(port.fieldName, port.GetConnections());
                         port.ClearConnections();
                         ports.Remove(port.fieldName);
                     } else port.ValueType = staticPort.ValueType;
@@ -44,7 +47,17 @@ namespace XNode {
             // Add missing ports
             foreach (NodePort staticPort in staticPorts.Values) {
                 if (!ports.ContainsKey(staticPort.fieldName)) {
-                    ports.Add(staticPort.fieldName, new NodePort(staticPort, node));
+                    NodePort port = new NodePort(staticPort, node);
+                    //If we just removed the port, try re-adding the connections
+                    List<NodePort> reconnectConnections;
+                    if (removedPorts.TryGetValue(staticPort.fieldName, out reconnectConnections)) {
+                        for (int i = 0; i < reconnectConnections.Count; i++) {
+                            NodePort connection = reconnectConnections[i];
+                            if (connection == null) continue;
+                            if (port.CanConnectTo(connection)) port.Connect(connection);
+                        }
+                    }
+                    ports.Add(staticPort.fieldName, port);
                 }
             }
         }

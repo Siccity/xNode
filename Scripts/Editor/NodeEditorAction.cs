@@ -359,10 +359,17 @@ namespace XNodeEditor {
             }
         }
 
-        /// <summary> Puts all nodes in focus. If no nodes are present, resets view to  </summary>
+        /// <summary> Puts all selected nodes in focus. If no nodes are present, resets view and zoom to to origin </summary>
         public void Home() {
-            zoom = 2;
-            panOffset = Vector2.zero;
+            var nodes = Selection.objects.Where(o => o is XNode.Node).Cast<XNode.Node>().ToList();
+            if (nodes.Count > 0) {
+                Vector2 minPos = nodes.Select(x => x.position).Aggregate((x, y) => new Vector2(Mathf.Min(x.x, y.x), Mathf.Min(x.y, y.y)));
+                Vector2 maxPos = nodes.Select(x => x.position + (nodeSizes.ContainsKey(x) ? nodeSizes[x] : Vector2.zero)).Aggregate((x, y) => new Vector2(Mathf.Max(x.x, y.x), Mathf.Max(x.y, y.y)));
+                panOffset = -(minPos + (maxPos - minPos) / 2f);
+            } else {
+                zoom = 2;
+                panOffset = Vector2.zero;
+            }
         }
 
         /// <summary> Remove nodes in the graph in Selection.objects</summary>

@@ -293,7 +293,7 @@ namespace XNodeEditor {
                     }
                 }
                 return new { index = -1, port = (XNode.NodePort) null };
-            });
+            }).Where(x => x.port != null);
             List<XNode.NodePort> dynamicPorts = indexedPorts.OrderBy(x => x.index).Select(x => x.port).ToList();
 
             ReorderableList list = null;
@@ -423,7 +423,7 @@ namespace XNodeEditor {
                             }
                         }
                         return new { index = -1, port = (XNode.NodePort) null };
-                    });
+                    }).Where(x => x.port != null);
                     dynamicPorts = indexedPorts.OrderBy(x => x.index).Select(x => x.port).ToList();
 
                     int index = rl.index;

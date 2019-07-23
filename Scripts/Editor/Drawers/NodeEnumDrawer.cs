@@ -29,7 +29,7 @@ namespace XNodeEditor {
 			if (EditorGUI.DropdownButton(position, new GUIContent(enumName), FocusType.Passive)) {
 				// Position is all wrong if we show the dropdown during the node draw phase.
 				// Instead, add it to onLateGUI to display it later.
-				NodeEditorWindow.current.onLateGUI += () => ShowContextMenuAtMouse(property);
+				NodeGraphWindow.current.onLateGUI += () => ShowContextMenuAtMouse(property);
 			}
 #else
 			// Display dropdown

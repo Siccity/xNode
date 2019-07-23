@@ -141,8 +141,8 @@ namespace XNodeEditor {
 
                 Color backgroundColor = new Color32(90, 97, 105, 255);
                 Color tint;
-                if (NodeEditorWindow.nodeTint.TryGetValue(port.node.GetType(), out tint)) backgroundColor *= tint;
-                Color col = NodeEditorWindow.current.graphEditor.GetPortColor(port);
+                if (NodeEditorReflection.nodeTint.TryGetValue(port.node.GetType(), out tint)) backgroundColor *= tint;
+                Color col = NodeGraphWindow.current.GetPortColor(port);
                 DrawPortHandle(rect, backgroundColor, col);
 
                 // Register the handle position
@@ -153,7 +153,7 @@ namespace XNodeEditor {
 
         private static System.Type GetType(SerializedProperty property) {
             System.Type parentType = property.serializedObject.targetObject.GetType();
-            System.Reflection.FieldInfo fi = NodeEditorWindow.GetFieldInfo(parentType, property.name);
+            System.Reflection.FieldInfo fi = NodeEditorReflection.GetFieldInfo(parentType, property.name);
             return fi.FieldType;
         }
 
@@ -197,8 +197,8 @@ namespace XNodeEditor {
 
             Color backgroundColor = new Color32(90, 97, 105, 255);
             Color tint;
-            if (NodeEditorWindow.nodeTint.TryGetValue(port.node.GetType(), out tint)) backgroundColor *= tint;
-            Color col = NodeEditorWindow.current.graphEditor.GetPortColor(port);
+            if (NodeEditorReflection.nodeTint.TryGetValue(port.node.GetType(), out tint)) backgroundColor *= tint;
+            Color col = NodeGraphWindow.current.GetPortColor(port);
             DrawPortHandle(rect, backgroundColor, col);
 
             // Register the handle position
@@ -225,8 +225,8 @@ namespace XNodeEditor {
 
             Color backgroundColor = new Color32(90, 97, 105, 255);
             Color tint;
-            if (NodeEditorWindow.nodeTint.TryGetValue(port.node.GetType(), out tint)) backgroundColor *= tint;
-            Color col = NodeEditorWindow.current.graphEditor.GetPortColor(port);
+            if (NodeEditorReflection.nodeTint.TryGetValue(port.node.GetType(), out tint)) backgroundColor *= tint;
+            Color col = NodeGraphWindow.current.GetPortColor(port);
             DrawPortHandle(rect, backgroundColor, col);
 
             // Register the handle position
@@ -362,9 +362,9 @@ namespace XNodeEditor {
                             port.SwapConnections(nextPort);
 
                             // Swap cached positions to mitigate twitching
-                            Rect rect = NodeEditorWindow.current.portConnectionPoints[port];
-                            NodeEditorWindow.current.portConnectionPoints[port] = NodeEditorWindow.current.portConnectionPoints[nextPort];
-                            NodeEditorWindow.current.portConnectionPoints[nextPort] = rect;
+                            Rect rect = NodeGraphWindow.current.portConnectionPoints[port];
+                            NodeGraphWindow.current.portConnectionPoints[port] = NodeGraphWindow.current.portConnectionPoints[nextPort];
+                            NodeGraphWindow.current.portConnectionPoints[nextPort] = rect;
                         }
                     }
                     // Move down
@@ -375,9 +375,9 @@ namespace XNodeEditor {
                             port.SwapConnections(nextPort);
 
                             // Swap cached positions to mitigate twitching
-                            Rect rect = NodeEditorWindow.current.portConnectionPoints[port];
-                            NodeEditorWindow.current.portConnectionPoints[port] = NodeEditorWindow.current.portConnectionPoints[nextPort];
-                            NodeEditorWindow.current.portConnectionPoints[nextPort] = rect;
+                            Rect rect = NodeGraphWindow.current.portConnectionPoints[port];
+                            NodeGraphWindow.current.portConnectionPoints[port] = NodeGraphWindow.current.portConnectionPoints[nextPort];
+                            NodeGraphWindow.current.portConnectionPoints[nextPort] = rect;
                         }
                     }
                     // Apply changes
@@ -392,8 +392,8 @@ namespace XNodeEditor {
                     // Apply changes
                     serializedObject.ApplyModifiedProperties();
                     serializedObject.Update();
-                    NodeEditorWindow.current.Repaint();
-                    EditorApplication.delayCall += NodeEditorWindow.current.Repaint;
+                    NodeGraphWindow.current.Repaint();
+                    EditorApplication.delayCall += NodeGraphWindow.current.Repaint;
                 };
             list.onAddCallback =
                 (ReorderableList rl) => {

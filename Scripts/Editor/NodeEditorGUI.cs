@@ -6,8 +6,7 @@ using UnityEngine;
 
 namespace XNodeEditor {
     /// <summary> Contains GUI methods </summary>
-    public partial class NodeEditorWindow {
-        public NodeGraphEditor graphEditor;
+    public partial class NodeGraphWindow {
         private List<UnityEngine.Object> selectionCache;
         private List<XNode.Node> culledNodes;
         /// <summary> 19 if docked, 22 if not </summary>
@@ -23,7 +22,6 @@ namespace XNodeEditor {
             Event e = Event.current;
             Matrix4x4 m = GUI.matrix;
             if (graph == null) return;
-            ValidateGraphEditor();
             Controls();
 
             DrawGrid(position, zoom, panOffset);
@@ -71,7 +69,7 @@ namespace XNodeEditor {
             GUI.EndGroup();
             Rect rect = new Rect(new Vector2(leftPadding, topPadding), new Vector2(Screen.width, Screen.height));
             GUI.BeginGroup(rect);
-            graphEditor.OnGUI();
+            OnOverlayGUI();
             GUI.EndGroup();
             GUI.BeginGroup(new Rect(0.0f, topPadding - (topPadding * zoom), Screen.width, Screen.height));
         }
@@ -94,8 +92,8 @@ namespace XNodeEditor {
             rect.position = Vector2.zero;
 
             Vector2 center = rect.size / 2f;
-            Texture2D gridTex = graphEditor.GetGridTexture();
-            Texture2D crossTex = graphEditor.GetSecondaryGridTexture();
+            Texture2D gridTex = GetGridTexture();
+            Texture2D crossTex = GetSecondaryGridTexture();
 
             // Offset from origin in tile units
             float xOffset = -(center.x * zoom + panOffset.x) / gridTex.width;
@@ -230,7 +228,7 @@ namespace XNodeEditor {
                     Rect fromRect;
                     if (!_portConnectionPoints.TryGetValue(output, out fromRect)) continue;
 
-                    Color connectionColor = graphEditor.GetPortColor(output);
+                    Color connectionColor = GetPortColor(output);
 
                     for (int k = 0; k < output.ConnectionCount; k++) {
                         XNode.NodePort input = output.GetConnection(k);
@@ -430,8 +428,8 @@ namespace XNodeEditor {
         }
 
         private void DrawTooltip() {
-            if (hoveredPort != null && NodeEditorPreferences.GetSettings().portTooltips && graphEditor != null) {
-                string tooltip = graphEditor.GetPortTooltip(hoveredPort);
+            if (hoveredPort != null && NodeEditorPreferences.GetSettings().portTooltips) {
+                string tooltip = GetPortTooltip(hoveredPort);
                 if (string.IsNullOrEmpty(tooltip)) return;
                 GUIContent content = new GUIContent(tooltip);
                 Vector2 size = NodeEditorResources.styles.tooltip.CalcSize(content);

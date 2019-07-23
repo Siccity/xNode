@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 
 namespace XNodeEditor {
-    public partial class NodeEditorWindow {
+    public partial class NodeGraphWindow {
         public enum NodeActivity { Idle, HoldNode, DragNode, HoldGrid, DragGrid }
         public static NodeActivity currentActivity = NodeActivity.Idle;
         public static bool isPanning { get; private set; }
@@ -57,7 +57,7 @@ namespace XNodeEditor {
                     DragAndDrop.visualMode = DragAndDropVisualMode.Generic;
                     if (e.type == EventType.DragPerform) {
                         DragAndDrop.AcceptDrag();
-                        graphEditor.OnDropObjects(DragAndDrop.objectReferences);
+                        OnDropObjects(DragAndDrop.objectReferences);
                     }
                     break;
                 case EventType.MouseMove:
@@ -287,7 +287,7 @@ namespace XNodeEditor {
                                 e.Use(); // Fixes copy/paste context menu appearing in Unity 5.6.6f2 - doesn't occur in 2018.3.2f1 Probably needs to be used in other places.
                             } else if (!IsHoveringNode) {
                                 GenericMenu menu = new GenericMenu();
-                                graphEditor.AddContextMenuItems(menu);
+                                AddContextMenuItems(menu);
                                 menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
                             }
                         }
@@ -376,7 +376,7 @@ namespace XNodeEditor {
             foreach (UnityEngine.Object item in Selection.objects) {
                 if (item is XNode.Node) {
                     XNode.Node node = item as XNode.Node;
-                    graphEditor.RemoveNode(node);
+                    RemoveNode(node);
                 }
             }
         }
@@ -432,7 +432,7 @@ namespace XNodeEditor {
             for (int i = 0; i < nodes.Length; i++) {
                 XNode.Node srcNode = nodes[i];
                 if (srcNode == null) continue;
-                XNode.Node newNode = graphEditor.CopyNode(srcNode);
+                XNode.Node newNode = CopyNode(srcNode);
                 substitutes.Add(srcNode, newNode);
                 newNode.position = srcNode.position + offset;
                 newNodes[i] = newNode;

@@ -49,7 +49,7 @@ namespace XNodeEditor {
         public virtual int GetWidth() {
             Type type = target.GetType();
             int width;
-            if (NodeEditorWindow.nodeWidth.TryGetValue(type, out width)) return width;
+            if (NodeEditorReflection.nodeWidth.TryGetValue(type, out width)) return width;
             else return 208;
         }
 
@@ -58,7 +58,7 @@ namespace XNodeEditor {
             // Try get color from [NodeTint] attribute
             Type type = target.GetType();
             Color color;
-            if (NodeEditorWindow.nodeTint.TryGetValue(type, out color)) return color;
+            if (NodeEditorReflection.nodeTint.TryGetValue(type, out color)) return color;
             // Return default color (grey)
             else return DEFAULTCOLOR;
         }
@@ -72,19 +72,19 @@ namespace XNodeEditor {
             // Actions if only one node is selected
             if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
                 XNode.Node node = Selection.activeObject as XNode.Node;
-                menu.AddItem(new GUIContent("Move To Top"), false, () => NodeEditorWindow.current.MoveNodeToTop(node));
-                menu.AddItem(new GUIContent("Rename"), false, NodeEditorWindow.current.RenameSelectedNode);
+                menu.AddItem(new GUIContent("Move To Top"), false, () => NodeGraphWindow.current.MoveNodeToTop(node));
+                menu.AddItem(new GUIContent("Rename"), false, NodeGraphWindow.current.RenameSelectedNode);
             }
 
             // Add actions to any number of selected nodes
-            menu.AddItem(new GUIContent("Copy"), false, NodeEditorWindow.current.CopySelectedNodes);
-            menu.AddItem(new GUIContent("Duplicate"), false, NodeEditorWindow.current.DuplicateSelectedNodes);
-            menu.AddItem(new GUIContent("Remove"), false, NodeEditorWindow.current.RemoveSelectedNodes);
+            menu.AddItem(new GUIContent("Copy"), false, NodeGraphWindow.current.CopySelectedNodes);
+            menu.AddItem(new GUIContent("Duplicate"), false, NodeGraphWindow.current.DuplicateSelectedNodes);
+            menu.AddItem(new GUIContent("Remove"), false, NodeGraphWindow.current.RemoveSelectedNodes);
 
             // Custom sctions if only one node is selected
             if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
                 XNode.Node node = Selection.activeObject as XNode.Node;
-                NodeEditorWindow.AddCustomContextMenuItems(menu, node);
+                NodeEditorReflection.AddCustomContextMenuItems(menu, node);
             }
         }
 
@@ -96,8 +96,7 @@ namespace XNodeEditor {
         }
 
         [AttributeUsage(AttributeTargets.Class)]
-        public class CustomNodeEditorAttribute : Attribute,
-        XNodeEditor.Internal.NodeEditorBase<NodeEditor, NodeEditor.CustomNodeEditorAttribute, XNode.Node>.INodeEditorAttrib {
+        public class CustomNodeEditorAttribute : Attribute, XNodeEditor.Internal.INodeEditorAttrib {
             private Type inspectedType;
             /// <summary> Tells a NodeEditor which Node type it is an editor for </summary>
             /// <param name="inspectedType">Type that this editor can edit</param>

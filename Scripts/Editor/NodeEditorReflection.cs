@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace XNodeEditor {
     /// <summary> Contains reflection-related info </summary>
-    public partial class NodeEditorWindow {
+    public static class NodeEditorReflection {
         /// <summary> Custom node tint colors defined with [NodeColor(r, g, b)] </summary>
         public static Dictionary<Type, Color> nodeTint { get { return _nodeTint != null ? _nodeTint : _nodeTint = GetNodeTint(); } }
 
@@ -22,21 +22,16 @@ namespace XNodeEditor {
 
         [NonSerialized] private static Type[] _nodeTypes = null;
 
-        private Func<bool> isDocked {
-            get {
-                if (_isDocked == null) {
-                    BindingFlags fullBinding = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
-                    MethodInfo isDockedMethod = typeof(NodeEditorWindow).GetProperty("docked", fullBinding).GetGetMethod(true);
-                    _isDocked = (Func<bool>) Delegate.CreateDelegate(typeof(Func<bool>), this, isDockedMethod);
-                }
-                return _isDocked;
-            }
-        }
-        private Func<bool> _isDocked;
-
         public static Type[] GetNodeTypes() {
             //Get all classes deriving from Node via reflection
             return GetDerivedTypes(typeof(XNode.Node));
+        }
+
+        /// <summary> Return a delegate used to determine whether window is docked or not. It is faster to cache this delegate than run the reflection required each time. </summary>
+        public static Func<bool> GetIsDockedDelegate(this EditorWindow window) {
+            BindingFlags fullBinding = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
+            MethodInfo isDockedMethod = typeof(NodeGraphWindow).GetProperty("docked", fullBinding).GetGetMethod(true);
+            return (Func<bool>) Delegate.CreateDelegate(typeof(Func<bool>), window, isDockedMethod);
         }
 
         public static Dictionary<Type, Color> GetNodeTint() {

@@ -8,7 +8,7 @@ namespace XNodeEditor {
         public enum NoodleType { Curve, Line, Angled }
 
         /// <summary> The last editor we checked. This should be the one we modify </summary>
-        private static XNodeEditor.NodeGraphEditor lastEditor;
+        private static XNodeEditor.NodeGraphWindow lastEditor;
         /// <summary> The last key we checked. This should be the one we modify </summary>
         private static string lastKey = "xNode.Settings";
 
@@ -76,11 +76,11 @@ namespace XNodeEditor {
 
         /// <summary> Get settings of current active editor </summary>
         public static Settings GetSettings() {
-            if (lastEditor != XNodeEditor.NodeEditorWindow.current.graphEditor) {
-                object[] attribs = XNodeEditor.NodeEditorWindow.current.graphEditor.GetType().GetCustomAttributes(typeof(XNodeEditor.NodeGraphEditor.CustomNodeGraphEditorAttribute), true);
+            if (lastEditor != XNodeEditor.NodeGraphWindow.current) {
+                object[] attribs = XNodeEditor.NodeGraphWindow.current.GetType().GetCustomAttributes(typeof(XNodeEditor.NodeGraphWindow.CustomNodeGraphWindowAttribute), true);
                 if (attribs.Length == 1) {
-                    XNodeEditor.NodeGraphEditor.CustomNodeGraphEditorAttribute attrib = attribs[0] as XNodeEditor.NodeGraphEditor.CustomNodeGraphEditorAttribute;
-                    lastEditor = XNodeEditor.NodeEditorWindow.current.graphEditor;
+                    XNodeEditor.NodeGraphWindow.CustomNodeGraphWindowAttribute attrib = attribs[0] as XNodeEditor.NodeGraphWindow.CustomNodeGraphWindowAttribute;
+                    lastEditor = XNodeEditor.NodeGraphWindow.current;
                     lastKey = attrib.editorPrefsKey;
                 } else return null;
             }
@@ -130,7 +130,7 @@ namespace XNodeEditor {
             if (GUI.changed) {
                 SavePrefs(key, settings);
 
-                NodeEditorWindow.RepaintAll();
+                NodeGraphWindow.RepaintAll();
             }
             EditorGUILayout.Space();
         }
@@ -151,7 +151,7 @@ namespace XNodeEditor {
             settings.portTooltips = EditorGUILayout.Toggle("Port Tooltips", settings.portTooltips);
             if (GUI.changed) {
                 SavePrefs(key, settings);
-                NodeEditorWindow.RepaintAll();
+                NodeGraphWindow.RepaintAll();
             }
             EditorGUILayout.Space();
         }
@@ -176,7 +176,7 @@ namespace XNodeEditor {
                     if (settings.typeColors.ContainsKey(typeColorKey)) settings.typeColors[typeColorKey] = col;
                     else settings.typeColors.Add(typeColorKey, col);
                     SavePrefs(key, settings);
-                    NodeEditorWindow.RepaintAll();
+                    NodeGraphWindow.RepaintAll();
                 }
             }
         }
@@ -197,7 +197,7 @@ namespace XNodeEditor {
             if (settings.ContainsKey(lastKey)) settings.Remove(lastKey);
             typeColors = new Dictionary<Type, Color>();
             VerifyLoaded();
-            NodeEditorWindow.RepaintAll();
+            NodeGraphWindow.RepaintAll();
         }
 
         /// <summary> Save preferences in EditorPrefs </summary>

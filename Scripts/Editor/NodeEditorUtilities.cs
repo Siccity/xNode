@@ -36,7 +36,7 @@ namespace XNodeEditor {
 
         public static bool GetAttrib<T>(Type classType, string fieldName, out T attribOut) where T : Attribute {
             // If we can't find field in the first run, it's probably a private field in a base class.
-            FieldInfo field = NodeEditorWindow.GetFieldInfo(classType, fieldName);
+            FieldInfo field = classType.GetFieldInfo(fieldName);
             // This shouldn't happen. Ever.
             if (field == null) {
                 Debug.LogWarning("Field " + fieldName + " couldnt be found");

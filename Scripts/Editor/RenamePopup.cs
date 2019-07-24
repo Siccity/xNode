@@ -51,7 +51,7 @@ namespace XNodeEditor {
                     target.name = NodeEditorUtilities.NodeDefaultName(target.GetType());
                     AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
                     Close();
-					NodeEditorWindow.TriggerOnValidate(target);
+					target.TriggerOnValidate();
                 }
             }
             // Rename asset to input text
@@ -60,7 +60,7 @@ namespace XNodeEditor {
                     target.name = input;
                     AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
                     Close();
-					NodeEditorWindow.TriggerOnValidate(target);
+					target.TriggerOnValidate();
                 }
             }
         }

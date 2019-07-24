@@ -49,7 +49,7 @@ namespace XNodeEditor {
         public virtual int GetWidth() {
             Type type = target.GetType();
             int width;
-            if (NodeEditorWindow.nodeWidth.TryGetValue(type, out width)) return width;
+            if (type.TryGetAttributeWidth(out width)) return width;
             else return 208;
         }
 
@@ -58,7 +58,7 @@ namespace XNodeEditor {
             // Try get color from [NodeTint] attribute
             Type type = target.GetType();
             Color color;
-            if (NodeEditorWindow.nodeTint.TryGetValue(type, out color)) return color;
+            if (type.TryGetAttributeTint(out color)) return color;
             // Return default color (grey)
             else return DEFAULTCOLOR;
         }
@@ -84,7 +84,7 @@ namespace XNodeEditor {
             // Custom sctions if only one node is selected
             if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
                 XNode.Node node = Selection.activeObject as XNode.Node;
-                NodeEditorWindow.AddCustomContextMenuItems(menu, node);
+                menu.AddCustomContextMenuItems(node);
             }
         }
 

@@ -141,7 +141,7 @@ namespace XNodeEditor {
 
                 Color backgroundColor = new Color32(90, 97, 105, 255);
                 Color tint;
-                if (NodeEditorWindow.nodeTint.TryGetValue(port.node.GetType(), out tint)) backgroundColor *= tint;
+                if (port.node.GetType().TryGetAttributeTint(out tint)) backgroundColor *= tint;
                 Color col = NodeEditorWindow.current.graphEditor.GetPortColor(port);
                 DrawPortHandle(rect, backgroundColor, col);
 
@@ -153,7 +153,7 @@ namespace XNodeEditor {
 
         private static System.Type GetType(SerializedProperty property) {
             System.Type parentType = property.serializedObject.targetObject.GetType();
-            System.Reflection.FieldInfo fi = NodeEditorWindow.GetFieldInfo(parentType, property.name);
+            System.Reflection.FieldInfo fi = parentType.GetFieldInfo(property.name);
             return fi.FieldType;
         }
 
@@ -197,7 +197,7 @@ namespace XNodeEditor {
 
             Color backgroundColor = new Color32(90, 97, 105, 255);
             Color tint;
-            if (NodeEditorWindow.nodeTint.TryGetValue(port.node.GetType(), out tint)) backgroundColor *= tint;
+            if (port.node.GetType().TryGetAttributeTint(out tint)) backgroundColor *= tint;
             Color col = NodeEditorWindow.current.graphEditor.GetPortColor(port);
             DrawPortHandle(rect, backgroundColor, col);
 
@@ -225,7 +225,7 @@ namespace XNodeEditor {
 
             Color backgroundColor = new Color32(90, 97, 105, 255);
             Color tint;
-            if (NodeEditorWindow.nodeTint.TryGetValue(port.node.GetType(), out tint)) backgroundColor *= tint;
+            if (port.node.GetType().TryGetAttributeTint(out tint)) backgroundColor *= tint;
             Color col = NodeEditorWindow.current.graphEditor.GetPortColor(port);
             DrawPortHandle(rect, backgroundColor, col);
 

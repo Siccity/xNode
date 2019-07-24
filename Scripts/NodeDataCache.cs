@@ -64,25 +64,18 @@ namespace XNode {
 
         private static void BuildCache() {
             portDataCache = new PortDataCache();
-            System.Type baseType = typeof(Node);
             List<System.Type> nodeTypes = new List<System.Type>();
             System.Reflection.Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
-            Assembly selfAssembly = Assembly.GetAssembly(baseType);
-            if (selfAssembly.FullName.StartsWith("Assembly-CSharp") && !selfAssembly.FullName.Contains("-firstpass")) {
-                // If xNode is not used as a DLL, check only CSharp (fast)
-                nodeTypes.AddRange(selfAssembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)));
-            } else {
-                // Else, check all relevant DDLs (slower)
-                // ignore all unity related assemblies
-                // never ignore current executing assembly
-                Assembly executingAssembly = Assembly.GetExecutingAssembly();
-                foreach (Assembly assembly in assemblies) {
-                    if(assembly != executingAssembly) {
-                        if (assembly.FullName.StartsWith("Unity")) continue;
-                        // unity created assemblies always have version 0.0.0
-                        if (!assembly.FullName.Contains("Version=0.0.0")) continue;
-                    }
-                    nodeTypes.AddRange(assembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray());
+            string dataPath = System.IO.Directory.GetParent(Application.dataPath).FullName; //We need the parent folder of 'dataPath' and converted to the OS specific directory specifications.
+            foreach (Assembly assembly in assemblies) {
+                if (assembly.ManifestModule is System.Reflection.Emit.ModuleBuilder) continue; //we don't want to check dynamics and dynamics does not have a location for our next test.
+                if (!assembly.Location.StartsWith(dataPath)) continue; //we only care about assemblies that exists in our project directory.
+
+                System.Type[] types = assembly.GetExportedTypes();
+                foreach (var t in types) {
+                    if (t.IsAbstract) continue;
+                    if (!typeof(Node).IsAssignableFrom(t)) continue;
+                    nodeTypes.Add(t);
                 }
             }
             for (int i = 0; i < nodeTypes.Count; i++) {

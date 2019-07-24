@@ -139,9 +139,8 @@ namespace XNodeEditor {
 
                 rect.size = new Vector2(16, 16);
 
-                Color backgroundColor = new Color32(90, 97, 105, 255);
-                Color tint;
-                if (port.node.GetType().TryGetAttributeTint(out tint)) backgroundColor *= tint;
+                NodeEditor editor = NodeEditor.GetEditor(port.node, NodeEditorWindow.current);
+                Color backgroundColor = editor.GetTint();
                 Color col = NodeEditorWindow.current.graphEditor.GetPortColor(port);
                 DrawPortHandle(rect, backgroundColor, col);
 
@@ -176,7 +175,6 @@ namespace XNodeEditor {
 
                 Rect rect = GUILayoutUtility.GetLastRect();
                 position = rect.position - new Vector2(16, 0);
-
             }
             // If property is an output, display a text label and put a port handle on the right side
             else if (port.direction == XNode.NodePort.IO.Output) {
@@ -195,9 +193,8 @@ namespace XNodeEditor {
 
             Rect rect = new Rect(position, new Vector2(16, 16));
 
-            Color backgroundColor = new Color32(90, 97, 105, 255);
-            Color tint;
-            if (port.node.GetType().TryGetAttributeTint(out tint)) backgroundColor *= tint;
+            NodeEditor editor = NodeEditor.GetEditor(port.node, NodeEditorWindow.current);
+            Color backgroundColor = editor.GetTint();
             Color col = NodeEditorWindow.current.graphEditor.GetPortColor(port);
             DrawPortHandle(rect, backgroundColor, col);
 
@@ -223,9 +220,8 @@ namespace XNodeEditor {
 
             rect.size = new Vector2(16, 16);
 
-            Color backgroundColor = new Color32(90, 97, 105, 255);
-            Color tint;
-            if (port.node.GetType().TryGetAttributeTint(out tint)) backgroundColor *= tint;
+            NodeEditor editor = NodeEditor.GetEditor(port.node, NodeEditorWindow.current);
+            Color backgroundColor = editor.GetTint();
             Color col = NodeEditorWindow.current.graphEditor.GetPortColor(port);
             DrawPortHandle(rect, backgroundColor, col);
 

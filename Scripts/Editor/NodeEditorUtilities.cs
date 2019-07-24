@@ -9,7 +9,7 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace XNodeEditor {
-    /// <summary> A set of editor-only utilities and extensions for UnityNodeEditorBase </summary>
+    /// <summary> A set of editor-only utilities and extensions for xNode </summary>
     public static class NodeEditorUtilities {
 
         /// <summary>C#'s Script Icon [The one MonoBhevaiour Scripts have].</summary>
@@ -25,7 +25,7 @@ namespace XNodeEditor {
 
         public static bool GetAttrib<T>(object[] attribs, out T attribOut) where T : Attribute {
             for (int i = 0; i < attribs.Length; i++) {
-                if (attribs[i] is T){
+                if (attribs[i] is T) {
                     attribOut = attribs[i] as T;
                     return true;
                 }
@@ -82,6 +82,14 @@ namespace XNodeEditor {
 
             attribOut = attr as T;
             return true;
+        }
+
+        public static bool IsMac() {
+#if UNITY_2017_1_OR_NEWER
+            return SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX;
+#else
+            return SystemInfo.operatingSystem.StartsWith("Mac");
+#endif
         }
 
         /// <summary> Returns true if this can be casted to <see cref="Type"/></summary>

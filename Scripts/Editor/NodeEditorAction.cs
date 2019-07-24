@@ -299,7 +299,7 @@ namespace XNodeEditor {
                 case EventType.KeyDown:
                     if (EditorGUIUtility.editingTextField) break;
                     else if (e.keyCode == KeyCode.F) Home();
-                    if (IsMac()) {
+                    if (NodeEditorUtilities.IsMac()) {
                         if (e.keyCode == KeyCode.Return) RenameSelectedNode();
                     } else {
                         if (e.keyCode == KeyCode.F2) RenameSelectedNode();
@@ -310,7 +310,7 @@ namespace XNodeEditor {
                     if (e.commandName == "SoftDelete") {
                         if (e.type == EventType.ExecuteCommand) RemoveSelectedNodes();
                         e.Use();
-                    } else if (IsMac() && e.commandName == "Delete") {
+                    } else if (NodeEditorUtilities.IsMac() && e.commandName == "Delete") {
                         if (e.type == EventType.ExecuteCommand) RemoveSelectedNodes();
                         e.Use();
                     } else if (e.commandName == "Duplicate") {
@@ -333,14 +333,6 @@ namespace XNodeEditor {
                     }
                     break;
             }
-        }
-
-        public bool IsMac() {
-#if UNITY_2017_1_OR_NEWER
-            return SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX;
-#else
-            return SystemInfo.operatingSystem.StartsWith("Mac");
-#endif
         }
 
         private void RecalculateDragOffsets(Event current) {

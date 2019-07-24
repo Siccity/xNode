@@ -8,15 +8,17 @@ using XNode;
 namespace XNodeEditor {
     /// <summary> Base class to derive custom NodeGraph editors from. Use this to override how graphs are drawn in the editor. </summary>
     [CustomNodeGraphEditor(typeof(XNode.NodeGraph))]
-    public class NodeGraphEditor : XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.INodeGraph>, ICustomEditor<XNode.INodeGraph>, INodeGraphEditor {
+    public class NodeGraphEditor : Editor, INodeGraphEditor {
 
-        INodeGraph INodeGraphEditor.target { get { return base.target; } }
+        public NodeEditorWindow window;
 
         [Obsolete("Use window.position instead")]
         public Rect position { get { return window.position; } set { window.position = value; } }
 
-        INodeGraph ICustomEditor<INodeGraph>.Target { get { return target as INodeGraph; } }
-        SerializedObject ICustomEditor<INodeGraph>.SerializedObject { get { return serializedObject; } }
+#region Interface implementation
+        NodeEditorWindow INodeGraphEditor.window { get { return window; } set { window = value; } }
+        Editor INodeGraphEditor.editor { get { return this; } }
+#endregion
 
         /// <summary> Are we currently renaming a node? </summary>
         protected bool isRenaming;
@@ -42,7 +44,7 @@ namespace XNodeEditor {
         /// <summary> Returns context node menu path. Null or empty strings for hidden nodes. </summary>
         public virtual string GetNodeMenuName(Type type) {
             //Check if type has the CreateNodeMenuAttribute
-            XNode.Node.CreateNodeMenuAttribute attrib;
+            XNode.CreateNodeMenuAttribute attrib;
             if (NodeEditorUtilities.GetAttrib(type, out attrib)) // Return custom path
                 return attrib.menuName;
             else // Return generated path
@@ -85,7 +87,7 @@ namespace XNodeEditor {
                 if (typeName.EndsWith("Node")) typeName = typeName.Substring(0, typeName.LastIndexOf("Node"));
                 node.Name = UnityEditor.ObjectNames.NicifyVariableName(typeName);
             }
-            if (node is ScriptableObject) AssetDatabase.AddObjectToAsset(node as ScriptableObject, target);
+            if (node is ScriptableObject) AssetDatabase.AddObjectToAsset(node as UnityEngine.Object, target as UnityEngine.Object);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             NodeEditorWindow.RepaintAll();
             return node;
@@ -95,7 +97,7 @@ namespace XNodeEditor {
         public virtual XNode.INode CopyNode(XNode.INode original) {
             XNode.INode node = ((INodeGraph) target).CopyNode(original);
             node.Name = original.Name;
-            if (node is ScriptableObject) AssetDatabase.AddObjectToAsset(node as ScriptableObject, target);
+            if (node is ScriptableObject) AssetDatabase.AddObjectToAsset(node as UnityEngine.Object, target as UnityEngine.Object);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             return node;
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace XNode {
     /// <summary>
@@ -24,39 +25,6 @@ namespace XNode {
     /// </example>
     [Serializable]
     public abstract class Node : ScriptableObject, XNode.INode {
-        /// <summary> Used by <see cref="InputAttribute"/> and <see cref="OutputAttribute"/> to determine when to display the field value associated with a <see cref="NodePort"/> </summary>
-        public enum ShowBackingValue {
-            /// <summary> Never show the backing value </summary>
-            Never,
-            /// <summary> Show the backing value only when the port does not have any active connections </summary>
-            Unconnected,
-            /// <summary> Always show the backing value </summary>
-            Always
-        }
-
-        public enum ConnectionType {
-            /// <summary> Allow multiple connections</summary>
-            Multiple,
-            /// <summary> always override the current connection </summary>
-            Override,
-        }
-
-        /// <summary> Tells which types of input to allow </summary>
-        public enum TypeConstraint {
-            /// <summary> Allow all types of input</summary>
-            None,
-            /// <summary> Allow similar and inherited types </summary>
-            Inherited,
-            /// <summary> Allow only similar types </summary>
-            Strict,
-        }
-
-#region Interface implementation
-        string INode.Name { get { return name; } set { name = value; } }
-        INodeGraph INode.Graph { get { return graph; } }
-        Vector2 INode.Position { get { return position; } set { position = value; } }
-#endregion
-
         /// <summary> Iterate over all ports on this node. </summary>
         public IEnumerable<NodePort> Ports { get { foreach (NodePort port in ports.Values) yield return port; } }
         /// <summary> Iterate over all outputs on this node. </summary>
@@ -98,32 +66,15 @@ namespace XNode {
         /// <summary> Convenience function. </summary>
         /// <seealso cref="AddInstancePort"/>
         /// <seealso cref="AddInstanceOutput"/>
-        public NodePort AddDynamicInput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = TypeConstraint.None, string fieldName = null) {
-            return ((INode) this).AddDynamicPort(type, NodePort.IO.Input, connectionType, typeConstraint, fieldName);
+        public NodePort AddDynamicInput(Type type, ConnectionType connectionType = ConnectionType.Multiple, TypeConstraint typeConstraint = TypeConstraint.None, string fieldName = null) {
+            return (NodePort) ((INode) this).AddDynamicPort(type, IO.Input, connectionType, typeConstraint, fieldName);
         }
 
         /// <summary> Convenience function. </summary>
         /// <seealso cref="AddInstancePort"/>
         /// <seealso cref="AddInstanceInput"/>
-        public NodePort AddDynamicOutput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = TypeConstraint.None, string fieldName = null) {
-            return ((INode) this).AddDynamicPort(type, NodePort.IO.Output, connectionType, typeConstraint, fieldName);
-        }
-
-        /// <summary> Add a dynamic, serialized port to this node. </summary>
-        /// <seealso cref="AddDynamicInput"/>
-        /// <seealso cref="AddDynamicOutput"/>
-        NodePort INode.AddDynamicPort(Type type, NodePort.IO direction, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = TypeConstraint.None, string fieldName = null) {
-            if (fieldName == null) {
-                fieldName = "dynamicInput_0";
-                int i = 0;
-                while (HasPort(fieldName)) fieldName = "dynamicInput_" + (++i);
-            } else if (HasPort(fieldName)) {
-                Debug.LogWarning("Port '" + fieldName + "' already exists in " + name, this);
-                return ports[fieldName];
-            }
-            NodePort port = new NodePort(fieldName, type, direction, connectionType, typeConstraint, this);
-            ports.Add(fieldName, port);
-            return port;
+        public NodePort AddDynamicOutput(Type type, ConnectionType connectionType = ConnectionType.Multiple, TypeConstraint typeConstraint = TypeConstraint.None, string fieldName = null) {
+            return (NodePort) ((INode) this).AddDynamicPort(type, IO.Output, connectionType, typeConstraint, fieldName);
         }
 
         /// <summary> Remove an dynamic port from the node </summary>
@@ -155,14 +106,14 @@ namespace XNode {
         /// <summary> Returns output port which matches fieldName </summary>
         public NodePort GetOutputPort(string fieldName) {
             NodePort port = GetPort(fieldName);
-            if (port == null || port.direction != NodePort.IO.Output) return null;
+            if (port == null || port.direction != IO.Output) return null;
             else return port;
         }
 
         /// <summary> Returns input port which matches fieldName </summary>
         public NodePort GetInputPort(string fieldName) {
             NodePort port = GetPort(fieldName);
-            if (port == null || port.direction != NodePort.IO.Input) return null;
+            if (port == null || port.direction != IO.Input) return null;
             else return port;
         }
 
@@ -218,93 +169,6 @@ namespace XNode {
             foreach (NodePort port in Ports) port.ClearConnections();
         }
 
-#region Attributes
-        /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInputPort(string)"/> </summary>
-        [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
-        public class InputAttribute : Attribute {
-            public ShowBackingValue backingValue;
-            public ConnectionType connectionType;
-            public bool dynamicPortList;
-            public TypeConstraint typeConstraint;
-
-            /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInputPort(string)"/> </summary>
-            /// <param name="backingValue">Should we display the backing value for this port as an editor field? </param>
-            /// <param name="connectionType">Should we allow multiple connections? </param>
-            /// <param name="typeConstraint">Constrains which input connections can be made to this port </param>
-            /// <param name="dynamicPortList">If true, will display a reorderable list of inputs instead of a single port. Will automatically add and display values for lists and arrays </param>
-            public InputAttribute(ShowBackingValue backingValue = ShowBackingValue.Unconnected, ConnectionType connectionType = ConnectionType.Multiple, TypeConstraint typeConstraint = TypeConstraint.None, bool dynamicPortList = false) {
-                this.backingValue = backingValue;
-                this.connectionType = connectionType;
-                this.dynamicPortList = dynamicPortList;
-                this.typeConstraint = typeConstraint;
-            }
-        }
-
-        /// <summary> Mark a serializable field as an output port. You can access this through <see cref="GetOutputPort(string)"/> </summary>
-        [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
-        public class OutputAttribute : Attribute {
-            public ShowBackingValue backingValue;
-            public ConnectionType connectionType;
-            public bool dynamicPortList;
-
-            /// <summary> Mark a serializable field as an output port. You can access this through <see cref="GetOutputPort(string)"/> </summary>
-            /// <param name="backingValue">Should we display the backing value for this port as an editor field? </param>
-            /// <param name="connectionType">Should we allow multiple connections? </param>
-            /// <param name="dynamicPortList">If true, will display a reorderable list of outputs instead of a single port. Will automatically add and display values for lists and arrays </param>
-            public OutputAttribute(ShowBackingValue backingValue = ShowBackingValue.Never, ConnectionType connectionType = ConnectionType.Multiple, bool dynamicPortList = false) {
-                this.backingValue = backingValue;
-                this.connectionType = connectionType;
-                this.dynamicPortList = dynamicPortList;
-            }
-        }
-
-        [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-        public class CreateNodeMenuAttribute : Attribute {
-            public string menuName;
-            /// <summary> Manually supply node class with a context menu path </summary>
-            /// <param name="menuName"> Path to this node in the context menu. Null or empty hides it. </param>
-            public CreateNodeMenuAttribute(string menuName) {
-                this.menuName = menuName;
-            }
-        }
-
-        [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-        public class NodeTintAttribute : Attribute {
-            public Color color;
-            /// <summary> Specify a color for this node type </summary>
-            /// <param name="r"> Red [0.0f .. 1.0f] </param>
-            /// <param name="g"> Green [0.0f .. 1.0f] </param>
-            /// <param name="b"> Blue [0.0f .. 1.0f] </param>
-            public NodeTintAttribute(float r, float g, float b) {
-                color = new Color(r, g, b);
-            }
-
-            /// <summary> Specify a color for this node type </summary>
-            /// <param name="hex"> HEX color value </param>
-            public NodeTintAttribute(string hex) {
-                ColorUtility.TryParseHtmlString(hex, out color);
-            }
-
-            /// <summary> Specify a color for this node type </summary>
-            /// <param name="r"> Red [0 .. 255] </param>
-            /// <param name="g"> Green [0 .. 255] </param>
-            /// <param name="b"> Blue [0 .. 255] </param>
-            public NodeTintAttribute(byte r, byte g, byte b) {
-                color = new Color32(r, g, b, byte.MaxValue);
-            }
-        }
-
-        [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-        public class NodeWidthAttribute : Attribute {
-            public int width;
-            /// <summary> Specify a width for this node type </summary>
-            /// <param name="width"> Width </param>
-            public NodeWidthAttribute(int width) {
-                this.width = width;
-            }
-        }
-#endregion
-
         [Serializable] private class NodePortDictionary : Dictionary<string, NodePort>, ISerializationCallbackReceiver {
             [SerializeField] private List<string> keys = new List<string>();
             [SerializeField] private List<NodePort> values = new List<NodePort>();
@@ -328,5 +192,29 @@ namespace XNode {
                     this.Add(keys[i], values[i]);
             }
         }
+
+#region Interface implementation
+        string INode.Name { get { return name; } set { name = value; } }
+        INodeGraph INode.Graph { get { return graph; } }
+        Vector2 INode.Position { get { return position; } set { position = value; } }
+        Object INode.Object { get { return this; } }
+
+        /// <summary> Add a dynamic, serialized port to this node. </summary>
+        /// <seealso cref="AddDynamicInput"/>
+        /// <seealso cref="AddDynamicOutput"/>
+        INodePort INode.AddDynamicPort(Type type, IO direction, ConnectionType connectionType, TypeConstraint typeConstraint, string fieldName) {
+            if (fieldName == null) {
+                fieldName = "dynamicInput_0";
+                int i = 0;
+                while (HasPort(fieldName)) fieldName = "dynamicInput_" + (++i);
+            } else if (HasPort(fieldName)) {
+                Debug.LogWarning("Port '" + fieldName + "' already exists in " + name, this);
+                return ports[fieldName];
+            }
+            NodePort port = new NodePort(fieldName, type, direction, connectionType, typeConstraint, this);
+            ports.Add(fieldName, port);
+            return port;
+        }
+#endregion
     }
 }

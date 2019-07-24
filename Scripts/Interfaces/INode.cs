@@ -7,20 +7,21 @@ namespace XNode {
         string Name { get; set; }
         INodeGraph Graph { get; }
         Vector2 Position { get; set; }
-        object GetValue(NodePort port);
+        UnityEngine.Object Object { get; }
+        object GetValue(INodePort port);
         bool HasPort(string fieldName);
-        NodePort GetPort(string fieldName);
+        INodePort GetPort(string fieldName);
         void UpdateStaticPorts();
-        IEnumerable<NodePort> Ports { get; }
-        IEnumerable<NodePort> Outputs { get; }
-        IEnumerable<NodePort> Inputs { get; }
-        IEnumerable<NodePort> DynamicPorts { get; }
-        NodePort AddDynamicPort(Type type, NodePort.IO direction, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = Node.TypeConstraint.None, string fieldName = null);
+        IEnumerable<INodePort> Ports { get; }
+        IEnumerable<INodePort> Outputs { get; }
+        IEnumerable<INodePort> Inputs { get; }
+        IEnumerable<INodePort> DynamicPorts { get; }
+        INodePort AddDynamicPort(Type type, XNode.IO direction, XNode.ConnectionType connectionType, XNode.TypeConstraint typeConstraint, string fieldName);
         void RemoveDynamicPort(string fieldName);
-        NodePort GetInputPort(string fieldName);
-        NodePort GetOutputPort(string fieldName);
-        void OnCreateConnection(NodePort from, NodePort to);
-        void OnRemoveConnection(NodePort port);
+        INodePort GetInputPort(string fieldName);
+        INodePort GetOutputPort(string fieldName);
+        void OnCreateConnection(INodePort from, INodePort to);
+        void OnRemoveConnection(INodePort port);
         void ClearConnections();
     }
 }

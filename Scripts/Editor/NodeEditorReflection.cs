@@ -61,9 +61,9 @@ namespace XNodeEditor {
         public static Dictionary<Type, Color> GetNodeTint() {
             Dictionary<Type, Color> tints = new Dictionary<Type, Color>();
             for (int i = 0; i < nodeTypes.Length; i++) {
-                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.INode.NodeTintAttribute), true);
+                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.NodeTintAttribute), true);
                 if (attribs == null || attribs.Length == 0) continue;
-                XNode.INode.NodeTintAttribute attrib = attribs[0] as XNode.INode.NodeTintAttribute;
+                XNode.NodeTintAttribute attrib = attribs[0] as XNode.NodeTintAttribute;
                 tints.Add(nodeTypes[i], attrib.color);
             }
             return tints;
@@ -72,9 +72,9 @@ namespace XNodeEditor {
         public static Dictionary<Type, int> GetNodeWidth() {
             Dictionary<Type, int> widths = new Dictionary<Type, int>();
             for (int i = 0; i < nodeTypes.Length; i++) {
-                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.INode.NodeWidthAttribute), true);
+                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.NodeWidthAttribute), true);
                 if (attribs == null || attribs.Length == 0) continue;
-                XNode.INode.NodeWidthAttribute attrib = attribs[0] as XNode.INode.NodeWidthAttribute;
+                XNode.NodeWidthAttribute attrib = attribs[0] as XNode.NodeWidthAttribute;
                 widths.Add(nodeTypes[i], attrib.width);
             }
             return widths;
@@ -96,7 +96,7 @@ namespace XNodeEditor {
             foreach (Assembly assembly in assemblies) {
                 try {
                     types.AddRange(assembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray());
-                } catch(ReflectionTypeLoadException) {}
+                } catch (ReflectionTypeLoadException) { }
             }
             return types.ToArray();
         }

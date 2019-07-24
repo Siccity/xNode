@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace XNode {
     [Serializable]
-    public class NodePort {
-        public enum IO { Input, Output }
+    public class NodePort : INodePort {
 
         public int ConnectionCount { get { return connections.Count; } }
         /// <summary> Return the first non-null connection </summary>
@@ -20,8 +20,8 @@ namespace XNode {
         }
 
         public IO direction { get { return _direction; } }
-        public Node.ConnectionType connectionType { get { return _connectionType; } }
-        public Node.TypeConstraint typeConstraint { get { return _typeConstraint; } }
+        public ConnectionType connectionType { get { return _connectionType; } }
+        public TypeConstraint typeConstraint { get { return _typeConstraint; } }
 
         /// <summary> Is this port connected to anytihng? </summary>
         public bool IsConnected { get { return connections.Count != 0; } }
@@ -49,9 +49,22 @@ namespace XNode {
         [SerializeField] private string _typeQualifiedName;
         [SerializeField] private List<PortConnection> connections = new List<PortConnection>();
         [SerializeField] private IO _direction;
-        [SerializeField] private Node.ConnectionType _connectionType;
-        [SerializeField] private Node.TypeConstraint _typeConstraint;
+        [SerializeField] private ConnectionType _connectionType;
+        [SerializeField] private TypeConstraint _typeConstraint;
         [SerializeField] private bool _dynamic;
+
+#region Interface implementation
+        INode INodePort.node { get { return _node; } }
+        List<INodePort> INodePort.GetConnections() {
+            List<INodePort> result = new List<INodePort>();
+            for (int i = 0; i < connections.Count; i++) {
+                NodePort port = GetConnection(i);
+                if (port != null) result.Add(port);
+            }
+            return result;
+        }
+        bool INodePort.dynamic { get { return _dynamic; } }
+#endregion
 
         /// <summary> Construct a static targetless nodeport. Used as a template. </summary>
         public NodePort(FieldInfo fieldInfo) {
@@ -60,13 +73,13 @@ namespace XNode {
             _dynamic = false;
             var attribs = fieldInfo.GetCustomAttributes(false);
             for (int i = 0; i < attribs.Length; i++) {
-                if (attribs[i] is Node.InputAttribute) {
+                if (attribs[i] is InputAttribute) {
                     _direction = IO.Input;
-                    _connectionType = (attribs[i] as Node.InputAttribute).connectionType;
-                    _typeConstraint = (attribs[i] as Node.InputAttribute).typeConstraint;
-                } else if (attribs[i] is Node.OutputAttribute) {
+                    _connectionType = (attribs[i] as InputAttribute).connectionType;
+                    _typeConstraint = (attribs[i] as InputAttribute).typeConstraint;
+                } else if (attribs[i] is OutputAttribute) {
                     _direction = IO.Output;
-                    _connectionType = (attribs[i] as Node.OutputAttribute).connectionType;
+                    _connectionType = (attribs[i] as OutputAttribute).connectionType;
                 }
             }
         }
@@ -83,7 +96,7 @@ namespace XNode {
         }
 
         /// <summary> Construct a dynamic port. Dynamic ports are not forgotten on reimport, and is ideal for runtime-created ports. </summary>
-        public NodePort(string fieldName, Type type, IO direction, Node.ConnectionType connectionType, Node.TypeConstraint typeConstraint, Node node) {
+        public NodePort(string fieldName, Type type, IO direction, ConnectionType connectionType, TypeConstraint typeConstraint, Node node) {
             _fieldName = fieldName;
             this.ValueType = type;
             _direction = direction;
@@ -198,8 +211,8 @@ namespace XNode {
             if (port == this) { Debug.LogWarning("Cannot connect port to self."); return; }
             if (IsConnectedTo(port)) { Debug.LogWarning("Port already connected. "); return; }
             if (direction == port.direction) { Debug.LogWarning("Cannot connect two " + (direction == IO.Input ? "input" : "output") + " connections"); return; }
-            if (port.connectionType == Node.ConnectionType.Override && port.ConnectionCount != 0) { port.ClearConnections(); }
-            if (connectionType == Node.ConnectionType.Override && ConnectionCount != 0) { ClearConnections(); }
+            if (port.connectionType == ConnectionType.Override && port.ConnectionCount != 0) { port.ClearConnections(); }
+            if (connectionType == ConnectionType.Override && ConnectionCount != 0) { ClearConnections(); }
             connections.Add(new PortConnection(port));
             if (port.connections == null) port.connections = new List<PortConnection>();
             if (!port.IsConnectedTo(this)) port.connections.Add(new PortConnection(this));
@@ -256,8 +269,8 @@ namespace XNode {
             // If there isn't one of each, they can't connect
             if (input == null || output == null) return false;
             // Check type constraints
-            if (input.typeConstraint == XNode.Node.TypeConstraint.Inherited && !input.ValueType.IsAssignableFrom(output.ValueType)) return false;
-            if (input.typeConstraint == XNode.Node.TypeConstraint.Strict && input.ValueType != output.ValueType) return false;
+            if (input.typeConstraint == XNode.TypeConstraint.Inherited && !input.ValueType.IsAssignableFrom(output.ValueType)) return false;
+            if (input.typeConstraint == XNode.TypeConstraint.Strict && input.ValueType != output.ValueType) return false;
             // Success
             return true;
         }

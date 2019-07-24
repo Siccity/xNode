@@ -6,13 +6,17 @@ using UnityEngine;
 
 namespace XNodeEditor {
     /// <summary> Base class to derive custom Node editors from. Use this to create your own custom inspectors and editors for your nodes. </summary>
+    [CustomNodeEditor(typeof(XNode.Node))]
+    public class NodeEditor : Editor, INodeEditor {
+        public new XNode.Node target { get { return _target != null? _target : _target = base.target as XNode.Node; } }
+        private XNode.Node _target;
 
-    [CustomNodeEditor(typeof(XNode.INode))]
-    public class NodeEditor : XNodeEditor.Internal.NodeEditorBase<NodeEditor, NodeEditor.CustomNodeEditorAttribute, XNode.Node> {
-
-        /// <summary> Fires every whenever a node was modified through the editor </summary>
-        public static Action<XNode.INode> onUpdateNode;
+        /// <summary> Fires whenever a node was modified through the editor </summary>
         public readonly static Dictionary<XNode.NodePort, Vector2> portPositions = new Dictionary<XNode.NodePort, Vector2>();
+
+#region Interface implementation
+        Editor INodeEditor.editor { get { return this; } }
+#endregion
 
         public new virtual void OnHeaderGUI() {
             GUILayout.Label(target.name, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
@@ -88,21 +92,6 @@ namespace XNodeEditor {
             if (newName == null || newName.Trim() == "") newName = UnityEditor.ObjectNames.NicifyVariableName(target.GetType().Name);
             target.name = newName;
             AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
-        }
-
-        [AttributeUsage(AttributeTargets.Class)]
-        public class CustomNodeEditorAttribute : Attribute,
-        XNodeEditor.Internal.INodeEditorAttrib {
-            private Type inspectedType;
-            /// <summary> Tells a NodeEditor which Node type it is an editor for </summary>
-            /// <param name="inspectedType">Type that this editor can edit</param>
-            public CustomNodeEditorAttribute(Type inspectedType) {
-                this.inspectedType = inspectedType;
-            }
-
-            public Type GetInspectedType() {
-                return inspectedType;
-            }
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using XNodeEditor.Internal;
 
 namespace XNodeEditor {
     public partial class NodeEditorWindow {
@@ -160,7 +161,6 @@ namespace XNodeEditor {
                                     hoveredPort.Disconnect(output);
                                     draggedOutput = output;
                                     draggedOutputTarget = hoveredPort;
-                                    if (NodeEditor.onUpdateNode != null) NodeEditor.onUpdateNode(node);
                                 }
                             }
                         } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
@@ -215,7 +215,6 @@ namespace XNodeEditor {
                                 int connectionIndex = draggedOutput.GetConnectionIndex(draggedOutputTarget);
                                 if (connectionIndex != -1) {
                                     draggedOutput.GetReroutePoints(connectionIndex).AddRange(draggedOutputReroutes);
-                                    if (NodeEditor.onUpdateNode != null) NodeEditor.onUpdateNode(node);
                                     EditorUtility.SetDirty((UnityEngine.Object) graph);
                                 }
                             }
@@ -271,7 +270,7 @@ namespace XNodeEditor {
                             } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
                                 if (!Selection.Contains((UnityEngine.Object) hoveredNode)) SelectNode(hoveredNode, false);
                                 GenericMenu menu = new GenericMenu();
-                                NodeEditor.GetEditor(hoveredNode, this).AddContextMenuItems(menu);
+                                hoveredNode.GetNodeEditor().AddContextMenuItems(menu);
                                 menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
                                 e.Use(); // Fixes copy/paste context menu appearing in Unity 5.6.6f2 - doesn't occur in 2018.3.2f1 Probably needs to be used in other places.
                             } else if (!IsHoveringNode) {
@@ -387,8 +386,8 @@ namespace XNodeEditor {
                     if (srcNode.Graph != graph) continue; // ignore nodes selected in another graph
                     XNode.INode newNode = graphEditor.CopyNode(srcNode);
                     substitutes.Add(srcNode, newNode);
-                    newnode.Position = srcnode.Position + new Vector2(30, 30);
-                    newNodes[i] = newNode;
+                    newNode.Position = srcNode.Position + new Vector2(30, 30);
+                    newNodes[i] = newNode as UnityEngine.Object;
                 }
             }
 
@@ -396,7 +395,7 @@ namespace XNodeEditor {
             for (int i = 0; i < Selection.objects.Length; i++) {
                 if (Selection.objects[i] is XNode.INode) {
                     XNode.INode srcNode = Selection.objects[i] as XNode.INode;
-                    if (srcNode.graph != graph) continue; // ignore nodes selected in another graph
+                    if (srcNode.Graph != graph) continue; // ignore nodes selected in another graph
                     foreach (XNode.NodePort port in srcNode.Ports) {
                         for (int c = 0; c < port.ConnectionCount; c++) {
                             XNode.NodePort inputPort = port.direction == XNode.NodePort.IO.Input ? port : port.GetConnection(c);

@@ -13,6 +13,7 @@ namespace XNode {
 
 #region Interface implementation
         IEnumerable<INode> INodeGraph.Nodes { get { foreach (Node node in nodes) yield return node; } }
+        UnityEngine.Object INodeGraph.Object { get { return this; } }
         INode INodeGraph.AddNode(Type type) { return AddNode(type); }
         void INodeGraph.MoveNodeToTop(INode node) { MoveNodeToTop(node as Node); }
         INode INodeGraph.CopyNode(INode original) { return CopyNode(original as Node); }

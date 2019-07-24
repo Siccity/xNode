@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
+using XNodeEditor.Internal;
 
 namespace XNodeEditor {
     [InitializeOnLoad]
@@ -79,14 +80,15 @@ namespace XNodeEditor {
         /// <summary> Handle Selection Change events</summary>
         private static void OnSelectionChanged() {
             XNode.INodeGraph nodeGraph = Selection.activeObject as XNode.INodeGraph;
-            if (nodeGraph && !AssetDatabase.Contains(nodeGraph)) {
+            // Open if double clicked non-asset graph (eg a runtime cloned graph)
+            if (nodeGraph != null && !AssetDatabase.Contains(nodeGraph.Object)) {
                 Open(nodeGraph);
             }
         }
 
         /// <summary> Make sure the graph editor is assigned and to the right object </summary>
         private void ValidateGraphEditor() {
-            NodeGraphEditor graphEditor = NodeGraphEditor.GetEditor(graph, this);
+            INodeGraphEditor graphEditor = graph.GetGraphEditor(this);
             if (this.graphEditor != graphEditor) {
                 this.graphEditor = graphEditor;
                 graphEditor.OnOpen();
@@ -100,25 +102,6 @@ namespace XNodeEditor {
             w.wantsMouseMove = true;
             w.Show();
             return w;
-        }
-
-        public void Save() {
-            if (AssetDatabase.Contains(graph)) {
-                EditorUtility.SetDirty(graph);
-                if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
-            } else SaveAs();
-        }
-
-        public void SaveAs() {
-            string path = EditorUtility.SaveFilePanelInProject("Save NodeGraph", "NewNodeGraph", "asset", "");
-            if (string.IsNullOrEmpty(path)) return;
-            else {
-                XNode.INodeGraph existingGraph = AssetDatabase.LoadAssetAtPath<XNode.INodeGraph>(path);
-                if (existingGraph != null) AssetDatabase.DeleteAsset(path);
-                AssetDatabase.CreateAsset(graph, path);
-                EditorUtility.SetDirty(graph);
-                if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
-            }
         }
 
         private void DraggableWindow(int windowID) {
@@ -155,14 +138,14 @@ namespace XNodeEditor {
         public void SelectNode(XNode.INode node, bool add) {
             if (add) {
                 List<Object> selection = new List<Object>(Selection.objects);
-                selection.Add(node);
+                selection.Add(node.Object);
                 Selection.objects = selection.ToArray();
-            } else Selection.objects = new Object[] { node };
+            } else Selection.objects = new Object[] { node.Object };
         }
 
         public void DeselectNode(XNode.INode node) {
             List<Object> selection = new List<Object>(Selection.objects);
-            selection.Remove(node);
+            selection.Remove(node.Object);
             Selection.objects = selection.ToArray();
         }
 

@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using XNodeEditor.Internal;
 
 namespace XNodeEditor {
     /// <summary> Contains GUI methods </summary>
     public partial class NodeEditorWindow {
-        public NodeGraphEditor graphEditor;
+        public INodeGraphEditor graphEditor;
         private List<UnityEngine.Object> selectionCache;
-        private List<XNode.Node> culledNodes;
+        private List<XNode.INode> culledNodes;
         private int topPadding { get { return isDocked() ? 19 : 22; } }
         /// <summary> Executed after all other window GUI. Useful if Zoom is ruining your day. Automatically resets after being run.</summary>
         public event Action onLateGUI;
@@ -136,8 +137,7 @@ namespace XNodeEditor {
 
                             p = new Vector2(-p.y, p.x) * Mathf.Sign(side) * tangentLength;
                             inputTangent = p;
-                        }
-                        else {
+                        } else {
                             inputTangent = Vector2.left * Vector2.Distance(windowPoints[i], windowPoints[i + 1]) * 0.01f * zoom;
                         }
 
@@ -190,7 +190,7 @@ namespace XNodeEditor {
             hoveredReroute = new RerouteReference();
 
             Color col = GUI.color;
-            foreach (XNode.Node node in graph.nodes) {
+            foreach (XNode.Node node in graph.Nodes) {
                 //If a null node is found, return. This can happen if the nodes associated script is deleted. It is currently not possible in Unity to delete a null asset.
                 if (node == null) continue;
 
@@ -279,17 +279,18 @@ namespace XNodeEditor {
             //Save guiColor so we can revert it
             Color guiColor = GUI.color;
 
-            if (e.type == EventType.Layout) culledNodes = new List<XNode.Node>();
-            for (int n = 0; n < graph.nodes.Count; n++) {
+            if (e.type == EventType.Layout) culledNodes = new List<XNode.INode>();
+
+            for (int n = 0; n < graph.Nodes.Count(); n++) {
+                if (n >= graph.Nodes.Count()) return;
+                XNode.INode node = graph.Nodes.ElementAt(n);
                 // Skip null nodes. The user could be in the process of renaming scripts, so removing them at this point is not advisable.
-                if (graph.nodes[n] == null) continue;
-                if (n >= graph.nodes.Count) return;
-                XNode.Node node = graph.nodes[n];
+                if (node == null) continue;
 
                 // Culling
                 if (e.type == EventType.Layout) {
                     // Cull unselected nodes outside view
-                    if (!Selection.Contains(node) && ShouldBeCulled(node)) {
+                    if (!Selection.Contains(node.Object) && ShouldBeCulled(node)) {
                         culledNodes.Add(node);
                         continue;
                     }
@@ -299,7 +300,7 @@ namespace XNodeEditor {
                     _portConnectionPoints = _portConnectionPoints.Where(x => x.Key.node != node).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
                 }
 
-                NodeEditor nodeEditor = NodeEditor.GetEditor(node, this);
+                INodeEditor nodeEditor = node.GetNodeEditor();
 
                 NodeEditor.portPositions.Clear();
 
@@ -308,7 +309,7 @@ namespace XNodeEditor {
 
                 GUILayout.BeginArea(new Rect(nodePos, new Vector2(nodeEditor.GetWidth(), 4000)));
 
-                bool selected = selectionCache.Contains(graph.nodes[n]);
+                bool selected = selectionCache.Contains(graph.Nodes.ElementAt(n).Object);
 
                 if (selected) {
                     GUIStyle style = new GUIStyle(nodeEditor.GetBodyStyle());
@@ -335,7 +336,7 @@ namespace XNodeEditor {
                 //If user changed a value, notify other scripts through onUpdateNode
                 if (EditorGUI.EndChangeCheck()) {
                     if (NodeEditor.onUpdateNode != null) NodeEditor.onUpdateNode(node);
-                    EditorUtility.SetDirty(node);
+                    EditorUtility.SetDirty(node.Object);
                     nodeEditor.serializedObject.ApplyModifiedProperties();
                 }
 
@@ -365,7 +366,7 @@ namespace XNodeEditor {
 
                     //If dragging a selection box, add nodes inside to selection
                     if (currentActivity == NodeActivity.DragGrid) {
-                        if (windowRect.Overlaps(selectionBox)) preSelection.Add(node);
+                        if (windowRect.Overlaps(selectionBox)) preSelection.Add(node.Object);
                     }
 
                     //Check if we are hovering any of this nodes ports
@@ -397,8 +398,7 @@ namespace XNodeEditor {
             if (onValidate != null && EditorGUI.EndChangeCheck()) onValidate.Invoke(Selection.activeObject, null);
         }
 
-        private bool ShouldBeCulled(XNode.Node node) {
-
+        private bool ShouldBeCulled(XNode.INode node) {
             Vector2 nodePos = GridToWindowPositionNoClipped(node.Position);
             if (nodePos.x / _zoom > position.width) return true; // Right
             else if (nodePos.y / _zoom > position.height) return true; // Bottom

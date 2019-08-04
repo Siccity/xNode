@@ -10,6 +10,8 @@ namespace XNode {
         /// <summary> All nodes in the graph. <para/>
         /// See: <see cref="AddNode{T}"/> </summary>
         [SerializeField] public List<Node> nodes = new List<Node>();
+        /// <summary> All groups in the graph. </summary>
+        [SerializeField] public List<NodeGroup> groups = new List<NodeGroup>();
 
         /// <summary> Add a node to the graph by type (convenience method - will call the System.Type version) </summary>
         public T AddNode<T>() where T : Node {

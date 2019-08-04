@@ -12,13 +12,15 @@ namespace XNodeEditor {
         private static Texture2D _nodeBody;
         public static Texture2D nodeHighlight { get { return _nodeHighlight != null ? _nodeHighlight : _nodeHighlight = Resources.Load<Texture2D>("xnode_node_highlight"); } }
         private static Texture2D _nodeHighlight;
+        public static Texture2D groupBody { get { return _groupBody != null ? _groupBody : _groupBody = Resources.Load<Texture2D>("xnode_group"); } }
+        private static Texture2D _groupBody;
 
         // Styles
         public static Styles styles { get { return _styles != null ? _styles : _styles = new Styles(); } }
         public static Styles _styles = null;
         public static GUIStyle OutputPort { get { return new GUIStyle(EditorStyles.label) { alignment = TextAnchor.UpperRight }; } }
         public class Styles {
-            public GUIStyle inputPort, nodeHeader, nodeBody, tooltip, nodeHighlight;
+            public GUIStyle inputPort, nodeHeader, nodeBody, tooltip, nodeHighlight, group;
 
             public Styles() {
                 GUIStyle baseStyle = new GUIStyle("Label");
@@ -37,6 +39,9 @@ namespace XNodeEditor {
                 nodeBody.normal.background = NodeEditorResources.nodeBody;
                 nodeBody.border = new RectOffset(32, 32, 32, 32);
                 nodeBody.padding = new RectOffset(16, 16, 4, 16);
+
+                group = new GUIStyle(nodeBody);
+                group.normal.background = NodeEditorResources.groupBody;
 
                 nodeHighlight = new GUIStyle();
                 nodeHighlight.normal.background = NodeEditorResources.nodeHighlight;

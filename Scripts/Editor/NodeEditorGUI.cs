@@ -28,7 +28,10 @@ namespace XNodeEditor {
             DrawGrid(position, zoom, panOffset);
             DrawConnections();
             DrawDraggedConnection();
+            BeginZoomed(position, zoom, topPadding);
+            DrawGroups();
             DrawNodes();
+            EndZoomed(position, zoom, topPadding);
             DrawSelectionBox();
             DrawTooltip();
             DrawGraphOnGUI();
@@ -272,8 +275,6 @@ namespace XNodeEditor {
                 if (onValidate != null) EditorGUI.BeginChangeCheck();
             }
 
-            BeginZoomed(position, zoom, topPadding);
-
             Vector2 mousePos = Event.current.mousePosition;
 
             if (e.type != EventType.Layout) {
@@ -403,12 +404,19 @@ namespace XNodeEditor {
             }
 
             if (e.type != EventType.Layout && currentActivity == NodeActivity.DragGrid) Selection.objects = preSelection.ToArray();
-            EndZoomed(position, zoom, topPadding);
 
             //If a change in is detected in the selected node, call OnValidate method. 
             //This is done through reflection because OnValidate is only relevant in editor, 
             //and thus, the code should not be included in build.
             if (onValidate != null && EditorGUI.EndChangeCheck()) onValidate.Invoke(Selection.activeObject, null);
+        }
+
+        private void DrawGroups() {
+            for (int i = 0; i < graph.groups.Count; i++) {
+                GUIStyle style = new GUIStyle(graphEditor.GetGroupStyle());
+                Rect groupRect = GridToWindowRectNoClipped(graph.groups[i].position);
+                GUI.Box(groupRect, "", style);
+            }
         }
 
         private bool ShouldBeCulled(XNode.Node node) {

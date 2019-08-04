@@ -56,6 +56,7 @@ namespace XNodeEditor {
                 });
             }
             menu.AddSeparator("");
+            menu.AddItem(new GUIContent("New Group"), false, () => AddNewGroup(pos));
             if (NodeEditorWindow.copyBuffer != null && NodeEditorWindow.copyBuffer.Length > 0) menu.AddItem(new GUIContent("Paste"), false, () => NodeEditorWindow.current.PasteNodes(pos));
             else menu.AddDisabledItem(new GUIContent("Paste"));
             menu.AddItem(new GUIContent("Preferences"), false, () => NodeEditorReflection.OpenPreferences());
@@ -68,6 +69,10 @@ namespace XNodeEditor {
 
         public virtual Color GetTypeColor(Type type) {
             return NodeEditorPreferences.GetTypeColor(type);
+        }
+
+        public virtual GUIStyle GetGroupStyle() {
+            return NodeEditorResources.styles.group;
         }
 
         public virtual string GetPortTooltip(XNode.NodePort port) {
@@ -110,6 +115,15 @@ namespace XNodeEditor {
             target.RemoveNode(node);
             UnityEngine.Object.DestroyImmediate(node, true);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+        }
+
+        /// <summary> Add a new group and instantly start editing its title </summary>
+        public virtual void AddNewGroup(Vector2 position) {
+            XNode.NodeGroup group = new XNode.NodeGroup() {
+                name = "New Group",
+                position = new Rect(position, new Vector2(100, 100))
+            };
+            target.groups.Add(group);
         }
 
         [AttributeUsage(AttributeTargets.Class)]

@@ -8,6 +8,7 @@ namespace XNode {
     public static class NodeDataCache {
         private static PortDataCache portDataCache;
         private static bool Initialized { get { return portDataCache != null; } }
+        private static readonly HashSet<string> skippedDlls = new HashSet<string>() { "UnityEditor", "mscorlib", "System", "System.Xml", "System.Core" };
 
         /// <summary> Update static ports to reflect class fields. </summary>
         public static void UpdatePorts(Node node, Dictionary<string, NodePort> ports) {
@@ -62,29 +63,32 @@ namespace XNode {
             }
         }
 
+        /// <summary> Cache node types </summary>
         private static void BuildCache() {
             portDataCache = new PortDataCache();
             System.Type baseType = typeof(Node);
             List<System.Type> nodeTypes = new List<System.Type>();
             System.Reflection.Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
-            Assembly selfAssembly = Assembly.GetAssembly(baseType);
-            if (selfAssembly.FullName.StartsWith("Assembly-CSharp") && !selfAssembly.FullName.Contains("-firstpass")) {
-                // If xNode is not used as a DLL, check only CSharp (fast)
-                nodeTypes.AddRange(selfAssembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)));
-            } else {
-                // Else, check all relevant DDLs (slower)
-                // ignore all unity related assemblies
-                // never ignore current executing assembly
-                Assembly executingAssembly = Assembly.GetExecutingAssembly();
-                foreach (Assembly assembly in assemblies) {
-                    if(assembly != executingAssembly) {
-                        if (assembly.FullName.StartsWith("Unity")) continue;
-                        // unity created assemblies always have version 0.0.0
-                        if (!assembly.FullName.Contains("Version=0.0.0")) continue;
-                    }
-                    nodeTypes.AddRange(assembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray());
+
+            // Loop through assemblies and add node types to list
+            foreach (Assembly assembly in assemblies) {
+                // Skip certain dlls to improve performance
+                string assemblyName = assembly.GetName().Name;
+                int index = assemblyName.IndexOf('.');
+                if (index != -1) assemblyName = assemblyName.Substring(0, index);
+                switch (assemblyName) {
+                    // The following assemblies, and sub-assemblies (eg. UnityEngine.UI) are skipped
+                    case "UnityEditor":
+                    case "UnityEngine":
+                    case "System":
+                    case "mscorlib":
+                        continue;
+                    default:
+                        nodeTypes.AddRange(assembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray());
+                        break;
                 }
             }
+
             for (int i = 0; i < nodeTypes.Count; i++) {
                 CachePorts(nodeTypes[i]);
             }

@@ -8,7 +8,6 @@ namespace XNode {
     public static class NodeDataCache {
         private static PortDataCache portDataCache;
         private static bool Initialized { get { return portDataCache != null; } }
-        private static readonly HashSet<string> skippedDlls = new HashSet<string>() { "UnityEditor", "mscorlib", "System", "System.Xml", "System.Core" };
 
         /// <summary> Update static ports to reflect class fields. </summary>
         public static void UpdatePorts(Node node, Dictionary<string, NodePort> ports) {

@@ -10,7 +10,7 @@ namespace XNodeEditor {
     public class NodeEditor : XNodeEditor.Internal.NodeEditorBase<NodeEditor, NodeEditor.CustomNodeEditorAttribute, XNode.Node> {
 
         private readonly Color DEFAULTCOLOR = new Color32(90, 97, 105, 255);
-        
+
         /// <summary> Fires every whenever a node was modified through the editor </summary>
         public static Action<XNode.Node> onUpdateNode;
         public readonly static Dictionary<XNode.NodePort, Vector2> portPositions = new Dictionary<XNode.NodePort, Vector2>();
@@ -27,15 +27,34 @@ namespace XNodeEditor {
             serializedObject.Update();
             string[] excludes = { "m_Script", "graph", "position", "ports" };
 
+#if ODIN_INSPECTOR
+            // let xNode handle these
+            string[] drawnbyXNode = { "input", "output" };
+#endif
+
             // Iterate through serialized properties and draw them like the Inspector (But with ports)
             SerializedProperty iterator = serializedObject.GetIterator();
             bool enterChildren = true;
             EditorGUIUtility.labelWidth = 84;
             while (iterator.NextVisible(enterChildren)) {
                 enterChildren = false;
+#if ODIN_INSPECTOR
+                if (drawnbyXNode.Contains(iterator.name)) NodeEditorGUILayout.PropertyField(iterator, true);
+#else
                 if (excludes.Contains(iterator.name)) continue;
                 NodeEditorGUILayout.PropertyField(iterator, true);
+#endif
             }
+
+#if ODIN_INSPECTOR
+            InspectorUtilities.BeginDrawPropertyTree(objectTree, true);
+            objectTree.EnumerateTree(includeChildren: false).ForEach(p => {
+                if (!drawnbyXNode.Contains(p.Name) && !excludes.Contains(p.Name)) {
+                    p.Draw();
+                }
+            });
+            InspectorUtilities.EndDrawPropertyTree(objectTree);
+#endif
 
             // Iterate through dynamic ports and draw them in the order in which they are serialized
             foreach (XNode.NodePort dynamicPort in target.DynamicPorts) {
@@ -44,6 +63,15 @@ namespace XNodeEditor {
             }
 
             serializedObject.ApplyModifiedProperties();
+
+#if ODIN_INSPECTOR
+            // Call repaint so that the graph window elements respond properly to layout changes coming from Odin    
+            if (GUIHelper.RepaintRequested) {
+                GUIHelper.ClearRepaintRequest();
+            }
+#else
+            window.Repaint();
+#endif
         }
 
         public virtual int GetWidth() {

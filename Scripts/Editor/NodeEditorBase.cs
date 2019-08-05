@@ -17,6 +17,21 @@ namespace XNodeEditor.Internal {
 		public NodeEditorWindow window;
 		public K target;
 		public SerializedObject serializedObject;
+#if ODIN_INSPECTOR
+		private PropertyTree _objectTree;
+		public PropertyTree objectTree {
+			get {
+				if (this._objectTree == null) {
+					try {
+						this._objectTree = PropertyTree.Create(this.serializedObject);
+					} catch (ArgumentException ex) {
+						Debug.Log(ex);
+					}
+				}
+				return this._objectTree;
+			}
+		}
+#endif
 
 		public static T GetEditor(K target, NodeEditorWindow window) {
 			if (target == null) return null;

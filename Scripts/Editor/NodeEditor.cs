@@ -34,7 +34,7 @@ namespace XNodeEditor {
 
 #if ODIN_INSPECTOR
             // let xNode handle these
-            string[] drawnbyXNode = { "input", "output" };
+            string[] drawnbyXNode = target.Ports.Select(x => x.fieldName).ToArray();
 #endif
 
             // Iterate through serialized properties and draw them like the Inspector (But with ports)
@@ -73,6 +73,7 @@ namespace XNodeEditor {
             // Call repaint so that the graph window elements respond properly to layout changes coming from Odin    
             if (GUIHelper.RepaintRequested) {
                 GUIHelper.ClearRepaintRequest();
+                window.Repaint();
             }
 #else
             window.Repaint();

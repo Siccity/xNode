@@ -13,8 +13,6 @@ namespace XNodeEditor {
         private List<XNode.Node> culledNodes;
         /// <summary> 19 if docked, 22 if not </summary>
         private int topPadding { get { return isDocked() ? 19 : 22; } }
-        /// <summary> 0 if docked, 3 if not </summary>
-        private int leftPadding { get { return isDocked() ? 2 : 0; } }
         /// <summary> Executed after all other window GUI. Useful if Zoom is ruining your day. Automatically resets after being run.</summary>
         public event Action onLateGUI;
 
@@ -31,7 +29,7 @@ namespace XNodeEditor {
             DrawNodes();
             DrawSelectionBox();
             DrawTooltip();
-            DrawGraphOnGUI();
+            graphEditor.OnGUI();
 
             // Run and reset onLateGUI
             if (onLateGUI != null) {
@@ -60,16 +58,6 @@ namespace XNodeEditor {
                 (((rect.height * zoom) - rect.height) * 0.5f) + (-topPadding * zoom) + topPadding,
                 0);
             GUI.matrix = Matrix4x4.TRS(offset, Quaternion.identity, Vector3.one);
-        }
-
-        /// <summary> Ends the GUI Group temporarily to draw any additional elements in the NodeGraphEditor. </summary>
-        private void DrawGraphOnGUI() {
-            GUI.EndGroup();
-            Rect rect = new Rect(new Vector2(leftPadding, topPadding), new Vector2(Screen.width, Screen.height));
-            GUI.BeginGroup(rect);
-            graphEditor.OnGUI();
-            GUI.EndGroup();
-            GUI.BeginGroup(new Rect(0.0f, topPadding - (topPadding * zoom), Screen.width, Screen.height));
         }
 
         public void DrawGrid(Rect rect, float zoom, Vector2 panOffset) {

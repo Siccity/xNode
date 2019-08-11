@@ -38,7 +38,7 @@ namespace XNodeEditor {
             if (NodeEditorUtilities.GetAttrib(type, out attrib)) // Return custom path
                 return attrib.menuName;
             else // Return generated path
-                return ObjectNames.NicifyVariableName(type.ToString().Replace('.', '/'));
+                return NodeEditorUtilities.NodeDefaultPath(type);
         }
 
         /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>

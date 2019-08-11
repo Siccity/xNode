@@ -150,6 +150,15 @@ namespace XNodeEditor {
             return typeName;
         }
 
+        /// <summary> Returns the default creation path for the node type. </summary>
+        public static string NodeDefaultPath(Type type) {
+            string typePath = type.ToString().Replace('.', '/');
+            // Automatically remove redundant 'Node' postfix
+            if (typePath.EndsWith("Node")) typePath = typePath.Substring(0, typePath.LastIndexOf("Node"));
+            typePath = UnityEditor.ObjectNames.NicifyVariableName(typePath);
+            return typePath;
+        }
+
         /// <summary>Creates a new C# Class.</summary>
         [MenuItem("Assets/Create/xNode/Node C# Script", false, 89)]
         private static void CreateNode() {

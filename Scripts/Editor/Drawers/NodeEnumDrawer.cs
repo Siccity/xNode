@@ -47,7 +47,7 @@ namespace XNodeEditor {
 #endif
 		}
 
-		private static void ShowContextMenuAtMouse(SerializedProperty property) {
+		public static void ShowContextMenuAtMouse(SerializedProperty property) {
 			// Initialize menu
 			GenericMenu menu = new GenericMenu();
 

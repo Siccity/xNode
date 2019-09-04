@@ -288,6 +288,19 @@ namespace XNodeEditor {
                     } else {
                         if (e.keyCode == KeyCode.F2) RenameSelectedNode();
                     }
+                    if(e.keyCode == KeyCode.A)
+                    {
+                        if (!SomeNodesSelected())
+                            foreach (XNode.Node node in graph.nodes)
+                            {
+                                SelectNode(node, true);
+                            }
+                        else
+                            foreach (XNode.Node node in graph.nodes)
+                            {
+                                DeselectNode(node);
+                            }
+                    }
                     break;
                 case EventType.ValidateCommand:
                 case EventType.ExecuteCommand:
@@ -490,6 +503,14 @@ namespace XNodeEditor {
             else width = 200;
             Rect windowRect = new Rect(nodePos, new Vector2(width / zoom, 30 / zoom));
             return windowRect.Contains(mousePos);
+        }
+        private bool SomeNodesSelected()
+        {
+            foreach(UnityEngine.Object obj in Selection.objects)
+            {
+                return graph.nodes.Any(r => r.Equals((XNode.Node)obj));
+            }
+            return false;
         }
     }
 }

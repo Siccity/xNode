@@ -51,7 +51,7 @@ namespace XNodeEditor {
                 string path = GetNodeMenuName(type);
                 if (string.IsNullOrEmpty(path)) continue;
 
-                if(call != null)
+                if (call != null)
                     menu.AddItem(new GUIContent(path), false, () => {
                         CreateNode(type, pos);
                         call(null);

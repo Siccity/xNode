@@ -499,13 +499,9 @@ namespace XNodeEditor {
                     NodeEditorGUILayout.DrawPortHandle(rect, bgcol, frcol);
                 }
                 stoppedDraggingPort = true;
-            }
-            else
-            {
-                if(stoppedDraggingPort)
-                {
-                    if(draggedPort != null && draggedPort.IsOutput)
-                    {
+            } else {
+                if (stoppedDraggingPort) {
+                    if (draggedPort != null && draggedPort.IsOutput) {
                         GenericMenu menu = new GenericMenu();
                         graphEditor.AddContextMenuItems(menu, ConnectOnCreate);
                         menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
@@ -515,10 +511,10 @@ namespace XNodeEditor {
             }
             if (hoveredPort != null)
                 draggedPort = hoveredPort;
-            else if(draggedOutputTarget != null)
+            else if (draggedOutputTarget != null)
                 draggedPort = draggedOutputTarget;
 
-                Repaint();
+            Repaint();
         }
 
         bool IsHoveringTitle(XNode.Node node) {
@@ -532,12 +528,12 @@ namespace XNodeEditor {
             Rect windowRect = new Rect(nodePos, new Vector2(width / zoom, 30 / zoom));
             return windowRect.Contains(mousePos);
         }
-        private void ConnectOnCreate(object obj = default(object))
-        {
-            if(graph.nodes.Last().Ports.Where(r => r.IsInput == true).Any(r => r.ValueType == draggedPort.ValueType))
-                draggedPort.Connect(graph.nodes.Last().Ports.Where(r => r.IsInput == true).Where(r => r.ValueType == draggedPort.ValueType).ToArray()[0]);
+        
+        private void ConnectOnCreate(object obj = default(object)) {
+            if (graph.nodes.Last().Ports.Where(r => r.IsInput == true).Any(r => r.ValueType == draggedPort.ValueType))
+                draggedPort.Connect(graph.nodes.Last().Ports.Where(r => r.IsInput == true).Where(r => r.ValueType == draggedPort.ValueType).ToArray() [0]);
             else
-                draggedPort.Connect(graph.nodes.Last().Ports.Where(r => r.IsInput == true).ToArray()[0]);
+                draggedPort.Connect(graph.nodes.Last().Ports.Where(r => r.IsInput == true).ToArray() [0]);
         }
     }
 }

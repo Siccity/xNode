@@ -30,27 +30,6 @@ namespace XNodeEditor {
         private RerouteReference[] preBoxSelectionReroute;
         private Rect selectionBox;
         private bool isDoubleClick = false;
-
-        private bool stoppedDraggingPort = true;
-        private XNode.NodePort draggedPort;
-
-        private struct RerouteReference {
-            public XNode.NodePort port;
-            public int connectionIndex;
-            public int pointIndex;
-
-            public RerouteReference(XNode.NodePort port, int connectionIndex, int pointIndex) {
-                this.port = port;
-                this.connectionIndex = connectionIndex;
-                this.pointIndex = pointIndex;
-            }
-
-            public void InsertPoint(Vector2 pos) { port.GetReroutePoints(connectionIndex).Insert(pointIndex, pos); }
-            public void SetPoint(Vector2 pos) { port.GetReroutePoints(connectionIndex) [pointIndex] = pos; }
-            public void RemovePoint() { port.GetReroutePoints(connectionIndex).RemoveAt(pointIndex); }
-            public Vector2 GetPoint() { return port.GetReroutePoints(connectionIndex) [pointIndex]; }
-        }
-
         private Vector2 lastMousePosition;
 
         public void Controls() {
@@ -498,27 +477,7 @@ namespace XNodeEditor {
 
                     NodeEditorGUILayout.DrawPortHandle(rect, bgcol, frcol);
                 }
-                stoppedDraggingPort = true;
             }
-            else
-            {
-                if(stoppedDraggingPort)
-                {
-                    if(draggedPort != null && draggedPort.IsOutput)
-                    {
-                        GenericMenu menu = new GenericMenu();
-                        graphEditor.AddContextMenuItems(menu, ConnectOnCreate);
-                        menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
-                    }
-                    stoppedDraggingPort = false;
-                }
-            }
-            if (hoveredPort != null)
-                draggedPort = hoveredPort;
-            else if(draggedOutputTarget != null)
-                draggedPort = draggedOutputTarget;
-
-                Repaint();
         }
 
         bool IsHoveringTitle(XNode.Node node) {
@@ -531,13 +490,6 @@ namespace XNodeEditor {
             else width = 200;
             Rect windowRect = new Rect(nodePos, new Vector2(width / zoom, 30 / zoom));
             return windowRect.Contains(mousePos);
-        }
-        private void ConnectOnCreate(object obj = default(object))
-        {
-            if(graph.nodes.Last().Ports.Where(r => r.IsInput == true).Any(r => r.ValueType == draggedPort.ValueType))
-                draggedPort.Connect(graph.nodes.Last().Ports.Where(r => r.IsInput == true).Where(r => r.ValueType == draggedPort.ValueType).ToArray()[0]);
-            else
-                draggedPort.Connect(graph.nodes.Last().Ports.Where(r => r.IsInput == true).ToArray()[0]);
         }
     }
 }

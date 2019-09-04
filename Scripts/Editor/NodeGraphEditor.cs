@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -38,28 +38,32 @@ namespace XNodeEditor {
             if (NodeEditorUtilities.GetAttrib(type, out attrib)) // Return custom path
                 return attrib.menuName;
             else // Return generated path
-                return NodeEditorUtilities.NodeDefaultPath(type);
+                return ObjectNames.NicifyVariableName(type.ToString().Replace('.', '/'));
         }
 
         /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>
-        public virtual void AddContextMenuItems(GenericMenu menu) {
+        public virtual void AddContextMenuItems(GenericMenu menu, GenericMenu.MenuFunction2 call = default(GenericMenu.MenuFunction2)) {
             Vector2 pos = NodeEditorWindow.current.WindowToGridPosition(Event.current.mousePosition);
-            for (int i = 0; i < NodeEditorReflection.nodeTypes.Length; i++) {
-                Type type = NodeEditorReflection.nodeTypes[i];
+            for (int i = 0; i < NodeEditorWindow.nodeTypes.Length; i++) {
+                Type type = NodeEditorWindow.nodeTypes[i];
 
                 //Get node context menu path
                 string path = GetNodeMenuName(type);
                 if (string.IsNullOrEmpty(path)) continue;
 
-                menu.AddItem(new GUIContent(path), false, () => {
-                    CreateNode(type, pos);
-                });
+                if(call != null)
+                    menu.AddItem(new GUIContent(path), false, () => {
+                        CreateNode(type, pos);
+                        call(null);
+                    });
+                else
+                    menu.AddItem(new GUIContent(path), false, () => {
+                        CreateNode(type, pos);
+                    });
             }
             menu.AddSeparator("");
-            if (NodeEditorWindow.copyBuffer != null && NodeEditorWindow.copyBuffer.Length > 0) menu.AddItem(new GUIContent("Paste"), false, () => NodeEditorWindow.current.PasteNodes(pos));
-            else menu.AddDisabledItem(new GUIContent("Paste"));
-            menu.AddItem(new GUIContent("Preferences"), false, () => NodeEditorReflection.OpenPreferences());
-            menu.AddCustomContextMenuItems(target);
+            menu.AddItem(new GUIContent("Preferences"), false, () => NodeEditorWindow.OpenPreferences());
+            NodeEditorWindow.AddCustomContextMenuItems(menu, target);
         }
 
         public virtual Color GetPortColor(XNode.NodePort port) {
@@ -70,27 +74,16 @@ namespace XNodeEditor {
             return NodeEditorPreferences.GetTypeColor(type);
         }
 
-        public virtual string GetPortTooltip(XNode.NodePort port) {
-            Type portType = port.ValueType;
-            string tooltip = "";
-            tooltip = portType.PrettyName();
-            if (port.IsOutput) {
-                object obj = port.node.GetValue(port);
-                tooltip += " = " + (obj != null ? obj.ToString() : "null");
-            }
-            return tooltip;
-        }
-
-        /// <summary> Deal with objects dropped into the graph through DragAndDrop </summary>
-        public virtual void OnDropObjects(UnityEngine.Object[] objects) {
-            Debug.Log("No OnDropItems override defined for " + GetType());
-        }
-
         /// <summary> Create a node and save it in the graph asset </summary>
         public virtual void CreateNode(Type type, Vector2 position) {
             XNode.Node node = target.AddNode(type);
             node.position = position;
-            if (node.name == null || node.name.Trim() == "") node.name = NodeEditorUtilities.NodeDefaultName(type);
+            if (string.IsNullOrEmpty(node.name)) {
+                // Automatically remove redundant 'Node' postfix
+                string typeName = type.Name;
+                if (typeName.EndsWith("Node")) typeName = typeName.Substring(0, typeName.LastIndexOf("Node"));
+                node.name = UnityEditor.ObjectNames.NicifyVariableName(typeName);
+            }
             AssetDatabase.AddObjectToAsset(node, target);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             NodeEditorWindow.RepaintAll();
@@ -114,7 +107,7 @@ namespace XNodeEditor {
 
         [AttributeUsage(AttributeTargets.Class)]
         public class CustomNodeGraphEditorAttribute : Attribute,
-            XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph>.INodeEditorAttrib {
+        XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph>.INodeEditorAttrib {
             private Type inspectedType;
             public string editorPrefsKey;
             /// <summary> Tells a NodeGraphEditor which Graph type it is an editor for </summary>

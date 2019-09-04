@@ -31,7 +31,7 @@ namespace XNodeEditor {
         private Rect selectionBox;
         private bool isDoubleClick = false;
 
-        private bool stoppedDraggingPort = true;
+        public static bool stoppedDraggingPort = true;
         private XNode.NodePort draggedPort;
 
         private struct RerouteReference {
@@ -529,7 +529,7 @@ namespace XNodeEditor {
             return windowRect.Contains(mousePos);
         }
         
-        private void ConnectOnCreate(object obj = default(object)) {
+        public void ConnectOnCreate() {
             if (graph.nodes.Last().Ports.Where(r => r.IsInput == true).Any(r => r.ValueType == draggedPort.ValueType))
                 draggedPort.Connect(graph.nodes.Last().Ports.Where(r => r.IsInput == true).Where(r => r.ValueType == draggedPort.ValueType).ToArray() [0]);
             else

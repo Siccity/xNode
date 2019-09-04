@@ -500,13 +500,5 @@ namespace XNodeEditor {
             else
                 draggedPort.Connect(graph.nodes.Last().Ports.Where(r => r.IsInput == true).ToArray()[0]);
         }
-        private bool SomeNodesSelected()
-        {
-            foreach(UnityEngine.Object obj in Selection.objects)
-            {
-                return graph.nodes.Any(r => r.Equals((XNode.Node)obj));
-            }
-            return false;
-        }
     }
 }

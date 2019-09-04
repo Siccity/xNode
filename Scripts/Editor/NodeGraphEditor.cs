@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -42,7 +42,7 @@ namespace XNodeEditor {
         }
 
         /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>
-        public virtual void AddContextMenuItems(GenericMenu menu, GenericMenu.MenuFunction2 call = default(GenericMenu.MenuFunction2)) {
+        public virtual void AddContextMenuItems(GenericMenu menu) {
             Vector2 pos = NodeEditorWindow.current.WindowToGridPosition(Event.current.mousePosition);
             for (int i = 0; i < NodeEditorReflection.nodeTypes.Length; i++) {
                 Type type = NodeEditorReflection.nodeTypes[i];
@@ -51,15 +51,9 @@ namespace XNodeEditor {
                 string path = GetNodeMenuName(type);
                 if (string.IsNullOrEmpty(path)) continue;
 
-                if(call != null)
-                    menu.AddItem(new GUIContent(path), false, () => {
-                        CreateNode(type, pos);
-                        call(null);
-                    });
-                else
-                    menu.AddItem(new GUIContent(path), false, () => {
-                        CreateNode(type, pos);
-                    });
+                menu.AddItem(new GUIContent(path), false, () => {
+                    CreateNode(type, pos);
+                });
             }
             menu.AddSeparator("");
             if (NodeEditorWindow.copyBuffer != null && NodeEditorWindow.copyBuffer.Length > 0) menu.AddItem(new GUIContent("Paste"), false, () => NodeEditorWindow.current.PasteNodes(pos));

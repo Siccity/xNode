@@ -487,8 +487,6 @@ namespace XNodeEditor {
                     NodeEditorGUILayout.DrawPortHandle(rect, bgcol, frcol);
                 }
             }
-
-            Repaint();
         }
 
         bool IsHoveringTitle(XNode.Node node) {

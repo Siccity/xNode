@@ -218,7 +218,7 @@ namespace XNodeEditor {
                                 }
                             }
                             // Open context menu for auto-connection
-                            else if (autoConnectOutput != null) {
+                            else if (NodeEditorPreferences.GetSettings().dragToCreate && autoConnectOutput != null) {
                                 GenericMenu menu = new GenericMenu();
                                 graphEditor.AddContextMenuItems(menu);
                                 menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));

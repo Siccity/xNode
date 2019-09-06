@@ -106,6 +106,9 @@ namespace XNodeEditor {
         private static void PreferencesGUI() {
             VerifyLoaded();
             Settings settings = NodeEditorPreferences.settings[lastKey];
+            
+            if (GUILayout.Button(new GUIContent("Documentation", "https://github.com/Siccity/xNode/wiki"), GUILayout.Width(100))) Application.OpenURL("https://github.com/Siccity/xNode/wiki");
+            EditorGUILayout.Space();
 
             NodeSettingsGUI(lastKey, settings);
             GridSettingsGUI(lastKey, settings);

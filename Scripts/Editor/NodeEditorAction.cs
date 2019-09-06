@@ -297,6 +297,17 @@ namespace XNodeEditor {
                     } else {
                         if (e.keyCode == KeyCode.F2) RenameSelectedNode();
                     }
+                    if (e.keyCode == KeyCode.A) {
+                        if (Selection.objects.Any(x => graph.nodes.Contains(x))) {
+                            foreach (XNode.Node node in graph.nodes) {
+                                DeselectNode(node);
+                            }
+                        } else {
+                            foreach (XNode.Node node in graph.nodes) {
+                                SelectNode(node, true);
+                            }
+                        }
+                    }
                     break;
                 case EventType.ValidateCommand:
                 case EventType.ExecuteCommand:

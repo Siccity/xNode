@@ -50,11 +50,11 @@ namespace XNodeEditor {
                 //Get node context menu path
                 string path = GetNodeMenuName(type);
                 if (string.IsNullOrEmpty(path)) continue;
-                
-                    menu.AddItem(new GUIContent(path), false, () => {
-                        CreateNode(type, pos);
-                        if(!NodeEditorWindow.stoppedDraggingPort) NodeEditorWindow.current.ConnectOnCreate();
-                    });
+
+                menu.AddItem(new GUIContent(path), false, () => {
+                    CreateNode(type, pos);
+                    if (!NodeEditorWindow.stoppedDraggingPort) NodeEditorWindow.current.ConnectOnCreate();
+                });
             }
             menu.AddSeparator("");
             if (NodeEditorWindow.copyBuffer != null && NodeEditorWindow.copyBuffer.Length > 0) menu.AddItem(new GUIContent("Paste"), false, () => NodeEditorWindow.current.PasteNodes(pos));
@@ -115,7 +115,7 @@ namespace XNodeEditor {
 
         [AttributeUsage(AttributeTargets.Class)]
         public class CustomNodeGraphEditorAttribute : Attribute,
-            XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph>.INodeEditorAttrib {
+        XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph>.INodeEditorAttrib {
             private Type inspectedType;
             public string editorPrefsKey;
             /// <summary> Tells a NodeGraphEditor which Graph type it is an editor for </summary>

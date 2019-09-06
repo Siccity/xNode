@@ -503,7 +503,7 @@ namespace XNodeEditor {
                 if (stoppedDraggingPort) {
                     if (draggedPort != null && draggedPort.IsOutput) {
                         GenericMenu menu = new GenericMenu();
-                        graphEditor.AddContextMenuItems(menu, ConnectOnCreate);
+                        graphEditor.AddContextMenuItems(menu);
                         menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
                     }
                     stoppedDraggingPort = false;
@@ -528,7 +528,7 @@ namespace XNodeEditor {
             Rect windowRect = new Rect(nodePos, new Vector2(width / zoom, 30 / zoom));
             return windowRect.Contains(mousePos);
         }
-        
+
         public void ConnectOnCreate() {
             if (graph.nodes.Last().Ports.Where(r => r.IsInput == true).Any(r => r.ValueType == draggedPort.ValueType))
                 draggedPort.Connect(graph.nodes.Last().Ports.Where(r => r.IsInput == true).Where(r => r.ValueType == draggedPort.ValueType).ToArray() [0]);

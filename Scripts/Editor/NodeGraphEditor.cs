@@ -52,8 +52,8 @@ namespace XNodeEditor {
                 if (string.IsNullOrEmpty(path)) continue;
 
                 menu.AddItem(new GUIContent(path), false, () => {
-                    CreateNode(type, pos);
-                    if (!NodeEditorWindow.stoppedDraggingPort) NodeEditorWindow.current.ConnectOnCreate();
+                    XNode.Node node = CreateNode(type, pos);
+                    NodeEditorWindow.current.AutoConnect(node);
                 });
             }
             menu.AddSeparator("");
@@ -88,13 +88,14 @@ namespace XNodeEditor {
         }
 
         /// <summary> Create a node and save it in the graph asset </summary>
-        public virtual void CreateNode(Type type, Vector2 position) {
+        public virtual XNode.Node CreateNode(Type type, Vector2 position) {
             XNode.Node node = target.AddNode(type);
             node.position = position;
             if (node.name == null || node.name.Trim() == "") node.name = NodeEditorUtilities.NodeDefaultName(type);
             AssetDatabase.AddObjectToAsset(node, target);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             NodeEditorWindow.RepaintAll();
+            return node;
         }
 
         /// <summary> Creates a copy of the original node in the graph </summary>

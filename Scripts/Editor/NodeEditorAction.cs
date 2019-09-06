@@ -22,6 +22,7 @@ namespace XNodeEditor {
         [NonSerialized] private XNode.NodePort hoveredPort = null;
         [NonSerialized] private XNode.NodePort draggedOutput = null;
         [NonSerialized] private XNode.NodePort draggedOutputTarget = null;
+        [NonSerialized] private XNode.NodePort autoConnectOutput = null;
         [NonSerialized] private List<Vector2> draggedOutputReroutes = new List<Vector2>();
         private RerouteReference hoveredReroute = new RerouteReference();
         private List<RerouteReference> selectedReroutes = new List<RerouteReference>();
@@ -145,8 +146,10 @@ namespace XNodeEditor {
                         if (IsHoveringPort) {
                             if (hoveredPort.IsOutput) {
                                 draggedOutput = hoveredPort;
+                                autoConnectOutput = hoveredPort;
                             } else {
                                 hoveredPort.VerifyConnections();
+                                autoConnectOutput = null;
                                 if (hoveredPort.IsConnected) {
                                     XNode.Node node = hoveredPort.node;
                                     XNode.NodePort output = hoveredPort.Connection;
@@ -213,6 +216,12 @@ namespace XNodeEditor {
                                     if (NodeEditor.onUpdateNode != null) NodeEditor.onUpdateNode(node);
                                     EditorUtility.SetDirty(graph);
                                 }
+                            }
+                            // Open context menu for auto-connection
+                            else if (NodeEditorPreferences.GetSettings().dragToCreate && autoConnectOutput != null) {
+                                GenericMenu menu = new GenericMenu();
+                                graphEditor.AddContextMenuItems(menu);
+                                menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
                             }
                             //Release dragged connection
                             draggedOutput = null;
@@ -490,6 +499,22 @@ namespace XNodeEditor {
             else width = 200;
             Rect windowRect = new Rect(nodePos, new Vector2(width / zoom, 30 / zoom));
             return windowRect.Contains(mousePos);
+        }
+
+        /// <summary> Attempt to connect dragged output to target node </summary>
+        public void AutoConnect(XNode.Node node) {
+            if (autoConnectOutput == null) return;
+
+            // Find input port of same type
+            XNode.NodePort inputPort = node.Ports.FirstOrDefault(x => x.IsInput && x.ValueType == autoConnectOutput.ValueType);
+            // Fallback to input port
+            if (inputPort == null) inputPort = node.Ports.FirstOrDefault(x => x.IsInput);
+            // Autoconnect
+            if (inputPort != null) autoConnectOutput.Connect(inputPort);
+
+            // Save changes
+            EditorUtility.SetDirty(graph);
+            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
     }
 }

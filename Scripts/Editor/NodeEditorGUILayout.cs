@@ -319,7 +319,6 @@ namespace XNodeEditor {
                     XNode.NodePort port = node.GetPort(fieldName + " " + index);
                     if (hasArrayData) {
                         if (arrayData.arraySize <= index) {
-                            string portInfo = port != null ? port.fieldName : "";
                             EditorGUI.LabelField(rect, "Array[" + index + "] data out of range");
                             return;
                         }

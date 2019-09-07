@@ -298,7 +298,7 @@ namespace XNodeEditor {
                         if (e.keyCode == KeyCode.F2) RenameSelectedNode();
                     }
                     if (e.keyCode == KeyCode.A) {
-                        if (Selection.objects.Any(x => graph.nodes.Contains(x))) {
+                        if (Selection.objects.Any(x => graph.nodes.Contains(x as XNode.Node))) {
                             foreach (XNode.Node node in graph.nodes) {
                                 DeselectNode(node);
                             }

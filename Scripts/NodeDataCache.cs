@@ -98,8 +98,12 @@ namespace XNode {
 
             // GetFields doesnt return inherited private fields, so walk through base types and pick those up
             System.Type tempType = nodeType;
-            while ((tempType = tempType.BaseType) != typeof(XNode.Node)) {
-                fieldInfo.AddRange(tempType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance));
+            while ((tempType = tempType.BaseType) != typeof(XNode.Node))
+            {
+                //只返回私有的,保护等其他的不需要
+                var fieldInfos = tempType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Where(x=>x.IsPrivate);
+               
+                fieldInfo.AddRange(fieldInfos);
             }
             return fieldInfo;
         }

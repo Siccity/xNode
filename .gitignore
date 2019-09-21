@@ -25,3 +25,5 @@ sysinfo.txt
 .git.meta
 .gitignore.meta
 .gitattributes.meta
+
+*.meta

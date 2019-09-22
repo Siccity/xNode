@@ -36,7 +36,12 @@ namespace XNode {
                         if (!port.IsDynamic && port.direction == staticPort.direction) removedPorts.Add(port.fieldName, port.GetConnections());
                         port.ClearConnections();
                         ports.Remove(port.fieldName);
-                    } else port.ValueType = staticPort.ValueType;
+                    }
+                    else
+                    {
+                        port.ValueType = staticPort.ValueType;
+                        port.TypeConstraintBaseType = staticPort.TypeConstraintBaseType;
+                    }
                 }
                 // If port doesn't exist anymore, remove it
                 else if (port.IsStatic) {

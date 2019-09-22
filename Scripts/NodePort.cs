@@ -94,6 +94,7 @@ namespace XNode {
         public NodePort(NodePort nodePort, Node node) {
             _fieldName = nodePort._fieldName;
             ValueType = nodePort.valueType;
+            TypeConstraintBaseType = nodePort.TypeConstraintBaseType;
             _direction = nodePort.direction;
             _dynamic = nodePort._dynamic;
             _connectionType = nodePort._connectionType;

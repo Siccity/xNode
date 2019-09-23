@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
+using System;
+using Object = UnityEngine.Object;
 
 namespace XNodeEditor {
     [InitializeOnLoad]
@@ -13,6 +15,14 @@ namespace XNodeEditor {
         private Dictionary<XNode.NodePort, Rect> _portConnectionPoints = new Dictionary<XNode.NodePort, Rect>();
         [SerializeField] private NodePortReference[] _references = new NodePortReference[0];
         [SerializeField] private Rect[] _rects = new Rect[0];
+
+        private Func<bool> isDocked {
+            get {
+                if (_isDocked == null) _isDocked = this.GetIsDockedDelegate();
+                return _isDocked;
+            }
+        }
+        private Func<bool> _isDocked;
 
         [System.Serializable] private class NodePortReference {
             [SerializeField] private XNode.Node _node;

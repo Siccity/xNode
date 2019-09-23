@@ -7,7 +7,7 @@
 
 [Downloads](https://github.com/Siccity/xNode/releases) / [Asset Store](http://u3d.as/108S) / [Documentation](https://github.com/Siccity/xNode/wiki)
 
-[Support Me on Ko-fi](https://ko-fi.com/Z8Z5DYWA)
+Support xNode on [Ko-fi](https://ko-fi.com/Z8Z5DYWA) or [Patreon](https://www.patreon.com/thorbrigsted)
 
 ### xNode
 Thinking of developing a node-based plugin? Then this is for you. You can download it as an archive and unpack to a new unity project, or connect it as git submodule.
@@ -31,6 +31,20 @@ With a minimal footprint, it is ideal as a base for custom state machines, dialo
 ### Wiki
 * [Getting started](https://github.com/Siccity/xNode/wiki/Getting%20Started) - create your very first node node and graph
 * [Examples branch](https://github.com/Siccity/xNode/tree/examples) - look at other small projects
+
+### Installing with Unity Package Manager
+*(Requires Unity version 2018.3.0b7  or above)*
+
+To install this project as a [Git dependency](https://docs.unity3d.com/Manual/upm-git.html) using the Unity Package Manager,
+add the following line to your project's `manifest.json`:
+
+```
+"com.github.siccity.xnode": "https://github.com/siccity/xNode.git"
+```
+
+You will need to have Git installed and available in your system's PATH.
+
+If you are using [Assembly Definitions](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html) in your project, you will need to add `XNode` and/or `XNodeEditor` as Assembly Definition References.
 
 ### Node example:
 ```csharp
@@ -70,8 +84,3 @@ public class MathNode : Node {
 
 Join the [Discord](https://discord.gg/qgPrHv4 "Join Discord server") server to leave feedback or get support.
 Feel free to also leave suggestions/requests in the [issues](https://github.com/Siccity/xNode/issues "Go to Issues") page.
-
-Projects using xNode:
-* [Graphmesh](https://github.com/Siccity/Graphmesh "Go to github page")
-* [Dialogue](https://github.com/Siccity/Dialogue "Go to github page")
-* [qAI](https://github.com/jlreymendez/qAI "Go to github page")

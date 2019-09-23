@@ -32,7 +32,9 @@ namespace XNodeEditor {
             public Color32 highlightColor = new Color32(255, 255, 255, 255);
             public bool gridSnap = true;
             public bool autoSave = true;
+            public bool dragToCreate = true;
             public bool zoomToMouse = true;
+            public bool portTooltips = true;
             [SerializeField] private string typeColorsData = "";
             [NonSerialized] public Dictionary<string, Color> typeColors = new Dictionary<string, Color>();
             public NoodleType noodleType = NoodleType.Curve;
@@ -104,6 +106,9 @@ namespace XNodeEditor {
         private static void PreferencesGUI() {
             VerifyLoaded();
             Settings settings = NodeEditorPreferences.settings[lastKey];
+            
+            if (GUILayout.Button(new GUIContent("Documentation", "https://github.com/Siccity/xNode/wiki"), GUILayout.Width(100))) Application.OpenURL("https://github.com/Siccity/xNode/wiki");
+            EditorGUILayout.Space();
 
             NodeSettingsGUI(lastKey, settings);
             GridSettingsGUI(lastKey, settings);
@@ -147,6 +152,8 @@ namespace XNodeEditor {
             EditorGUILayout.LabelField("Node", EditorStyles.boldLabel);
             settings.highlightColor = EditorGUILayout.ColorField("Selection", settings.highlightColor);
             settings.noodleType = (NoodleType) EditorGUILayout.EnumPopup("Noodle type", (Enum) settings.noodleType);
+            settings.portTooltips = EditorGUILayout.Toggle("Port Tooltips", settings.portTooltips);
+            settings.dragToCreate = EditorGUILayout.Toggle(new GUIContent("Drag to Create", "Drag a port connection anywhere on the grid to create and connect a node"), settings.dragToCreate);
             if (GUI.changed) {
                 SavePrefs(key, settings);
                 NodeEditorWindow.RepaintAll();
@@ -218,12 +225,19 @@ namespace XNodeEditor {
                 if (settings[lastKey].typeColors.ContainsKey(typeName)) typeColors.Add(type, settings[lastKey].typeColors[typeName]);
                 else {
 #if UNITY_5_4_OR_NEWER
+                    UnityEngine.Random.State oldState = UnityEngine.Random.state;
                     UnityEngine.Random.InitState(typeName.GetHashCode());
 #else
+                    int oldSeed = UnityEngine.Random.seed;
                     UnityEngine.Random.seed = typeName.GetHashCode();
 #endif
                     col = new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
                     typeColors.Add(type, col);
+#if UNITY_5_4_OR_NEWER
+                    UnityEngine.Random.state = oldState;
+#else
+                    UnityEngine.Random.seed = oldSeed;
+#endif
                 }
             }
             return col;

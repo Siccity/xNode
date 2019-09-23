@@ -67,6 +67,7 @@ namespace XNode {
                 } else if (attribs[i] is Node.OutputAttribute) {
                     _direction = IO.Output;
                     _connectionType = (attribs[i] as Node.OutputAttribute).connectionType;
+                    _typeConstraint = (attribs[i] as Node.OutputAttribute).typeConstraint;
                 }
             }
         }
@@ -255,9 +256,12 @@ namespace XNode {
             else output = port;
             // If there isn't one of each, they can't connect
             if (input == null || output == null) return false;
-            // Check type constraints
+            // Check input type constraints
             if (input.typeConstraint == XNode.Node.TypeConstraint.Inherited && !input.ValueType.IsAssignableFrom(output.ValueType)) return false;
             if (input.typeConstraint == XNode.Node.TypeConstraint.Strict && input.ValueType != output.ValueType) return false;
+            // Check output type constraints
+            if (output.typeConstraint == XNode.Node.TypeConstraint.Inherited && !output.ValueType.IsAssignableFrom(input.ValueType)) return false;
+            if (output.typeConstraint == XNode.Node.TypeConstraint.Strict && output.ValueType != input.ValueType) return false;
             // Success
             return true;
         }

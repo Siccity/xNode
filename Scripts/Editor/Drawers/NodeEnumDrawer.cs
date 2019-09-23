@@ -12,6 +12,12 @@ namespace XNodeEditor {
 		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
 			EditorGUI.BeginProperty(position, label, property);
 
+			EnumPopup(position, property, label);
+
+			EditorGUI.EndProperty();
+		}
+
+		public static void EnumPopup(Rect position, SerializedProperty property, GUIContent label) {
 			// Throw error on wrong type
 			if (property.propertyType != SerializedPropertyType.Enum) {
 				throw new ArgumentException("Parameter selected must be of type System.Enum");
@@ -39,10 +45,9 @@ namespace XNodeEditor {
 				NodeEditorWindow.current.onLateGUI += () => ShowContextMenuAtMouse(property);
 			}
 #endif
-			EditorGUI.EndProperty();
 		}
 
-		private void ShowContextMenuAtMouse(SerializedProperty property) {
+		public static void ShowContextMenuAtMouse(SerializedProperty property) {
 			// Initialize menu
 			GenericMenu menu = new GenericMenu();
 
@@ -57,7 +62,7 @@ namespace XNodeEditor {
 			menu.DropDown(r);
 		}
 
-		private void SetEnum(SerializedProperty property, int index) {
+		private static void SetEnum(SerializedProperty property, int index) {
 			property.enumValueIndex = index;
 			property.serializedObject.ApplyModifiedProperties();
 			property.serializedObject.Update();

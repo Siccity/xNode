@@ -63,14 +63,22 @@ namespace XNodeEditor {
             menu.AddCustomContextMenuItems(target);
         }
 
+        /// <summary> Returned color is used to color noodles </summary>
+        public virtual Color GetNoodleColor(XNode.NodePort output, XNode.NodePort input) {
+            return GetTypeColor(output.ValueType);
+        }
+
+        /// <summary> Returned color is used to color ports </summary>
         public virtual Color GetPortColor(XNode.NodePort port) {
             return GetTypeColor(port.ValueType);
         }
 
+        /// <summary> Returns generated color for a type. This color is editable in preferences </summary>
         public virtual Color GetTypeColor(Type type) {
             return NodeEditorPreferences.GetTypeColor(type);
         }
 
+        /// <summary> Override to display custom tooltips </summary>
         public virtual string GetPortTooltip(XNode.NodePort port) {
             Type portType = port.ValueType;
             string tooltip = "";

@@ -25,7 +25,7 @@ namespace XNodeEditor {
         public static void PropertyField(SerializedProperty property, GUIContent label, bool includeChildren = true, params GUILayoutOption[] options) {
             if (property == null) throw new NullReferenceException();
             XNode.Node node = property.serializedObject.targetObject as XNode.Node;
-            XNode.NodePort port = node.GetPort(property.name);
+            XNode.NodePort port = node != null ? node.GetPort(property.name) : null;
             PropertyField(property, label, port, includeChildren);
         }
 

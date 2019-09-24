@@ -112,6 +112,10 @@ namespace XNodeEditor {
         void ShowPortContextMenu(XNode.NodePort hoveredPort) {
             GenericMenu contextMenu = new GenericMenu();
             contextMenu.AddItem(new GUIContent("Clear Connections"), false, () => hoveredPort.ClearConnections());
+            if (hoveredPort.IsDynamic)
+            {
+                contextMenu.AddItem(new GUIContent("Remove"), false, () => hoveredPort.node.RemoveDynamicPort(hoveredPort));
+            }
             contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }

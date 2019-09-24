@@ -259,6 +259,9 @@ namespace XNode {
         }
 
 #region Attributes
+#if ODIN_INSPECTOR
+		[Sirenix.OdinInspector.DontApplyToListElements]
+#endif
         /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInputPort(string)"/> </summary>
         [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
         public class InputAttribute : Attribute {
@@ -281,7 +284,10 @@ namespace XNode {
                 this.typeConstraint = typeConstraint;
             }
         }
-
+		
+#if ODIN_INSPECTOR
+		[Sirenix.OdinInspector.DontApplyToListElements]
+#endif
         /// <summary> Mark a serializable field as an output port. You can access this through <see cref="GetOutputPort(string)"/> </summary>
         [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
         public class OutputAttribute : Attribute {

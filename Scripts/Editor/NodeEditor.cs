@@ -21,7 +21,7 @@ namespace XNodeEditor {
         public readonly static Dictionary<XNode.NodePort, Vector2> portPositions = new Dictionary<XNode.NodePort, Vector2>();
 
 #if ODIN_INSPECTOR
-        internal static bool inNodeEditor = false;
+        public static bool isNodeEditor { get; internal set; }
 #endif
 
         public virtual void OnHeaderGUI() {
@@ -31,7 +31,7 @@ namespace XNodeEditor {
         /// <summary> Draws standard field editors for all public fields </summary>
         public virtual void OnBodyGUI() {
 #if ODIN_INSPECTOR
-            inNodeEditor = true;
+            isNodeEditor = true;
 #endif
 
             // Unity specifically requires this to save/update any serial object.
@@ -57,13 +57,13 @@ namespace XNodeEditor {
                 if (excludes.Contains(iterator.name)) continue;
                 NodeEditorGUILayout.PropertyField(iterator, true);
             }
-#endif
 
             // Iterate through dynamic ports and draw them in the order in which they are serialized
             foreach (XNode.NodePort dynamicPort in target.DynamicPorts) {
                 if (NodeEditorGUILayout.IsDynamicPortListPort(dynamicPort)) continue;
                 NodeEditorGUILayout.PortField(dynamicPort);
             }
+#endif
 
             serializedObject.ApplyModifiedProperties();
 
@@ -78,7 +78,7 @@ namespace XNodeEditor {
 #endif
 
 #if ODIN_INSPECTOR
-            inNodeEditor = false;
+            isNodeEditor = false;
 #endif
         }
 

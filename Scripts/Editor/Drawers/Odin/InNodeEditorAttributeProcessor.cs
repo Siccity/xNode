@@ -1,19 +1,20 @@
 ﻿#if UNITY_EDITOR && ODIN_INSPECTOR
+using Sirenix.OdinInspector.Editor;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Sirenix.OdinInspector.Editor;
 using UnityEngine;
 using XNode;
 
-namespace XNodeEditor {
+namespace XNodeEditor
+{
 	internal class OdinNodeInGraphAttributeProcessor<T> : OdinAttributeProcessor<T> where T : Node {
 		public override bool CanProcessSelfAttributes(InspectorProperty property) {
 			return false;
 		}
 
 		public override bool CanProcessChildMemberAttributes(InspectorProperty parentProperty, MemberInfo member) {
-			if (!NodeEditor.inNodeEditor)
+			if (!NodeEditor.isNodeEditor)
 				return false;
 
 			if (member.MemberType == MemberTypes.Field) {

@@ -89,6 +89,13 @@ namespace XNodeEditor {
             else return 208;
         }
 
+        public Vector2 GetCurrentMousePosition()
+        {
+            var pos = this.target.position + Event.current.mousePosition;
+            pos.x = pos.x - target.position.x;
+            return pos;
+        }
+
         /// <summary> Returns color for target node </summary>
         public virtual Color GetTint() {
             // Try get color from [NodeTint] attribute

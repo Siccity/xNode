@@ -11,7 +11,9 @@ namespace XNodeEditor {
     /// <summary> xNode-specific version of <see cref="EditorGUILayout"/> </summary>
     public static class NodeEditorGUILayout {
 
-        private static readonly Dictionary<UnityEngine.Object, Dictionary<string, ReorderableList>> reorderableListCache = new Dictionary<UnityEngine.Object, Dictionary<string, ReorderableList>>();
+        private static readonly Dictionary<UnityEngine.Object, Dictionary<string, ReorderableList>> ReorderableListCache =
+            new Dictionary<UnityEngine.Object, Dictionary<string, ReorderableList>>();
+        
         private static int reorderableListIndex = -1;
 
         /// <summary> Make a field for a serialized property. Automatically displays relevant node port. </summary>
@@ -264,7 +266,7 @@ namespace XNodeEditor {
             string[] parts = port.fieldName.Split(' ');
             if (parts.Length != 2) return false;
             Dictionary<string, ReorderableList> cache;
-            if (reorderableListCache.TryGetValue(port.node, out cache)) {
+            if (ReorderableListCache.TryGetValue(port.node, out cache)) {
                 ReorderableList list;
                 if (cache.TryGetValue(parts[0], out list)) return true;
             }
@@ -294,15 +296,15 @@ namespace XNodeEditor {
 
             ReorderableList list = null;
             Dictionary<string, ReorderableList> rlc;
-            if (reorderableListCache.TryGetValue(serializedObject.targetObject, out rlc)) {
+            if (ReorderableListCache.TryGetValue(serializedObject.targetObject, out rlc)) {
                 if (!rlc.TryGetValue(fieldName, out list)) list = null;
             }
             // If a ReorderableList isn't cached for this array, do so.
             if (list == null) {
                 SerializedProperty arrayData = serializedObject.FindProperty(fieldName);
                 list = CreateReorderableList(fieldName, dynamicPorts, arrayData, type, serializedObject, io, connectionType, typeConstraint, onCreation);
-                if (reorderableListCache.TryGetValue(serializedObject.targetObject, out rlc)) rlc.Add(fieldName, list);
-                else reorderableListCache.Add(serializedObject.targetObject, new Dictionary<string, ReorderableList>() { { fieldName, list } });
+                if (ReorderableListCache.TryGetValue(serializedObject.targetObject, out rlc)) rlc.Add(fieldName, list);
+                else ReorderableListCache.Add(serializedObject.targetObject, new Dictionary<string, ReorderableList>() { { fieldName, list } });
             }
             list.list = dynamicPorts;
             list.DoLayoutList();

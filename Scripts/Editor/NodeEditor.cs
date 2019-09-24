@@ -52,10 +52,28 @@ namespace XNodeEditor {
             SerializedProperty iterator = serializedObject.GetIterator();
             bool enterChildren = true;
             EditorGUIUtility.labelWidth = 84;
+            List<string> _names = new List<string>();
             while (iterator.NextVisible(enterChildren)) {
                 enterChildren = false;
                 if (excludes.Contains(iterator.name)) continue;
                 NodeEditorGUILayout.PropertyField(iterator, true);
+                _names.Add(iterator.name);
+            }
+            
+            //处理一下没被绘制的端口
+            foreach (var port in target.Ports)
+            {
+                //动态的跳过
+                if (port.IsDynamic)
+                {
+                    continue;
+                }
+
+                //不受unity序列化支持,但是被标记为了输入或输出
+                if (!_names.Contains(port.fieldName))
+                {
+                    NodeEditorGUILayout.PortField(port);
+                }
             }
 #endif
 

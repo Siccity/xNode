@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 
 namespace XNode.Examples.LogicToy {
-	[NodeWidth(140)]
+	[NodeWidth(140), NodeTint(70,100,70)]
 	public class PulseNode : LogicNode, ITimerTick {
+		[Space(-18)]
 		public float interval = 1f;
-		[Output] public bool output;
+		[Output, HideInInspector] public bool output;
 		public override bool led { get { return output; } }
 
 		private float timer;

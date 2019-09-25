@@ -25,5 +25,17 @@ namespace XNodeEditor.Examples.LogicToy {
 			GUI.DrawTexture(dotRect, NodeEditorResources.dot);
 			GUI.color = Color.white;
 		}
+
+		public override void OnBodyGUI() {
+			NodePort input = target.GetPort("input");
+			NodePort output = target.GetPort("output");
+
+			GUILayout.BeginHorizontal();
+			if (input != null) NodeEditorGUILayout.PortField(GUIContent.none, input, GUILayout.MinWidth(0));
+			if (output != null) NodeEditorGUILayout.PortField(GUIContent.none, output, GUILayout.MinWidth(0));
+			GUILayout.EndHorizontal();
+			EditorGUIUtility.labelWidth = 60;
+			base.OnBodyGUI();
+		}
 	}
 }

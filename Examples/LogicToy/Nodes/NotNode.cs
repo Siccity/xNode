@@ -2,10 +2,10 @@
 using UnityEngine;
 
 namespace XNode.Examples.LogicToy {
-	[NodeWidth(140)]
+	[NodeWidth(140), NodeTint(100, 100, 50)]
 	public class NotNode : LogicNode {
-		[Input] public bool input;
-		[Output] public bool output = true;
+		[Input, HideInInspector] public bool input;
+		[Output, HideInInspector] public bool output = true;
 		public override bool led { get { return output; } }
 
 		protected override void OnInputChanged() {

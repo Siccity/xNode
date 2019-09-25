@@ -19,6 +19,7 @@ MonoBehaviour:
   - {fileID: 114194736576219100}
   - {fileID: 114558631167130670}
   - {fileID: 114481634605117190}
+  - {fileID: 114463302483022418}
 --- !u!114 &114046633862954194
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -48,7 +49,7 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-  interval: 2
+  interval: 1
   output: 0
 --- !u!114 &114194736576219100
 MonoBehaviour:
@@ -96,6 +97,47 @@ MonoBehaviour:
       _typeConstraint: 0
       _dynamic: 0
   input: 0
+  output: 1
+--- !u!114 &114463302483022418
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4bb0f0e96df60a4690ca03082a93b44, type: 3}
+  m_Name: Not
+  m_EditorClassIdentifier: 
+  graph: {fileID: 11400000}
+  position: {x: 88, y: -248}
+  ports:
+    keys:
+    - input
+    - output
+    values:
+    - _fieldName: input
+      _node: {fileID: 114463302483022418}
+      _typeQualifiedName: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections:
+      - fieldName: output
+        node: {fileID: 114880916489599218}
+        reroutePoints: []
+      _direction: 0
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+    - _fieldName: output
+      _node: {fileID: 114463302483022418}
+      _typeQualifiedName: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      connections: []
+      _direction: 1
+      _connectionType: 0
+      _typeConstraint: 0
+      _dynamic: 0
+  input: 1
   output: 0
 --- !u!114 &114481634605117190
 MonoBehaviour:
@@ -167,7 +209,7 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-  input: 0
+  input: 1
   output: 0
 --- !u!114 &114880916489599218
 MonoBehaviour:
@@ -207,12 +249,15 @@ MonoBehaviour:
       - fieldName: input
         node: {fileID: 114945579453429622}
         reroutePoints: []
+      - fieldName: input
+        node: {fileID: 114463302483022418}
+        reroutePoints: []
       _direction: 1
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
   input: 0
-  output: 0
+  output: 1
 --- !u!114 &114944478030018250
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -242,7 +287,7 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-  interval: 1
+  interval: 1.06
   output: 0
 --- !u!114 &114945579453429622
 MonoBehaviour:
@@ -289,5 +334,5 @@ MonoBehaviour:
       _connectionType: 0
       _typeConstraint: 0
       _dynamic: 0
-  input: 0
-  output: 0
+  input: 1
+  output: 1

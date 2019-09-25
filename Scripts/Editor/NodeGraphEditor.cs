@@ -60,6 +60,24 @@ namespace XNodeEditor {
             if (NodeEditorWindow.copyBuffer != null && NodeEditorWindow.copyBuffer.Length > 0) menu.AddItem(new GUIContent("Paste"), false, () => NodeEditorWindow.current.PasteNodes(pos));
             else menu.AddDisabledItem(new GUIContent("Paste"));
             menu.AddItem(new GUIContent("Preferences"), false, () => NodeEditorReflection.OpenPreferences());
+            menu.AddItem(new GUIContent("创建所有的节点 ---> 测试用"), false, () =>
+            {
+                for (int i = 0; i < NodeEditorReflection.nodeTypes.Length; i++)
+                {
+                    Type type = NodeEditorReflection.nodeTypes[i];
+
+                    //Get node context menu path
+                    string path = GetNodeMenuName(type);
+                    //当前Group 不支持该节点跳过
+                    if (string.IsNullOrEmpty(path))
+                    {
+                        continue;
+                    }
+
+                    XNode.Node node = CreateNode(type, pos);
+                    NodeEditorWindow.current.AutoConnect(node);
+                }
+            });
             menu.AddCustomContextMenuItems(target);
         }
 

@@ -19,7 +19,7 @@ namespace XNodeEditor {
         private bool IsHoveringNode { get { return hoveredNode != null; } }
         private bool IsHoveringReroute { get { return hoveredReroute.port != null; } }
         private XNode.Node hoveredNode = null;
-        [NonSerialized] private XNode.NodePort hoveredPort = null;
+        [NonSerialized] public XNode.NodePort hoveredPort = null;
         [NonSerialized] private XNode.NodePort draggedOutput = null;
         [NonSerialized] private XNode.NodePort draggedOutputTarget = null;
         [NonSerialized] private XNode.NodePort autoConnectOutput = null;

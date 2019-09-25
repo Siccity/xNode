@@ -48,7 +48,11 @@ namespace XNodeEditor {
             for (int i = 0; i < guids.Length; i++) {
                 string assetpath = AssetDatabase.GUIDToAssetPath (guids[i]);
                 XNode.NodeGraph graph = AssetDatabase.LoadAssetAtPath (assetpath, typeof (XNode.NodeGraph)) as XNode.NodeGraph;
-                graph.nodes.RemoveAll(x => x == null); //Remove null items
+                if (!graph)
+                {
+                    return;
+                }
+                graph.nodes.RemoveAll(x => !x); //Remove null items
                 Object[] objs = AssetDatabase.LoadAllAssetRepresentationsAtPath (assetpath);
                 // Ensure that all sub node assets are present in the graph node list
                 for (int u = 0; u < objs.Length; u++) {

@@ -129,11 +129,9 @@ namespace XNodeEditor {
             else return 208;
         }
 
-        public Vector2 GetCurrentMousePosition()
+        public Vector2 GetCurrentMousePosition(float yOffset = 10)
         {
-            var pos = this.target.position + Event.current.mousePosition;
-            pos.x = pos.x - target.position.x;
-            return pos;
+            return new Vector2(Event.current.mousePosition.x,Event.current.mousePosition.y + yOffset);
         }
 
         /// <summary> Returns color for target node </summary>

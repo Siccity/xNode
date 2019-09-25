@@ -1,22 +1,31 @@
-﻿namespace XNode.Examples.LogicToy {
+﻿using System;
+using UnityEngine;
+
+namespace XNode.Examples.LogicToy {
 	/// <summary> Base node for the LogicToy system </summary>
 	public abstract class LogicNode : Node {
-		public abstract bool on { get; }
+		public Action onStateChange;
+		public abstract bool led { get; }
 
-		protected abstract void OnTrigger();
-
-		public void SendPulse(NodePort port) {
+		public void SendSignal(NodePort output) {
 			// Loop through port connections
-			int connectionCount = port.ConnectionCount;
+			int connectionCount = output.ConnectionCount;
 			for (int i = 0; i < connectionCount; i++) {
-				NodePort connectedPort = port.GetConnection(i);
+				NodePort connectedPort = output.GetConnection(i);
 
 				// Get connected ports logic node
-				LogicNode logicNode = connectedPort.node as LogicNode;
+				LogicNode connectedNode = connectedPort.node as LogicNode;
 
 				// Trigger it
-				if (logicNode != null) logicNode.OnTrigger();
+				if (connectedNode != null) connectedNode.OnInputChanged();
 			}
+			if (onStateChange != null) onStateChange();
+		}
+
+		protected abstract void OnInputChanged();
+
+		public override void OnCreateConnection(NodePort from, NodePort to) {
+			OnInputChanged();
 		}
 	}
 }

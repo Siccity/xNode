@@ -3,20 +3,18 @@ using UnityEngine;
 
 namespace XNode.Examples.LogicToy {
 	[NodeWidth(140)]
-	public class ToggleNode : LogicNode {
+	public class AndNode : LogicNode {
 		[Input] public bool input;
 		[Output] public bool output;
 		public override bool led { get { return output; } }
 
 		protected override void OnInputChanged() {
-			bool newInput = GetPort("input").GetInputValues<bool>().Any(x => x);
+			bool newInput = GetPort("input").GetInputValues<bool>().All(x => x);
 
-			if (!input && newInput) {
+			if (input != newInput) {
 				input = newInput;
-				output = !output;
+				output = newInput;
 				SendSignal(GetPort("output"));
-			} else if (input && !newInput) {
-				input = newInput;
 			}
 		}
 

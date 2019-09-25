@@ -197,7 +197,31 @@ namespace XNodeEditor {
             Color backgroundColor = editor.GetTint();
             Color col = NodeEditorWindow.current.graphEditor.GetPortColor(port);
             DrawPortHandle(rect, backgroundColor, col);
-
+            
+            //当选择节点时显示所有的输入点索引
+            if (port.direction == XNode.NodePort.IO.Output)
+            {
+                if (port.Connection != null)
+                {
+                    if (port.Connection.node == Selection.activeObject)
+                    {
+                        var dCol = GUI.color;
+                        var fontStyle = EditorStyles.label.fontStyle;
+                        var textCol = Color.white - col;
+                        textCol.a = 1;
+                        var index = port.Connection.GetConnectionIndex(port);
+                        EditorStyles.label.fontStyle = FontStyle.Bold;
+                        GUI.contentColor = textCol;
+                        {
+                            EditorGUI.LabelField(new Rect( rect.position + new Vector2(rect.size.x / 4 - 0.5f,0), rect.size),
+                                index.ToString());
+                        }
+                        GUI.contentColor = dCol;
+                        EditorStyles.label.fontStyle = fontStyle;
+                    } 
+                }
+            }
+            
             // Register the handle position
             Vector2 portPos = rect.center;
             NodeEditor.portPositions[port] = portPos;

@@ -305,6 +305,9 @@ namespace XNodeEditor {
 
                 NodeEditor.portPositions.Clear();
 
+                // Set default label width. This is potentially overridden in OnBodyGUI
+                EditorGUIUtility.labelWidth = 84;
+
                 //Get node position
                 Vector2 nodePos = GridToWindowPositionNoClipped(node.position);
 

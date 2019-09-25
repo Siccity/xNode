@@ -311,6 +311,33 @@ namespace XNode {
             [Obsolete("Use constructor with TypeConstraint")]
             public OutputAttribute(ShowBackingValue backingValue, ConnectionType connectionType, bool dynamicPortList) : this(backingValue, connectionType, TypeConstraint.None, dynamicPortList) { }
         }
+        
+        /// <summary>
+        /// Use this to specify how a dynamic port list should be configured.
+        /// </summary>
+        [AttributeUsage(AttributeTargets.Field)]
+        public class DynamicPortListSettingsAttribute : Attribute
+        {
+            /// <summary>
+            /// Set this to true to use the first connection name as the name of each entry in the port list.
+            /// </summary>
+            public bool useConnectionNames;
+
+            /// <summary>
+            /// Set to true to show the entry index in the entry name.
+            /// </summary>
+            public bool showEntryIndexes;
+            
+            /// <summary>
+            /// Use this to define the entry name for elements in the list.
+            /// </summary>
+            public string defaultEntryName = null;
+
+            /// <summary>
+            /// The format to use to display the list values.
+            /// </summary>
+            public string entryFormat = null;
+        }
 
         [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
         public class CreateNodeMenuAttribute : Attribute {

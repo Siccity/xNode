@@ -23,9 +23,32 @@ namespace XNodeEditor {
 #if ODIN_INSPECTOR
         internal static bool inNodeEditor = false;
 #endif
+        private List<string> _excludesField;
+        public sealed override void OnCreate()
+        {
+            _excludesField = new List<string> { "m_Script", "graph", "position", "ports" };
+
+            var fields = GetExcludesField();
+
+            if (fields != null)
+            {
+                _excludesField.AddRange(fields);
+            }
+            
+            Init();
+        }
+
+        protected virtual void Init()
+        {
+        }
 
         public virtual void OnHeaderGUI() {
             GUILayout.Label(target.name, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
+        }
+
+        protected virtual IEnumerable<string> GetExcludesField()
+        {
+            return null;
         }
 
         /// <summary> Draws standard field editors for all public fields </summary>
@@ -38,8 +61,7 @@ namespace XNodeEditor {
             // serializedObject.Update(); must go at the start of an inspector gui, and
             // serializedObject.ApplyModifiedProperties(); goes at the end.
             serializedObject.Update();
-            string[] excludes = { "m_Script", "graph", "position", "ports" };
-
+            
 #if ODIN_INSPECTOR
             InspectorUtilities.BeginDrawPropertyTree(objectTree, true);
             GUIHelper.PushLabelWidth(84);
@@ -55,7 +77,7 @@ namespace XNodeEditor {
             List<string> _names = new List<string>();
             while (iterator.NextVisible(enterChildren)) {
                 enterChildren = false;
-                if (excludes.Contains(iterator.name)) continue;
+                if (_excludesField.Contains(iterator.name)) continue;
                 NodeEditorGUILayout.PropertyField(iterator, true);
                 _names.Add(iterator.name);
             }

@@ -65,7 +65,9 @@ namespace XNodeEditor {
 
         /// <summary> Returned color is used to color noodles </summary>
         public virtual Color GetNoodleColor(XNode.NodePort output, XNode.NodePort input) {
-            return GetTypeColor(output.ValueType);
+            Color col = GetTypeColor(output.ValueType);
+            if (window.hoveredPort == output || window.hoveredPort == input) return Color.Lerp(col, Color.white, 0.8f);
+            return col;
         }
 
         /// <summary> Returned color is used to color ports </summary>

@@ -25,8 +25,8 @@ namespace XNodeEditor {
 
             DrawGrid(position, zoom, panOffset);
             DrawDraggedConnection();
-            DrawNodes();
             DrawConnections();
+            DrawNodes();
             DrawSelectionBox();
             DrawTooltip();
             graphEditor.OnGUI();

@@ -24,6 +24,7 @@ namespace XNodeEditor {
             Controls();
 
             DrawGrid(position, zoom, panOffset);
+            _drawGroupName();
             DrawDraggedConnection();
             DrawConnections();
             DrawNodes();
@@ -38,6 +39,19 @@ namespace XNodeEditor {
             }
 
             GUI.matrix = m;
+        }
+
+        private void _drawGroupName()
+        {
+            var guiContent = new GUIContent(this.graph.name);
+            var col = EditorStyles.label.normal.textColor;
+            var fontSize = EditorStyles.label.fontSize;
+            EditorStyles.label.fontSize = 48;
+            var size = GUILayoutUtility.GetRect(guiContent, EditorStyles.label);
+            EditorStyles.label.normal.textColor = new Color(175 / 255f, 185 / 255f, 185 / 255f);
+            EditorGUI.LabelField(new Rect(new Vector2(5, 5), size.size), guiContent);
+            EditorStyles.label.fontSize = fontSize;
+            EditorStyles.label.normal.textColor = col;
         }
 
         public static void BeginZoomed(Rect rect, float zoom, float topPadding) {

@@ -11,6 +11,23 @@ using static XNode.Node;
 
 namespace XNodeEditor.Odin
 {
+	[DrawerPriority( 0.4, 0, 0 )]
+	public class DynamicPortCollectionOverrideDrawer<T> : CollectionDrawer<T>
+	{
+		protected override bool CanDrawValueProperty( InspectorProperty property )
+		{
+			var input = property.GetAttribute<InputAttribute>();
+			if ( input != null )
+				return input.dynamicPortList;
+
+			var output = property.GetAttribute<OutputAttribute>();
+			if ( output != null )
+				return output.dynamicPortList;
+
+			return false;
+		}
+	}
+
 	[ResolverPriority( 10 )]
 	public class DynamicPortListBackedResolver<TList, TElement> : StrongListPropertyResolver<TList, TElement>
 		where TList : IList<TElement>

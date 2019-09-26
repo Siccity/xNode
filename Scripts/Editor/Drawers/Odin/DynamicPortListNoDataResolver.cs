@@ -13,6 +13,7 @@ using static XNode.Node;
 
 namespace XNodeEditor
 {
+	[ResolverPriority( 10 )]
 	public class DynamicPortListNoDataResolver<TNotAList> : BaseOrderedCollectionResolver<TNotAList>
 	{
 		public override bool CanResolveForPropertyFilter( InspectorProperty property )

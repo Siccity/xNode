@@ -1,5 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using System.IO;
 
 namespace XNodeEditor {
     /// <summary> Deals with modified assets </summary>
@@ -9,6 +10,9 @@ namespace XNodeEditor {
         /// This is important to do, because you can't delete null sub assets.
         /// <para/> For another workaround, see: https://gitlab.com/RotaryHeart-UnityShare/subassetmissingscriptdelete </summary> 
         private static AssetDeleteResult OnWillDeleteAsset (string path, RemoveAssetOptions options) {
+            // Skip processing anything without the .cs extension
+            if (Path.GetExtension(path) != ".cs") return AssetDeleteResult.DidNotDelete;
+            
             // Get the object that is requested for deletion
             UnityEngine.Object obj = AssetDatabase.LoadAssetAtPath<UnityEngine.Object> (path);
 

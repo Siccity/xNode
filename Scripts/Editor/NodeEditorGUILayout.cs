@@ -201,7 +201,7 @@ namespace XNodeEditor {
             //当选择节点时显示所有的输入点索引
             if (port.direction == XNode.NodePort.IO.Output)
             {
-                if (port.Connection != null)
+                if (port.Connection != null && port.Connection.ConnectionCount > 1)
                 {
                     if (port.Connection.node == Selection.activeObject)
                     {
@@ -214,7 +214,7 @@ namespace XNodeEditor {
                         GUI.contentColor = textCol;
                         {
                             EditorGUI.LabelField(new Rect( rect.position + new Vector2(rect.size.x / 4 - 0.5f,0), rect.size),
-                                index.ToString());
+                                (index + 1).ToString());
                         }
                         GUI.contentColor = dCol;
                         EditorStyles.label.fontStyle = fontStyle;

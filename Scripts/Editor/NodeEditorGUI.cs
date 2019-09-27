@@ -24,11 +24,11 @@ namespace XNodeEditor {
             Controls();
 
             DrawGrid(position, zoom, panOffset);
-            _drawGroupName();
             DrawDraggedConnection();
             DrawConnections();
             DrawNodes();
             DrawSelectionBox();
+            _drawGroupName();
             DrawTooltip();
             graphEditor.OnGUI();
 

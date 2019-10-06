@@ -15,6 +15,8 @@ namespace XNodeEditor
 	public class FullyDynamicPortPropertyResolver<T> : BaseMemberPropertyResolver<T>
 		where T : Node
 	{
+		internal struct Nothing { }
+
 		private List<OdinPropertyProcessor> processors;
 
 		protected override InspectorPropertyInfo[] GetPropertyInfos()
@@ -52,7 +54,7 @@ namespace XNodeEditor
 						continue;
 
 					// value can't possibly matter here so many this "lie" is ok
-					infos.AddValue( port.fieldName, () => 0, value => { },
+					infos.AddValue( port.fieldName, () => new Nothing(), value => { },
 						new AsDynamicPortNoDataAtribute()
 						{
 							BackingValue = ShowBackingValue.Never,

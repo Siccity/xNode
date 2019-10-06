@@ -10,18 +10,17 @@ namespace XNodeEditor.Odin
 {
 	internal abstract class AsDynamicPortAtribute : System.Attribute
 	{
-		internal string fieldName { get; set; }
-		internal int index { get; set; }
-		internal Node Node { get; set; }
+		public string FieldName { get; set; }
+		public Node Node { get; set; }
 
-		internal ConnectionType connectionType { get; set; }
-		internal ShowBackingValue backingValue { get; set; }
+		public bool InList { get; set; }
+		public ShowBackingValue BackingValue { get; set; }
 
-		internal NodePort Port
+		public NodePort Port
 		{
 			get
 			{
-				return Node.GetPort( $"{fieldName} {index}" );
+				return Node.GetPort( FieldName );
 			}
 		}
 	}
@@ -31,19 +30,31 @@ namespace XNodeEditor.Odin
 
 	internal struct AsDynamicPortScope : IDisposable
 	{
-		public AsDynamicPortScope( NodePort port )
+		public AsDynamicPortScope( NodePort port, bool inList )
 		{
 			EditorGUILayout.BeginVertical();
 			var rect = GUILayoutUtility.GetRect( 0f, float.MaxValue, 0f, 0f, GUI.skin.label, GUILayout.ExpandWidth( true ) );
-			if ( NodeEditor.isNodeEditor )
+			if ( port != null && NodeEditor.isNodeEditor )
 			{
 				if ( port.IsInput )
 				{
-					NodeEditorGUILayout.PortField( new Vector2( rect.xMin - 42, rect.center.y ), port );
+					Vector2 offset;
+					if ( inList )
+						offset = new Vector2( -42, 0 );
+					else
+						offset = new Vector2( -18, 0 );
+
+					NodeEditorGUILayout.PortField( new Vector2( rect.xMin, rect.center.y ) + offset, port );
 				}
 				else
 				{
-					NodeEditorGUILayout.PortField( new Vector2( rect.xMax + 21, rect.center.y ), port );
+					Vector2 offset;
+					if ( inList )
+						offset = new Vector2( 21, 0 );
+					else
+						offset = new Vector2( 0, 0 );
+
+					NodeEditorGUILayout.PortField( new Vector2( rect.xMax, rect.center.y ) + offset, port );
 				}
 			}
 
@@ -67,7 +78,7 @@ namespace XNodeEditor.Odin
 			if ( Attribute.Port == null )
 				return;
 
-			using ( new AsDynamicPortScope( Attribute.Port ) )
+			using ( new AsDynamicPortScope( Attribute.Port, Attribute.InList ) )
 				CallNextDrawer( label );
 		}
 	}
@@ -83,9 +94,9 @@ namespace XNodeEditor.Odin
 				return;
 
 			if ( Event.current.type == EventType.Layout )
-				drawData = Attribute.backingValue == ShowBackingValue.Always || Attribute.backingValue == ShowBackingValue.Unconnected && !Attribute.Port.IsConnected;
+				drawData = Attribute.BackingValue == ShowBackingValue.Always || Attribute.BackingValue == ShowBackingValue.Unconnected && !Attribute.Port.IsConnected;
 
-			using ( new AsDynamicPortScope( Attribute.Port ) )
+			using ( new AsDynamicPortScope( Attribute.Port, Attribute.InList ) )
 			{
 				if ( drawData )
 					CallNextDrawer( label );

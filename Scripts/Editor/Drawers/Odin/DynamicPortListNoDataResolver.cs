@@ -69,12 +69,11 @@ namespace XNodeEditor
 		{
 			return new AsDynamicPortNoDataAtribute()
 			{
-				fieldName = fieldName,
-				index = index,
+				FieldName = string.Format( "{0} {1}", fieldName, index ),
+				InList = true,
 				Node = node,
 
-				connectionType = connectionType,
-				backingValue = backingValue
+				BackingValue = backingValue
 			};
 		}
 

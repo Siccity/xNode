@@ -86,12 +86,11 @@ namespace XNodeEditor.Odin
 		{
 			return new AsDynamicPortWithDataAtribute()
 			{
-				fieldName = fieldName,
-				index = index,
+				FieldName = string.Format( "{0} {1}", fieldName, index ),
+				InList = true,
 				Node = node,
 
-				connectionType = connectionType,
-				backingValue = backingValue
+				BackingValue = backingValue
 			};
 		}
 

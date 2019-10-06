@@ -14,7 +14,7 @@ namespace XNodeEditor.Odin
 		{
 			EditorGUILayout.BeginVertical();
 			var rect = GUILayoutUtility.GetRect( 0f, float.MaxValue, 0f, 0f, GUI.skin.label, GUILayout.ExpandWidth( true ) );
-			if ( NodeEditor.isNodeEditor )
+			if ( port != null && NodeEditor.isNodeEditor )
 			{
 				if ( port.IsInput )
 				{

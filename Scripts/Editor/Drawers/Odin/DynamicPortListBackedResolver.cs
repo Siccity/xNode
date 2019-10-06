@@ -29,7 +29,7 @@ namespace XNodeEditor.Odin
 		}
 	}
 
-	[ResolverPriority( 10 )]
+	[ResolverPriority( 15 )]
 	public class DynamicPortListBackedResolver<TList, TElement> : StrongListPropertyResolver<TList, TElement>
 		where TList : IList<TElement>
 	{

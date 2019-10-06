@@ -157,7 +157,7 @@ namespace XNodeEditor {
                         // Coloring and bezier drawing.
                         for (int j = 0; j < points.Length - 1; j++)	{
                             Handles.color = gradient.Evaluate((j + 1f) / (points.Length));
-                            Handles.DrawAAPolyLine(bezier_width / zoom, points[j], points[j + 1]);
+                            Handles.DrawAAPolyLine(bezier_width, points[j], points[j + 1]);
                         }
                         outputTangent = -inputTangent;
                     }
@@ -173,7 +173,7 @@ namespace XNodeEditor {
                         for (float j = 0; j < 1; j += 10f / Vector2.Distance(point_a, point_b))	{
                             Vector2 lerp = Vector2.Lerp(point_a, point_b, j);
                             Handles.color = gradient.Evaluate(j);
-                            Handles.DrawAAPolyLine(line_width / zoom, prev_point, lerp);
+                            Handles.DrawAAPolyLine(line_width, prev_point, lerp);
                             prev_point = lerp;
                         }
                     }

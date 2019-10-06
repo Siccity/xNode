@@ -117,7 +117,7 @@ namespace XNodeEditor {
         }
 
         /// <summary> Draw a bezier from output to input in grid coordinates </summary>
-        public void DrawNoodle(Gradient gradient, List<Vector2> gridPoints, bool enableHoveringHighlight = true) {
+        public void DrawNoodle(Gradient gradient, List<Vector2> gridPoints) {
             Vector2[] windowPoints = gridPoints.Select(x => GridToWindowPosition(x)).ToArray();
             Handles.color = gradient.Evaluate(0f);
             int length = gridPoints.Count;
@@ -154,20 +154,6 @@ namespace XNodeEditor {
                         int bezier_width = 4;
                         int division = Mathf.RoundToInt(.1f * dist_ab) + 3;
                         Vector3[] points = Handles.MakeBezierPoints(point_a, point_b, tangent_a, tangent_b, division);
-                        if (enableHoveringHighlight) {
-                            for (int j = 0; j < points.Length; j++) {
-                                Vector3 current = points[j];
-                                bool next_has_mouse = false;
-                                if (j + 1 < points.Length) {
-                                    Vector3 next = points[j + 1];
-                                    next_has_mouse = ContainsMouse(current, next);
-                                }
-                                if (next_has_mouse) {
-                                    bezier_width += 2;
-                                    break;
-                                }
-                            }
-                        }
                         // Coloring and bezier drawing.
                         for (int j = 0; j < points.Length - 1; j++)	{
                             Handles.color = gradient.Evaluate((j + 1f) / (points.Length));
@@ -182,7 +168,6 @@ namespace XNodeEditor {
                         Vector2 point_b = windowPoints[i + 1];
                         // Hover effect.
                         int line_width = 5;
-                        if (enableHoveringHighlight && LineContainsMouse(point_a, point_b)) line_width += 2;
                         // Draws the line with the coloring.
                         Vector2 prev_point = point_a;
                         for (float j = 0; j < 1; j += 10f / Vector2.Distance(point_a, point_b))	{
@@ -234,34 +219,6 @@ namespace XNodeEditor {
             }
         }
 
-        /// <summary>
-        /// Verifies if the cursor is anywhere between the given coordinates.
-        /// </summary>
-        /// <param name="point_a"></param>
-        /// <param name="point_b"></param>
-        bool ContainsMouse(Vector2 point_a, Vector2 point_b) {
-            Vector2 min = new Vector2(point_a.x < point_b.x ? point_a.x : point_b.x, point_a.y < point_b.y ? point_a.y : point_b.y);
-            Vector2 max = new Vector2(point_a.x > point_b.x ? point_a.x : point_b.x, point_a.y > point_b.y ? point_a.y : point_b.y);
-            bool equals_x =	lastMousePosition.x >= min.x && lastMousePosition.x <= max.x;
-            bool equals_y =	lastMousePosition.y >= min.y && lastMousePosition.y <= max.y;
-            return equals_x && equals_y;
-        }
-
-        /// <summary>
-        /// Splits a line in various points and verifies if any of those points contain the mouse position.
-        /// </summary>
-        /// <param name="point_a"></param>
-        /// <param name="point_b"></param>
-        bool LineContainsMouse(Vector2 point_a, Vector2 point_b) {
-            Vector2 prev_point = point_a;
-            for (float j = 0; j < 1; j += 10f / Vector2.Distance(point_a, point_b))	{
-                Vector2 lerp = Vector2.Lerp(point_a, point_b, j);
-                if (ContainsMouse(prev_point, lerp)) return true;
-                prev_point = lerp;
-            }
-            return false;
-        }
-
         /// <summary> Draws all connections </summary>
         public void DrawConnections() {
             Vector2 mousePos = Event.current.mousePosition;
@@ -297,7 +254,7 @@ namespace XNodeEditor {
                         gridPoints.Add(fromRect.center);
                         gridPoints.AddRange(reroutePoints);
                         gridPoints.Add(toRect.center);
-                        DrawNoodle(noodleColor, gridPoints);
+                        DrawNoodle(noodleGradient, gridPoints);
 
                         // Loop through reroute points again and draw the points
                         for (int i = 0; i < reroutePoints.Count; i++) {

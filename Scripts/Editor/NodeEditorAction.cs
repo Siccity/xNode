@@ -486,7 +486,7 @@ namespace XNodeEditor {
                 if (draggedOutputTarget != null) gridPoints.Add(portConnectionPoints[draggedOutputTarget].center);
                 else gridPoints.Add(WindowToGridPosition(Event.current.mousePosition));
 
-                DrawNoodle(gradient, gridPoints, false);
+                DrawNoodle(gradient, gridPoints);
 
                 Color bgcol = Color.black;
                 Color frcol = col;

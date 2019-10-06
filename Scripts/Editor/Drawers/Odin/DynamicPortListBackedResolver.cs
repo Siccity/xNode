@@ -65,7 +65,7 @@ namespace XNodeEditor.Odin
 
 				attributes = attributes
 				.Append( GetPortAttribute( Property.Name, childIndex ) )
-				.AppendIf( labelTextAttribute == null && hideLabelAttribute == null, new LabelTextAttribute( $"{Property.Name} {childIndex}" ) );
+				.AppendIf( labelTextAttribute == null && hideLabelAttribute == null, new LabelTextAttribute( string.Format( "{0} {1}", Property.Name, childIndex ) ) );
 
 				result = InspectorPropertyInfo.CreateValue(
 						name: CollectionResolverUtilities.DefaultIndexToChildName( childIndex ),
@@ -99,9 +99,9 @@ namespace XNodeEditor.Odin
 			int nextId = this.ChildCount;
 
 			if ( IsInput )
-				this.node.AddDynamicInput( typeof( TElement ), connectionType, typeConstraint, $"{Property.Name} {nextId}" );
+				this.node.AddDynamicInput( typeof( TElement ), connectionType, typeConstraint, string.Format( "{0} {1}", Property.Name, nextId ) );
 			else
-				this.node.AddDynamicOutput( typeof( TElement ), connectionType, typeConstraint, $"{Property.Name} {nextId}" );
+				this.node.AddDynamicOutput( typeof( TElement ), connectionType, typeConstraint, string.Format( "{0} {1}", Property.Name, nextId ) );
 
 			lastRemovedConnections.Clear();
 
@@ -115,9 +115,9 @@ namespace XNodeEditor.Odin
 			// Remove happens before insert and we lose all the connections
 			// Add a new port at the end
 			if ( IsInput )
-				this.node.AddDynamicInput( typeof( TElement ), connectionType, typeConstraint, $"{Property.Name} {nextId}" );
+				this.node.AddDynamicInput( typeof( TElement ), connectionType, typeConstraint, string.Format( "{0} {1}", Property.Name, nextId ) );
 			else
-				this.node.AddDynamicOutput( typeof( TElement ), connectionType, typeConstraint, $"{Property.Name} {nextId}" );
+				this.node.AddDynamicOutput( typeof( TElement ), connectionType, typeConstraint, string.Format( "{0} {1}", Property.Name, nextId ) );
 
 			var dynamicPorts = this.ports;
 
@@ -205,7 +205,7 @@ namespace XNodeEditor.Odin
 				List<NodePort> dynamicPorts = new List<NodePort>();
 				for ( int i = 0; i < int.MaxValue; ++i )
 				{
-					var nodePort = node.GetPort( $"{Property.Name} {i}" );
+					var nodePort = node.GetPort( string.Format( "{0} {1}", Property.Name, i ) );
 					if ( nodePort == null )
 						break;
 

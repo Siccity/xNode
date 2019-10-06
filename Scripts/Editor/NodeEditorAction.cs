@@ -473,8 +473,8 @@ namespace XNodeEditor {
                 Color col = NodeEditorPreferences.GetTypeColor(draggedOutput.ValueType);
                 col.a = draggedOutputTarget != null ? 1.0f : 0.6f;
 
-				Gradient g = new Gradient();
-				g.SetKeys(new GradientColorKey[] { new GradientColorKey(col, 0f) }, new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f) });
+                Gradient gradient = new Gradient();
+                gradient.SetKeys(new GradientColorKey[] { new GradientColorKey(col, 0f) }, new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f) });
 
                 Rect fromRect;
                 if (!_portConnectionPoints.TryGetValue(draggedOutput, out fromRect)) return;
@@ -486,7 +486,7 @@ namespace XNodeEditor {
                 if (draggedOutputTarget != null) gridPoints.Add(portConnectionPoints[draggedOutputTarget].center);
                 else gridPoints.Add(WindowToGridPosition(Event.current.mousePosition));
 
-                DrawNoodle(g, gridPoints, true);
+                DrawNoodle(gradient, gridPoints, false);
 
                 Color bgcol = Color.black;
                 Color frcol = col;

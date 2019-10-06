@@ -117,22 +117,22 @@ namespace XNodeEditor {
         }
 
         /// <summary> Draw a bezier from output to input in grid coordinates </summary>
-        public void DrawNoodle(Gradient grad, List<Vector2> gridPoints, bool disableHover = false) {
+        public void DrawNoodle(Gradient gradient, List<Vector2> gridPoints, bool enableHoveringHighlight = true) {
             Vector2[] windowPoints = gridPoints.Select(x => GridToWindowPosition(x)).ToArray();
-            Handles.color = grad.Evaluate(0f);
+            Handles.color = gradient.Evaluate(0f);
             int length = gridPoints.Count;
             switch (NodeEditorPreferences.GetSettings().noodleType) {
                 case NodeEditorPreferences.NoodleType.Curve:
                     Vector2 outputTangent = Vector2.right;
                     for (int i = 0; i < length - 1; i++) {
                         Vector2 inputTangent = Vector2.left;
-						// Cached most variables that repeat themselves here to avoid so many indexer calls :p
-						Vector2 point_a = windowPoints[i]; 
-						Vector2 point_b = windowPoints[i + 1];
-						float dist_ab = Vector2.Distance(point_a, point_b);
+                        // Cached most variables that repeat themselves here to avoid so many indexer calls :p
+                        Vector2 point_a = windowPoints[i]; 
+                        Vector2 point_b = windowPoints[i + 1];
+                        float dist_ab = Vector2.Distance(point_a, point_b);
                         if (i == 0) outputTangent = Vector2.right * dist_ab * 0.01f * zoom;
                         if (i < length - 2) {
-							Vector2 point_c = windowPoints[i + 2];
+                            Vector2 point_c = windowPoints[i + 2];
                             Vector2 ab = (point_b - point_a).normalized;
                             Vector2 cb = (point_b - point_c).normalized;
                             Vector2 ac = (point_c - point_a).normalized;
@@ -147,50 +147,50 @@ namespace XNodeEditor {
                             inputTangent = Vector2.left * dist_ab * 0.01f * zoom;
                         }
 
-						// Calculates the tangents for the bezier's curves.
-						Vector2 tangent_a = point_a + outputTangent * 50 / zoom;
-						Vector2 tangent_b = point_b + inputTangent * 50 / zoom;
-						// Hover effect.
-						int bezier_width = 4;
-						int division = Mathf.RoundToInt(.1f * dist_ab) + 3;
-						Vector3[] points = Handles.MakeBezierPoints(point_a, point_b, tangent_a, tangent_b, division);
-						if (!disableHover) {
-							for (int j = 0; j < points.Length; j++) {
-								Vector3 current = points[j];
-								bool next_has_mouse = false;
-								if (j + 1 < points.Length) {
-									Vector3 next = points[j + 1];
-									next_has_mouse = ContainsMouse(current, next);
-								}
-								if (next_has_mouse) {
-									bezier_width += 2;
-									break;
-								}
-							}
-						}
-						// Coloring and bezier drawing.
-						for (int j = 0; j < points.Length - 1; j++)	{
-							Handles.color = grad.Evaluate((j + 1f) / (points.Length));
-							Handles.DrawAAPolyLine(bezier_width / zoom, points[j], points[j + 1]);
-						}
+                        // Calculates the tangents for the bezier's curves.
+                        Vector2 tangent_a = point_a + outputTangent * 50 / zoom;
+                        Vector2 tangent_b = point_b + inputTangent * 50 / zoom;
+                        // Hover effect.
+                        int bezier_width = 4;
+                        int division = Mathf.RoundToInt(.1f * dist_ab) + 3;
+                        Vector3[] points = Handles.MakeBezierPoints(point_a, point_b, tangent_a, tangent_b, division);
+                        if (enableHoveringHighlight) {
+                            for (int j = 0; j < points.Length; j++) {
+                                Vector3 current = points[j];
+                                bool next_has_mouse = false;
+                                if (j + 1 < points.Length) {
+                                    Vector3 next = points[j + 1];
+                                    next_has_mouse = ContainsMouse(current, next);
+                                }
+                                if (next_has_mouse) {
+                                    bezier_width += 2;
+                                    break;
+                                }
+                            }
+                        }
+                        // Coloring and bezier drawing.
+                        for (int j = 0; j < points.Length - 1; j++)	{
+                            Handles.color = gradient.Evaluate((j + 1f) / (points.Length));
+                            Handles.DrawAAPolyLine(bezier_width / zoom, points[j], points[j + 1]);
+                        }
                         outputTangent = -inputTangent;
                     }
                     break;
                 case NodeEditorPreferences.NoodleType.Line:
                     for (int i = 0; i < length - 1; i++) {
-						Vector2 point_a = windowPoints[i];
-						Vector2 point_b = windowPoints[i + 1];
-						// Hover effect.
-						int line_width = 5;
-						if (!disableHover && LineContainsMouse(point_a, point_b)) line_width += 2;
-						// Draws the line with the coloring.
-						Vector2 prev_point = point_a;
-						for (float j = 0; j < 1; j += 10f / Vector2.Distance(point_a, point_b))	{
-							Vector2 lerp = Vector2.Lerp(point_a, point_b, j);
-							Handles.color = grad.Evaluate(j);
-							Handles.DrawAAPolyLine(line_width / zoom, prev_point, lerp);
-							prev_point = lerp;
-						}
+                        Vector2 point_a = windowPoints[i];
+                        Vector2 point_b = windowPoints[i + 1];
+                        // Hover effect.
+                        int line_width = 5;
+                        if (enableHoveringHighlight && LineContainsMouse(point_a, point_b)) line_width += 2;
+                        // Draws the line with the coloring.
+                        Vector2 prev_point = point_a;
+                        for (float j = 0; j < 1; j += 10f / Vector2.Distance(point_a, point_b))	{
+                            Vector2 lerp = Vector2.Lerp(point_a, point_b, j);
+                            Handles.color = gradient.Evaluate(j);
+                            Handles.DrawAAPolyLine(line_width / zoom, prev_point, lerp);
+                            prev_point = lerp;
+                        }
                     }
                     break;
                 case NodeEditorPreferences.NoodleType.Angled:
@@ -202,11 +202,11 @@ namespace XNodeEditor {
                             Vector2 end_1 = windowPoints[i + 1];
                             start_1.x = midpoint;
                             end_1.x = midpoint;
-							Handles.color = grad.Evaluate(0f);
+                            Handles.color = gradient.Evaluate(0f);
                             Handles.DrawAAPolyLine(5, windowPoints[i], start_1);
-							Handles.color = grad.Evaluate(0.5f);
+                            Handles.color = gradient.Evaluate(0.5f);
                             Handles.DrawAAPolyLine(5, start_1, end_1);
-							Handles.color = grad.Evaluate(1f);
+                            Handles.color = gradient.Evaluate(1f);
                             Handles.DrawAAPolyLine(5, end_1, windowPoints[i + 1]);
                         } else {
                             float midpoint = (windowPoints[i].y + windowPoints[i + 1].y) * 0.5f;
@@ -218,15 +218,15 @@ namespace XNodeEditor {
                             Vector2 end_2 = end_1;
                             start_2.y = midpoint;
                             end_2.y = midpoint;
-							Handles.color = grad.Evaluate(0f);
+                            Handles.color = gradient.Evaluate(0f);
                             Handles.DrawAAPolyLine(5, windowPoints[i], start_1);
-							Handles.color = grad.Evaluate(0.25f);
+                            Handles.color = gradient.Evaluate(0.25f);
                             Handles.DrawAAPolyLine(5, start_1, start_2);
-							Handles.color = grad.Evaluate(0.5f);
+                            Handles.color = gradient.Evaluate(0.5f);
                             Handles.DrawAAPolyLine(5, start_2, end_2);
-							Handles.color = grad.Evaluate(0.75f);
+                            Handles.color = gradient.Evaluate(0.75f);
                             Handles.DrawAAPolyLine(5, end_2, end_1);
-							Handles.color = grad.Evaluate(1f);
+                            Handles.color = gradient.Evaluate(1f);
                             Handles.DrawAAPolyLine(5, end_1, windowPoints[i + 1]);
                         }
                     }
@@ -234,33 +234,33 @@ namespace XNodeEditor {
             }
         }
 
-		/// <summary>
-		/// Verifies if the cursor is anywhere between the given coordinates.
-		/// </summary>
-		/// <param name="point_a"></param>
-		/// <param name="point_b"></param>
-		bool ContainsMouse(Vector2 point_a, Vector2 point_b) {
-			Vector2 min = new Vector2(point_a.x < point_b.x ? point_a.x : point_b.x, point_a.y < point_b.y ? point_a.y : point_b.y);
-			Vector2 max = new Vector2(point_a.x > point_b.x ? point_a.x : point_b.x, point_a.y > point_b.y ? point_a.y : point_b.y);
-			bool equals_x =	lastMousePosition.x >= min.x && lastMousePosition.x <= max.x;
-			bool equals_y =	lastMousePosition.y >= min.y && lastMousePosition.y <= max.y;
-			return equals_x && equals_y;
-		}
+        /// <summary>
+        /// Verifies if the cursor is anywhere between the given coordinates.
+        /// </summary>
+        /// <param name="point_a"></param>
+        /// <param name="point_b"></param>
+        bool ContainsMouse(Vector2 point_a, Vector2 point_b) {
+            Vector2 min = new Vector2(point_a.x < point_b.x ? point_a.x : point_b.x, point_a.y < point_b.y ? point_a.y : point_b.y);
+            Vector2 max = new Vector2(point_a.x > point_b.x ? point_a.x : point_b.x, point_a.y > point_b.y ? point_a.y : point_b.y);
+            bool equals_x =	lastMousePosition.x >= min.x && lastMousePosition.x <= max.x;
+            bool equals_y =	lastMousePosition.y >= min.y && lastMousePosition.y <= max.y;
+            return equals_x && equals_y;
+        }
 
-		/// <summary>
-		/// Splits a line in various points and verifies if any of those points contain the mouse position.
-		/// </summary>
-		/// <param name="point_a"></param>
-		/// <param name="point_b"></param>
-		bool LineContainsMouse(Vector2 point_a, Vector2 point_b) {
-			Vector2 prev_point = point_a;
-			for (float j = 0; j < 1; j += 10f / Vector2.Distance(point_a, point_b))	{
-				Vector2 lerp = Vector2.Lerp(point_a, point_b, j);
-				if (ContainsMouse(prev_point, lerp)) return true;
-				prev_point = lerp;
-			}
-			return false;
-		}
+        /// <summary>
+        /// Splits a line in various points and verifies if any of those points contain the mouse position.
+        /// </summary>
+        /// <param name="point_a"></param>
+        /// <param name="point_b"></param>
+        bool LineContainsMouse(Vector2 point_a, Vector2 point_b) {
+            Vector2 prev_point = point_a;
+            for (float j = 0; j < 1; j += 10f / Vector2.Distance(point_a, point_b))	{
+                Vector2 lerp = Vector2.Lerp(point_a, point_b, j);
+                if (ContainsMouse(prev_point, lerp)) return true;
+                prev_point = lerp;
+            }
+            return false;
+        }
 
         /// <summary> Draws all connections </summary>
         public void DrawConnections() {
@@ -282,8 +282,8 @@ namespace XNodeEditor {
                     Color portColor = graphEditor.GetPortColor(output);
                     for (int k = 0; k < output.ConnectionCount; k++) {
                         XNode.NodePort input = output.GetConnection(k);
-						
-						Gradient noodleGradient = graphEditor.GetNoodleGradient(output, input);
+                        
+                        Gradient noodleGradient = graphEditor.GetNoodleGradient(output, input);
 
                         // Error handling
                         if (input == null) continue; //If a script has been updated and the port doesn't exist, it is removed and null is returned. If this happens, return.

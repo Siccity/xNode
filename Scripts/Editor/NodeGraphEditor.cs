@@ -65,19 +65,19 @@ namespace XNodeEditor {
 
         /// <summary> Returned color is used to color noodles </summary>
         public virtual Gradient GetNoodleGradient(XNode.NodePort output, XNode.NodePort input) {
-			Color a = GetTypeColor(output.ValueType);
-			Color b = GetTypeColor(input.ValueType);
-			if (window.hoveredPort == output || window.hoveredPort == input) {
-				a = Color.Lerp(a, Color.white, 0.8f);
-				b = Color.Lerp(b, Color.white, 0.8f);
-			}
-			Gradient grad = new Gradient();
-			grad.SetKeys(
-				new GradientColorKey[] { new GradientColorKey(a, 0f), new GradientColorKey(b, 1f)	},
-				new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f)	}
-			);
-			return grad;
-		}
+            Color a = GetTypeColor(output.ValueType);
+            Color b = GetTypeColor(input.ValueType);
+            if (window.hoveredPort == output || window.hoveredPort == input) {
+                a = Color.Lerp(a, Color.white, 0.8f);
+                b = Color.Lerp(b, Color.white, 0.8f);
+            }
+            Gradient grad = new Gradient();
+            grad.SetKeys(
+                new GradientColorKey[] { new GradientColorKey(a, 0f), new GradientColorKey(b, 1f)	},
+                new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f)	}
+            );
+            return grad;
+        }
 
         /// <summary> Returned color is used to color ports </summary>
         public virtual Color GetPortColor(XNode.NodePort port) {

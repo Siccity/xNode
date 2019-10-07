@@ -470,11 +470,7 @@ namespace XNodeEditor {
         /// <summary> Draw a connection as we are dragging it </summary>
         public void DrawDraggedConnection() {
             if (IsDraggingPort) {
-                Color col = NodeEditorPreferences.GetTypeColor(draggedOutput.ValueType);
-                col.a = draggedOutputTarget != null ? 1.0f : 0.6f;
-
-                Gradient gradient = new Gradient();
-                gradient.SetKeys(new GradientColorKey[] { new GradientColorKey(col, 0f) }, new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f) });
+                Gradient gradient = graphEditor.GetNoodleGradient(draggedOutput, null);
 
                 Rect fromRect;
                 if (!_portConnectionPoints.TryGetValue(draggedOutput, out fromRect)) return;
@@ -489,7 +485,7 @@ namespace XNodeEditor {
                 DrawNoodle(gradient, gridPoints);
 
                 Color bgcol = Color.black;
-                Color frcol = col;
+                Color frcol = gradient.colorKeys[0].color;
                 bgcol.a = 0.6f;
                 frcol.a = 0.6f;
 

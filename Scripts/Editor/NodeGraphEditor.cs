@@ -64,18 +64,33 @@ namespace XNodeEditor {
         }
 
         /// <summary> Returned color is used to color noodles </summary>
+        /// <param name="output"> The output this noodle comes from. Never null. </param>
+        /// <param name="input"> The output this noodle comes from. Can be null if we are dragging the noodle. </param>
         public virtual Gradient GetNoodleGradient(XNode.NodePort output, XNode.NodePort input) {
-            Color a = GetTypeColor(output.ValueType);
-            Color b = GetTypeColor(input.ValueType);
-            if (window.hoveredPort == output || window.hoveredPort == input) {
-                a = Color.Lerp(a, Color.white, 0.8f);
-                b = Color.Lerp(b, Color.white, 0.8f);
-            }
             Gradient grad = new Gradient();
-            grad.SetKeys(
-                new GradientColorKey[] { new GradientColorKey(a, 0f), new GradientColorKey(b, 1f) },
-                new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) }
-            );
+
+            // If dragging the noodle, draw solid, slightly transparent
+            if (input == null) {
+                Color a = GetTypeColor(output.ValueType);
+                grad.SetKeys(
+                    new GradientColorKey[] { new GradientColorKey(a, 0f) },
+                    new GradientAlphaKey[] { new GradientAlphaKey(0.6f, 0f) }
+                );
+            }
+            // If normal, draw gradient fading from one input color to the other
+            else {
+                Color a = GetTypeColor(output.ValueType);
+                Color b = GetTypeColor(input.ValueType);
+                // If any port is hovered, tint white
+                if (window.hoveredPort == output || window.hoveredPort == input) {
+                    a = Color.Lerp(a, Color.white, 0.8f);
+                    b = Color.Lerp(b, Color.white, 0.8f);
+                }
+                grad.SetKeys(
+                    new GradientColorKey[] { new GradientColorKey(a, 0f), new GradientColorKey(b, 1f) },
+                    new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) }
+                );
+            }
             return grad;
         }
 

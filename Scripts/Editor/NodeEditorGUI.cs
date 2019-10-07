@@ -127,7 +127,7 @@ namespace XNodeEditor {
                     for (int i = 0; i < length - 1; i++) {
                         Vector2 inputTangent = Vector2.left;
                         // Cached most variables that repeat themselves here to avoid so many indexer calls :p
-                        Vector2 point_a = windowPoints[i]; 
+                        Vector2 point_a = windowPoints[i];
                         Vector2 point_b = windowPoints[i + 1];
                         float dist_ab = Vector2.Distance(point_a, point_b);
                         if (i == 0) outputTangent = Vector2.right * dist_ab * 0.01f * zoom;
@@ -142,8 +142,7 @@ namespace XNodeEditor {
 
                             p = new Vector2(-p.y, p.x) * Mathf.Sign(side) * tangentLength;
                             inputTangent = p;
-                        }
-                        else {
+                        } else {
                             inputTangent = Vector2.left * dist_ab * 0.01f * zoom;
                         }
 
@@ -155,7 +154,7 @@ namespace XNodeEditor {
                         int division = Mathf.RoundToInt(.1f * dist_ab) + 3;
                         Vector3[] points = Handles.MakeBezierPoints(point_a, point_b, tangent_a, tangent_b, division);
                         // Coloring and bezier drawing.
-                        for (int j = 0; j < points.Length - 1; j++)	{
+                        for (int j = 0; j < points.Length - 1; j++) {
                             Handles.color = gradient.Evaluate((j + 1f) / (points.Length));
                             Handles.DrawAAPolyLine(bezier_width, points[j], points[j + 1]);
                         }
@@ -170,7 +169,7 @@ namespace XNodeEditor {
                         int line_width = 5;
                         // Draws the line with the coloring.
                         Vector2 prev_point = point_a;
-                        for (float j = 0; j < 1; j += 10f / Vector2.Distance(point_a, point_b))	{
+                        for (float j = 0; j < 1; j += 10f / Vector2.Distance(point_a, point_b)) {
                             Vector2 lerp = Vector2.Lerp(point_a, point_b, j);
                             Handles.color = gradient.Evaluate(j);
                             Handles.DrawAAPolyLine(line_width, prev_point, lerp);
@@ -239,7 +238,7 @@ namespace XNodeEditor {
                     Color portColor = graphEditor.GetPortColor(output);
                     for (int k = 0; k < output.ConnectionCount; k++) {
                         XNode.NodePort input = output.GetConnection(k);
-                        
+
                         Gradient noodleGradient = graphEditor.GetNoodleGradient(output, input);
 
                         // Error handling

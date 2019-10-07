@@ -73,8 +73,8 @@ namespace XNodeEditor {
             }
             Gradient grad = new Gradient();
             grad.SetKeys(
-                new GradientColorKey[] { new GradientColorKey(a, 0f), new GradientColorKey(b, 1f)	},
-                new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f)	}
+                new GradientColorKey[] { new GradientColorKey(a, 0f), new GradientColorKey(b, 1f) },
+                new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) }
             );
             return grad;
         }

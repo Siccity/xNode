@@ -155,7 +155,7 @@ namespace XNodeEditor {
                         Vector3[] points = Handles.MakeBezierPoints(point_a, point_b, tangent_a, tangent_b, division);
                         // Coloring and bezier drawing.
                         for (int j = 0; j < points.Length - 1; j++) {
-                            Handles.color = gradient.Evaluate((j + 1f) / (points.Length));
+                            if (i == gridPoints.Count - 2) Handles.color = gradient.Evaluate((j + 1f) / points.Length);
                             Handles.DrawAAPolyLine(bezier_width, points[j], points[j + 1]);
                         }
                         outputTangent = -inputTangent;
@@ -171,7 +171,7 @@ namespace XNodeEditor {
                         Vector2 prev_point = point_a;
                         for (float j = 0; j < 1; j += 10f / Vector2.Distance(point_a, point_b)) {
                             Vector2 lerp = Vector2.Lerp(point_a, point_b, j);
-                            Handles.color = gradient.Evaluate(j);
+                            if (i == gridPoints.Count - 2) Handles.color = gradient.Evaluate(j);
                             Handles.DrawAAPolyLine(line_width, prev_point, lerp);
                             prev_point = lerp;
                         }
@@ -186,12 +186,17 @@ namespace XNodeEditor {
                             Vector2 end_1 = windowPoints[i + 1];
                             start_1.x = midpoint;
                             end_1.x = midpoint;
-                            Handles.color = gradient.Evaluate(0f);
-                            Handles.DrawAAPolyLine(5, windowPoints[i], start_1);
-                            Handles.color = gradient.Evaluate(0.5f);
-                            Handles.DrawAAPolyLine(5, start_1, end_1);
-                            Handles.color = gradient.Evaluate(1f);
-                            Handles.DrawAAPolyLine(5, end_1, windowPoints[i + 1]);
+                            if (i == gridPoints.Count - 2) {
+                                Handles.DrawAAPolyLine(5, windowPoints[i], start_1);
+                                Handles.color = gradient.Evaluate(0.5f);
+                                Handles.DrawAAPolyLine(5, start_1, end_1);
+                                Handles.color = gradient.Evaluate(1f);
+                                Handles.DrawAAPolyLine(5, end_1, windowPoints[i + 1]);
+                            } else {
+                                Handles.DrawAAPolyLine(5, windowPoints[i], start_1);
+                                Handles.DrawAAPolyLine(5, start_1, end_1);
+                                Handles.DrawAAPolyLine(5, end_1, windowPoints[i + 1]);
+                            }
                         } else {
                             float midpoint = (windowPoints[i].y + windowPoints[i + 1].y) * 0.5f;
                             Vector2 start_1 = windowPoints[i];
@@ -202,16 +207,23 @@ namespace XNodeEditor {
                             Vector2 end_2 = end_1;
                             start_2.y = midpoint;
                             end_2.y = midpoint;
-                            Handles.color = gradient.Evaluate(0f);
-                            Handles.DrawAAPolyLine(5, windowPoints[i], start_1);
-                            Handles.color = gradient.Evaluate(0.25f);
-                            Handles.DrawAAPolyLine(5, start_1, start_2);
-                            Handles.color = gradient.Evaluate(0.5f);
-                            Handles.DrawAAPolyLine(5, start_2, end_2);
-                            Handles.color = gradient.Evaluate(0.75f);
-                            Handles.DrawAAPolyLine(5, end_2, end_1);
-                            Handles.color = gradient.Evaluate(1f);
-                            Handles.DrawAAPolyLine(5, end_1, windowPoints[i + 1]);
+                            if (i == gridPoints.Count - 2) {
+                                Handles.DrawAAPolyLine(5, windowPoints[i], start_1);
+                                Handles.color = gradient.Evaluate(0.25f);
+                                Handles.DrawAAPolyLine(5, start_1, start_2);
+                                Handles.color = gradient.Evaluate(0.5f);
+                                Handles.DrawAAPolyLine(5, start_2, end_2);
+                                Handles.color = gradient.Evaluate(0.75f);
+                                Handles.DrawAAPolyLine(5, end_2, end_1);
+                                Handles.color = gradient.Evaluate(1f);
+                                Handles.DrawAAPolyLine(5, end_1, windowPoints[i + 1]);
+                            } else {
+                                Handles.DrawAAPolyLine(5, windowPoints[i], start_1);
+                                Handles.DrawAAPolyLine(5, start_1, start_2);
+                                Handles.DrawAAPolyLine(5, start_2, end_2);
+                                Handles.DrawAAPolyLine(5, end_2, end_1);
+                                Handles.DrawAAPolyLine(5, end_1, windowPoints[i + 1]);
+                            }
                         }
                     }
                     break;

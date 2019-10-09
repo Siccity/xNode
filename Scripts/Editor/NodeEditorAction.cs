@@ -309,6 +309,7 @@ namespace XNodeEditor {
                                 SelectNode(node, true);
                             }
                         }
+                        Repaint();
                     }
                     break;
                 case EventType.ValidateCommand:

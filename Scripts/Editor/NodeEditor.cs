@@ -72,8 +72,6 @@ namespace XNodeEditor {
                 GUIHelper.ClearRepaintRequest();
                 window.Repaint();
             }
-#else
-            window.Repaint();
 #endif
 
 #if ODIN_INSPECTOR

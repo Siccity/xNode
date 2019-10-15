@@ -274,13 +274,13 @@ namespace XNodeEditor {
                                 ShowPortContextMenu(hoveredPort);
                             } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
                                 if (!Selection.Contains(hoveredNode)) SelectNode(hoveredNode, false);
-                                autoConnectOutput = null;                                
+                                autoConnectOutput = null;
                                 GenericMenu menu = new GenericMenu();
                                 NodeEditor.GetEditor(hoveredNode, this).AddContextMenuItems(menu);
                                 menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
                                 e.Use(); // Fixes copy/paste context menu appearing in Unity 5.6.6f2 - doesn't occur in 2018.3.2f1 Probably needs to be used in other places.
                             } else if (!IsHoveringNode) {
-                                autoConnectOutput = null;                                
+                                autoConnectOutput = null;
                                 GenericMenu menu = new GenericMenu();
                                 graphEditor.AddContextMenuItems(menu);
                                 menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
@@ -471,8 +471,7 @@ namespace XNodeEditor {
         /// <summary> Draw a connection as we are dragging it </summary>
         public void DrawDraggedConnection() {
             if (IsDraggingPort) {
-                Color col = NodeEditorPreferences.GetTypeColor(draggedOutput.ValueType);
-                col.a = draggedOutputTarget != null ? 1.0f : 0.6f;
+                Gradient gradient = graphEditor.GetNoodleGradient(draggedOutput, null);
 
                 Rect fromRect;
                 if (!_portConnectionPoints.TryGetValue(draggedOutput, out fromRect)) return;
@@ -484,10 +483,10 @@ namespace XNodeEditor {
                 if (draggedOutputTarget != null) gridPoints.Add(portConnectionPoints[draggedOutputTarget].center);
                 else gridPoints.Add(WindowToGridPosition(Event.current.mousePosition));
 
-                DrawNoodle(col, gridPoints);
+                DrawNoodle(gradient, gridPoints);
 
                 Color bgcol = Color.black;
-                Color frcol = col;
+                Color frcol = gradient.colorKeys[0].color;
                 bgcol.a = 0.6f;
                 frcol.a = 0.6f;
 

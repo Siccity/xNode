@@ -63,7 +63,7 @@ namespace XNodeEditor {
             menu.AddCustomContextMenuItems(target);
         }
 
-        /// <summary> Returned color is used to color noodles </summary>
+        /// <summary> Returned gradient is used to color noodles </summary>
         /// <param name="output"> The output this noodle comes from. Never null. </param>
         /// <param name="input"> The output this noodle comes from. Can be null if we are dragging the noodle. </param>
         public virtual Gradient GetNoodleGradient(XNode.NodePort output, XNode.NodePort input) {
@@ -92,6 +92,13 @@ namespace XNodeEditor {
                 );
             }
             return grad;
+        }
+
+        /// <summary> Returned float is used for noodle thickness </summary>
+        /// <param name="output"> The output this noodle comes from. Never null. </param>
+        /// <param name="input"> The output this noodle comes from. Can be null if we are dragging the noodle. </param>
+        public virtual float GetNoodleThickness(XNode.NodePort output, XNode.NodePort input) {
+            return 5f;
         }
 
         /// <summary> Returned color is used to color ports </summary>

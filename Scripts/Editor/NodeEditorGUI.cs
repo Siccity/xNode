@@ -117,7 +117,7 @@ namespace XNodeEditor {
         }
 
         /// <summary> Draw a bezier from output to input in grid coordinates </summary>
-        public void DrawNoodle(Gradient gradient, List<Vector2> gridPoints) {
+        public void DrawNoodle(Gradient gradient, float width, List<Vector2> gridPoints) {
             Vector2[] windowPoints = gridPoints.Select(x => GridToWindowPosition(x)).ToArray();
             Handles.color = gradient.Evaluate(0f);
             int length = gridPoints.Count;
@@ -150,13 +150,12 @@ namespace XNodeEditor {
                         Vector2 tangent_a = point_a + outputTangent * 50 / zoom;
                         Vector2 tangent_b = point_b + inputTangent * 50 / zoom;
                         // Hover effect.
-                        int bezier_width = 4;
                         int division = Mathf.RoundToInt(.1f * dist_ab) + 3;
                         Vector3[] points = Handles.MakeBezierPoints(point_a, point_b, tangent_a, tangent_b, division);
                         // Coloring and bezier drawing.
                         for (int j = 0; j < points.Length - 1; j++) {
                             if (i == gridPoints.Count - 2) Handles.color = gradient.Evaluate((j + 1f) / points.Length);
-                            Handles.DrawAAPolyLine(bezier_width, points[j], points[j + 1]);
+                            Handles.DrawAAPolyLine(width, points[j], points[j + 1]);
                         }
                         outputTangent = -inputTangent;
                     }
@@ -165,14 +164,12 @@ namespace XNodeEditor {
                     for (int i = 0; i < length - 1; i++) {
                         Vector2 point_a = windowPoints[i];
                         Vector2 point_b = windowPoints[i + 1];
-                        // Hover effect.
-                        int line_width = 5;
                         // Draws the line with the coloring.
                         Vector2 prev_point = point_a;
                         for (float j = 0; j < 1; j += 10f / Vector2.Distance(point_a, point_b)) {
                             Vector2 lerp = Vector2.Lerp(point_a, point_b, j);
                             if (i == gridPoints.Count - 2) Handles.color = gradient.Evaluate(j);
-                            Handles.DrawAAPolyLine(line_width, prev_point, lerp);
+                            Handles.DrawAAPolyLine(width, prev_point, lerp);
                             prev_point = lerp;
                         }
                     }
@@ -187,15 +184,15 @@ namespace XNodeEditor {
                             start_1.x = midpoint;
                             end_1.x = midpoint;
                             if (i == gridPoints.Count - 2) {
-                                Handles.DrawAAPolyLine(5, windowPoints[i], start_1);
+                                Handles.DrawAAPolyLine(width, windowPoints[i], start_1);
                                 Handles.color = gradient.Evaluate(0.5f);
-                                Handles.DrawAAPolyLine(5, start_1, end_1);
+                                Handles.DrawAAPolyLine(width, start_1, end_1);
                                 Handles.color = gradient.Evaluate(1f);
-                                Handles.DrawAAPolyLine(5, end_1, windowPoints[i + 1]);
+                                Handles.DrawAAPolyLine(width, end_1, windowPoints[i + 1]);
                             } else {
-                                Handles.DrawAAPolyLine(5, windowPoints[i], start_1);
-                                Handles.DrawAAPolyLine(5, start_1, end_1);
-                                Handles.DrawAAPolyLine(5, end_1, windowPoints[i + 1]);
+                                Handles.DrawAAPolyLine(width, windowPoints[i], start_1);
+                                Handles.DrawAAPolyLine(width, start_1, end_1);
+                                Handles.DrawAAPolyLine(width, end_1, windowPoints[i + 1]);
                             }
                         } else {
                             float midpoint = (windowPoints[i].y + windowPoints[i + 1].y) * 0.5f;
@@ -208,21 +205,21 @@ namespace XNodeEditor {
                             start_2.y = midpoint;
                             end_2.y = midpoint;
                             if (i == gridPoints.Count - 2) {
-                                Handles.DrawAAPolyLine(5, windowPoints[i], start_1);
+                                Handles.DrawAAPolyLine(width, windowPoints[i], start_1);
                                 Handles.color = gradient.Evaluate(0.25f);
-                                Handles.DrawAAPolyLine(5, start_1, start_2);
+                                Handles.DrawAAPolyLine(width, start_1, start_2);
                                 Handles.color = gradient.Evaluate(0.5f);
-                                Handles.DrawAAPolyLine(5, start_2, end_2);
+                                Handles.DrawAAPolyLine(width, start_2, end_2);
                                 Handles.color = gradient.Evaluate(0.75f);
-                                Handles.DrawAAPolyLine(5, end_2, end_1);
+                                Handles.DrawAAPolyLine(width, end_2, end_1);
                                 Handles.color = gradient.Evaluate(1f);
-                                Handles.DrawAAPolyLine(5, end_1, windowPoints[i + 1]);
+                                Handles.DrawAAPolyLine(width, end_1, windowPoints[i + 1]);
                             } else {
-                                Handles.DrawAAPolyLine(5, windowPoints[i], start_1);
-                                Handles.DrawAAPolyLine(5, start_1, start_2);
-                                Handles.DrawAAPolyLine(5, start_2, end_2);
-                                Handles.DrawAAPolyLine(5, end_2, end_1);
-                                Handles.DrawAAPolyLine(5, end_1, windowPoints[i + 1]);
+                                Handles.DrawAAPolyLine(width, windowPoints[i], start_1);
+                                Handles.DrawAAPolyLine(width, start_1, start_2);
+                                Handles.DrawAAPolyLine(width, start_2, end_2);
+                                Handles.DrawAAPolyLine(width, end_2, end_1);
+                                Handles.DrawAAPolyLine(width, end_1, windowPoints[i + 1]);
                             }
                         }
                     }
@@ -252,6 +249,7 @@ namespace XNodeEditor {
                         XNode.NodePort input = output.GetConnection(k);
 
                         Gradient noodleGradient = graphEditor.GetNoodleGradient(output, input);
+                        float noodleThickness = graphEditor.GetNoodleThickness(output, input);
 
                         // Error handling
                         if (input == null) continue; //If a script has been updated and the port doesn't exist, it is removed and null is returned. If this happens, return.
@@ -265,7 +263,7 @@ namespace XNodeEditor {
                         gridPoints.Add(fromRect.center);
                         gridPoints.AddRange(reroutePoints);
                         gridPoints.Add(toRect.center);
-                        DrawNoodle(noodleGradient, gridPoints);
+                        DrawNoodle(noodleGradient, noodleThickness, gridPoints);
 
                         // Loop through reroute points again and draw the points
                         for (int i = 0; i < reroutePoints.Count; i++) {

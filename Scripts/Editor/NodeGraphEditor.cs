@@ -101,6 +101,14 @@ namespace XNodeEditor {
             return 5f;
         }
 
+        public virtual NoodlePath GetNoodlePath(XNode.NodePort output, XNode.NodePort input) {
+            return NodeEditorPreferences.GetSettings().noodlePath;
+        }
+
+        public virtual NoodleStroke GetNoodleStroke(XNode.NodePort output, XNode.NodePort input) {
+            return NodeEditorPreferences.GetSettings().noodleStroke;
+        }
+
         /// <summary> Returned color is used to color ports </summary>
         public virtual Color GetPortColor(XNode.NodePort port) {
             return GetTypeColor(port.ValueType);

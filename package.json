@@ -3,5 +3,27 @@
   "description": "xNode provides a set of APIs and an editor interface for creating and editing custom node graphs.",
   "version": "1.7.0",
   "unity": "2018.1",
-  "displayName": "xNode"
+  "displayName": "xNode",
+  "samples": [
+    {
+      "displayName": "LogicToy",
+      "description": "LogicToy",
+      "path": "Samples~/LogicToy"
+    },
+    {
+      "displayName": "MathGraph",
+      "description": "MathGraph",
+      "path": "Samples~/MathGraph"
+    },
+    {
+      "displayName": "RuntimeMathGraph",
+      "description": "RuntimeMathGraph",
+      "path": "Samples~/RuntimeMathGraph"
+    },
+    {
+      "displayName": "StateMachine",
+      "description": "StateMachine",
+      "path": "Samples~/StateMachine"
+    }
+  ]
 }

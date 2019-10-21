@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -100,6 +98,7 @@ namespace XNodeEditor {
         /// <summary> Create a node and save it in the graph asset </summary>
         public virtual XNode.Node CreateNode(Type type, Vector2 position) {
             XNode.Node node = target.AddNode(type);
+            Undo.RegisterCreatedObjectUndo(node, "Create Node");
             node.position = position;
             if (node.name == null || node.name.Trim() == "") node.name = NodeEditorUtilities.NodeDefaultName(type);
             AssetDatabase.AddObjectToAsset(node, target);
@@ -111,6 +110,7 @@ namespace XNodeEditor {
         /// <summary> Creates a copy of the original node in the graph </summary>
         public XNode.Node CopyNode(XNode.Node original) {
             XNode.Node node = target.CopyNode(original);
+            Undo.RegisterCreatedObjectUndo(node, "Duplicate Node");
             node.name = original.name;
             AssetDatabase.AddObjectToAsset(node, target);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
@@ -119,8 +119,15 @@ namespace XNodeEditor {
 
         /// <summary> Safely remove a node and all its connections. </summary>
         public virtual void RemoveNode(XNode.Node node) {
+            Undo.SetCurrentGroupName("Removed Node");
+            Undo.RecordObject(node, null);
+            Undo.RecordObject(target, null);
+            foreach (var port in node.Ports)
+                foreach (var conn in port.GetConnections())
+                    Undo.RecordObject(conn.node, null);
             target.RemoveNode(node);
-            UnityEngine.Object.DestroyImmediate(node, true);
+            Undo.DestroyObjectImmediate(node);
+            Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 
@@ -132,7 +139,8 @@ namespace XNodeEditor {
             /// <summary> Tells a NodeGraphEditor which Graph type it is an editor for </summary>
             /// <param name="inspectedType">Type that this editor can edit</param>
             /// <param name="editorPrefsKey">Define unique key for unique layout settings instance</param>
-            public CustomNodeGraphEditorAttribute(Type inspectedType, string editorPrefsKey = "xNode.Settings") {
+            public CustomNodeGraphEditorAttribute(Type inspectedType, string editorPrefsKey = "xNode.Settings")
+            {
                 this.inspectedType = inspectedType;
                 this.editorPrefsKey = editorPrefsKey;
             }

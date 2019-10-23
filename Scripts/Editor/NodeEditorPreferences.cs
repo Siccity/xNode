@@ -81,6 +81,8 @@ namespace XNodeEditor {
 
         /// <summary> Get settings of current active editor </summary>
         public static Settings GetSettings() {
+            if (XNodeEditor.NodeEditorWindow.current == null) return new Settings();
+
             if (lastEditor != XNodeEditor.NodeEditorWindow.current.graphEditor) {
                 object[] attribs = XNodeEditor.NodeEditorWindow.current.graphEditor.GetType().GetCustomAttributes(typeof(XNodeEditor.NodeGraphEditor.CustomNodeGraphEditorAttribute), true);
                 if (attribs.Length == 1) {

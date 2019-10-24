@@ -100,13 +100,11 @@ namespace XNodeEditor {
             return NodeEditorResources.styles.nodeBody;
         }
 
-        public virtual GUIStyle GetBodyHighlightStyle()
-        {
+        public virtual GUIStyle GetBodyHighlightStyle() {
             return NodeEditorResources.styles.nodeHighlight;
         }
 
-        public virtual GUIStyle GetHeaderTitleStyle()
-        {
+        public virtual GUIStyle GetHeaderTitleStyle() {
             return NodeEditorResources.styles.nodeHeader;
         }
 

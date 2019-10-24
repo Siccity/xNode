@@ -25,7 +25,7 @@ namespace XNodeEditor {
 #endif
 
         public virtual void OnHeaderGUI() {
-            GUILayout.Label(target.name, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
+            GUILayout.Label(target.name, GetHeaderTitleStyle(), GUILayout.Height(30));
         }
 
         /// <summary> Draws standard field editors for all public fields </summary>
@@ -98,6 +98,16 @@ namespace XNodeEditor {
 
         public virtual GUIStyle GetBodyStyle() {
             return NodeEditorResources.styles.nodeBody;
+        }
+
+        public virtual GUIStyle GetBodyHighlightStyle()
+        {
+            return NodeEditorResources.styles.nodeHighlight;
+        }
+
+        public virtual GUIStyle GetHeaderTitleStyle()
+        {
+            return NodeEditorResources.styles.nodeHeader;
         }
 
         /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>

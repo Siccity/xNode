@@ -117,7 +117,7 @@ namespace XNodeEditor {
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
         
-        static Vector3 CalculateBezierPoint(in Vector3 p0, in Vector3 p1, in Vector3 p2, in Vector3 p3, float t) {
+        static Vector2 CalculateBezierPoint(in Vector2 p0, in Vector2 p1, in Vector2 p2, in Vector2 p3, float t) {
             float u = 1 - t;
             float tt = t * t, uu = u * u;
             float uuu = uu * u, ttt = tt * t;
@@ -125,7 +125,7 @@ namespace XNodeEditor {
         }
 
         /// <summary> Draws a line segment without allocating temporary arrays </summary>
-        static void DrawAAPolyLineNonAlloc(float thickness, in Vector3 p0, in Vector3 p1) {
+        static void DrawAAPolyLineNonAlloc(float thickness, in Vector2 p0, in Vector2 p1) {
             polyLineTempArray[0] = p0;
             polyLineTempArray[1] = p1;
             Handles.DrawAAPolyLine(thickness, polyLineTempArray);
@@ -172,8 +172,8 @@ namespace XNodeEditor {
                         int division = Mathf.RoundToInt(.2f * dist_ab) + 3;
                         // Coloring and bezier drawing.
                         int draw = 0;
-                        Vector3 bezierPrevious = point_a;
-                        for (int j = 1; j < division; ++j)
+                        Vector2 bezierPrevious = point_a;
+                        for (int j = 1; j <= division; ++j)
                         {
                             if (stroke == NoodleStroke.Dashed) {
                                 draw++;
@@ -182,7 +182,7 @@ namespace XNodeEditor {
                             }
                             if (i == length - 2)
                                 Handles.color = gradient.Evaluate((j + 1f) / division);
-                            Vector3 bezierNext = CalculateBezierPoint(point_a, tangent_a, tangent_b, point_b, j / (float)division);
+                            Vector2 bezierNext = CalculateBezierPoint(point_a, tangent_a, tangent_b, point_b, j / (float)division);
                             DrawAAPolyLineNonAlloc(thickness, bezierPrevious, bezierNext);
                             bezierPrevious = bezierNext;
                         }

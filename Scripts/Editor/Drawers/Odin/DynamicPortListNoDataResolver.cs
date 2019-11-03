@@ -9,7 +9,6 @@ using System.Linq;
 using UnityEngine;
 using XNode;
 using XNodeEditor.Odin;
-using static XNode.Node;
 
 namespace XNodeEditor
 {
@@ -18,11 +17,11 @@ namespace XNodeEditor
 	{
 		public override bool CanResolveForPropertyFilter( InspectorProperty property )
 		{
-			var input = property.GetAttribute<InputAttribute>();
+			var input = property.GetAttribute<Node.InputAttribute>();
 			if ( input != null )
 				return input.dynamicPortList;
 
-			var output = property.GetAttribute<OutputAttribute>();
+			var output = property.GetAttribute<Node.OutputAttribute>();
 			if ( output != null )
 				return output.dynamicPortList;
 
@@ -47,14 +46,14 @@ namespace XNodeEditor
 				var hideLabelAttribute = attributes.OfType<HideLabelAttribute>().SingleOrDefault();
 
 				attributes = attributes
-				.Append( GetPortAttribute( Property.Name, childIndex ) )
+				.AppendIf( true, GetPortAttribute( Property.Name, childIndex ) )
 				.AppendIf( labelTextAttribute == null && hideLabelAttribute == null, new LabelTextAttribute( string.Format( "{0} {1}", Property.Name, childIndex ) ) );
 
 				result = InspectorPropertyInfo.CreateValue(
 						name: CollectionResolverUtilities.DefaultIndexToChildName( childIndex ),
 						order: childIndex,
 						serializationBackend: this.Property.BaseValueEntry.SerializationBackend,
-						new GetterSetter<TNotAList, NodePort>(
+						getterSetter: new GetterSetter<TNotAList, NodePort>(
 							getter: ( ref TNotAList list ) => ports[childIndex], // Return absolutely nothing? Return a port?
 							setter: ( ref TNotAList list, NodePort element ) => ports[childIndex] = element ),
 						attributes: attributes.ToArray() );
@@ -200,9 +199,10 @@ namespace XNodeEditor
 			return CollectionResolverUtilities.DefaultChildNameToIndex( name );
 		}
 
-		public override Type ElementType => typeof( NodePort );
+		public override Type ElementType { get { return typeof( NodePort ); } }
 
-		protected Node node => ( Property.Tree.UnitySerializedObject.targetObject as Node );
+		protected Node node { get { return ( Property.Tree.UnitySerializedObject.targetObject as Node ); } }
+
 		protected List<NodePort> ports
 		{
 			get
@@ -221,11 +221,11 @@ namespace XNodeEditor
 			}
 		}
 
-		protected bool IsInput => Property.GetAttribute<InputAttribute>() != null;
+		protected bool IsInput { get { return Property.GetAttribute<Node.InputAttribute>() != null; } }
 
-		public ConnectionType connectionType => IsInput ? Property.GetAttribute<InputAttribute>().connectionType : Property.GetAttribute<OutputAttribute>().connectionType;
-		public TypeConstraint typeConstraint => IsInput ? Property.GetAttribute<InputAttribute>().typeConstraint : Property.GetAttribute<OutputAttribute>().typeConstraint;
-		public ShowBackingValue backingValue => IsInput ? Property.GetAttribute<InputAttribute>().backingValue : Property.GetAttribute<OutputAttribute>().backingValue;
+		public Node.ConnectionType connectionType { get { return IsInput ? Property.GetAttribute<Node.InputAttribute>().connectionType : Property.GetAttribute<Node.OutputAttribute>().connectionType; } }
+		public Node.TypeConstraint typeConstraint { get { return IsInput ? Property.GetAttribute<Node.InputAttribute>().typeConstraint : Property.GetAttribute<Node.OutputAttribute>().typeConstraint; } }
+		public Node.ShowBackingValue backingValue { get { return IsInput ? Property.GetAttribute<Node.InputAttribute>().backingValue : Property.GetAttribute<Node.OutputAttribute>().backingValue; } }
 	}
 }
 #endif

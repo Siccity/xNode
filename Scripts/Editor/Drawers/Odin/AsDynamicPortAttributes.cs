@@ -4,7 +4,6 @@ using System;
 using UnityEditor;
 using UnityEngine;
 using XNode;
-using static XNode.Node;
 
 namespace XNodeEditor.Odin
 {
@@ -14,7 +13,7 @@ namespace XNodeEditor.Odin
 		public Node Node { get; set; }
 
 		public bool InList { get; set; }
-		public ShowBackingValue BackingValue { get; set; }
+		public Node.ShowBackingValue BackingValue { get; set; }
 
 		public NodePort Port
 		{
@@ -94,7 +93,7 @@ namespace XNodeEditor.Odin
 				return;
 
 			if ( Event.current.type == EventType.Layout )
-				drawData = Attribute.BackingValue == ShowBackingValue.Always || Attribute.BackingValue == ShowBackingValue.Unconnected && !Attribute.Port.IsConnected;
+				drawData = Attribute.BackingValue == Node.ShowBackingValue.Always || Attribute.BackingValue == Node.ShowBackingValue.Unconnected && !Attribute.Port.IsConnected;
 
 			using ( new AsDynamicPortScope( Attribute.Port, Attribute.InList ) )
 			{

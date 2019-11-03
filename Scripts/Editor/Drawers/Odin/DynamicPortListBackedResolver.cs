@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using XNode;
-using static XNode.Node;
 
 namespace XNodeEditor.Odin
 {
@@ -17,11 +16,11 @@ namespace XNodeEditor.Odin
 	{
 		protected override bool CanDrawValueProperty( InspectorProperty property )
 		{
-			var input = property.GetAttribute<InputAttribute>();
+			var input = property.GetAttribute<Node.InputAttribute>();
 			if ( input != null )
 				return input.dynamicPortList;
 
-			var output = property.GetAttribute<OutputAttribute>();
+			var output = property.GetAttribute<Node.OutputAttribute>();
 			if ( output != null )
 				return output.dynamicPortList;
 
@@ -35,11 +34,11 @@ namespace XNodeEditor.Odin
 	{
 		public override bool CanResolveForPropertyFilter( InspectorProperty property )
 		{
-			var input = property.GetAttribute<InputAttribute>();
+			var input = property.GetAttribute<Node.InputAttribute>();
 			if ( input != null )
 				return input.dynamicPortList;
 
-			var output = property.GetAttribute<OutputAttribute>();
+			var output = property.GetAttribute<Node.OutputAttribute>();
 			if ( output != null )
 				return output.dynamicPortList;
 
@@ -64,14 +63,14 @@ namespace XNodeEditor.Odin
 				var hideLabelAttribute = attributes.OfType<HideLabelAttribute>().SingleOrDefault();
 
 				attributes = attributes
-				.Append( GetPortAttribute( Property.Name, childIndex ) )
+				.AppendIf( true, GetPortAttribute( Property.Name, childIndex ) )
 				.AppendIf( labelTextAttribute == null && hideLabelAttribute == null, new LabelTextAttribute( string.Format( "{0} {1}", Property.Name, childIndex ) ) );
 
 				result = InspectorPropertyInfo.CreateValue(
 						name: CollectionResolverUtilities.DefaultIndexToChildName( childIndex ),
 						order: childIndex,
 						serializationBackend: this.Property.BaseValueEntry.SerializationBackend,
-						new GetterSetter<TList, TElement>(
+						getterSetter: new GetterSetter<TList, TElement>(
 							getter: ( ref TList list ) => list[childIndex],
 							setter: ( ref TList list, TElement element ) => list[childIndex] = element ),
 						attributes: attributes.ToArray() );
@@ -196,7 +195,7 @@ namespace XNodeEditor.Odin
 			base.Clear( collection );
 		}
 
-		protected Node node => ( Property.Tree.UnitySerializedObject.targetObject as Node );
+		protected Node node { get { return ( Property.Tree.UnitySerializedObject.targetObject as Node ); } }
 		protected List<NodePort> ports
 		{
 			get
@@ -215,11 +214,11 @@ namespace XNodeEditor.Odin
 			}
 		}
 
-		protected bool IsInput => Property.GetAttribute<InputAttribute>() != null;
+		protected bool IsInput { get { return Property.GetAttribute<Node.InputAttribute>() != null; } }
 
-		public ConnectionType connectionType => IsInput ? Property.GetAttribute<InputAttribute>().connectionType : Property.GetAttribute<OutputAttribute>().connectionType;
-		public TypeConstraint typeConstraint => IsInput ? Property.GetAttribute<InputAttribute>().typeConstraint : Property.GetAttribute<OutputAttribute>().typeConstraint;
-		public ShowBackingValue backingValue => IsInput ? Property.GetAttribute<InputAttribute>().backingValue : Property.GetAttribute<OutputAttribute>().backingValue;
+		public Node.ConnectionType connectionType { get { return IsInput ? Property.GetAttribute<Node.InputAttribute>().connectionType : Property.GetAttribute<Node.OutputAttribute>().connectionType; } }
+		public Node.TypeConstraint typeConstraint { get { return IsInput ? Property.GetAttribute<Node.InputAttribute>().typeConstraint : Property.GetAttribute<Node.OutputAttribute>().typeConstraint; } }
+		public Node.ShowBackingValue backingValue { get { return IsInput ? Property.GetAttribute<Node.InputAttribute>().backingValue : Property.GetAttribute<Node.OutputAttribute>().backingValue; } }
 	}
 
 	public class DynamicPortListAttributeProcessor<T> : OdinAttributeProcessor<T>
@@ -227,11 +226,11 @@ namespace XNodeEditor.Odin
 		public override bool CanProcessSelfAttributes( InspectorProperty property )
 		{
 			// We can guess that it's going to fall in here
-			var input = property.GetAttribute<InputAttribute>();
+			var input = property.GetAttribute<Node.InputAttribute>();
 			if ( input != null )
 				return input.dynamicPortList;
 
-			var output = property.GetAttribute<OutputAttribute>();
+			var output = property.GetAttribute<Node.OutputAttribute>();
 			if ( output != null )
 				return output.dynamicPortList;
 

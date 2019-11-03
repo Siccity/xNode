@@ -38,7 +38,6 @@ namespace XNodeEditor {
             // serializedObject.Update(); must go at the start of an inspector gui, and
             // serializedObject.ApplyModifiedProperties(); goes at the end.
             serializedObject.Update();
-            string[] excludes = { "m_Script", "graph", "position", "ports" };
 
 #if ODIN_INSPECTOR
             InspectorUtilities.BeginDrawPropertyTree(objectTree, true);
@@ -47,6 +46,7 @@ namespace XNodeEditor {
             InspectorUtilities.EndDrawPropertyTree(objectTree);
             GUIHelper.PopLabelWidth();
 #else
+            string[] excludes = { "m_Script", "graph", "position", "ports" };
 
             // Iterate through serialized properties and draw them like the Inspector (But with ports)
             SerializedProperty iterator = serializedObject.GetIterator();
@@ -65,7 +65,7 @@ namespace XNodeEditor {
             }
 #endif
 
-            serializedObject.ApplyModifiedProperties();
+			serializedObject.ApplyModifiedProperties();
 
 #if ODIN_INSPECTOR
             // Call repaint so that the graph window elements respond properly to layout changes coming from Odin    

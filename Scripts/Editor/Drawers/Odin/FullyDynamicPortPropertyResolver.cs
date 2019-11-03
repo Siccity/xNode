@@ -7,7 +7,6 @@ using System.Linq;
 using System.Reflection;
 using XNode;
 using XNodeEditor.Odin;
-using static XNode.Node;
 
 namespace XNodeEditor
 {
@@ -46,7 +45,12 @@ namespace XNodeEditor
 				nodeType.FindMember()
 					.IsFieldOrProperty()
 					.TryGetMembers( out fieldsAndProperties, out error );
-				var attributedMembers = fieldsAndProperties?.Where( x => x.GetAttribute<InputAttribute>() != null || x.GetAttribute<OutputAttribute>() != null );
+
+				IEnumerable<MemberInfo> attributedMembers;
+				if ( fieldsAndProperties != null )
+					attributedMembers = fieldsAndProperties.Where( x => x.GetAttribute<Node.InputAttribute>() != null || x.GetAttribute<Node.OutputAttribute>() != null );
+				else
+					attributedMembers = Enumerable.Empty<MemberInfo>();
 
 				foreach ( var port in node.DynamicPorts )
 				{
@@ -57,7 +61,7 @@ namespace XNodeEditor
 					infos.AddValue( port.fieldName, () => new Nothing(), value => { },
 						new AsDynamicPortNoDataAtribute()
 						{
-							BackingValue = ShowBackingValue.Never,
+							BackingValue = Node.ShowBackingValue.Never,
 							FieldName = port.fieldName,
 							InList = false,
 							Node = node

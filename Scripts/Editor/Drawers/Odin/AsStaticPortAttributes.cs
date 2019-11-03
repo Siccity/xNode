@@ -4,7 +4,6 @@ using System;
 using UnityEditor;
 using UnityEngine;
 using XNode;
-using static XNode.Node;
 
 namespace XNodeEditor.Odin
 {
@@ -39,11 +38,11 @@ namespace XNodeEditor.Odin
 	}
 
 	[DrawerPriority( 0.4, 0, 0 )]
-	internal class InputAttributeDrawer<T> : OdinAttributeDrawer<InputAttribute, T>
+	internal class InputAttributeDrawer<T> : OdinAttributeDrawer<Node.InputAttribute, T>
 	{
 		protected override bool CanDrawAttributeValueProperty( InspectorProperty property )
 		{
-			var attr = property.GetAttribute<InputAttribute>();
+			var attr = property.GetAttribute<Node.InputAttribute>();
 			if ( attr != null )
 				return !attr.dynamicPortList;
 
@@ -56,7 +55,7 @@ namespace XNodeEditor.Odin
 		{
 			NodePort port = ( Property.Tree.UnitySerializedObject.targetObject as Node ).GetInputPort( Property.Name );
 			if ( Event.current.type == EventType.Layout )
-				drawData = Attribute.backingValue == ShowBackingValue.Always || Attribute.backingValue == ShowBackingValue.Unconnected && !port.IsConnected;
+				drawData = Attribute.backingValue == Node.ShowBackingValue.Always || Attribute.backingValue == Node.ShowBackingValue.Unconnected && !port.IsConnected;
 
 			using ( new AsStaticPortScope( port ) )
 			{
@@ -69,11 +68,11 @@ namespace XNodeEditor.Odin
 	}
 
 	[DrawerPriority( 0.4, 0, 0 )]
-	internal class OutputAttributeDrawer<T> : OdinAttributeDrawer<OutputAttribute, T>
+	internal class OutputAttributeDrawer<T> : OdinAttributeDrawer<Node.OutputAttribute, T>
 	{
 		protected override bool CanDrawAttributeValueProperty( InspectorProperty property )
 		{
-			var attr = property.GetAttribute<OutputAttribute>();
+			var attr = property.GetAttribute<Node.OutputAttribute>();
 			if ( attr != null )
 				return !attr.dynamicPortList;
 
@@ -86,7 +85,7 @@ namespace XNodeEditor.Odin
 		{
 			NodePort port = ( Property.Tree.UnitySerializedObject.targetObject as Node ).GetOutputPort( Property.Name );
 			if ( Event.current.type == EventType.Layout )
-				drawData = Attribute.backingValue == ShowBackingValue.Always || Attribute.backingValue == ShowBackingValue.Unconnected && !port.IsConnected;
+				drawData = Attribute.backingValue == Node.ShowBackingValue.Always || Attribute.backingValue == Node.ShowBackingValue.Unconnected && !port.IsConnected;
 
 			using ( new AsStaticPortScope( port ) )
 			{

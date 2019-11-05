@@ -49,6 +49,8 @@ namespace XNode {
             Inherited,
             /// <summary> Allow only similar types </summary>
             Strict,
+            /// <summary> Allow similar and inherited types but checks inheritance in reverse </summary>
+            InheritedInverse,
         }
 
 #region Obsolete

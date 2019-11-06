@@ -133,7 +133,7 @@ namespace XNodeEditor {
 
         /// <summary> Deal with objects dropped into the graph through DragAndDrop </summary>
         public virtual void OnDropObjects(UnityEngine.Object[] objects) {
-            Debug.Log("No OnDropItems override defined for " + GetType());
+            Debug.Log("No OnDropObjects override defined for " + GetType());
         }
 
         /// <summary> Create a node and save it in the graph asset </summary>

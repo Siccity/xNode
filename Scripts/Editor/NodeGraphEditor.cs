@@ -138,7 +138,9 @@ namespace XNodeEditor {
 
         /// <summary> Create a node and save it in the graph asset </summary>
         public virtual XNode.Node CreateNode(Type type, Vector2 position) {
+            Undo.RecordObject(target, "Create Node");
             XNode.Node node = target.AddNode(type);
+            Undo.RegisterCreatedObjectUndo(node, "Create Node");
             node.position = position;
             if (node.name == null || node.name.Trim() == "") node.name = NodeEditorUtilities.NodeDefaultName(type);
             AssetDatabase.AddObjectToAsset(node, target);
@@ -149,7 +151,9 @@ namespace XNodeEditor {
 
         /// <summary> Creates a copy of the original node in the graph </summary>
         public XNode.Node CopyNode(XNode.Node original) {
+            Undo.RecordObject(target, "Duplicate Node");
             XNode.Node node = target.CopyNode(original);
+            Undo.RegisterCreatedObjectUndo(node, "Duplicate Node");
             node.name = original.name;
             AssetDatabase.AddObjectToAsset(node, target);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
@@ -158,8 +162,13 @@ namespace XNodeEditor {
 
         /// <summary> Safely remove a node and all its connections. </summary>
         public virtual void RemoveNode(XNode.Node node) {
+            Undo.RecordObject(node, "Delete Node");
+            Undo.RecordObject(target, "Delete Node");
+            foreach (var port in node.Ports)
+                foreach (var conn in port.GetConnections())
+                    Undo.RecordObject(conn.node, "Delete Node");
             target.RemoveNode(node);
-            UnityEngine.Object.DestroyImmediate(node, true);
+            Undo.DestroyObjectImmediate(node);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 

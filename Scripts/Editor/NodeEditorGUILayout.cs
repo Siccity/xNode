@@ -45,6 +45,11 @@ namespace XNodeEditor {
                 SpaceAttribute spaceAttribute;
                 if (NodeEditorUtilities.GetCachedAttrib(port.node.GetType(), property.name, out spaceAttribute)) spacePadding = spaceAttribute.height;
 
+                //GUI Values are from https://github.com/Unity-Technologies/UnityCsReference/blob/master/Editor/Mono/ScriptAttributeGUI/Implementations/DecoratorDrawers.cs
+                float headerPadding = 0;
+                HeaderAttribute headerAttribute;
+                if (NodeEditorUtilities.GetCachedAttrib(port.node.GetType(), property.name, out headerAttribute)) headerPadding = EditorGUIUtility.singleLineHeight * 1.5f;
+
                 // If property is an input, display a regular property field and put a port handle on the left side
                 if (port.direction == XNode.NodePort.IO.Input) {
                     // Get data from [Input] attribute
@@ -63,6 +68,14 @@ namespace XNodeEditor {
                     if (spacePadding > 0 && useLayoutSpace) {
                         GUILayout.Space(spacePadding);
                         spacePadding = 0;
+                    }
+                    if (headerPadding > 0 && useLayoutSpace)
+                    {
+                        Rect position = GUILayoutUtility.GetRect(0, EditorGUIUtility.singleLineHeight * 1.5f);
+                        position.yMin += (EditorGUIUtility.singleLineHeight * 0.5f) + EditorGUIUtility.standardVerticalSpacing;
+                        position = EditorGUI.IndentedRect(position);
+                        GUI.Label(position, headerAttribute.header, EditorStyles.boldLabel);
+                        headerPadding = 0;
                     }
 
                     if (dynamicPortList) {
@@ -89,7 +102,7 @@ namespace XNodeEditor {
                     }
 
                     rect = GUILayoutUtility.GetLastRect();
-                    rect.position = rect.position - new Vector2(16, -spacePadding);
+                    rect.position = rect.position - new Vector2(16, -(spacePadding + headerPadding));
                     // If property is an output, display a text label and put a port handle on the right side
                 } else if (port.direction == XNode.NodePort.IO.Output) {
                     // Get data from [Output] attribute
@@ -108,6 +121,14 @@ namespace XNodeEditor {
                     if (spacePadding > 0 && useLayoutSpace) {
                         GUILayout.Space(spacePadding);
                         spacePadding = 0;
+                    }
+                    if (headerPadding > 0 && useLayoutSpace)
+                    {
+                        Rect position = GUILayoutUtility.GetRect(0, EditorGUIUtility.singleLineHeight * 1.5f);
+                        position.yMin += (EditorGUIUtility.singleLineHeight * 0.5f) + EditorGUIUtility.standardVerticalSpacing;
+                        position = EditorGUI.IndentedRect(position);
+                        GUI.Label(position, headerAttribute.header, EditorStyles.boldLabel);
+                        headerPadding = 0;
                     }
 
                     if (dynamicPortList) {
@@ -134,7 +155,7 @@ namespace XNodeEditor {
                     }
 
                     rect = GUILayoutUtility.GetLastRect();
-                    rect.position = rect.position + new Vector2(rect.width, spacePadding);
+                    rect.position = rect.position + new Vector2(rect.width, spacePadding + headerPadding);
                 }
 
                 rect.size = new Vector2(16, 16);

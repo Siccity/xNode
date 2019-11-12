@@ -121,7 +121,10 @@ namespace XNodeEditor {
             float u = 1 - t;
             float tt = t * t, uu = u * u;
             float uuu = uu * u, ttt = tt * t;
-            return (uuu * p0) + (3 * uu * t * p1) + (3 * u * tt * p2) + (ttt * p3);
+            return new Vector2(
+                (uuu * p0.x) + (3 * uu * t * p1.x) + (3 * u * tt * p2.x) + (ttt * p3.x),
+                (uuu * p0.y) + (3 * uu * t * p1.y) + (3 * u * tt * p2.y) + (ttt * p3.y)
+            );
         }
 
         /// <summary> Draws a line segment without allocating temporary arrays </summary>

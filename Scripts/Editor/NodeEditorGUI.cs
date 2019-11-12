@@ -271,6 +271,8 @@ namespace XNodeEditor {
             List<RerouteReference> selection = preBoxSelectionReroute != null ? new List<RerouteReference>(preBoxSelectionReroute) : new List<RerouteReference>();
             hoveredReroute = new RerouteReference();
 
+            List<Vector2> gridPoints = new List<Vector2>(2);
+
             Color col = GUI.color;
             foreach (XNode.Node node in graph.nodes) {
                 //If a null node is found, return. This can happen if the nodes associated script is deleted. It is currently not possible in Unity to delete a null asset.
@@ -299,7 +301,7 @@ namespace XNodeEditor {
 
                         List<Vector2> reroutePoints = output.GetReroutePoints(k);
 
-                        List<Vector2> gridPoints = new List<Vector2>();
+                        gridPoints.Clear();
                         gridPoints.Add(fromRect.center);
                         gridPoints.AddRange(reroutePoints);
                         gridPoints.Add(toRect.center);

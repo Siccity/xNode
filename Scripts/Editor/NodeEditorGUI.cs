@@ -117,7 +117,7 @@ namespace XNodeEditor {
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
         
-        static Vector2 CalculateBezierPoint(in Vector2 p0, in Vector2 p1, in Vector2 p2, in Vector2 p3, float t) {
+        static Vector2 CalculateBezierPoint(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, float t) {
             float u = 1 - t;
             float tt = t * t, uu = u * u;
             float uuu = uu * u, ttt = tt * t;
@@ -125,7 +125,7 @@ namespace XNodeEditor {
         }
 
         /// <summary> Draws a line segment without allocating temporary arrays </summary>
-        static void DrawAAPolyLineNonAlloc(float thickness, in Vector2 p0, in Vector2 p1) {
+        static void DrawAAPolyLineNonAlloc(float thickness, Vector2 p0, Vector2 p1) {
             polyLineTempArray[0] = p0;
             polyLineTempArray[1] = p1;
             Handles.DrawAAPolyLine(thickness, polyLineTempArray);

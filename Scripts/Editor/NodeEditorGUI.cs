@@ -129,8 +129,10 @@ namespace XNodeEditor {
 
         /// <summary> Draws a line segment without allocating temporary arrays </summary>
         static void DrawAAPolyLineNonAlloc(float thickness, Vector2 p0, Vector2 p1) {
-            polyLineTempArray[0] = p0;
-            polyLineTempArray[1] = p1;
+            polyLineTempArray[0].x = p0.x;
+            polyLineTempArray[0].y = p0.y;
+            polyLineTempArray[1].x = p1.x;
+            polyLineTempArray[1].y = p1.y;
             Handles.DrawAAPolyLine(thickness, polyLineTempArray);
         }
         

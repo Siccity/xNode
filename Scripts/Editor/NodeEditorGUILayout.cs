@@ -41,14 +41,7 @@ namespace XNodeEditor {
             else {
                 Rect rect = new Rect();
 
-                float spacePadding = 0;
-                SpaceAttribute spaceAttribute;
-                if (NodeEditorUtilities.GetCachedAttrib(port.node.GetType(), property.name, out spaceAttribute)) spacePadding = spaceAttribute.height;
-
-                //GUI Values are from https://github.com/Unity-Technologies/UnityCsReference/blob/master/Editor/Mono/ScriptAttributeGUI/Implementations/DecoratorDrawers.cs
-                float headerPadding = 0;
-                HeaderAttribute headerAttribute;
-                if (NodeEditorUtilities.GetCachedAttrib(port.node.GetType(), property.name, out headerAttribute)) headerPadding = EditorGUIUtility.singleLineHeight * 1.5f;
+                List<PropertyAttribute> propertyAttributes = NodeEditorUtilities.GetCachedPropertyAttribs(port.node.GetType(), property.name);
 
                 // If property is an input, display a regular property field and put a port handle on the left side
                 if (port.direction == XNode.NodePort.IO.Input) {
@@ -61,21 +54,24 @@ namespace XNodeEditor {
                         showBacking = inputAttribute.backingValue;
                     }
 
-                    //Call GUILayout.Space if Space attribute is set and we are NOT drawing a PropertyField
-                    bool useLayoutSpace = dynamicPortList ||
+                    bool usePropertyAttributes = dynamicPortList ||
                         showBacking == XNode.Node.ShowBackingValue.Never ||
                         (showBacking == XNode.Node.ShowBackingValue.Unconnected && port.IsConnected);
-                    if (spacePadding > 0 && useLayoutSpace) {
-                        GUILayout.Space(spacePadding);
-                        spacePadding = 0;
-                    }
-                    if (headerPadding > 0 && useLayoutSpace)
-                    {
-                        Rect position = GUILayoutUtility.GetRect(0, EditorGUIUtility.singleLineHeight * 1.5f);
-                        position.yMin += (EditorGUIUtility.singleLineHeight * 0.5f) + EditorGUIUtility.standardVerticalSpacing;
-                        position = EditorGUI.IndentedRect(position);
-                        GUI.Label(position, headerAttribute.header, EditorStyles.boldLabel);
-                        headerPadding = 0;
+
+                    float spacePadding = 0;
+                    foreach (var attr in propertyAttributes) {
+                        if (attr is SpaceAttribute) {
+                            if (usePropertyAttributes) GUILayout.Space((attr as SpaceAttribute).height);
+                            else spacePadding += (attr as SpaceAttribute).height;
+                        } else if (attr is HeaderAttribute) {
+                            if (usePropertyAttributes) {
+                                //GUI Values are from https://github.com/Unity-Technologies/UnityCsReference/blob/master/Editor/Mono/ScriptAttributeGUI/Implementations/DecoratorDrawers.cs
+                                Rect position = GUILayoutUtility.GetRect(0, (EditorGUIUtility.singleLineHeight * 1.5f) - EditorGUIUtility.standardVerticalSpacing); //Layout adds standardVerticalSpacing after rect so we subtract it.
+                                position.yMin += EditorGUIUtility.singleLineHeight * 0.5f;
+                                position = EditorGUI.IndentedRect(position);
+                                GUI.Label(position, (attr as HeaderAttribute).header, EditorStyles.boldLabel);
+                            } else spacePadding += EditorGUIUtility.singleLineHeight * 1.5f;
+                        }
                     }
 
                     if (dynamicPortList) {
@@ -102,7 +98,7 @@ namespace XNodeEditor {
                     }
 
                     rect = GUILayoutUtility.GetLastRect();
-                    rect.position = rect.position - new Vector2(16, -(spacePadding + headerPadding));
+                    rect.position = rect.position - new Vector2(16, -spacePadding);
                     // If property is an output, display a text label and put a port handle on the right side
                 } else if (port.direction == XNode.NodePort.IO.Output) {
                     // Get data from [Output] attribute
@@ -114,21 +110,24 @@ namespace XNodeEditor {
                         showBacking = outputAttribute.backingValue;
                     }
 
-                    //Call GUILayout.Space if Space attribute is set and we are NOT drawing a PropertyField
-                    bool useLayoutSpace = dynamicPortList ||
+                    bool usePropertyAttributes = dynamicPortList ||
                         showBacking == XNode.Node.ShowBackingValue.Never ||
                         (showBacking == XNode.Node.ShowBackingValue.Unconnected && port.IsConnected);
-                    if (spacePadding > 0 && useLayoutSpace) {
-                        GUILayout.Space(spacePadding);
-                        spacePadding = 0;
-                    }
-                    if (headerPadding > 0 && useLayoutSpace)
-                    {
-                        Rect position = GUILayoutUtility.GetRect(0, EditorGUIUtility.singleLineHeight * 1.5f);
-                        position.yMin += (EditorGUIUtility.singleLineHeight * 0.5f) + EditorGUIUtility.standardVerticalSpacing;
-                        position = EditorGUI.IndentedRect(position);
-                        GUI.Label(position, headerAttribute.header, EditorStyles.boldLabel);
-                        headerPadding = 0;
+
+                    float spacePadding = 0;
+                    foreach (var attr in propertyAttributes) {
+                        if (attr is SpaceAttribute) {
+                            if (usePropertyAttributes) GUILayout.Space((attr as SpaceAttribute).height);
+                            else spacePadding += (attr as SpaceAttribute).height;
+                        } else if (attr is HeaderAttribute) {
+                            if (usePropertyAttributes) {
+                                //GUI Values are from https://github.com/Unity-Technologies/UnityCsReference/blob/master/Editor/Mono/ScriptAttributeGUI/Implementations/DecoratorDrawers.cs
+                                Rect position = GUILayoutUtility.GetRect(0, (EditorGUIUtility.singleLineHeight * 1.5f) - EditorGUIUtility.standardVerticalSpacing); //Layout adds standardVerticalSpacing after rect so we subtract it.
+                                position.yMin += EditorGUIUtility.singleLineHeight * 0.5f;
+                                position = EditorGUI.IndentedRect(position);
+                                GUI.Label(position, (attr as HeaderAttribute).header, EditorStyles.boldLabel);
+                            } else spacePadding += EditorGUIUtility.singleLineHeight * 1.5f;
+                        }
                     }
 
                     if (dynamicPortList) {
@@ -155,7 +154,7 @@ namespace XNodeEditor {
                     }
 
                     rect = GUILayoutUtility.GetLastRect();
-                    rect.position = rect.position + new Vector2(rect.width, spacePadding + headerPadding);
+                    rect.position = rect.position + new Vector2(rect.width, spacePadding);
                 }
 
                 rect.size = new Vector2(16, 16);

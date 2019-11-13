@@ -372,6 +372,8 @@ namespace XNodeEditor {
             //Save guiColor so we can revert it
             Color guiColor = GUI.color;
 
+            List<XNode.NodePort> removeEntries = new List<XNode.NodePort>();
+
             if (e.type == EventType.Layout) culledNodes = new List<XNode.Node>();
             for (int n = 0; n < graph.nodes.Count; n++) {
                 // Skip null nodes. The user could be in the process of renaming scripts, so removing them at this point is not advisable.
@@ -389,7 +391,10 @@ namespace XNodeEditor {
                 } else if (culledNodes.Contains(node)) continue;
 
                 if (e.type == EventType.Repaint) {
-                    _portConnectionPoints = _portConnectionPoints.Where(x => x.Key.node != node).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                    removeEntries.Clear();
+                    foreach (var kvp in _portConnectionPoints)
+                        if (kvp.Key.node == node) removeEntries.Add(kvp.Key);
+                    foreach (var k in removeEntries) _portConnectionPoints.Remove(k);
                 }
 
                 NodeEditor nodeEditor = NodeEditor.GetEditor(node, this);

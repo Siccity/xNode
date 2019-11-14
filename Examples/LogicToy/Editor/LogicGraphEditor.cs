@@ -50,11 +50,11 @@ namespace XNodeEditor.Examples.LogicToy {
 		}
 
 		/// <summary> Controls graph noodle colors </summary>
-		public override Color GetNoodleColor(NodePort output, NodePort input) {
+		public override Gradient GetNoodleGradient(NodePort output, NodePort input) {
 			LogicNode node = output.node as LogicNode;
-			Color baseColor = base.GetNoodleColor(output, input);
-
-			return GetLerpColor(baseColor, Color.yellow, output, (bool) node.GetValue(output));
+			Gradient baseGradient = base.GetNoodleGradient(output, input);
+			HighlightGradient(baseGradient, Color.yellow, output, (bool) node.GetValue(output));
+			return baseGradient;
 		}
 
 		/// <summary> Controls graph type colors </summary>
@@ -80,11 +80,32 @@ namespace XNodeEditor.Examples.LogicToy {
 
 			if (high) return on;
 			else {
-				float t = (float) (EditorApplication.timeSinceStartup - lastOnTime);
+				float t = (float) (lastOnTime - EditorApplication.timeSinceStartup);
 				t *= 8f;
-				if (t < 1) return Color.Lerp(on, off, t);
+				if (t > 0) return Color.Lerp(off, on, t);
 				else return off;
 			}
+		}
+
+		/// <summary> Returns a color based on if or when an arbitrary object was last 'on' </summary>
+		public void HighlightGradient(Gradient gradient, Color highlightColor, object obj, bool high) {
+			double lastOnTime = GetLastOnTime(obj, high);
+			float t;
+
+			if (high) t = 1f;
+			else {
+				t = (float) (lastOnTime - EditorApplication.timeSinceStartup);
+				t *= 8f;
+				t += 1;
+			}
+			t = Mathf.Clamp01(t);
+			GradientColorKey[] colorKeys = gradient.colorKeys;
+			for (int i = 0; i < colorKeys.Length; i++) {
+				GradientColorKey colorKey = colorKeys[i];
+				colorKey.color = Color.Lerp(colorKeys[i].color, highlightColor, t);
+				colorKeys[i] = colorKey;
+			}
+			gradient.SetKeys(colorKeys, gradient.alphaKeys);
 		}
 	}
 }

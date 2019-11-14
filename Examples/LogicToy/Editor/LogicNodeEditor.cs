@@ -27,6 +27,10 @@ namespace XNodeEditor.Examples.LogicToy {
 		}
 
 		public override void OnBodyGUI() {
+			if (target == null) {
+				Debug.LogWarning("Null target node for node editor!");
+				return;
+			}
 			NodePort input = target.GetPort("input");
 			NodePort output = target.GetPort("output");
 

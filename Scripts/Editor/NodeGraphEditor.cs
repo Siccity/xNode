@@ -63,11 +63,50 @@ namespace XNodeEditor {
             menu.AddCustomContextMenuItems(target);
         }
 
-        /// <summary> Returned color is used to color noodles </summary>
-        public virtual Color GetNoodleColor(XNode.NodePort output, XNode.NodePort input) {
-            Color col = GetTypeColor(output.ValueType);
-            if (window.hoveredPort == output || window.hoveredPort == input) return Color.Lerp(col, Color.white, 0.8f);
-            return col;
+        /// <summary> Returned gradient is used to color noodles </summary>
+        /// <param name="output"> The output this noodle comes from. Never null. </param>
+        /// <param name="input"> The output this noodle comes from. Can be null if we are dragging the noodle. </param>
+        public virtual Gradient GetNoodleGradient(XNode.NodePort output, XNode.NodePort input) {
+            Gradient grad = new Gradient();
+
+            // If dragging the noodle, draw solid, slightly transparent
+            if (input == null) {
+                Color a = GetTypeColor(output.ValueType);
+                grad.SetKeys(
+                    new GradientColorKey[] { new GradientColorKey(a, 0f) },
+                    new GradientAlphaKey[] { new GradientAlphaKey(0.6f, 0f) }
+                );
+            }
+            // If normal, draw gradient fading from one input color to the other
+            else {
+                Color a = GetTypeColor(output.ValueType);
+                Color b = GetTypeColor(input.ValueType);
+                // If any port is hovered, tint white
+                if (window.hoveredPort == output || window.hoveredPort == input) {
+                    a = Color.Lerp(a, Color.white, 0.8f);
+                    b = Color.Lerp(b, Color.white, 0.8f);
+                }
+                grad.SetKeys(
+                    new GradientColorKey[] { new GradientColorKey(a, 0f), new GradientColorKey(b, 1f) },
+                    new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) }
+                );
+            }
+            return grad;
+        }
+
+        /// <summary> Returned float is used for noodle thickness </summary>
+        /// <param name="output"> The output this noodle comes from. Never null. </param>
+        /// <param name="input"> The output this noodle comes from. Can be null if we are dragging the noodle. </param>
+        public virtual float GetNoodleThickness(XNode.NodePort output, XNode.NodePort input) {
+            return 5f;
+        }
+
+        public virtual NoodlePath GetNoodlePath(XNode.NodePort output, XNode.NodePort input) {
+            return NodeEditorPreferences.GetSettings().noodlePath;
+        }
+
+        public virtual NoodleStroke GetNoodleStroke(XNode.NodePort output, XNode.NodePort input) {
+            return NodeEditorPreferences.GetSettings().noodleStroke;
         }
 
         /// <summary> Returned color is used to color ports </summary>
@@ -94,12 +133,14 @@ namespace XNodeEditor {
 
         /// <summary> Deal with objects dropped into the graph through DragAndDrop </summary>
         public virtual void OnDropObjects(UnityEngine.Object[] objects) {
-            Debug.Log("No OnDropItems override defined for " + GetType());
+            Debug.Log("No OnDropObjects override defined for " + GetType());
         }
 
         /// <summary> Create a node and save it in the graph asset </summary>
         public virtual XNode.Node CreateNode(Type type, Vector2 position) {
+            Undo.RecordObject(target, "Create Node");
             XNode.Node node = target.AddNode(type);
+            Undo.RegisterCreatedObjectUndo(node, "Create Node");
             node.position = position;
             if (node.name == null || node.name.Trim() == "") node.name = NodeEditorUtilities.NodeDefaultName(type);
             AssetDatabase.AddObjectToAsset(node, target);
@@ -110,7 +151,9 @@ namespace XNodeEditor {
 
         /// <summary> Creates a copy of the original node in the graph </summary>
         public XNode.Node CopyNode(XNode.Node original) {
+            Undo.RecordObject(target, "Duplicate Node");
             XNode.Node node = target.CopyNode(original);
+            Undo.RegisterCreatedObjectUndo(node, "Duplicate Node");
             node.name = original.name;
             AssetDatabase.AddObjectToAsset(node, target);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
@@ -119,8 +162,13 @@ namespace XNodeEditor {
 
         /// <summary> Safely remove a node and all its connections. </summary>
         public virtual void RemoveNode(XNode.Node node) {
+            Undo.RecordObject(node, "Delete Node");
+            Undo.RecordObject(target, "Delete Node");
+            foreach (var port in node.Ports)
+                foreach (var conn in port.GetConnections())
+                    Undo.RecordObject(conn.node, "Delete Node");
             target.RemoveNode(node);
-            UnityEngine.Object.DestroyImmediate(node, true);
+            Undo.DestroyObjectImmediate(node);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 

@@ -81,6 +81,7 @@ namespace XNodeEditor {
                             for (int i = 0; i < Selection.objects.Length; i++) {
                                 if (Selection.objects[i] is XNode.Node) {
                                     XNode.Node node = Selection.objects[i] as XNode.Node;
+                                    Undo.RecordObject(node, "Moved Node");
                                     Vector2 initial = node.position;
                                     node.position = mousePos + dragOffset[i];
                                     if (gridSnap) {
@@ -274,13 +275,13 @@ namespace XNodeEditor {
                                 ShowPortContextMenu(hoveredPort);
                             } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
                                 if (!Selection.Contains(hoveredNode)) SelectNode(hoveredNode, false);
-                                autoConnectOutput = null;                                
+                                autoConnectOutput = null;
                                 GenericMenu menu = new GenericMenu();
                                 NodeEditor.GetEditor(hoveredNode, this).AddContextMenuItems(menu);
                                 menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
                                 e.Use(); // Fixes copy/paste context menu appearing in Unity 5.6.6f2 - doesn't occur in 2018.3.2f1 Probably needs to be used in other places.
                             } else if (!IsHoveringNode) {
-                                autoConnectOutput = null;                                
+                                autoConnectOutput = null;
                                 GenericMenu menu = new GenericMenu();
                                 graphEditor.AddContextMenuItems(menu);
                                 menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
@@ -309,6 +310,7 @@ namespace XNodeEditor {
                                 SelectNode(node, true);
                             }
                         }
+                        Repaint();
                     }
                     break;
                 case EventType.ValidateCommand:
@@ -412,6 +414,7 @@ namespace XNodeEditor {
         public void DuplicateSelectedNodes() {
             // Get selected nodes which are part of this graph
             XNode.Node[] selectedNodes = Selection.objects.Select(x => x as XNode.Node).Where(x => x != null && x.graph == graph).ToArray();
+            if (selectedNodes == null || selectedNodes.Length == 0) return;
             // Get top left node position
             Vector2 topLeftNode = selectedNodes.Select(x => x.position).Aggregate((x, y) => new Vector2(Mathf.Min(x.x, y.x), Mathf.Min(x.y, y.y)));
             InsertDuplicateNodes(selectedNodes, topLeftNode + new Vector2(30, 30));
@@ -470,8 +473,10 @@ namespace XNodeEditor {
         /// <summary> Draw a connection as we are dragging it </summary>
         public void DrawDraggedConnection() {
             if (IsDraggingPort) {
-                Color col = NodeEditorPreferences.GetTypeColor(draggedOutput.ValueType);
-                col.a = draggedOutputTarget != null ? 1.0f : 0.6f;
+                Gradient gradient = graphEditor.GetNoodleGradient(draggedOutput, null);
+                float thickness = graphEditor.GetNoodleThickness(draggedOutput, null);
+                NoodlePath path = graphEditor.GetNoodlePath(draggedOutput, null);
+                NoodleStroke stroke = graphEditor.GetNoodleStroke(draggedOutput, null);
 
                 Rect fromRect;
                 if (!_portConnectionPoints.TryGetValue(draggedOutput, out fromRect)) return;
@@ -483,10 +488,10 @@ namespace XNodeEditor {
                 if (draggedOutputTarget != null) gridPoints.Add(portConnectionPoints[draggedOutputTarget].center);
                 else gridPoints.Add(WindowToGridPosition(Event.current.mousePosition));
 
-                DrawNoodle(col, gridPoints);
+                DrawNoodle(gradient, path, stroke, thickness, gridPoints);
 
                 Color bgcol = Color.black;
-                Color frcol = col;
+                Color frcol = gradient.colorKeys[0].color;
                 bgcol.a = 0.6f;
                 frcol.a = 0.6f;
 

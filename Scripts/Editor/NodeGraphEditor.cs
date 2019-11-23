@@ -2,9 +2,199 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
 namespace XNodeEditor {
+    public class MenuPopupWindow : PopupWindowContent
+    {
+        private SearchField _search;
+        private MenuTreeView _menuTree;
+        public MenuPopupWindow()
+        {
+            _search = new SearchField();
+            _menuTree = new MenuTreeView();
+        }
+
+        private bool _isInit;
+        
+        public void AddItem(string menuPath, Action onClick, char symbol = '/',bool autoClose = true)
+        {
+            _menuTree.AddItem(menuPath, () =>
+            {
+                onClick?.Invoke();
+                if (autoClose)
+                {
+                    editorWindow.Close();
+                }
+            },symbol);
+        }
+
+        public void Init()
+        {
+            _menuTree.Reload();
+            _isInit = true;
+        }
+
+        public override void OnOpen()
+        {
+            _search.SetFocus();
+        }
+
+        private string _str;
+        public override void OnGUI(Rect rect)
+        {
+            if (!_isInit)
+            {
+                Init();
+            }
+
+            EditorGUI.BeginChangeCheck();
+            {
+                _str = _search.OnGUI(new Rect(rect.position, new Vector2(rect.width, 20)),_str);
+            }
+            if (EditorGUI.EndChangeCheck())
+            {
+                _menuTree.searchString = _str;
+            }
+            
+            _menuTree.OnGUI(new Rect(new Vector2(0,25),rect.size - new Vector2(0,20)));
+        }
+    }
+    public class MenuTreeView:TreeView
+    {
+        class MenuItem:TreeViewItem
+        {
+            public readonly Action OnClick;
+
+            public MenuItem(int id, int depth, string displayName, Action onClick) : base(id, depth, displayName)
+            {
+                OnClick = onClick;
+            }
+        }
+
+        public TreeViewItem Root { get; }
+
+        public MenuTreeView():this(new TreeViewState())
+        {
+        }
+        
+        public MenuTreeView(TreeViewState state, MultiColumnHeader multiColumnHeader = null) : base(state, multiColumnHeader)
+        {
+            Root = new TreeViewItem(_id++,-1,nameof(Root));
+        }
+
+        private int _id = -1;
+
+        private Dictionary<int, List<string>> _menuCache = new Dictionary<int, List<string>>();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="menuPath"></param>
+        /// <param name="onClick"></param>
+        /// <param name="symbol"></param>
+        public void AddItem(string menuPath,Action onClick,char symbol = '/')
+        {
+            var paths = menuPath.Split(symbol);
+            
+            int depth = 0;
+
+            TreeViewItem last = Root;
+
+            if (paths.Length > 1)
+            {
+                for (var i = 0; i < paths.Length - 1; i++)
+                {
+                    var path = paths[i];
+                    
+                    if (!_menuCache.TryGetValue(depth, out var caches))
+                    {
+                        caches = new List<string>();
+                        _menuCache.Add(depth, caches);
+                    }
+
+                    while (true)
+                    {
+                        if (last.hasChildren)
+                        {
+                            foreach (var item in last.children)
+                            {
+                                if (item.displayName == path)
+                                {
+                                    last = item;
+                                    depth++;
+                                    goto end;
+                                }                                    
+                            }
+                        }
+
+                        break;
+                    }
+
+                    var temp = new TreeViewItem(_id++,depth++,path);
+                    
+                    last.AddChild(temp);
+                    
+                    last = temp;
+                    
+                    end: ;
+                }
+            }
+            
+            last.AddChild(new MenuItem(_id++,depth,paths.Last(),onClick));
+        }
+        
+        protected override bool DoesItemMatchSearch(TreeViewItem item, string search)
+        {
+            if (item.parent != null && item.parent.displayName.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return true;
+            }
+            
+            return base.DoesItemMatchSearch(item, search);
+        }
+        
+        List<int> _ids = new List<int>();
+        protected override void DoubleClickedItem(int id)
+        {
+            var item = FindItem(id,Root);
+            if (item.hasChildren)
+            {
+                if (hasSearch)
+                {
+                    searchString = "";
+
+                    _ids.Clear();
+
+                    while (item != null)
+                    {
+                        _ids.Add(item.id);
+                        item = item.parent;
+                    }
+                    
+                    SetExpanded(_ids);
+                }
+                else
+                {
+                    SetExpanded(id, !IsExpanded(id));
+                }
+            }
+            else
+            {
+                if (item is MenuItem menuItem)
+                {
+                    menuItem.OnClick?.Invoke();
+                }
+            }
+        }
+
+        protected override TreeViewItem BuildRoot()
+        {
+            return Root;
+        }
+    }
+    
     /// <summary> Base class to derive custom Node Graph editors from. Use this to override how graphs are drawn in the editor. </summary>
     [CustomNodeGraphEditor(typeof(XNode.NodeGraph))]
     public class NodeGraphEditor : XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph> {
@@ -42,7 +232,7 @@ namespace XNodeEditor {
         }
 
         /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>
-        public virtual void AddContextMenuItems(GenericMenu menu) {
+        public virtual void AddContextMenuItems(MenuPopupWindow menu) {
             Vector2 pos = NodeEditorWindow.current.WindowToGridPosition(Event.current.mousePosition);
             for (int i = 0; i < NodeEditorReflection.nodeTypes.Length; i++) {
                 Type type = NodeEditorReflection.nodeTypes[i];
@@ -51,17 +241,23 @@ namespace XNodeEditor {
                 string path = GetNodeMenuName(type);
                 if (string.IsNullOrEmpty(path)) continue;
 
-                menu.AddItem(new GUIContent(path), false, () => {
+                menu.AddItem(path, () => {
                     XNode.Node node = CreateNode(type, pos);
                     NodeEditorWindow.current.AutoConnect(node);
                 });
             }
-            menu.AddSeparator("");
-            if (NodeEditorWindow.copyBuffer != null && NodeEditorWindow.copyBuffer.Length > 0) menu.AddItem(new GUIContent("Paste"), false, () => NodeEditorWindow.current.PasteNodes(pos));
-            else menu.AddDisabledItem(new GUIContent("Paste"));
-            menu.AddItem(new GUIContent("Preferences"), false, () => NodeEditorReflection.OpenPreferences());
-            menu.AddItem(new GUIContent("创建所有的节点 ---> 测试用"), false, () =>
+//            menu.AddSeparator("");
+            if (NodeEditorWindow.copyBuffer != null && NodeEditorWindow.copyBuffer.Length > 0) 
+                menu.AddItem("Paste", () => NodeEditorWindow.current.PasteNodes(pos));
+//            else menu.AddDisabledItem(new GUIContent("Paste"));
+            menu.AddItem("Preferences", () => NodeEditorReflection.OpenPreferences());
+            menu.AddItem("创建所有的节点 ---> 测试用", () =>
             {
+                if (!EditorUtility.DisplayDialog("warning","Are you sure you want to create all the nodes?","ok","no"))
+                {
+                    return;
+                }
+
                 for (int i = 0; i < NodeEditorReflection.nodeTypes.Length; i++)
                 {
                     Type type = NodeEditorReflection.nodeTypes[i];

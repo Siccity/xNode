@@ -74,6 +74,23 @@ namespace XNodeEditor {
             }
             return types.ToArray();
         }
+        
+        /// <summary> Find methods marked with the [ContextMenu] attribute and add them to the context menu </summary>
+        public static void AddCustomContextMenuItems(this MenuPopupWindow contextMenu, object obj) {
+            KeyValuePair<ContextMenu, MethodInfo>[] items = GetContextMenuMethods(obj);
+            if (items.Length != 0) {
+                List<string> invalidatedEntries = new List<string>();
+                foreach (KeyValuePair<ContextMenu, MethodInfo> checkValidate in items) {
+                    if (checkValidate.Key.validate && !(bool) checkValidate.Value.Invoke(obj, null)) {
+                        invalidatedEntries.Add(checkValidate.Key.menuItem);
+                    }
+                }
+                for (int i = 0; i < items.Length; i++) {
+                    KeyValuePair<ContextMenu, MethodInfo> kvp = items[i];
+                    contextMenu.AddItem(kvp.Key.menuItem, () => kvp.Value.Invoke(obj, null));
+                }
+            }
+        }
 
         /// <summary> Find methods marked with the [ContextMenu] attribute and add them to the context menu </summary>
         public static void AddCustomContextMenuItems(this GenericMenu contextMenu, object obj) {

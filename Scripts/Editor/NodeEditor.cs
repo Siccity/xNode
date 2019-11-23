@@ -100,6 +100,10 @@ namespace XNodeEditor {
             return NodeEditorResources.styles.nodeBody;
         }
 
+        public virtual GUIStyle GetBodyHighlightStyle() {
+            return NodeEditorResources.styles.nodeHighlight;
+        }
+
         /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>
         public virtual void AddContextMenuItems(GenericMenu menu) {
             // Actions if only one node is selected

@@ -221,13 +221,18 @@ namespace XNodeEditor {
                             else if (NodeEditorPreferences.GetSettings().dragToCreate && autoConnectOutput != null) {
                                 MenuPopupWindow menu = new MenuPopupWindow();
                                 graphEditor.AddContextMenuItems(menu);
+                                
+                                menu.OnCloseA += () =>
+                                {
+                                    //Release dragged connection
+                                    draggedOutput = null;
+                                    draggedOutputTarget = null;
+                                    EditorUtility.SetDirty(graph);
+                                    if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+                                };
+                                
                                 PopupWindow.Show(new Rect(Event.current.mousePosition, Vector2.zero),menu);
                             }
-                            //Release dragged connection
-                            draggedOutput = null;
-                            draggedOutputTarget = null;
-                            EditorUtility.SetDirty(graph);
-                            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
                         } else if (currentActivity == NodeActivity.DragNode) {
                             IEnumerable<XNode.Node> nodes = Selection.objects.Where(x => x is XNode.Node).Select(x => x as XNode.Node);
                             foreach (XNode.Node node in nodes) EditorUtility.SetDirty(node);

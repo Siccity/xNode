@@ -10,6 +10,7 @@ namespace XNodeEditor {
     {
         private SearchField _search;
         private MenuTreeView _menuTree;
+        public Action OnCloseA;
         public MenuPopupWindow()
         {
             _search = new SearchField();
@@ -41,6 +42,11 @@ namespace XNodeEditor {
             _search.SetFocus();
         }
 
+        public override void OnClose()
+        {
+            OnCloseA?.Invoke();
+        }
+
         private string _str;
         public override void OnGUI(Rect rect)
         {
@@ -49,6 +55,8 @@ namespace XNodeEditor {
                 Init();
             }
 
+            _action();
+            
             EditorGUI.BeginChangeCheck();
             {
                 _str = _search.OnGUI(new Rect(rect.position, new Vector2(rect.width, 20)),_str);
@@ -59,6 +67,22 @@ namespace XNodeEditor {
             }
             
             _menuTree.OnGUI(new Rect(new Vector2(0,25),rect.size - new Vector2(0,20)));
+        }
+        
+        private void _action()
+        {
+            Event e = Event.current;
+            switch (e.type)
+            {
+                case EventType.KeyDown:
+                    
+                    if (e.keyCode == KeyCode.DownArrow && !_menuTree.HasFocus())
+                    {
+                        _menuTree.SetFocusAndEnsureSelectedItem();
+                        e.Use();
+                    }
+                    break;
+            }
         }
     }
     public class MenuTreeView:TreeView
@@ -192,6 +216,38 @@ namespace XNodeEditor {
         protected override TreeViewItem BuildRoot()
         {
             return Root;
+        }
+
+        protected override void KeyEvent()
+        {
+            Event e = Event.current;
+            switch (e.type)
+            {
+                case EventType.KeyDown:
+                    
+                    if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter)
+                    {
+                        DoubleClickedItem(GetSelection()[0]);
+                        e.Use();
+                    }
+                    break;
+            }
+        }
+
+        private void _action()
+        {
+            Event e = Event.current;
+            switch (e.type)
+            {
+                case EventType.KeyDown:
+                    
+                    if (e.keyCode == KeyCode.DownArrow && !HasFocus())
+                    {
+                        this.SetFocusAndEnsureSelectedItem();
+                        e.Use();
+                    }
+                    break;
+            }
         }
     }
     

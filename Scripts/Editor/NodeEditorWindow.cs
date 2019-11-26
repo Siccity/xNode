@@ -100,6 +100,7 @@ namespace XNodeEditor {
             if (this.graphEditor != graphEditor) {
                 this.graphEditor = graphEditor;
                 graphEditor.OnOpen();
+                this.graphEditor.window.minSize = new Vector2(300,300);
             }
         }
 

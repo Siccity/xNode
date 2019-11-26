@@ -222,17 +222,13 @@ namespace XNodeEditor {
                                 MenuPopupWindow menu = new MenuPopupWindow();
                                 graphEditor.AddContextMenuItems(menu);
                                 
-                                menu.OnCloseA += () =>
-                                {
-                                    //Release dragged connection
-                                    draggedOutput = null;
-                                    draggedOutputTarget = null;
-                                    EditorUtility.SetDirty(graph);
-                                    if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
-                                };
+                                menu.OnCloseA += _releaseDraggedConnection;
                                 
                                 PopupWindow.Show(new Rect(Event.current.mousePosition, Vector2.zero),menu);
                             }
+
+                            _releaseDraggedConnection();
+
                         } else if (currentActivity == NodeActivity.DragNode) {
                             IEnumerable<XNode.Node> nodes = Selection.objects.Where(x => x is XNode.Node).Select(x => x as XNode.Node);
                             foreach (XNode.Node node in nodes) EditorUtility.SetDirty(node);
@@ -344,6 +340,15 @@ namespace XNodeEditor {
                     }
                     break;
             }
+        }
+
+        private void _releaseDraggedConnection()
+        {
+//Release dragged connection
+            draggedOutput = null;
+            draggedOutputTarget = null;
+            EditorUtility.SetDirty(graph);
+            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 
         private void RecalculateDragOffsets(Event current) {

@@ -8,6 +8,18 @@ using Object = UnityEngine.Object;
 namespace XNodeEditor {
     [InitializeOnLoad]
     public partial class NodeEditorWindow : EditorWindow {
+
+        [MenuItem("Icarus/Node Editor/Close All Editor Window")]
+        static void CloseAllNodeEditorWindow()
+        {
+            var windows = Resources.FindObjectsOfTypeAll<NodeEditorWindow>();
+
+            foreach (var window in windows)
+            {
+                window.Close();
+            }
+        }
+        
         public static NodeEditorWindow current;
 
         /// <summary> Stores node positions for all nodePorts. </summary>

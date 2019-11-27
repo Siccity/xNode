@@ -111,6 +111,12 @@ namespace XNode {
         /// <summary> It is recommended not to modify these at hand. Instead, see <see cref="InputAttribute"/> and <see cref="OutputAttribute"/> </summary>
         [SerializeField] private NodePortDictionary ports = new NodePortDictionary();
 
+#if UNITY_EDITOR
+        public const string PortFieldName = nameof(ports);
+        public const string KeysFieldName = NodePortDictionary.KeyFieldName;
+        public const string ValuesFieldName = NodePortDictionary.ValueFieldName;
+#endif
+
         /// <summary> Used during node instantiation to fix null/misconfigured graph during OnEnable/Init. Set it before instantiating a node. Will automatically be unset during OnEnable </summary>
         public static NodeGraph graphHotfix;
 
@@ -365,6 +371,11 @@ namespace XNode {
         [Serializable] private class NodePortDictionary : Dictionary<string, NodePort>, ISerializationCallbackReceiver {
             [SerializeField] private List<string> keys = new List<string>();
             [SerializeField] private List<NodePort> values = new List<NodePort>();
+
+#if UNITY_EDITOR
+            public const string KeyFieldName = nameof(keys);
+            public const string ValueFieldName = nameof(values);
+#endif
 
             public void OnBeforeSerialize() {
                 keys.Clear();

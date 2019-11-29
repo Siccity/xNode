@@ -7,7 +7,29 @@ using Object = UnityEngine.Object;
 
 namespace XNodeEditor {
     [InitializeOnLoad]
-    public partial class NodeEditorWindow : EditorWindow {
+    public partial class NodeEditorWindow : EditorWindow,IHasCustomMenu {
+        
+        public bool Lock { get; private set; }
+        
+        [System.NonSerialized]
+        GUIStyle lockButtonStyle;
+        
+        /// <summary>
+        /// Magic method which Unity detects automatically.
+        /// </summary>
+        /// <param name="position">Position of button.</param>
+        void ShowButton(Rect position) {
+            if (lockButtonStyle == null)
+                lockButtonStyle = "IN LockButton";
+            Lock = GUI.Toggle(position, Lock, GUIContent.none, lockButtonStyle);
+        }
+        
+        public void AddItemsToMenu(GenericMenu menu)
+        {
+            menu.AddItem(new GUIContent("Lock"), Lock, () => {
+                Lock = !Lock;
+            });
+        }
 
         [MenuItem("Icarus/Node Editor/Close All Editor Window")]
         static void CloseAllNodeEditorWindow()
@@ -203,7 +225,30 @@ namespace XNodeEditor {
         public static void Open(XNode.NodeGraph graph) {
             if (!graph) return;
 
-            NodeEditorWindow w = GetWindow(typeof(NodeEditorWindow), false, "xNode", true) as NodeEditorWindow;
+            var windows = Resources.FindObjectsOfTypeAll<NodeEditorWindow>();
+            NodeEditorWindow w = null;
+            foreach (var window in windows)
+            {
+                if (window.Lock)
+                {
+                    if (window.graph == graph)
+                    {
+                        w = window;
+                    }
+                }
+                else
+                {
+                    w = window;
+                }
+            }
+
+            if (!w)
+            {
+                w = CreateWindow<NodeEditorWindow>("xNode");
+            }
+            
+            w.Show(true);
+            w.Focus();
             w.wantsMouseMove = true;
             w.graph = graph;
         }

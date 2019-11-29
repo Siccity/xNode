@@ -309,7 +309,7 @@ namespace XNodeEditor {
             Action<ReorderableList> onCreation = null) {
             XNode.Node node = serializedObject.targetObject as XNode.Node;
 
-            var indexedPorts = node.DynamicPorts;
+            var indexedPorts = io == NodePort.IO.Input ? node.DynamicInputs : node.DynamicOutputs;
             
             List<XNode.NodePort> dynamicPorts = indexedPorts.ToList();
 
@@ -322,7 +322,9 @@ namespace XNodeEditor {
             // If a ReorderableList isn't cached for this array, do so.
             if (list == null) {
                 SerializedProperty arrayData = serializedObject.FindProperty(fieldName);
-                list = CreateReorderableList(fieldName, dynamicPorts, arrayData, type, serializedObject, io, connectionType, typeConstraint, inputTypeConstraintBaseType,onCreation);
+                list = CreateReorderableList(fieldName, dynamicPorts, arrayData, type, serializedObject, 
+                    io, connectionType, typeConstraint, inputTypeConstraintBaseType);
+                onCreation?.Invoke(list);
                 if (reorderableListCache.TryGetValue(serializedObject.targetObject, out rlc)) rlc.Add(fieldName, list);
                 else reorderableListCache.Add(serializedObject.targetObject, new Dictionary<string, ReorderableList>() { { fieldName, list } });
             }
@@ -330,7 +332,9 @@ namespace XNodeEditor {
             list.DoLayoutList();
         }
 
-        private static ReorderableList CreateReorderableList(string fieldName, List<XNode.NodePort> dynamicPorts, SerializedProperty arrayData, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType, XNode.Node.TypeConstraint typeConstraint,Type inputTypeConstraintBaseType, Action<ReorderableList> onCreation) {
+        private static ReorderableList CreateReorderableList(string fieldName, List<XNode.NodePort> dynamicPorts, SerializedProperty arrayData, Type type, 
+            SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType, XNode.Node.TypeConstraint typeConstraint,
+            Type inputTypeConstraintBaseType) {
             bool hasArrayData = arrayData != null && arrayData.isArray;
             XNode.Node node = serializedObject.targetObject as XNode.Node;
             ReorderableList list = new ReorderableList(dynamicPorts, null, true, true, true, true);
@@ -340,7 +344,6 @@ namespace XNodeEditor {
                 (Rect rect, int index, bool isActive, bool isFocused) =>
                 {
                     XNode.NodePort port = (NodePort) list.list[index];
-                    
                     if (hasArrayData) 
                     {
                         if (arrayData.arraySize <= index) {
@@ -422,51 +425,13 @@ namespace XNodeEditor {
             list.onRemoveCallback =
                 (ReorderableList rl) =>
                 {
-
-                    var indexedPorts = node.DynamicPorts;
-                    dynamicPorts = indexedPorts.ToList();
-
                     int index = rl.index;
 
-                    if (dynamicPorts[index] == null) {
-                        Debug.LogWarning("No port found at index " + index + " - Skipped");
-                    } else if (dynamicPorts.Count <= index) {
-                        Debug.LogWarning("DynamicPorts[" + index + "] out of range. Length was " + dynamicPorts.Count + " - Skipped");
-                    } else {
-
-                        // Clear the removed ports connections
-                        dynamicPorts[index].ClearConnections();
-                        // Move following connections one step up to replace the missing connection
-                        for (int k = index + 1; k < dynamicPorts.Count(); k++) {
-                            for (int j = 0; j < dynamicPorts[k].ConnectionCount; j++) {
-                                XNode.NodePort other = dynamicPorts[k].GetConnection(j);
-                                dynamicPorts[k].Disconnect(other);
-                                dynamicPorts[k - 1].Connect(other);
-                            }
-                        }
-                        // Remove the last dynamic port, to avoid messing up the indexing
-                        node.RemoveDynamicPort(dynamicPorts[dynamicPorts.Count() - 1].fieldName);
-                        serializedObject.Update();
-                        EditorUtility.SetDirty(node);
-                    }
-
-                    if (hasArrayData) {
-                        if (arrayData.arraySize <= index) {
-                            Debug.LogWarning("Attempted to remove array index " + index + " where only " + arrayData.arraySize + " exist - Skipped");
-                            Debug.Log(rl.list[0]);
-                            return;
-                        }
-                        arrayData.DeleteArrayElementAtIndex(index);
-                        // Error handling. If the following happens too often, file a bug report at https://github.com/Siccity/xNode/issues
-                        if (dynamicPorts.Count <= arrayData.arraySize) {
-                            while (dynamicPorts.Count <= arrayData.arraySize) {
-                                arrayData.DeleteArrayElementAtIndex(arrayData.arraySize - 1);
-                            }
-                            UnityEngine.Debug.LogWarning("Array size exceeded dynamic ports size. Excess items removed.");
-                        }
-                        serializedObject.ApplyModifiedProperties();
-                        serializedObject.Update();
-                    }
+                    NodePort o = (NodePort) rl.list[index];
+                    
+                    node.RemoveDynamicPort(o);
+                 
+                    EditorUtility.SetDirty(node);
                 };
 
             if (hasArrayData) {
@@ -487,7 +452,7 @@ namespace XNodeEditor {
                 serializedObject.ApplyModifiedProperties();
                 serializedObject.Update();
             }
-            if (onCreation != null) onCreation(list);
+
             return list;
         }
     }

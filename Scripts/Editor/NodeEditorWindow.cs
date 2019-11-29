@@ -11,17 +11,12 @@ namespace XNodeEditor {
         
         public bool Lock { get; private set; }
         
-        [System.NonSerialized]
-        GUIStyle lockButtonStyle;
-        
         /// <summary>
         /// Magic method which Unity detects automatically.
         /// </summary>
         /// <param name="position">Position of button.</param>
         void ShowButton(Rect position) {
-            if (lockButtonStyle == null)
-                lockButtonStyle = "IN LockButton";
-            Lock = GUI.Toggle(position, Lock, GUIContent.none, lockButtonStyle);
+            Lock = GUI.Toggle(position, Lock, GUIContent.none, "IN LockButton");
         }
         
         public void AddItemsToMenu(GenericMenu menu)

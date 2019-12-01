@@ -306,7 +306,7 @@ namespace XNodeEditor {
         public static void DynamicPortList(string fieldName, Type type, SerializedObject serializedObject, XNode.NodePort.IO io,
             XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple,
             XNode.Node.TypeConstraint typeConstraint = XNode.Node.TypeConstraint.None,Type inputTypeConstraintBaseType = null,
-            Action<ReorderableList> onCreation = null) {
+            Action<ReorderableList> onCreation = null,Action<string> onAdd = null) {
             XNode.Node node = serializedObject.targetObject as XNode.Node;
 
             var indexedPorts = io == NodePort.IO.Input ? node.DynamicInputs : node.DynamicOutputs;
@@ -323,7 +323,7 @@ namespace XNodeEditor {
             if (list == null) {
                 SerializedProperty arrayData = serializedObject.FindProperty(fieldName);
                 list = CreateReorderableList(fieldName, dynamicPorts, arrayData, type, serializedObject, 
-                    io, connectionType, typeConstraint, inputTypeConstraintBaseType);
+                    io, connectionType, typeConstraint, inputTypeConstraintBaseType,onAdd);
                 onCreation?.Invoke(list);
                 if (reorderableListCache.TryGetValue(serializedObject.targetObject, out rlc)) rlc.Add(fieldName, list);
                 else reorderableListCache.Add(serializedObject.targetObject, new Dictionary<string, ReorderableList>() { { fieldName, list } });
@@ -334,7 +334,7 @@ namespace XNodeEditor {
 
         private static ReorderableList CreateReorderableList(string fieldName, List<XNode.NodePort> dynamicPorts, SerializedProperty arrayData, Type type, 
             SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType, XNode.Node.TypeConstraint typeConstraint,
-            Type inputTypeConstraintBaseType) {
+            Type inputTypeConstraintBaseType,Action<string> onAdd) {
             bool hasArrayData = arrayData != null && arrayData.isArray;
             XNode.Node node = serializedObject.targetObject as XNode.Node;
             ReorderableList list = new ReorderableList(dynamicPorts, null, true, true, true, true);
@@ -421,6 +421,8 @@ namespace XNodeEditor {
                         arrayData.InsertArrayElementAtIndex(arrayData.arraySize);
                     }
                     serializedObject.ApplyModifiedProperties();
+                    
+                    onAdd?.Invoke(newName);
                 };
             list.onRemoveCallback =
                 (ReorderableList rl) =>

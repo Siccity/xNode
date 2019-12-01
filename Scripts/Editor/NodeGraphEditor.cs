@@ -264,6 +264,15 @@ namespace XNodeEditor {
         /// <summary> Called when opened by NodeEditorWindow </summary>
         public virtual void OnOpen() { }
 
+        public virtual void OnFocus()
+        {
+            foreach (var targetNode in target.nodes)
+            {
+                var editor = NodeEditor.GetEditor(targetNode, window);
+                editor.OnInit();
+            }
+        }
+        
         public virtual Texture2D GetGridTexture() {
             return NodeEditorPreferences.GetSettings().gridTexture;
         }

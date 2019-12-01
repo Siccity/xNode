@@ -24,7 +24,7 @@ namespace XNodeEditor {
         internal static bool inNodeEditor = false;
 #endif
         private List<string> _excludesField;
-        public sealed override void OnCreate()
+        public override void OnCreate()
         {
             _excludesField = new List<string> { "m_Script", "graph", "position", "ports" };
 
@@ -34,12 +34,6 @@ namespace XNodeEditor {
             {
                 _excludesField.AddRange(fields);
             }
-            
-            Init();
-        }
-
-        protected virtual void Init()
-        {
         }
 
         public virtual void OnHeaderGUI() {

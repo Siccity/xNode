@@ -366,6 +366,19 @@ namespace XNode {
                 this.width = width;
             }
         }
+
+        /// <summary> Custom Port Label </summary>
+        [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
+        public class LabelAttribute : Attribute
+        {
+            public string Label { get; }
+
+            public LabelAttribute(string label)
+            {
+                Label = label;
+            }
+        }
+
 #endregion
 
         [Serializable] private class NodePortDictionary : Dictionary<string, NodePort>, ISerializationCallbackReceiver {

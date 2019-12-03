@@ -233,22 +233,6 @@ namespace XNodeEditor {
                     break;
             }
         }
-
-        private void _action()
-        {
-            Event e = Event.current;
-            switch (e.type)
-            {
-                case EventType.KeyDown:
-                    
-                    if (e.keyCode == KeyCode.DownArrow && !HasFocus())
-                    {
-                        this.SetFocusAndEnsureSelectedItem();
-                        e.Use();
-                    }
-                    break;
-            }
-        }
     }
     
     /// <summary> Base class to derive custom Node Graph editors from. Use this to override how graphs are drawn in the editor. </summary>

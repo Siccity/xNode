@@ -125,11 +125,7 @@ namespace XNodeEditor {
         /// <summary> Show right-click context menu for hovered port </summary>
         void ShowPortContextMenu(XNode.NodePort hoveredPort) {
             GenericMenu contextMenu = new GenericMenu();
-            contextMenu.AddItem(new GUIContent("Clear Connections"), false, () =>
-            {
-                //todo Remove Connect Callback 2019.12.3 18点41分
-                hoveredPort.ClearConnections();
-            });
+            contextMenu.AddItem(new GUIContent("Clear Connections"), false, hoveredPort.ClearConnections);
             if (hoveredPort.IsDynamic)
             {
                 contextMenu.AddItem(new GUIContent("Remove"), false, () => hoveredPort.node.RemoveDynamicPort(hoveredPort));

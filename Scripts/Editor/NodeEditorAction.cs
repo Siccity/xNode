@@ -207,11 +207,7 @@ namespace XNodeEditor {
                             //If connection is valid, save it
                             if (draggedOutputTarget != null) {
                                 XNode.Node node = draggedOutputTarget.node;
-                                if (graph.nodes.Count != 0)
-                                {
-                                    //todo Connect Callback 2019.12.3 18点38分
-                                    draggedOutput.Connect(draggedOutputTarget);
-                                }
+                                if (graph.nodes.Count != 0) draggedOutput.Connect(draggedOutputTarget);
 
                                 // ConnectionIndex can be -1 if the connection is removed instantly after creation
                                 int connectionIndex = draggedOutput.GetConnectionIndex(draggedOutputTarget);

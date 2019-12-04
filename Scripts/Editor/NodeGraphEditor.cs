@@ -253,7 +253,7 @@ namespace XNodeEditor {
             foreach (var targetNode in target.nodes)
             {
                 var editor = NodeEditor.GetEditor(targetNode, window);
-                editor.OnInit();
+                editor?.OnInit();
             }
         }
         

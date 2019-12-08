@@ -427,12 +427,14 @@ namespace XNodeEditor {
                 serializedObject.ApplyModifiedProperties();
                 EditorUtility.SetDirty(node);
                 serializedObject.Update();
-                NodeEditorWindow.current.Repaint();
-                EditorApplication.delayCall += NodeEditorWindow.current.Repaint;
+
                 foreach (NodePort port in reorderableList.list)
                 {
                     port.RefreshValueType();
                 }
+               
+                NodeEditorWindow.current.Repaint();
+                EditorApplication.delayCall += NodeEditorWindow.current.Repaint;
             };
 
             list.onAddCallback =

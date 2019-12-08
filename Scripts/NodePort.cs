@@ -60,6 +60,9 @@ namespace XNode {
         
         private Type valueType;
         private Type _typeConstraintBaseType;
+#if UNITY_EDITOR
+        public const string FieldNameEditor = nameof(_fieldName);
+#endif
         [SerializeField] private string _fieldName;
         [SerializeField] private Node _node;
         [SerializeField] private string _typeQualifiedName;

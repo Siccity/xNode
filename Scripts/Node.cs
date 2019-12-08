@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace XNode {
@@ -168,7 +169,9 @@ namespace XNode {
                 return ports[fieldName];
             }
             NodePort port = new NodePort(fieldName, type, direction, connectionType, typeConstraint,baseType, this);
+
             ports.Add(fieldName, port);
+            
             return port;
         }
 
@@ -394,6 +397,19 @@ namespace XNode {
                 keys.Clear();
                 values.Clear();
                 foreach (KeyValuePair<string, NodePort> pair in this) {
+                   
+                    if (pair.Value.direction == NodePort.IO.Input)
+                    {
+                        var firstOutIndex = values.FindIndex(x => x.direction == NodePort.IO.Output);
+
+                        if (firstOutIndex > -1)
+                        {
+                            keys.Insert(firstOutIndex,pair.Key);
+                            values.Insert(firstOutIndex,pair.Value);
+                            continue;
+                        }
+                    }
+
                     keys.Add(pair.Key);
                     values.Add(pair.Value);
                 }

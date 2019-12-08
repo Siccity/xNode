@@ -32,6 +32,14 @@ namespace XNode {
         public Node node { get { return _node; } }
         public bool IsDynamic { get { return _dynamic; } }
         public bool IsStatic { get { return !_dynamic; } }
+
+#if UNITY_EDITOR
+        public void RefreshValueType()
+        {
+            valueType = null;
+        }
+#endif
+        
         public Type ValueType {
             get {
                 if (valueType == null && !string.IsNullOrEmpty(_typeQualifiedName)) valueType = Type.GetType(_typeQualifiedName, false);

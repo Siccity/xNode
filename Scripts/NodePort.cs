@@ -231,7 +231,17 @@ namespace XNode {
             if (IsConnectedTo(port)) { Debug.LogWarning("Port already connected. "); return; }
             if (direction == port.direction) { Debug.LogWarning("Cannot connect two " + (direction == IO.Input ? "input" : "output") + " connections"); return; }
             if (port.connectionType == Node.ConnectionType.Override && port.ConnectionCount != 0) { port.ClearConnections(); }
-            if (connectionType == Node.ConnectionType.Override && ConnectionCount != 0) { ClearConnections(); }
+
+            if (connectionType == Node.ConnectionType.Override && ConnectionCount != 0)
+            {
+                var conPort = GetConnection(0);
+                
+                if(conPort.node != port.node || conPort != port)
+                {
+                    ClearConnections();
+                }
+                return;
+            }
             connections.Add(new PortConnection(port));
             if (port.connections == null) port.connections = new List<PortConnection>();
             if (!port.IsConnectedTo(this)) port.connections.Add(new PortConnection(this));

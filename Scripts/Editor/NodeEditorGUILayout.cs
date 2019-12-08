@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -397,28 +397,42 @@ namespace XNodeEditor {
 
             list.onReorderCallbackWithDetails = (reorderableList, index, newIndex) =>
             {
-                var port = serializedObject.FindProperty(Node.PortFieldName);
-                SerializedProperty keys = port.FindPropertyRelative(Node.KeysFieldName);
-                SerializedProperty values = port.FindPropertyRelative(Node.ValuesFieldName);
-                var count = 0;
-                
-                foreach (var nodePort in node.Ports)
+                var portSer = serializedObject.FindProperty(Node.PortFieldName);
+                SerializedProperty keys = portSer.FindPropertyRelative(Node.KeysFieldName);
+                SerializedProperty values = portSer.FindPropertyRelative(Node.ValuesFieldName);
+
+                var baseIndex = 0;
+
+                if (io == NodePort.IO.Output)
                 {
-                    if (!reorderableList.list.Contains(nodePort))
+                    foreach (var nodePort in node.Ports)
                     {
-                        count++;
+                        if (nodePort.direction == NodePort.IO.Input)
+                        {
+                            baseIndex++;
                         
-                        continue;
-                    }
+                            continue;
+                        }
                     
-                    //list after May exist dynamic node so break
-                    break;
+                        break;
+                    }
+
+                    baseIndex++;
                 }
-                
-                index += count;
-                newIndex += count;
+
+                index += baseIndex;
+                newIndex += baseIndex;
                 keys.MoveArrayElement(index, newIndex);
                 values.MoveArrayElement(index, newIndex);
+                serializedObject.ApplyModifiedProperties();
+                EditorUtility.SetDirty(node);
+                serializedObject.Update();
+                NodeEditorWindow.current.Repaint();
+                EditorApplication.delayCall += NodeEditorWindow.current.Repaint;
+                foreach (NodePort port in reorderableList.list)
+                {
+                    port.RefreshValueType();
+                }
             };
 
             list.onAddCallback =

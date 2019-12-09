@@ -32,8 +32,14 @@ namespace XNodeEditor {
         private Rect selectionBox;
         private bool isDoubleClick = false;
         private Vector2 lastMousePosition;
+        private MenuPopupWindow _menuPopupWindow;
 
         public void Controls() {
+            if (_menuPopupWindow == null)
+            {
+                _menuPopupWindow = new MenuPopupWindow();
+                graphEditor.AddContextMenuItems(_menuPopupWindow);
+            }
             wantsMouseMove = true;
             Event e = Event.current;
             switch (e.type) {
@@ -219,12 +225,9 @@ namespace XNodeEditor {
                             }
                             // Open context menu for auto-connection
                             else if (NodeEditorPreferences.GetSettings().dragToCreate && autoConnectOutput != null) {
-                                MenuPopupWindow menu = new MenuPopupWindow();
-                                graphEditor.AddContextMenuItems(menu);
+                                _menuPopupWindow.OnCloseA = _releaseDraggedConnection;
                                 
-                                menu.OnCloseA += _releaseDraggedConnection;
-                                
-                                PopupWindow.Show(new Rect(Event.current.mousePosition, Vector2.zero),menu);
+                                PopupWindow.Show(new Rect(Event.current.mousePosition, Vector2.zero),_menuPopupWindow);
                             }
 
                             _releaseDraggedConnection();
@@ -281,10 +284,8 @@ namespace XNodeEditor {
                                 menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
                                 e.Use(); // Fixes copy/paste context menu appearing in Unity 5.6.6f2 - doesn't occur in 2018.3.2f1 Probably needs to be used in other places.
                             } else if (!IsHoveringNode) {
-                                autoConnectOutput = null;                                
-                                MenuPopupWindow menu = new MenuPopupWindow();
-                                graphEditor.AddContextMenuItems(menu);
-                                PopupWindow.Show(new Rect(Event.current.mousePosition, Vector2.zero),menu);
+                                autoConnectOutput = null;
+                                PopupWindow.Show(new Rect(Event.current.mousePosition, Vector2.zero),_menuPopupWindow);
                             }
                         }
                         isPanning = false;

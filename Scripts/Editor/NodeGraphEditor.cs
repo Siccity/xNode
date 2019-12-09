@@ -156,6 +156,17 @@ namespace XNodeEditor {
                         break;
                     }
 
+                    if (last.hasChildren)
+                    {
+                        foreach (var child in last.children)
+                        {
+                            if (child.displayName == path)
+                            {
+                                return;
+                            }
+                        }
+                    }
+                    
                     var temp = new TreeViewItem(_id++,depth++,path);
                     
                     last.AddChild(temp);
@@ -248,15 +259,6 @@ namespace XNodeEditor {
         /// <summary> Called when opened by NodeEditorWindow </summary>
         public virtual void OnOpen() { }
 
-        public virtual void OnFocus()
-        {
-            foreach (var targetNode in target.nodes)
-            {
-                var editor = NodeEditor.GetEditor(targetNode, window);
-                editor?.OnInit();
-            }
-        }
-        
         public virtual Texture2D GetGridTexture() {
             return NodeEditorPreferences.GetSettings().gridTexture;
         }

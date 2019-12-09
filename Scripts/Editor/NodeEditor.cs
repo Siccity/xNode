@@ -67,7 +67,6 @@ namespace XNodeEditor {
             // Iterate through serialized properties and draw them like the Inspector (But with ports)
             SerializedProperty iterator = serializedObject.GetIterator();
             bool enterChildren = true;
-            EditorGUIUtility.labelWidth = 84;
             List<string> _names = new List<string>();
             while (iterator.NextVisible(enterChildren)) {
                 enterChildren = false;
@@ -76,16 +75,16 @@ namespace XNodeEditor {
                 _names.Add(iterator.name);
             }
             
-            //å¤„ç†ä¸€ä¸‹æ²¡è¢«ç»˜åˆ¶çš„ç«¯å£
+            //´¦ÀíÒ»ÏÂÃ»±»»æÖÆµÄ¶Ë¿Ú
             foreach (var port in target.Ports)
             {
-                //åŠ¨æ€çš„è·³è¿‡
+                //¶¯Ì¬µÄÌø¹ı
                 if (port.IsDynamic)
                 {
                     continue;
                 }
 
-                //ä¸å—unityåºåˆ—åŒ–æ”¯æŒ,ä½†æ˜¯è¢«æ ‡è®°ä¸ºäº†è¾“å…¥æˆ–è¾“å‡º
+                //²»ÊÜunityĞòÁĞ»¯Ö§³Ö,µ«ÊÇ±»±ê¼ÇÎªÁËÊäÈë»òÊä³ö
                 if (!_names.Contains(port.fieldName))
                 {
                     NodeEditorGUILayout.PortField(port);
@@ -107,8 +106,6 @@ namespace XNodeEditor {
                 GUIHelper.ClearRepaintRequest();
                 window.Repaint();
             }
-#else
-            window.Repaint();
 #endif
 
 #if ODIN_INSPECTOR
@@ -140,6 +137,10 @@ namespace XNodeEditor {
 
         public virtual GUIStyle GetBodyStyle() {
             return NodeEditorResources.styles.nodeBody;
+        }
+
+        public virtual GUIStyle GetBodyHighlightStyle() {
+            return NodeEditorResources.styles.nodeHighlight;
         }
 
         /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>

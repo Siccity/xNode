@@ -15,6 +15,7 @@ namespace XNodeEditor {
         private int topPadding { get { return isDocked() ? 19 : 22; } }
         /// <summary> Executed after all other window GUI. Useful if Zoom is ruining your day. Automatically resets after being run.</summary>
         public event Action onLateGUI;
+        private static readonly Vector3[] polyLineTempArray = new Vector3[2];
 
         private void OnGUI() {
             Event e = Event.current;
@@ -134,69 +135,153 @@ namespace XNodeEditor {
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
 
+        static Vector2 CalculateBezierPoint(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, float t) {
+            float u = 1 - t;
+            float tt = t * t, uu = u * u;
+            float uuu = uu * u, ttt = tt * t;
+            return new Vector2(
+                (uuu * p0.x) + (3 * uu * t * p1.x) + (3 * u * tt * p2.x) + (ttt * p3.x),
+                (uuu * p0.y) + (3 * uu * t * p1.y) + (3 * u * tt * p2.y) + (ttt * p3.y)
+            );
+        }
+
+        /// <summary> Draws a line segment without allocating temporary arrays </summary>
+        static void DrawAAPolyLineNonAlloc(float thickness, Vector2 p0, Vector2 p1) {
+            polyLineTempArray[0].x = p0.x;
+            polyLineTempArray[0].y = p0.y;
+            polyLineTempArray[1].x = p1.x;
+            polyLineTempArray[1].y = p1.y;
+            Handles.DrawAAPolyLine(thickness, polyLineTempArray);
+        }
+
         /// <summary> Draw a bezier from output to input in grid coordinates </summary>
-        public void DrawNoodle(Color col, List<Vector2> gridPoints) {
-            Vector2[] windowPoints = gridPoints.Select(x => GridToWindowPosition(x)).ToArray();
-            Handles.color = col;
+        public void DrawNoodle(Gradient gradient, NoodlePath path, NoodleStroke stroke, float thickness, List<Vector2> gridPoints) {
+            // convert grid points to window points
+            for (int i = 0; i < gridPoints.Count; ++i)
+                gridPoints[i] = GridToWindowPosition(gridPoints[i]);
+
+            Handles.color = gradient.Evaluate(0f);
             int length = gridPoints.Count;
-            switch (NodeEditorPreferences.GetSettings().noodleType) {
-                case NodeEditorPreferences.NoodleType.Curve:
+            switch (path) {
+                case NoodlePath.Curvy:
                     Vector2 outputTangent = Vector2.right;
                     for (int i = 0; i < length - 1; i++) {
-                        Vector2 inputTangent = Vector2.left;
-
-                        if (i == 0) outputTangent = Vector2.right * Vector2.Distance(windowPoints[i], windowPoints[i + 1]) * 0.01f * zoom;
+                        Vector2 inputTangent;
+                        // Cached most variables that repeat themselves here to avoid so many indexer calls :p
+                        Vector2 point_a = gridPoints[i];
+                        Vector2 point_b = gridPoints[i + 1];
+                        float dist_ab = Vector2.Distance(point_a, point_b);
+                        if (i == 0) outputTangent = zoom * dist_ab * 0.01f * Vector2.right;
                         if (i < length - 2) {
-                            Vector2 ab = (windowPoints[i + 1] - windowPoints[i]).normalized;
-                            Vector2 cb = (windowPoints[i + 1] - windowPoints[i + 2]).normalized;
-                            Vector2 ac = (windowPoints[i + 2] - windowPoints[i]).normalized;
+                            Vector2 point_c = gridPoints[i + 2];
+                            Vector2 ab = (point_b - point_a).normalized;
+                            Vector2 cb = (point_b - point_c).normalized;
+                            Vector2 ac = (point_c - point_a).normalized;
                             Vector2 p = (ab + cb) * 0.5f;
-                            float tangentLength = (Vector2.Distance(windowPoints[i], windowPoints[i + 1]) + Vector2.Distance(windowPoints[i + 1], windowPoints[i + 2])) * 0.005f * zoom;
-                            float side = ((ac.x * (windowPoints[i + 1].y - windowPoints[i].y)) - (ac.y * (windowPoints[i + 1].x - windowPoints[i].x)));
+                            float tangentLength = (dist_ab + Vector2.Distance(point_b, point_c)) * 0.005f * zoom;
+                            float side = ((ac.x * (point_b.y - point_a.y)) - (ac.y * (point_b.x - point_a.x)));
 
-                            p = new Vector2(-p.y, p.x) * Mathf.Sign(side) * tangentLength;
+                            p = tangentLength * Mathf.Sign(side) * new Vector2(-p.y, p.x);
                             inputTangent = p;
-                        }
-                        else {
-                            inputTangent = Vector2.left * Vector2.Distance(windowPoints[i], windowPoints[i + 1]) * 0.01f * zoom;
+                        } else {
+                            inputTangent = zoom * dist_ab * 0.01f * Vector2.left;
                         }
 
-                        Handles.DrawBezier(windowPoints[i], windowPoints[i + 1], windowPoints[i] + ((outputTangent * 50) / zoom), windowPoints[i + 1] + ((inputTangent * 50) / zoom), col, null, 4);
+                        // Calculates the tangents for the bezier's curves.
+                        float zoomCoef = 50 / zoom;
+                        Vector2 tangent_a = point_a + outputTangent * zoomCoef;
+                        Vector2 tangent_b = point_b + inputTangent * zoomCoef;
+                        // Hover effect.
+                        int division = Mathf.RoundToInt(.2f * dist_ab) + 3;
+                        // Coloring and bezier drawing.
+                        int draw = 0;
+                        Vector2 bezierPrevious = point_a;
+                        for (int j = 1; j <= division; ++j) {
+                            if (stroke == NoodleStroke.Dashed) {
+                                draw++;
+                                if (draw >= 2) draw = -2;
+                                if (draw < 0) continue;
+                                if (draw == 0) bezierPrevious = CalculateBezierPoint(point_a, tangent_a, tangent_b, point_b, (j - 1f) / (float) division);
+                            }
+                            if (i == length - 2)
+                                Handles.color = gradient.Evaluate((j + 1f) / division);
+                            Vector2 bezierNext = CalculateBezierPoint(point_a, tangent_a, tangent_b, point_b, j / (float) division);
+                            DrawAAPolyLineNonAlloc(thickness, bezierPrevious, bezierNext);
+                            bezierPrevious = bezierNext;
+                        }
                         outputTangent = -inputTangent;
                     }
                     break;
-                case NodeEditorPreferences.NoodleType.Line:
+                case NoodlePath.Straight:
                     for (int i = 0; i < length - 1; i++) {
-                        Handles.DrawAAPolyLine(5, windowPoints[i], windowPoints[i + 1]);
+                        Vector2 point_a = gridPoints[i];
+                        Vector2 point_b = gridPoints[i + 1];
+                        // Draws the line with the coloring.
+                        Vector2 prev_point = point_a;
+                        // Approximately one segment per 5 pixels
+                        int segments = (int) Vector2.Distance(point_a, point_b) / 5;
+
+                        int draw = 0;
+                        for (int j = 0; j <= segments; j++) {
+                            draw++;
+                            float t = j / (float) segments;
+                            Vector2 lerp = Vector2.Lerp(point_a, point_b, t);
+                            if (draw > 0) {
+                                if (i == length - 2) Handles.color = gradient.Evaluate(t);
+                                DrawAAPolyLineNonAlloc(thickness, prev_point, lerp);
+                            }
+                            prev_point = lerp;
+                            if (stroke == NoodleStroke.Dashed && draw >= 2) draw = -2;
+                        }
                     }
                     break;
-                case NodeEditorPreferences.NoodleType.Angled:
+                case NoodlePath.Angled:
                     for (int i = 0; i < length - 1; i++) {
                         if (i == length - 1) continue; // Skip last index
-                        if (windowPoints[i].x <= windowPoints[i + 1].x - (50 / zoom)) {
-                            float midpoint = (windowPoints[i].x + windowPoints[i + 1].x) * 0.5f;
-                            Vector2 start_1 = windowPoints[i];
-                            Vector2 end_1 = windowPoints[i + 1];
+                        if (gridPoints[i].x <= gridPoints[i + 1].x - (50 / zoom)) {
+                            float midpoint = (gridPoints[i].x + gridPoints[i + 1].x) * 0.5f;
+                            Vector2 start_1 = gridPoints[i];
+                            Vector2 end_1 = gridPoints[i + 1];
                             start_1.x = midpoint;
                             end_1.x = midpoint;
-                            Handles.DrawAAPolyLine(5, windowPoints[i], start_1);
-                            Handles.DrawAAPolyLine(5, start_1, end_1);
-                            Handles.DrawAAPolyLine(5, end_1, windowPoints[i + 1]);
+                            if (i == length - 2) {
+                                DrawAAPolyLineNonAlloc(thickness, gridPoints[i], start_1);
+                                Handles.color = gradient.Evaluate(0.5f);
+                                DrawAAPolyLineNonAlloc(thickness, start_1, end_1);
+                                Handles.color = gradient.Evaluate(1f);
+                                DrawAAPolyLineNonAlloc(thickness, end_1, gridPoints[i + 1]);
+                            } else {
+                                DrawAAPolyLineNonAlloc(thickness, gridPoints[i], start_1);
+                                DrawAAPolyLineNonAlloc(thickness, start_1, end_1);
+                                DrawAAPolyLineNonAlloc(thickness, end_1, gridPoints[i + 1]);
+                            }
                         } else {
-                            float midpoint = (windowPoints[i].y + windowPoints[i + 1].y) * 0.5f;
-                            Vector2 start_1 = windowPoints[i];
-                            Vector2 end_1 = windowPoints[i + 1];
+                            float midpoint = (gridPoints[i].y + gridPoints[i + 1].y) * 0.5f;
+                            Vector2 start_1 = gridPoints[i];
+                            Vector2 end_1 = gridPoints[i + 1];
                             start_1.x += 25 / zoom;
                             end_1.x -= 25 / zoom;
                             Vector2 start_2 = start_1;
                             Vector2 end_2 = end_1;
                             start_2.y = midpoint;
                             end_2.y = midpoint;
-                            Handles.DrawAAPolyLine(5, windowPoints[i], start_1);
-                            Handles.DrawAAPolyLine(5, start_1, start_2);
-                            Handles.DrawAAPolyLine(5, start_2, end_2);
-                            Handles.DrawAAPolyLine(5, end_2, end_1);
-                            Handles.DrawAAPolyLine(5, end_1, windowPoints[i + 1]);
+                            if (i == length - 2) {
+                                DrawAAPolyLineNonAlloc(thickness, gridPoints[i], start_1);
+                                Handles.color = gradient.Evaluate(0.25f);
+                                DrawAAPolyLineNonAlloc(thickness, start_1, start_2);
+                                Handles.color = gradient.Evaluate(0.5f);
+                                DrawAAPolyLineNonAlloc(thickness, start_2, end_2);
+                                Handles.color = gradient.Evaluate(0.75f);
+                                DrawAAPolyLineNonAlloc(thickness, end_2, end_1);
+                                Handles.color = gradient.Evaluate(1f);
+                                DrawAAPolyLineNonAlloc(thickness, end_1, gridPoints[i + 1]);
+                            } else {
+                                DrawAAPolyLineNonAlloc(thickness, gridPoints[i], start_1);
+                                DrawAAPolyLineNonAlloc(thickness, start_1, start_2);
+                                DrawAAPolyLineNonAlloc(thickness, start_2, end_2);
+                                DrawAAPolyLineNonAlloc(thickness, end_2, end_1);
+                                DrawAAPolyLineNonAlloc(thickness, end_1, gridPoints[i + 1]);
+                            }
                         }
                     }
                     break;
@@ -209,6 +294,8 @@ namespace XNodeEditor {
             List<RerouteReference> selection = preBoxSelectionReroute != null ? new List<RerouteReference>(preBoxSelectionReroute) : new List<RerouteReference>();
             hoveredReroute = new RerouteReference();
 
+            List<Vector2> gridPoints = new List<Vector2>(2);
+
             Color col = GUI.color;
             foreach (XNode.Node node in graph.nodes) {
                 //If a null node is found, return. This can happen if the nodes associated script is deleted. It is currently not possible in Unity to delete a null asset.
@@ -220,10 +307,14 @@ namespace XNodeEditor {
                     Rect fromRect;
                     if (!_portConnectionPoints.TryGetValue(output, out fromRect)) continue;
 
-                    Color connectionColor = graphEditor.GetPortColor(output);
-
+                    Color portColor = graphEditor.GetPortColor(output);
                     for (int k = 0; k < output.ConnectionCount; k++) {
                         XNode.NodePort input = output.GetConnection(k);
+
+                        Gradient noodleGradient = graphEditor.GetNoodleGradient(output, input);
+                        float noodleThickness = graphEditor.GetNoodleThickness(output, input);
+                        NoodlePath noodlePath = graphEditor.GetNoodlePath(output, input);
+                        NoodleStroke noodleStroke = graphEditor.GetNoodleStroke(output, input);
 
                         // Error handling
                         if (input == null) continue; //If a script has been updated and the port doesn't exist, it is removed and null is returned. If this happens, return.
@@ -233,11 +324,11 @@ namespace XNodeEditor {
 
                         List<Vector2> reroutePoints = output.GetReroutePoints(k);
 
-                        List<Vector2> gridPoints = new List<Vector2>();
+                        gridPoints.Clear();
                         gridPoints.Add(fromRect.center);
                         gridPoints.AddRange(reroutePoints);
                         gridPoints.Add(toRect.center);
-                        DrawNoodle(connectionColor, gridPoints);
+                        DrawNoodle(noodleGradient, noodlePath, noodleStroke, noodleThickness, gridPoints);
 
                         // Loop through reroute points again and draw the points
                         for (int i = 0; i < reroutePoints.Count; i++) {
@@ -253,7 +344,7 @@ namespace XNodeEditor {
                                 GUI.DrawTexture(rect, NodeEditorResources.dotOuter);
                             }
 
-                            GUI.color = connectionColor;
+                            GUI.color = portColor;
                             GUI.DrawTexture(rect, NodeEditorResources.dot);
                             if (rect.Overlaps(selectionBox)) selection.Add(rerouteRef);
                             if (rect.Contains(mousePos)) hoveredReroute = rerouteRef;
@@ -299,6 +390,8 @@ namespace XNodeEditor {
             //Save guiColor so we can revert it
             Color guiColor = GUI.color;
 
+            List<XNode.NodePort> removeEntries = new List<XNode.NodePort>();
+
             if (e.type == EventType.Layout) culledNodes = new List<XNode.Node>();
             for (int n = 0; n < graph.nodes.Count; n++) {
                 // Skip null nodes. The user could be in the process of renaming scripts, so removing them at this point is not advisable.
@@ -316,12 +409,18 @@ namespace XNodeEditor {
                 } else if (culledNodes.Contains(node)) continue;
 
                 if (e.type == EventType.Repaint) {
-                    _portConnectionPoints = _portConnectionPoints.Where(x => x.Key.node != node).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                    removeEntries.Clear();
+                    foreach (var kvp in _portConnectionPoints)
+                        if (kvp.Key.node == node) removeEntries.Add(kvp.Key);
+                    foreach (var k in removeEntries) _portConnectionPoints.Remove(k);
                 }
 
                 NodeEditor nodeEditor = NodeEditor.GetEditor(node, this);
 
                 NodeEditor.portPositions.Clear();
+
+                // Set default label width. This is potentially overridden in OnBodyGUI
+                EditorGUIUtility.labelWidth = 84;
 
                 //Get node position
                 Vector2 nodePos = GridToWindowPositionNoClipped(node.position);
@@ -332,7 +431,7 @@ namespace XNodeEditor {
 
                 if (selected) {
                     GUIStyle style = new GUIStyle(nodeEditor.GetBodyStyle());
-                    GUIStyle highlightStyle = new GUIStyle(NodeEditorResources.styles.nodeHighlight);
+                    GUIStyle highlightStyle = new GUIStyle(nodeEditor.GetBodyHighlightStyle());
                     highlightStyle.padding = style.padding;
                     style.padding = new RectOffset();
                     GUI.color = nodeEditor.GetTint();

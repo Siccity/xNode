@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace XNodeEditor {
+    public enum NoodlePath { Curvy, Straight, Angled }
+    public enum NoodleStroke { Full, Dashed }
+
     public static class NodeEditorPreferences {
-        public enum NoodleType { Curve, Line, Angled }
 
         /// <summary> The last editor we checked. This should be the one we modify </summary>
         private static XNodeEditor.NodeGraphEditor lastEditor;
@@ -37,7 +40,8 @@ namespace XNodeEditor {
             public bool portTooltips = true;
             [SerializeField] private string typeColorsData = "";
             [NonSerialized] public Dictionary<string, Color> typeColors = new Dictionary<string, Color>();
-            public NoodleType noodleType = NoodleType.Curve;
+            [FormerlySerializedAs("noodleType")] public NoodlePath noodlePath = NoodlePath.Curvy;
+            public NoodleStroke noodleStroke = NoodleStroke.Full;
 
             private Texture2D _gridTexture;
             public Texture2D gridTexture {
@@ -77,6 +81,8 @@ namespace XNodeEditor {
 
         /// <summary> Get settings of current active editor </summary>
         public static Settings GetSettings() {
+            if (XNodeEditor.NodeEditorWindow.current == null) return new Settings();
+
             if (lastEditor != XNodeEditor.NodeEditorWindow.current.graphEditor) {
                 object[] attribs = XNodeEditor.NodeEditorWindow.current.graphEditor.GetType().GetCustomAttributes(typeof(XNodeEditor.NodeGraphEditor.CustomNodeGraphEditorAttribute), true);
                 if (attribs.Length == 1) {
@@ -124,6 +130,7 @@ namespace XNodeEditor {
             }
             EditorGUILayout.EndHorizontal();
             
+            
             EditorGUILayout.Space();
 
             NodeSettingsGUI(lastKey, settings);
@@ -167,7 +174,8 @@ namespace XNodeEditor {
             //Label
             EditorGUILayout.LabelField("Node", EditorStyles.boldLabel);
             settings.highlightColor = EditorGUILayout.ColorField("Selection", settings.highlightColor);
-            settings.noodleType = (NoodleType) EditorGUILayout.EnumPopup("Noodle type", (Enum) settings.noodleType);
+            settings.noodlePath = (NoodlePath) EditorGUILayout.EnumPopup("Noodle path", (Enum) settings.noodlePath);
+            settings.noodleStroke = (NoodleStroke) EditorGUILayout.EnumPopup("Noodle stroke", (Enum) settings.noodleStroke);
             settings.portTooltips = EditorGUILayout.Toggle("Port Tooltips", settings.portTooltips);
             settings.dragToCreate = EditorGUILayout.Toggle(new GUIContent("Drag to Create", "Drag a port connection anywhere on the grid to create and connect a node"), settings.dragToCreate);
             if (GUI.changed) {

@@ -8,6 +8,7 @@ using UnityEngine;
 namespace XNodeEditor {
     public class MenuPopupWindow : PopupWindowContent
     {
+        public Vector2 OpenBeforeMousePos;
         private SearchField _search;
         private MenuTreeView _menuTree;
         public Action OnCloseA;
@@ -293,13 +294,18 @@ namespace XNodeEditor {
                 if (string.IsNullOrEmpty(path)) continue;
 
                 menu.AddItem(path, () => {
+                    pos = NodeEditorWindow.current.WindowToGridPosition(menu.OpenBeforeMousePos);
                     XNode.Node node = CreateNode(type, pos);
                     NodeEditorWindow.current.AutoConnect(node);
                 });
             }
 //            menu.AddSeparator("");
             if (NodeEditorWindow.copyBuffer != null && NodeEditorWindow.copyBuffer.Length > 0) 
-                menu.AddItem("Paste", () => NodeEditorWindow.current.PasteNodes(pos));
+                menu.AddItem("Paste", () =>
+                {
+                    pos = NodeEditorWindow.current.WindowToGridPosition(menu.OpenBeforeMousePos);
+                    NodeEditorWindow.current.PasteNodes(pos);
+                });
 //            else menu.AddDisabledItem(new GUIContent("Paste"));
             menu.AddItem("Preferences", () => NodeEditorReflection.OpenPreferences());
             menu.AddItem("创建所有的节点 ---> 测试用", () =>
@@ -308,7 +314,9 @@ namespace XNodeEditor {
                 {
                     return;
                 }
-
+                
+                pos = NodeEditorWindow.current.WindowToGridPosition(menu.OpenBeforeMousePos);
+                
                 for (int i = 0; i < NodeEditorReflection.nodeTypes.Length; i++)
                 {
                     Type type = NodeEditorReflection.nodeTypes[i];

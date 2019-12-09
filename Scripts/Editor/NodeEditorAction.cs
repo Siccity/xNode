@@ -227,7 +227,7 @@ namespace XNodeEditor {
                             // Open context menu for auto-connection
                             else if (NodeEditorPreferences.GetSettings().dragToCreate && autoConnectOutput != null) {
                                 _menuPopupWindow.OnCloseA = _releaseDraggedConnection;
-                                
+                                _menuPopupWindow.OpenBeforeMousePos = e.mousePosition;
                                 PopupWindow.Show(new Rect(Event.current.mousePosition, Vector2.zero),_menuPopupWindow);
                             }
 
@@ -286,6 +286,7 @@ namespace XNodeEditor {
                                 e.Use(); // Fixes copy/paste context menu appearing in Unity 5.6.6f2 - doesn't occur in 2018.3.2f1 Probably needs to be used in other places.
                             } else if (!IsHoveringNode) {
                                 autoConnectOutput = null;
+                                _menuPopupWindow.OpenBeforeMousePos = e.mousePosition;
                                 PopupWindow.Show(new Rect(Event.current.mousePosition, Vector2.zero),_menuPopupWindow);
                             }
                         }

@@ -241,11 +241,13 @@ namespace XNodeEditor {
             {
                 w = CreateWindow<NodeEditorWindow>("xNode");
             }
-            
+
             w.Show(true);
             w.Focus();
             w.wantsMouseMove = true;
             w.graph = graph;
+            NodeGraphEditor graphEditor = NodeGraphEditor.GetEditor(graph, w);
+            NodeEditorWindow.current.graphEditor = graphEditor;
         }
 
         /// <summary> Repaint all open NodeEditorWindows. </summary>

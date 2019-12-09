@@ -120,11 +120,6 @@ namespace XNodeEditor {
                     if (GUILayout.Button(new GUIContent("XNode Documentation", "https://github.com/Siccity/xNode/wiki"),
                         GUILayout.Width(180)))
                         Application.OpenURL("https://github.com/Siccity/xNode/wiki");
-
-                    if (GUILayout.Button(
-                        new GUIContent("IcSkill Documentation", "https://github.com/yika-aixi/IcSkillSystem"),
-                        GUILayout.Width(180)))
-                        Application.OpenURL("https://github.com/yika-aixi/IcSkillSystem");
                 }
                 EditorGUILayout.Space();
             }

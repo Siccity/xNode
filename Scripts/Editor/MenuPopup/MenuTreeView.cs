@@ -26,10 +26,10 @@ namespace XNodeEditor
         
         public MenuTreeView(TreeViewState state, MultiColumnHeader multiColumnHeader = null) : base(state, multiColumnHeader)
         {
-            Root = new TreeViewItem(_id++,-1,nameof(Root));
+            Root = new TreeViewItem(id++,-1,nameof(Root));
         }
 
-        private int _id = -1;
+        private int id = -1;
 
         private Dictionary<int, List<string>> _menuCache = new Dictionary<int, List<string>>();
 
@@ -88,7 +88,7 @@ namespace XNodeEditor
                         }
                     }
                     
-                    var temp = new TreeViewItem(_id++,depth++,path);
+                    var temp = new TreeViewItem(id++,depth++,path);
                     
                     last.AddChild(temp);
                     
@@ -98,7 +98,7 @@ namespace XNodeEditor
                 }
             }
             
-            last.AddChild(new MenuItem(_id++,depth,paths.Last(),onClick));
+            last.AddChild(new MenuItem(id++,depth,paths.Last(),onClick));
         }
         
         protected override bool DoesItemMatchSearch(TreeViewItem item, string search)
@@ -111,7 +111,7 @@ namespace XNodeEditor
             return base.DoesItemMatchSearch(item, search);
         }
         
-        List<int> _ids = new List<int>();
+        List<int> ids = new List<int>();
         protected override void DoubleClickedItem(int id)
         {
             var item = FindItem(id,Root);
@@ -121,15 +121,15 @@ namespace XNodeEditor
                 {
                     searchString = "";
 
-                    _ids.Clear();
+                    ids.Clear();
 
                     while (item != null)
                     {
-                        _ids.Add(item.id);
+                        ids.Add(item.id);
                         item = item.parent;
                     }
                     
-                    SetExpanded(_ids);
+                    SetExpanded(ids);
                 }
                 else
                 {

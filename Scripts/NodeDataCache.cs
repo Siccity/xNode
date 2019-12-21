@@ -40,7 +40,6 @@ namespace XNode {
                     else
                     {
                         port.ValueType = staticPort.ValueType;
-                        port.TypeConstraintBaseType = staticPort.TypeConstraintBaseType;
                     }
                 }
                 // If port doesn't exist anymore, remove it

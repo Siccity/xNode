@@ -312,6 +312,8 @@ namespace XNodeEditor {
             }).Where(x => x.port != null);
             List<XNode.NodePort> dynamicPorts = indexedPorts.OrderBy(x => x.index).Select(x => x.port).ToList();
 
+            node.UpdatePorts();
+            
             ReorderableList list = null;
             Dictionary<string, ReorderableList> rlc;
             if (reorderableListCache.TryGetValue(serializedObject.targetObject, out rlc)) {
@@ -326,6 +328,7 @@ namespace XNodeEditor {
             }
             list.list = dynamicPorts;
             list.DoLayoutList();
+            
         }
 
         private static ReorderableList CreateReorderableList(string fieldName, List<XNode.NodePort> dynamicPorts, SerializedProperty arrayData, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType, XNode.Node.TypeConstraint typeConstraint, Action<ReorderableList> onCreation) {
@@ -337,7 +340,7 @@ namespace XNodeEditor {
             list.drawElementCallback =
                 (Rect rect, int index, bool isActive, bool isFocused) => {
                     XNode.NodePort port = node.GetPort(fieldName + " " + index);
-                    if (hasArrayData) {
+                    if (hasArrayData && arrayData.propertyType != SerializedPropertyType.String) {
                         if (arrayData.arraySize <= index) {
                             EditorGUI.LabelField(rect, "Array[" + index + "] data out of range");
                             return;
@@ -465,7 +468,7 @@ namespace XNodeEditor {
                         EditorUtility.SetDirty(node);
                     }
 
-                    if (hasArrayData) {
+                    if (hasArrayData && arrayData.propertyType != SerializedPropertyType.String) {
                         if (arrayData.arraySize <= index) {
                             Debug.LogWarning("Attempted to remove array index " + index + " where only " + arrayData.arraySize + " exist - Skipped");
                             Debug.Log(rl.list[0]);

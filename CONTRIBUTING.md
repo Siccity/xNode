@@ -5,13 +5,21 @@ If you haven't already, join our [Discord channel](https://discord.gg/qgPrHv4)!
 
 ## Pull Requests
 Try to keep your pull requests relevant, neat, and manageable. If you are adding multiple features, split them into separate PRs.
-* Avoid including irellevant whitespace or formatting changes.
-* Comment your code.
-* Spell check your code / comments
-* Use consistent formatting
+These are the main points to follow:
+
+1) Use formatting which is consistent with the rest of xNode base (see below)
+2) Keep _one feature_ per PR (see below)
+3) xNode aims to be compatible with C# 4.x, do not use new language features
+4) Avoid including irellevant whitespace or formatting changes
+5) Comment your code
+6) Spell check your code / comments
+7) Use concrete types, not *var*
+8) Use english language
 
 ## New features
 xNode aims to be simple and extendible, not trying to fix all of Unity's shortcomings.
+
+Approved changes might be rejected if bundled with rejected changes, so keep PRs as separate as possible.
 
 If your feature aims to cover something not related to editing nodes, it generally won't be accepted. If in doubt, ask on the Discord channel.
 

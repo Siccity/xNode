@@ -21,7 +21,7 @@ namespace XNodeEditor {
         public readonly static Dictionary<XNode.NodePort, Vector2> portPositions = new Dictionary<XNode.NodePort, Vector2>();
 
 #if ODIN_INSPECTOR
-        internal static bool inNodeEditor = false;
+        protected internal static bool inNodeEditor = false;
 #endif
 
         public virtual void OnHeaderGUI() {
@@ -129,9 +129,14 @@ namespace XNodeEditor {
         public void Rename(string newName) {
             if (newName == null || newName.Trim() == "") newName = NodeEditorUtilities.NodeDefaultName(target.GetType());
             target.name = newName;
+            OnRename();
             AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
         }
-
+        
+        /// <summary> Called after this node's name has changed. </summary>
+        public virtual void OnRename() { }
+        
+        
         [AttributeUsage(AttributeTargets.Class)]
         public class CustomNodeEditorAttribute : Attribute,
         XNodeEditor.Internal.NodeEditorBase<NodeEditor, NodeEditor.CustomNodeEditorAttribute, XNode.Node>.INodeEditorAttrib {

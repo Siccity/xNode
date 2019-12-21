@@ -119,12 +119,12 @@ namespace XNode {
         protected void OnEnable() {
             if (graphHotfix != null) graph = graphHotfix;
             graphHotfix = null;
-            UpdateStaticPorts();
+            UpdatePorts();
             Init();
         }
 
-        /// <summary> Update static ports to reflect class fields. This happens automatically on enable. </summary>
-        public void UpdateStaticPorts() {
+        /// <summary> Update static ports and dynamic ports managed by DynamicPortLists to reflect class fields. This happens automatically on enable or on redrawing a dynamic port list. </summary>
+        public void UpdatePorts() {
             NodeDataCache.UpdatePorts(this, ports);
         }
 
@@ -262,7 +262,7 @@ namespace XNode {
 
 #region Attributes
         /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInputPort(string)"/> </summary>
-        [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
+        [AttributeUsage(AttributeTargets.Field)]
         public class InputAttribute : Attribute {
             public ShowBackingValue backingValue;
             public ConnectionType connectionType;
@@ -285,7 +285,7 @@ namespace XNode {
         }
 
         /// <summary> Mark a serializable field as an output port. You can access this through <see cref="GetOutputPort(string)"/> </summary>
-        [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
+        [AttributeUsage(AttributeTargets.Field)]
         public class OutputAttribute : Attribute {
             public ShowBackingValue backingValue;
             public ConnectionType connectionType;

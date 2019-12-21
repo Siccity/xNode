@@ -51,30 +51,13 @@ namespace XNode {
             }
         }
         
-        public Type TypeConstraintBaseType {
-            get {
-                if (_typeConstraintBaseType == null && !string.IsNullOrEmpty(_typeConstraintBaseTypeQualifiedName)) 
-                    _typeConstraintBaseType = Type.GetType(_typeConstraintBaseTypeQualifiedName, false);
-                return _typeConstraintBaseType;
-            }
-            set {
-                _typeConstraintBaseType = value;
-                if (value != null)
-                {
-                    _typeConstraintBaseTypeQualifiedName = value.AssemblyQualifiedName;
-                }
-            }
-        }
-        
         private Type valueType;
-        private Type _typeConstraintBaseType;
 #if UNITY_EDITOR
         public const string FieldNameEditor = nameof(_fieldName);
 #endif
         [SerializeField] private string _fieldName;
         [SerializeField] private Node _node;
         [SerializeField] private string _typeQualifiedName;
-        [SerializeField] private string _typeConstraintBaseTypeQualifiedName;
         [SerializeField] private List<PortConnection> connections = new List<PortConnection>();
         [SerializeField] private IO _direction;
         [SerializeField] private Node.ConnectionType _connectionType;
@@ -92,7 +75,6 @@ namespace XNode {
                     _direction = IO.Input;
                     _connectionType = (attribs[i] as Node.InputAttribute).connectionType;
                     _typeConstraint = (attribs[i] as Node.InputAttribute).typeConstraint;
-                    TypeConstraintBaseType = (attribs[i] as Node.InputAttribute).BaseType;
                 } else if (attribs[i] is Node.OutputAttribute) {
                     _direction = IO.Output;
                     _connectionType = (attribs[i] as Node.OutputAttribute).connectionType;
@@ -105,7 +87,6 @@ namespace XNode {
         public NodePort(NodePort nodePort, Node node) {
             _fieldName = nodePort._fieldName;
             ValueType = nodePort.valueType;
-            TypeConstraintBaseType = nodePort.TypeConstraintBaseType;
             _direction = nodePort.direction;
             _dynamic = nodePort._dynamic;
             _connectionType = nodePort._connectionType;
@@ -114,10 +95,9 @@ namespace XNode {
         }
 
         /// <summary> Construct a dynamic port. Dynamic ports are not forgotten on reimport, and is ideal for runtime-created ports. </summary>
-        public NodePort(string fieldName, Type type, IO direction, Node.ConnectionType connectionType, Node.TypeConstraint typeConstraint,Type baseType, Node node) {
+        public NodePort(string fieldName, Type type, IO direction, Node.ConnectionType connectionType, Node.TypeConstraint typeConstraint, Node node) {
             _fieldName = fieldName;
             this.ValueType = type;
-            TypeConstraintBaseType = baseType;
             _direction = direction;
             _node = node;
             _dynamic = true;
@@ -301,21 +281,6 @@ namespace XNode {
             else output = port;
             // If there isn't one of each, they can't connect
             if (input == null || output == null) return false;
-            // Check input type constraints
-            if (input.typeConstraint == XNode.Node.TypeConstraint.Inherited)
-            {
-                //无法分配,失败
-                if (!input.ValueType.IsAssignableFrom(output.ValueType))
-                {
-                    return false;
-                }
-
-                //如果存在指定基类,同时无法分配,失败
-                if (input.TypeConstraintBaseType != null && !input.TypeConstraintBaseType.IsAssignableFrom(output.ValueType))
-                {
-                    return false;
-                }
-            }
             if (input.typeConstraint == XNode.Node.TypeConstraint.Strict && input.ValueType != output.ValueType) return false;
             if (input.typeConstraint == XNode.Node.TypeConstraint.InheritedInverse && !output.ValueType.IsAssignableFrom(input.ValueType)) return false;
             // Check output type constraints

@@ -314,8 +314,8 @@ namespace XNodeEditor {
         }
 
         [Obsolete("Use DynamicPortList instead")]
-        public static void InstancePortList(string fieldName, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple, XNode.Node.TypeConstraint typeConstraint = XNode.Node.TypeConstraint.None,Type inputTypeConstraintBaseType = null, Action<ReorderableList> onCreation = null) {
-            DynamicPortList(fieldName, type, serializedObject, io, connectionType, typeConstraint, inputTypeConstraintBaseType,onCreation);
+        public static void InstancePortList(string fieldName, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple, XNode.Node.TypeConstraint typeConstraint = XNode.Node.TypeConstraint.None, Action<ReorderableList> onCreation = null) {
+            DynamicPortList(fieldName, type, serializedObject, io, connectionType, typeConstraint, onCreation);
         }
 #endregion
 
@@ -331,16 +331,16 @@ namespace XNodeEditor {
             return false;
         }
 
-        /// <summary> Draw an editable list of dynamic ports. Port names are named as "[fieldName] [index]" </summary>
+        /// <summary> Draw an editable list of dynamic ports.</summary>
         /// <param name="fieldName">Supply a list for editable values</param>
         /// <param name="type">Value type of added dynamic ports</param>
         /// <param name="serializedObject">The serializedObject of the node</param>
         /// <param name="connectionType">Connection type of added dynamic ports</param>
-        /// <param name="inputTypeConstraintBaseType">当<see cref="io"/>为<see cref="IO.Input"/>并且<see cref="typeConstraint"/>为<see cref="TypeConstraint.Inherited"/>时可用</param>
         /// <param name="onCreation">Called on the list on creation. Use this if you want to customize the created ReorderableList</param>
+        /// <param name="onAdd">Return port name after adding port</param>
         public static void DynamicPortList(string fieldName, Type type, SerializedObject serializedObject, XNode.NodePort.IO io,
             XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple,
-            XNode.Node.TypeConstraint typeConstraint = XNode.Node.TypeConstraint.None,Type inputTypeConstraintBaseType = null,
+            XNode.Node.TypeConstraint typeConstraint = XNode.Node.TypeConstraint.None,
             Action<ReorderableList> onCreation = null,Action<string> onAdd = null) {
             XNode.Node node = serializedObject.targetObject as XNode.Node;
 
@@ -358,7 +358,7 @@ namespace XNodeEditor {
             if (list == null) {
                 SerializedProperty arrayData = serializedObject.FindProperty(fieldName);
                 list = CreateReorderableList(fieldName, dynamicPorts, arrayData, type, serializedObject, 
-                    io, connectionType, typeConstraint, inputTypeConstraintBaseType,onAdd);
+                    io, connectionType, typeConstraint, onAdd);
                 onCreation?.Invoke(list);
                 if (reorderableListCache.TryGetValue(serializedObject.targetObject, out rlc)) rlc.Add(fieldName, list);
                 else reorderableListCache.Add(serializedObject.targetObject, new Dictionary<string, ReorderableList>() { { fieldName, list } });
@@ -368,8 +368,7 @@ namespace XNodeEditor {
         }
 
         private static ReorderableList CreateReorderableList(string fieldName, List<XNode.NodePort> dynamicPorts, SerializedProperty arrayData, Type type, 
-            SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType, XNode.Node.TypeConstraint typeConstraint,
-            Type inputTypeConstraintBaseType,Action<string> onAdd) {
+            SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType, XNode.Node.TypeConstraint typeConstraint,Action<string> onAdd) {
             bool hasArrayData = arrayData != null && arrayData.isArray;
             XNode.Node node = serializedObject.targetObject as XNode.Node;
             ReorderableList list = new ReorderableList(dynamicPorts, null, true, true, true, true);
@@ -465,7 +464,7 @@ namespace XNodeEditor {
                     while (node.HasPort(newName)) newName = fieldName + " " + (++i);
 
                     if (io == XNode.NodePort.IO.Output) node.AddDynamicOutput(type, connectionType, XNode.Node.TypeConstraint.None, newName);
-                    else node.AddDynamicInput(type, connectionType, typeConstraint,inputTypeConstraintBaseType, newName);
+                    else node.AddDynamicInput(type, connectionType, typeConstraint, newName);
                     serializedObject.Update();
                     EditorUtility.SetDirty(node);
                     if (hasArrayData) {
@@ -495,7 +494,7 @@ namespace XNodeEditor {
                     int i = 0;
                     while (node.HasPort(newName)) newName = arrayData.name + " " + (++i);
                     if (io == XNode.NodePort.IO.Output) node.AddDynamicOutput(type, connectionType, typeConstraint,newName);
-                    else node.AddDynamicInput(type, connectionType, typeConstraint, inputTypeConstraintBaseType,newName);
+                    else node.AddDynamicInput(type, connectionType, typeConstraint, newName);
                     EditorUtility.SetDirty(node);
                     dynamicPortCount++;
                 }

@@ -76,7 +76,7 @@ namespace XNode {
 
         [Obsolete("Use AddDynamicPort instead")]
         private NodePort AddInstancePort(Type type, NodePort.IO direction, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = TypeConstraint.None, string fieldName = null) {
-            return AddDynamicPort(type, direction, connectionType, typeConstraint, null,fieldName);
+            return AddDynamicPort(type, direction, connectionType, typeConstraint, fieldName);
         }
 
         [Obsolete("Use RemoveDynamicPort instead")]
@@ -147,21 +147,21 @@ namespace XNode {
         /// <summary> Convenience function. </summary>
         /// <seealso cref="AddInstancePort"/>
         /// <seealso cref="AddInstanceOutput"/>
-        public NodePort AddDynamicInput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = TypeConstraint.None,Type baseType = null, string fieldName = null) {
-            return AddDynamicPort(type, NodePort.IO.Input, connectionType, typeConstraint,baseType, fieldName);
+        public NodePort AddDynamicInput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = TypeConstraint.None, string fieldName = null) {
+            return AddDynamicPort(type, NodePort.IO.Input, connectionType, typeConstraint, fieldName);
         }
 
         /// <summary> Convenience function. </summary>
         /// <seealso cref="AddInstancePort"/>
         /// <seealso cref="AddInstanceInput"/>
         public NodePort AddDynamicOutput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = TypeConstraint.None, string fieldName = null) {
-            return AddDynamicPort(type, NodePort.IO.Output, connectionType, typeConstraint, null,fieldName);
+            return AddDynamicPort(type, NodePort.IO.Output, connectionType, typeConstraint,fieldName);
         }
 
         /// <summary> Add a dynamic, serialized port to this node. </summary>
         /// <seealso cref="AddDynamicInput"/>
         /// <seealso cref="AddDynamicOutput"/>
-        private NodePort AddDynamicPort(Type type, NodePort.IO direction, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = TypeConstraint.None,Type baseType = null, string fieldName = null) {
+        private NodePort AddDynamicPort(Type type, NodePort.IO direction, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = TypeConstraint.None, string fieldName = null) {
             if (fieldName == null) {
                 fieldName = "dynamicInput_0";
                 int i = 0;
@@ -170,7 +170,7 @@ namespace XNode {
                 Debug.LogWarning("Port '" + fieldName + "' already exists in " + name, this);
                 return ports[fieldName];
             }
-            NodePort port = new NodePort(fieldName, type, direction, connectionType, typeConstraint,baseType, this);
+            NodePort port = new NodePort(fieldName, type, direction, connectionType, typeConstraint, this);
 
             ports.Add(fieldName, port);
             
@@ -400,6 +400,7 @@ namespace XNode {
                 values.Clear();
                 foreach (KeyValuePair<string, NodePort> pair in this) {
                    
+                    //Sorting, output port is always after input port
                     if (pair.Value.direction == NodePort.IO.Input)
                     {
                         var firstOutIndex = values.FindIndex(x => x.direction == NodePort.IO.Output);

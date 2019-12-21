@@ -123,9 +123,17 @@ namespace XNodeEditor {
         public virtual string GetPortTooltip(XNode.NodePort port) {
             Type portType = port.ValueType;
             string tooltip = "";
-            tooltip = portType.PrettyName();
-            if (port.IsOutput) {
-                object obj = port.node.GetValue(port);
+
+            // Now allow tooltips to be overridden or to have their values hidden based on attribute usage
+            var targetType = portType.HasElementType ? portType.GetElementType() : portType; // For arrays and lists.
+            // ReSharper disable once PossibleNullReferenceException
+            var attr = ((OverrideTooltipAttribute[])targetType
+                .GetCustomAttributes(typeof(OverrideTooltipAttribute), false)).SingleOrDefault();
+            tooltip = attr?.overrideTooltip ?? false ? attr.tooltip : targetType.PrettyName();
+            var hideValue = attr?.hideValue ?? false;
+            // ReSharper disable once InvertIf
+            if (!hideValue && port.IsOutput) {
+                var obj = port.node.GetValue(port);
                 tooltip += " = " + (obj != null ? obj.ToString() : "null");
             }
             return tooltip;

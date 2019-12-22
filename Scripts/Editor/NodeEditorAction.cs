@@ -58,10 +58,9 @@ namespace XNodeEditor {
                 case EventType.MouseDrag:
                     if (e.button == 0) {
                         if (IsDraggingPort) {
-                            if (IsHoveringPort && hoveredPort.IsInput && draggedOutput.CanConnectTo(hoveredPort)) {
-                                if (!draggedOutput.IsConnectedTo(hoveredPort)) {
-                                    draggedOutputTarget = hoveredPort;
-                                }
+                            // Set target even if we can't connect, so as to prevent auto-conn menu from opening erroneously
+                            if (IsHoveringPort && hoveredPort.IsInput && !draggedOutput.IsConnectedTo(hoveredPort)) {
+                                draggedOutputTarget = hoveredPort;
                             } else {
                                 draggedOutputTarget = null;
                             }
@@ -205,8 +204,8 @@ namespace XNodeEditor {
                     if (e.button == 0) {
                         //Port drag release
                         if (IsDraggingPort) {
-                            //If connection is valid, save it
-                            if (draggedOutputTarget != null) {
+                            // If connection is valid, save it
+                            if (draggedOutputTarget != null && draggedOutput.CanConnectTo(draggedOutputTarget)) {
                                 XNode.Node node = draggedOutputTarget.node;
                                 if (graph.nodes.Count != 0) draggedOutput.Connect(draggedOutputTarget);
 
@@ -218,8 +217,8 @@ namespace XNodeEditor {
                                     EditorUtility.SetDirty(graph);
                                 }
                             }
-                            // Open context menu for auto-connection
-                            else if (NodeEditorPreferences.GetSettings().dragToCreate && autoConnectOutput != null) {
+                            // Open context menu for auto-connection if there is no target node
+                            else if (draggedOutputTarget == null && NodeEditorPreferences.GetSettings().dragToCreate && autoConnectOutput != null) {
                                 GenericMenu menu = new GenericMenu();
                                 graphEditor.AddContextMenuItems(menu);
                                 menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));

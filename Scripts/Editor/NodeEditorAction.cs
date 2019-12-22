@@ -457,8 +457,8 @@ namespace XNodeEditor {
 
                         XNode.Node newNodeIn, newNodeOut;
                         if (substitutes.TryGetValue(inputPort.node, out newNodeIn) && substitutes.TryGetValue(outputPort.node, out newNodeOut)) {
-                            newNodeIn.UpdateStaticPorts();
-                            newNodeOut.UpdateStaticPorts();
+                            newNodeIn.UpdatePorts();
+                            newNodeOut.UpdatePorts();
                             inputPort = newNodeIn.GetInputPort(inputPort.fieldName);
                             outputPort = newNodeOut.GetOutputPort(outputPort.fieldName);
                         }

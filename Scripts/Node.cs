@@ -119,12 +119,12 @@ namespace XNode {
         protected void OnEnable() {
             if (graphHotfix != null) graph = graphHotfix;
             graphHotfix = null;
-            UpdateStaticPorts();
+            UpdatePorts();
             Init();
         }
 
-        /// <summary> Update static ports to reflect class fields. This happens automatically on enable. </summary>
-        public void UpdateStaticPorts() {
+        /// <summary> Update all ports to reflect class fields. This happens automatically on enable or on redrawing the list of ports. </summary>
+        public void UpdatePorts() {
             NodeDataCache.UpdatePorts(this, ports);
         }
 

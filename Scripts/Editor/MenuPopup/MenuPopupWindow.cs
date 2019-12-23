@@ -10,17 +10,17 @@ namespace XNodeEditor
     /// </summary>
     public class MenuPopupWindow : PopupWindowContent
     {
-        public Vector2 OpenBeforeMousePos;
-        private SearchField _search;
-        private MenuTreeView _menuTree;
-        public Action OnCloseA;
+        public Vector2 openBeforeMousePos;
+        private SearchField search;
+        private MenuTreeView menuTree;
+        public Action onCloseAction;
         public MenuPopupWindow()
         {
-            _search = new SearchField();
-            _menuTree = new MenuTreeView();
+            search = new SearchField();
+            menuTree = new MenuTreeView();
         }
 
-        private bool _isInit;
+        private bool isInit;
         
         /// <summary>
         /// Add Item
@@ -31,7 +31,7 @@ namespace XNodeEditor
         /// <param name="autoClose">Automatically close window after selecting an item</param>
         public void AddItem(string menuPath, Action onClick, char symbol = '/',bool autoClose = true)
         {
-            _menuTree.AddItem(menuPath, () =>
+            menuTree.AddItem(menuPath, () =>
             {
                 onClick?.Invoke();
                 if (autoClose)
@@ -46,52 +46,52 @@ namespace XNodeEditor
         /// </summary>
         public void Init()
         {
-            _menuTree.Reload();
-            _isInit = true;
+            menuTree.Reload();
+            isInit = true;
         }
 
         public override void OnOpen()
         {
-            _search.SetFocus();
+            search.SetFocus();
         }
 
         public override void OnClose()
         {
-            OnCloseA?.Invoke();
+            onCloseAction?.Invoke();
         }
 
         private string _str;
         public override void OnGUI(Rect rect)
         {
-            if (!_isInit)
+            if (!isInit)
             {
                 Init();
             }
 
-            _action();
+            EventAction();
             
             EditorGUI.BeginChangeCheck();
             {
-                _str = _search.OnGUI(new Rect(rect.position, new Vector2(rect.width, 20)),_str);
+                _str = search.OnGUI(new Rect(rect.position, new Vector2(rect.width, 20)),_str);
             }
             if (EditorGUI.EndChangeCheck())
             {
-                _menuTree.searchString = _str;
+                menuTree.searchString = _str;
             }
             
-            _menuTree.OnGUI(new Rect(new Vector2(0,25),rect.size - new Vector2(0,20)));
+            menuTree.OnGUI(new Rect(new Vector2(0,25),rect.size - new Vector2(0,20)));
         }
         
-        private void _action()
+        private void EventAction()
         {
             Event e = Event.current;
             switch (e.type)
             {
                 case EventType.KeyDown:
                     
-                    if (e.keyCode == KeyCode.DownArrow && !_menuTree.HasFocus())
+                    if (e.keyCode == KeyCode.DownArrow && !menuTree.HasFocus())
                     {
-                        _menuTree.SetFocusAndEnsureSelectedItem();
+                        menuTree.SetFocusAndEnsureSelectedItem();
                         e.Use();
                     }
                     break;

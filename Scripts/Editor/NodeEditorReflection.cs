@@ -75,7 +75,7 @@ namespace XNodeEditor {
             return types.ToArray();
         }
         
-        /// <summary> Find methods marked with the [ContextMenu] attribute and add them to the context menu </summary>
+        /// <summary> Find methods marked with the [ContextMenu] attribute and add them to the menu popup window</summary>
         public static void AddCustomContextMenuItems(this MenuPopupWindow contextMenu, object obj) {
             KeyValuePair<ContextMenu, MethodInfo>[] items = GetContextMenuMethods(obj);
             if (items.Length != 0) {

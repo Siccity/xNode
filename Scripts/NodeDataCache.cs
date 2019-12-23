@@ -104,7 +104,7 @@ namespace XNode {
             System.Type tempType = nodeType;
             while ((tempType = tempType.BaseType) != typeof(XNode.Node))
             {
-                //只返回私有的,保护等其他的不需要
+                // Only return private, protected, etc.
                 var fieldInfos = tempType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Where(x=>x.IsPrivate);
                
                 fieldInfo.AddRange(fieldInfos);

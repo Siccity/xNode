@@ -29,7 +29,7 @@ namespace XNodeEditor {
             DrawConnections();
             DrawNodes();
             DrawSelectionBox();
-            _drawGroupName();
+            DrawGroupName();
             DrawTooltip();
             graphEditor.OnGUI();
 
@@ -42,7 +42,7 @@ namespace XNodeEditor {
             GUI.matrix = m;
         }
 
-        private void _drawGroupName()
+        private void DrawGroupName()
         {
             var guiContent = new GUIContent(this.graph.name);
             var col = EditorStyles.label.normal.textColor;

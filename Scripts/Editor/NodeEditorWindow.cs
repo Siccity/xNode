@@ -26,7 +26,7 @@ namespace XNodeEditor {
             });
         }
 
-        [MenuItem("Icarus/Node Editor/Close All Editor Window")]
+        [MenuItem("xNode/Close All Editor Window")]
         static void CloseAllNodeEditorWindow()
         {
             var windows = Resources.FindObjectsOfTypeAll<NodeEditorWindow>();

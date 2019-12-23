@@ -32,13 +32,13 @@ namespace XNodeEditor {
         private Rect selectionBox;
         private bool isDoubleClick = false;
         private Vector2 lastMousePosition;
-        private MenuPopupWindow _menuPopupWindow;
+        private MenuPopupWindow menuPopupWindow;
 
         public void Controls() {
-            if (_menuPopupWindow == null)
+            if (menuPopupWindow == null)
             {
-                _menuPopupWindow = new MenuPopupWindow();
-                graphEditor.AddContextMenuItems(_menuPopupWindow);
+                menuPopupWindow = new MenuPopupWindow();
+                graphEditor.AddContextMenuItems(menuPopupWindow);
             }
             wantsMouseMove = true;
             Event e = Event.current;
@@ -226,12 +226,12 @@ namespace XNodeEditor {
                             }
                             // Open context menu for auto-connection
                             else if (NodeEditorPreferences.GetSettings().dragToCreate && autoConnectOutput != null) {
-                                _menuPopupWindow.OnCloseA = _releaseDraggedConnection;
-                                _menuPopupWindow.OpenBeforeMousePos = e.mousePosition;
-                                PopupWindow.Show(new Rect(Event.current.mousePosition, Vector2.zero),_menuPopupWindow);
+                                menuPopupWindow.OnCloseA = ReleaseDraggedConnection;
+                                menuPopupWindow.OpenBeforeMousePos = e.mousePosition;
+                                PopupWindow.Show(new Rect(Event.current.mousePosition, Vector2.zero),menuPopupWindow);
                             }
 
-                            _releaseDraggedConnection();
+                            ReleaseDraggedConnection();
 
                         } else if (currentActivity == NodeActivity.DragNode) {
                             IEnumerable<XNode.Node> nodes = Selection.objects.Where(x => x is XNode.Node).Select(x => x as XNode.Node);
@@ -286,8 +286,8 @@ namespace XNodeEditor {
                                 e.Use(); // Fixes copy/paste context menu appearing in Unity 5.6.6f2 - doesn't occur in 2018.3.2f1 Probably needs to be used in other places.
                             } else if (!IsHoveringNode) {
                                 autoConnectOutput = null;
-                                _menuPopupWindow.OpenBeforeMousePos = e.mousePosition;
-                                PopupWindow.Show(new Rect(Event.current.mousePosition, Vector2.zero),_menuPopupWindow);
+                                menuPopupWindow.OpenBeforeMousePos = e.mousePosition;
+                                PopupWindow.Show(new Rect(Event.current.mousePosition, Vector2.zero),menuPopupWindow);
                             }
                         }
                         isPanning = false;
@@ -346,7 +346,7 @@ namespace XNodeEditor {
             }
         }
 
-        private void _releaseDraggedConnection()
+        private void ReleaseDraggedConnection()
         {
 //Release dragged connection
             draggedOutput = null;

@@ -234,7 +234,7 @@ namespace XNodeEditor {
             Color col = NodeEditorWindow.current.graphEditor.GetPortColor(port);
             DrawPortHandle(rect, backgroundColor, col);
             
-            //当选择节点时显示所有的输入点索引
+            //Show all input point indexes when node is selected
             if (port.direction == XNode.NodePort.IO.Output)
             {
                 if (port.Connection != null && port.Connection.ConnectionCount > 1)

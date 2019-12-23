@@ -23,16 +23,18 @@ namespace XNodeEditor {
 #if ODIN_INSPECTOR
         internal static bool inNodeEditor = false;
 #endif
-        private List<string> _excludesField;
+        private List<string> excludesField;
+        private List<string> portNames = new List<string>();
+
         public override void OnCreate()
         {
-            _excludesField = new List<string> { "m_Script", "graph", "position", "ports" };
+            excludesField = new List<string> { "m_Script", "graph", "position", "ports" };
 
             var fields = GetExcludesField();
 
             if (fields != null)
             {
-                _excludesField.AddRange(fields);
+                excludesField.AddRange(fields);
             }
         }
 
@@ -67,25 +69,25 @@ namespace XNodeEditor {
             // Iterate through serialized properties and draw them like the Inspector (But with ports)
             SerializedProperty iterator = serializedObject.GetIterator();
             bool enterChildren = true;
-            List<string> _names = new List<string>();
+            portNames.Clear();
             while (iterator.NextVisible(enterChildren)) {
                 enterChildren = false;
-                if (_excludesField.Contains(iterator.name)) continue;
+                if (excludesField.Contains(iterator.name)) continue;
                 NodeEditorGUILayout.PropertyField(iterator, true);
-                _names.Add(iterator.name);
+                portNames.Add(iterator.name);
             }
             
-            //处理一下没被绘制的端口
+            //Deal with ports that are not drawn
             foreach (var port in target.Ports)
             {
-                //动态的跳过
+                //Dynamic skip
                 if (port.IsDynamic)
                 {
                     continue;
                 }
 
-                //不受unity序列化支持,但是被标记为了输入或输出
-                if (!_names.Contains(port.fieldName))
+                //Not supported by unity serialization, but marked as input or output
+                if (!portNames.Contains(port.fieldName))
                 {
                     NodeEditorGUILayout.PortField(port);
                 }
@@ -141,27 +143,6 @@ namespace XNodeEditor {
 
         public virtual GUIStyle GetBodyHighlightStyle() {
             return NodeEditorResources.styles.nodeHighlight;
-        }
-
-        /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>
-        public virtual void AddContextMenuItems(MenuPopupWindow menu) {
-            // Actions if only one node is selected
-            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
-                XNode.Node node = Selection.activeObject as XNode.Node;
-                menu.AddItem("Move To Top", () => NodeEditorWindow.current.MoveNodeToTop(node));
-                menu.AddItem("Rename",  NodeEditorWindow.current.RenameSelectedNode);
-            }
-
-            // Add actions to any number of selected nodes
-            menu.AddItem("Copy",  NodeEditorWindow.current.CopySelectedNodes);
-            menu.AddItem("Duplicate", NodeEditorWindow.current.DuplicateSelectedNodes);
-            menu.AddItem("Remove", NodeEditorWindow.current.RemoveSelectedNodes);
-
-            // Custom sctions if only one node is selected
-            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
-                XNode.Node node = Selection.activeObject as XNode.Node;
-                menu.AddCustomContextMenuItems(node);
-            }
         }
         
         /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>

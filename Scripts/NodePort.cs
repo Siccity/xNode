@@ -53,7 +53,7 @@ namespace XNode {
         
         private Type valueType;
 #if UNITY_EDITOR
-        public const string FieldNameEditor = nameof(_fieldName);
+        public const string FIELDNAMEEDITOR = nameof(_fieldName);
 #endif
         [SerializeField] private string _fieldName;
         [SerializeField] private Node _node;
@@ -219,7 +219,7 @@ namespace XNode {
             if (connectionType == Node.ConnectionType.Override && ConnectionCount != 0)
             {
                 var conPort = GetConnection(0);
-                
+                //Same connection, not disconnect
                 if(conPort.node != port.node || conPort != port)
                 {
                     ClearConnections();

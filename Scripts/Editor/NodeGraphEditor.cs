@@ -50,7 +50,7 @@ namespace XNodeEditor {
                 if (string.IsNullOrEmpty(path)) continue;
 
                 menu.AddItem(path, () => {
-                    pos = NodeEditorWindow.current.WindowToGridPosition(menu.OpenBeforeMousePos);
+                    pos = NodeEditorWindow.current.WindowToGridPosition(menu.openBeforeMousePos);
                     XNode.Node node = CreateNode(type, pos);
                     NodeEditorWindow.current.AutoConnect(node);
                 });
@@ -58,7 +58,7 @@ namespace XNodeEditor {
             if (NodeEditorWindow.copyBuffer != null && NodeEditorWindow.copyBuffer.Length > 0) 
                 menu.AddItem("Paste", () =>
                 {
-                    pos = NodeEditorWindow.current.WindowToGridPosition(menu.OpenBeforeMousePos);
+                    pos = NodeEditorWindow.current.WindowToGridPosition(menu.openBeforeMousePos);
                     NodeEditorWindow.current.PasteNodes(pos);
                 });
 
@@ -71,7 +71,7 @@ namespace XNodeEditor {
                     return;
                 }
                 
-                pos = NodeEditorWindow.current.WindowToGridPosition(menu.OpenBeforeMousePos);
+                pos = NodeEditorWindow.current.WindowToGridPosition(menu.openBeforeMousePos);
                 
                 for (int i = 0; i < NodeEditorReflection.nodeTypes.Length; i++)
                 {

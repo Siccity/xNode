@@ -32,7 +32,8 @@ namespace XNodeEditor {
 
             if (GUILayout.Button("Edit graph", GUILayout.Height(40))) {
                 SerializedProperty graphProp = serializedObject.FindProperty("graph");
-                NodeEditorWindow.Open(graphProp.objectReferenceValue as XNode.NodeGraph);
+                NodeEditorWindow w = NodeEditorWindow.Open(graphProp.objectReferenceValue as XNode.NodeGraph);
+                w.Home(); // Focus selected node
             }
 
             GUILayout.Space(EditorGUIUtility.singleLineHeight);

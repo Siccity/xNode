@@ -217,8 +217,8 @@ namespace XNodeEditor {
         }
 
         /// <summary>Open the provided graph in the NodeEditor</summary>
-        public static void Open(XNode.NodeGraph graph) {
-            if (!graph) return;
+        public static NodeEditorWindow Open(XNode.NodeGraph graph) {
+            if (!graph) return null;
 
             var windows = Resources.FindObjectsOfTypeAll<NodeEditorWindow>();
             NodeEditorWindow w = null;
@@ -248,6 +248,7 @@ namespace XNodeEditor {
             w.graph = graph;
             NodeGraphEditor graphEditor = NodeGraphEditor.GetEditor(graph, w);
             NodeEditorWindow.current.graphEditor = graphEditor;
+            return w;
         }
 
         /// <summary> Repaint all open NodeEditorWindows. </summary>

@@ -30,7 +30,7 @@ namespace XNodeEditor {
         {
             excludesField = new List<string> { "m_Script", "graph", "position", "ports" };
 
-            var fields = GetExcludesField();
+            IEnumerable<string> fields = GetExcludesField();
 
             if (fields != null)
             {

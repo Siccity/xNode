@@ -29,7 +29,7 @@ namespace XNodeEditor {
         [MenuItem("xNode/Close All Editor Window")]
         static void CloseAllNodeEditorWindow()
         {
-            var windows = Resources.FindObjectsOfTypeAll<NodeEditorWindow>();
+            NodeEditorWindow[] windows = Resources.FindObjectsOfTypeAll<NodeEditorWindow>();
 
             foreach (var window in windows)
             {

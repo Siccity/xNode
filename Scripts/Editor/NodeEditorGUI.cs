@@ -44,11 +44,11 @@ namespace XNodeEditor {
 
         private void DrawGroupName()
         {
-            var guiContent = new GUIContent(this.graph.name);
-            var col = EditorStyles.label.normal.textColor;
+            GUIContent guiContent = new GUIContent(this.graph.name);
+            Color col = EditorStyles.label.normal.textColor;
             var fontSize = EditorStyles.label.fontSize;
             EditorStyles.label.fontSize = 48;
-            var size = GUILayoutUtility.GetRect(guiContent, EditorStyles.label);
+            Rect size = GUILayoutUtility.GetRect(guiContent, EditorStyles.label);
             EditorStyles.label.normal.textColor = new Color(175 / 255f, 185 / 255f, 185 / 255f);
             EditorGUI.LabelField(new Rect(new Vector2(5, 5), size.size), guiContent);
             EditorStyles.label.fontSize = fontSize;

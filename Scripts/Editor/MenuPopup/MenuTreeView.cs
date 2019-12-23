@@ -88,7 +88,7 @@ namespace XNodeEditor
                         }
                     }
                     
-                    var temp = new TreeViewItem(id++,depth++,path);
+                    TreeViewItem temp = new TreeViewItem(id++,depth++,path);
                     
                     last.AddChild(temp);
                     
@@ -114,7 +114,7 @@ namespace XNodeEditor
         List<int> ids = new List<int>();
         protected override void DoubleClickedItem(int id)
         {
-            var item = FindItem(id,Root);
+            TreeViewItem item = FindItem(id,Root);
             if (item.hasChildren)
             {
                 if (hasSearch)

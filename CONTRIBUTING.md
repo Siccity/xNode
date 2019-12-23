@@ -13,7 +13,8 @@ These are the main points to follow:
 4) Avoid including irellevant whitespace or formatting changes
 5) Comment your code
 6) Spell check your code / comments
-7) Use english language
+7) Use concrete types, not *var*
+8) Use english language
 
 ## New features
 xNode aims to be simple and extendible, not trying to fix all of Unity's shortcomings.

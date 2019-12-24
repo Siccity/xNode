@@ -21,7 +21,7 @@ namespace XNodeEditor {
         public readonly static Dictionary<XNode.NodePort, Vector2> portPositions = new Dictionary<XNode.NodePort, Vector2>();
 
 #if ODIN_INSPECTOR
-        internal static bool inNodeEditor = false;
+        protected internal static bool inNodeEditor = false;
 #endif
 
         public virtual void OnHeaderGUI() {

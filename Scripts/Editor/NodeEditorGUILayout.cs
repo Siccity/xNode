@@ -312,6 +312,8 @@ namespace XNodeEditor {
             }).Where(x => x.port != null);
             List<XNode.NodePort> dynamicPorts = indexedPorts.OrderBy(x => x.index).Select(x => x.port).ToList();
 
+            node.UpdatePorts();
+            
             ReorderableList list = null;
             Dictionary<string, ReorderableList> rlc;
             if (reorderableListCache.TryGetValue(serializedObject.targetObject, out rlc)) {
@@ -327,7 +329,6 @@ namespace XNodeEditor {
             list.list = dynamicPorts;
             list.DoLayoutList();
             
-            node.UpdatePorts();
         }
 
         private static ReorderableList CreateReorderableList(string fieldName, List<XNode.NodePort> dynamicPorts, SerializedProperty arrayData, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType, XNode.Node.TypeConstraint typeConstraint, Action<ReorderableList> onCreation) {

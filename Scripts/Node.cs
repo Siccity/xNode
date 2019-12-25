@@ -123,7 +123,7 @@ namespace XNode {
             Init();
         }
 
-        /// <summary> Update all ports to reflect class fields. This happens automatically on enable or on redrawing the list of ports. </summary>
+        /// <summary> Update static ports and dynamic ports managed by DynamicPortLists to reflect class fields. This happens automatically on enable or on redrawing a dynamic port list. </summary>
         public void UpdatePorts() {
             NodeDataCache.UpdatePorts(this, ports);
         }

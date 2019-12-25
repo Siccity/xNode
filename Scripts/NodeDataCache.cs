@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using UnityEditor;
 using UnityEngine;
 
 namespace XNode {
@@ -10,7 +9,7 @@ namespace XNode {
         private static PortDataCache portDataCache;
         private static bool Initialized { get { return portDataCache != null; } }
 
-        /// <summary> Update static and dynamic ports to reflect class fields. </summary>
+        /// <summary> Update static and dynamic ports managed by DynamicPortLists to reflect class fields. </summary>
         public static void UpdatePorts(Node node, Dictionary<string, NodePort> ports) {
             if (!Initialized) BuildCache();
 
@@ -18,7 +17,7 @@ namespace XNode {
             Dictionary<string, List<NodePort>> removedPorts = new Dictionary<string, List<NodePort>>();
             System.Type nodeType = node.GetType();
 
-            List<NodePort> dynamicPorts = new List<NodePort>();
+            List<NodePort> dynamicListPorts = new List<NodePort>();
 
             List<NodePort> typePortCache;
             if (portDataCache.TryGetValue(nodeType, out typePortCache)) {
@@ -28,7 +27,7 @@ namespace XNode {
             }
 
             // Cleanup port dict - Remove nonexisting static ports - update static port types
-            // AND update dynamic ports too!
+            // AND update dynamic ports (albeit only those in lists) too, in order to enforce proper serialisation.
             // Loop through current node ports
             foreach (NodePort port in ports.Values.ToList()) {
                 // If port still exists, check it it has been changed
@@ -47,9 +46,9 @@ namespace XNode {
                     port.ClearConnections();
                     ports.Remove(port.fieldName);
                 }
-                // If the port is dynamic, flag it for reference updates
-                else {
-                    dynamicPorts.Add(port);
+                // If the port is dynamic and is managed by a dynamic port list, flag it for reference updates
+                else if (IsDynamicListPort(port)) {
+                    dynamicListPorts.Add(port);
                 }
             }
             // Add missing ports
@@ -69,32 +68,41 @@ namespace XNode {
                 }
             }
             
-            // Finally, make sure dynamic port settings correspond to the settings of their backing field
-            foreach (NodePort dynamicPort in dynamicPorts) {
-                string[] parts = dynamicPort.fieldName.Split(' ');
-                if (parts.Length != 2) {
-                    Debug.LogError("Dynamic port name " + dynamicPort.fieldName + " is invalid.");
-                    continue;
-                }
-                string backingPortName = parts[0];
-                NodePort backingPort;
-                if (!staticPorts.TryGetValue(backingPortName, out backingPort)) {
-                    Debug.LogError($"Could not find backing port \"{backingPortName}\" for port {dynamicPort.fieldName}");
-                    continue;
-                }
+            // Finally, make sure dynamic list port settings correspond to the settings of their "backing port"
+            foreach (NodePort listPort in dynamicListPorts) {
+                // At this point we know that ports here are dynamic list ports
+                // which have passed name/"backing port" checks, ergo we can proceed more safely.
+                string backingPortName = listPort.fieldName.Split(' ')[0];
+                NodePort backingPort = staticPorts[backingPortName];
                 
                 // Update port constraints. Creating a new port instead will break the editor, mandating the need for setters.
-                dynamicPort.ValueType = backingPort.ValueType;
-                dynamicPort.direction = backingPort.direction;
-                dynamicPort.connectionType = backingPort.connectionType;
-                dynamicPort.typeConstraint = backingPort.typeConstraint;
-
+                listPort.ValueType = backingPort.ValueType;
+                listPort.direction = backingPort.direction;
+                listPort.connectionType = backingPort.connectionType;
+                listPort.typeConstraint = backingPort.typeConstraint;
             }
-            
-            
-            
         }
 
+        /// <summary>Returns true if the given port is in a dynamic port list.</summary>
+        private static bool IsDynamicListPort(NodePort port) {
+            // Ports flagged as "dynamicPortList = true" end up having a "backing port" and a name with an index, but we have
+            // no guarantee that a dynamic port called "output 0" is an element in a list backed by a static "output" port.
+            // Thus, we need to check for attributes... (but at least we don't need to look at all fields this time)
+            string[] fieldNameParts = port.fieldName.Split(' ');
+            if (fieldNameParts.Length != 2) return false;
+            
+            FieldInfo backingPortInfo = port.node.GetType().GetField(fieldNameParts[0]);
+            if (backingPortInfo == null) return false;
+            
+            object[] attribs = backingPortInfo.GetCustomAttributes(true);
+            return attribs.Any(x => {
+                Node.InputAttribute inputAttribute = x as Node.InputAttribute;
+                Node.OutputAttribute outputAttribute = x as Node.OutputAttribute;
+                return inputAttribute != null && inputAttribute.dynamicPortList ||
+                       outputAttribute != null && outputAttribute.dynamicPortList;
+            });
+        }
+        
         /// <summary> Cache node types </summary>
         private static void BuildCache() {
             portDataCache = new PortDataCache();
@@ -182,11 +190,6 @@ namespace XNode {
                 for (int i = 0; i < keys.Count; i++)
                     this.Add(keys[i], values[i]);
             }
-        }
-
-        [MenuItem("TOOLS/LOL")]
-        public static void LOL() {
-            portDataCache = null;
         }
     }
 }

@@ -19,10 +19,6 @@ namespace XNode {
             }
         }
 
-        // public IO direction { get { return _direction; } }
-        // public Node.ConnectionType connectionType { get { return _connectionType; } }
-        // public Node.TypeConstraint typeConstraint { get { return _typeConstraint; } }
-
         public IO direction { 
             get { return _direction; }
             internal set { _direction = value; }

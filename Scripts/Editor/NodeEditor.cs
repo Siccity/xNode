@@ -129,33 +129,14 @@ namespace XNodeEditor {
         public void Rename(string newName) {
             if (newName == null || newName.Trim() == "") newName = NodeEditorUtilities.NodeDefaultName(target.GetType());
             target.name = newName;
-            TriggerRenameNotifications(target);
+            OnRename();
+            AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
         }
         
-        /// <summary>
-        /// Triggers OnRename on all nodes in the graph after a node's name changes,
-        /// reimporting asset files for all subsequently renamed nodes.
-        /// </summary>
-        public static void TriggerRenameNotifications(XNode.Node renamedNode) {
-            List<XNode.Node> graphNodes = renamedNode.graph.nodes;
-            string[] oldNodeNames = new string[graphNodes.Count];
-            // Notify all nodes, allow them to further change names accordingly
-            for (int i = 0; i < graphNodes.Count; i++) {
-                XNode.Node node = graphNodes[i];
-                oldNodeNames[i] = node.name;
-                node.OnRename(renamedNode);
-            }
-
-            // After all user-driven modifications have been resolved, update all assets whose node names have changed
-            // (And always reimport the node which got renamed in the first place)
-            for (int i = 0; i < graphNodes.Count; i++) {
-                if (graphNodes[i] == renamedNode || graphNodes[i].name != oldNodeNames[i]) {
-                    AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(graphNodes[i]));
-                }
-            }
-        }
+        /// <summary> Called after this node's name has changed. </summary>
+        public virtual void OnRename() { }
         
-
+        
         [AttributeUsage(AttributeTargets.Class)]
         public class CustomNodeEditorAttribute : Attribute,
         XNodeEditor.Internal.NodeEditorBase<NodeEditor, NodeEditor.CustomNodeEditorAttribute, XNode.Node>.INodeEditorAttrib {

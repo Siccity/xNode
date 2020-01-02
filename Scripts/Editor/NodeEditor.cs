@@ -129,9 +129,14 @@ namespace XNodeEditor {
         public void Rename(string newName) {
             if (newName == null || newName.Trim() == "") newName = NodeEditorUtilities.NodeDefaultName(target.GetType());
             target.name = newName;
+            OnRename();
             AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
         }
-
+        
+        /// <summary> Called after this node's name has changed. </summary>
+        public virtual void OnRename() { }
+        
+        
         [AttributeUsage(AttributeTargets.Class)]
         public class CustomNodeEditorAttribute : Attribute,
         XNodeEditor.Internal.NodeEditorBase<NodeEditor, NodeEditor.CustomNodeEditorAttribute, XNode.Node>.INodeEditorAttrib {

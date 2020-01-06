@@ -9,7 +9,7 @@ namespace XNode {
         private static PortDataCache portDataCache;
         private static bool Initialized { get { return portDataCache != null; } }
 
-        /// <summary> Update static and dynamic ports managed by DynamicPortLists to reflect class fields. </summary>
+        /// <summary> Update static ports and dynamic ports managed by DynamicPortLists to reflect class fields. </summary>
         public static void UpdatePorts(Node node, Dictionary<string, NodePort> ports) {
             if (!Initialized) BuildCache();
 

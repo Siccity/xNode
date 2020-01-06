@@ -340,7 +340,7 @@ namespace XNodeEditor {
             list.drawElementCallback =
                 (Rect rect, int index, bool isActive, bool isFocused) => {
                     XNode.NodePort port = node.GetPort(fieldName + " " + index);
-                    if (hasArrayData) {
+                    if (hasArrayData && arrayData.propertyType != SerializedPropertyType.String) {
                         if (arrayData.arraySize <= index) {
                             EditorGUI.LabelField(rect, "Array[" + index + "] data out of range");
                             return;
@@ -468,7 +468,7 @@ namespace XNodeEditor {
                         EditorUtility.SetDirty(node);
                     }
 
-                    if (hasArrayData) {
+                    if (hasArrayData && arrayData.propertyType != SerializedPropertyType.String) {
                         if (arrayData.arraySize <= index) {
                             Debug.LogWarning("Attempted to remove array index " + index + " where only " + arrayData.arraySize + " exist - Skipped");
                             Debug.Log(rl.list[0]);

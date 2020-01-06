@@ -33,7 +33,17 @@ namespace XNodeEditor {
 
             foreach (var window in windows)
             {
-                window.Close();
+                if (window)
+                {
+                    try
+                    {
+                        window.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        DestroyImmediate(window);
+                    }
+                }
             }
         }
         
@@ -103,7 +113,8 @@ namespace XNodeEditor {
         public float zoom { get { return _zoom; } set { _zoom = Mathf.Clamp(value, NodeEditorPreferences.GetSettings().minZoom, NodeEditorPreferences.GetSettings().maxZoom); Repaint(); } }
         private float _zoom = 1;
 
-        void OnFocus() {
+        void OnFocus()
+        {
             current = this;
             ValidateGraphEditor();
             if (graphEditor != null && NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
@@ -239,15 +250,26 @@ namespace XNodeEditor {
 
             if (!w)
             {
-                w = CreateWindow<NodeEditorWindow>("xNode");
+                w = EditorWindow.CreateInstance<NodeEditorWindow>();
+                w.titleContent = new GUIContent("xNode");
             }
-
+            
             w.Show(true);
             w.Focus();
+
+            if (w.graphEditor == null)
+            {
+                NodeGraphEditor graphEditor = NodeGraphEditor.GetEditor(graph, w);
+                w.graphEditor = graphEditor;
+            }
+            else
+            {
+                //refresh  target
+                w.graphEditor.target = graph;
+            }
+
             w.wantsMouseMove = true;
             w.graph = graph;
-            NodeGraphEditor graphEditor = NodeGraphEditor.GetEditor(graph, w);
-            NodeEditorWindow.current.graphEditor = graphEditor;
             return w;
         }
 

@@ -79,7 +79,7 @@ namespace XNodeEditor {
             ValidateGraphEditor();
             if (graphEditor != null && NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
 
-            dragThreshold = Screen.width / 1000f;
+            dragThreshold = Math.Max(1f, Screen.width / 1000f);
         }
 
         [InitializeOnLoadMethod]

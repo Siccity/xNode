@@ -76,11 +76,26 @@ namespace XNode {
                 NodePort backingPort = staticPorts[backingPortName];
                 
                 // Update port constraints. Creating a new port instead will break the editor, mandating the need for setters.
-                listPort.ValueType = backingPort.ValueType;
+                listPort.ValueType = GetBackingValueType(backingPort.ValueType);
                 listPort.direction = backingPort.direction;
                 listPort.connectionType = backingPort.connectionType;
                 listPort.typeConstraint = backingPort.typeConstraint;
             }
+        }
+
+        /// <summary>
+        /// Extracts the underlying types from arrays and lists, the only collections for dynamic port lists
+        /// currently supported. If the given type is not applicable (i.e. if the dynamic list port was not
+        /// defined as an array or a list), returns the given type itself. 
+        /// </summary>
+        private static System.Type GetBackingValueType(System.Type portValType) {
+            if (portValType.HasElementType) {
+                return portValType.GetElementType();
+            }
+            if (portValType.IsGenericType && portValType.GetGenericTypeDefinition() == typeof(List<>)) {
+                return portValType.GetGenericArguments()[0];
+            }
+            return portValType;
         }
 
         /// <summary>Returns true if the given port is in a dynamic port list.</summary>

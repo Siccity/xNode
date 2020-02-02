@@ -65,7 +65,7 @@ namespace XNode {
 
         [Obsolete("Use AddDynamicInput instead")]
         public NodePort AddInstanceInput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = TypeConstraint.None, string fieldName = null) {
-            return AddInstanceInput(type, connectionType, typeConstraint, fieldName);
+            return AddDynamicInput(type, connectionType, typeConstraint, fieldName);
         }
 
         [Obsolete("Use AddDynamicOutput instead")]

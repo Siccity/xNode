@@ -137,6 +137,7 @@ namespace XNode {
                     case "UnityEngine":
                     case "System":
                     case "mscorlib":
+                    case "Microsoft":
                         continue;
                     default:
                         nodeTypes.AddRange(assembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray());

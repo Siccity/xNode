@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -121,27 +122,20 @@ namespace XNode {
         /// <summary> Cache node types </summary>
         private static void BuildCache() {
             portDataCache = new PortDataCache();
-            System.Type baseType = typeof(Node);
-            List<System.Type> nodeTypes = new List<System.Type>();
-            System.Reflection.Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
+            Type baseType = typeof(Node);
+            List<Type> nodeTypes = new List<Type>();
+            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
             // Loop through assemblies and add node types to list
-            foreach (Assembly assembly in assemblies) {
+            foreach (Assembly assembly in assemblies)
+            {
                 // Skip certain dlls to improve performance
                 string assemblyName = assembly.GetName().Name;
-                int index = assemblyName.IndexOf('.');
-                if (index != -1) assemblyName = assemblyName.Substring(0, index);
-                switch (assemblyName) {
-                    // The following assemblies, and sub-assemblies (eg. UnityEngine.UI) are skipped
-                    case "UnityEditor":
-                    case "UnityEngine":
-                    case "System":
-                    case "mscorlib":
-                    case "Microsoft":
-                        continue;
-                    default:
-                        nodeTypes.AddRange(assembly.GetTypes().Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray());
-                        break;
+                if (!XNodeRuntimeConstants.IGNORE_ASSEMBLY_PREFIXES.Any(x => assemblyName.StartsWith(x)))
+                {
+                    IEnumerable<Type> foundNodeTypes = assembly.GetTypes()
+                        .Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t));
+                    nodeTypes.AddRange(foundNodeTypes);
                 }
             }
 
@@ -201,7 +195,13 @@ namespace XNode {
                 this.Clear();
 
                 if (keys.Count != values.Count)
-                    throw new System.Exception(string.Format("there are {0} keys and {1} values after deserialization. Make sure that both key and value types are serializable."));
+                {
+                    var msg = string.Format(
+                        XNodeRuntimeConstants.MISMATCHED_KEYS_TO_VALUES_EXCEPTION_MESSAGE,
+                        keys.Count,
+                        values.Count);
+                    throw new Exception(msg);
+                }
 
                 for (int i = 0; i < keys.Count; i++)
                     this.Add(keys[i], values[i]);

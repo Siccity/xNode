@@ -378,7 +378,13 @@ namespace XNode {
                 this.Clear();
 
                 if (keys.Count != values.Count)
-                    throw new System.Exception("there are " + keys.Count + " keys and " + values.Count + " values after deserialization. Make sure that both key and value types are serializable.");
+                {
+                    var msg = string.Format(
+                        XNodeRuntimeConstants.MISMATCHED_KEYS_TO_VALUES_EXCEPTION_MESSAGE,
+                        keys.Count,
+                        values.Count);
+                    throw new Exception(msg);
+                }
 
                 for (int i = 0; i < keys.Count; i++)
                     this.Add(keys[i], values[i]);

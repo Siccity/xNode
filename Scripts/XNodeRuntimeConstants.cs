@@ -25,7 +25,6 @@ namespace XNode
             "nunit",
             "SyntaxTree",
             "System",
-            "Unity",
             "UnityEditor",
             "UnityEngine"
         };

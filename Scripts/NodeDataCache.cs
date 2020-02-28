@@ -156,7 +156,14 @@ namespace XNode {
             // GetFields doesnt return inherited private fields, so walk through base types and pick those up
             System.Type tempType = nodeType;
             while ((tempType = tempType.BaseType) != typeof(XNode.Node)) {
-                fieldInfo.AddRange(tempType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance));
+                FieldInfo[] parentFields = tempType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
+                for (int i = 0; i < parentFields.Length; i++) {
+                    // Ensure that we do not already have a member with this type and name
+                    FieldInfo parentField = parentFields[i];
+                    if (fieldInfo.TrueForAll(x => x.Name != parentField.Name)) {
+                        fieldInfo.Add(parentField);
+                    }
+                }
             }
             return fieldInfo;
         }

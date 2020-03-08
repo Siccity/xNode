@@ -68,14 +68,14 @@ namespace XNode {
                     ports.Add(staticPort.fieldName, port);
                 }
             }
-            
+
             // Finally, make sure dynamic list port settings correspond to the settings of their "backing port"
             foreach (NodePort listPort in dynamicListPorts) {
                 // At this point we know that ports here are dynamic list ports
                 // which have passed name/"backing port" checks, ergo we can proceed more safely.
-                string backingPortName = listPort.fieldName.Split(' ')[0];
+                string backingPortName = listPort.fieldName.Split(' ') [0];
                 NodePort backingPort = staticPorts[backingPortName];
-                
+
                 // Update port constraints. Creating a new port instead will break the editor, mandating the need for setters.
                 listPort.ValueType = GetBackingValueType(backingPort.ValueType);
                 listPort.direction = backingPort.direction;
@@ -94,7 +94,7 @@ namespace XNode {
                 return portValType.GetElementType();
             }
             if (portValType.IsGenericType && portValType.GetGenericTypeDefinition() == typeof(List<>)) {
-                return portValType.GetGenericArguments()[0];
+                return portValType.GetGenericArguments() [0];
             }
             return portValType;
         }
@@ -106,19 +106,19 @@ namespace XNode {
             // Thus, we need to check for attributes... (but at least we don't need to look at all fields this time)
             string[] fieldNameParts = port.fieldName.Split(' ');
             if (fieldNameParts.Length != 2) return false;
-            
+
             FieldInfo backingPortInfo = port.node.GetType().GetField(fieldNameParts[0]);
             if (backingPortInfo == null) return false;
-            
+
             object[] attribs = backingPortInfo.GetCustomAttributes(true);
             return attribs.Any(x => {
                 Node.InputAttribute inputAttribute = x as Node.InputAttribute;
                 Node.OutputAttribute outputAttribute = x as Node.OutputAttribute;
                 return inputAttribute != null && inputAttribute.dynamicPortList ||
-                       outputAttribute != null && outputAttribute.dynamicPortList;
+                    outputAttribute != null && outputAttribute.dynamicPortList;
             });
         }
-        
+
         /// <summary> Cache node types </summary>
         private static void BuildCache() {
             portDataCache = new PortDataCache();
@@ -127,12 +127,10 @@ namespace XNode {
             Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
             // Loop through assemblies and add node types to list
-            foreach (Assembly assembly in assemblies)
-            {
+            foreach (Assembly assembly in assemblies) {
                 // Skip certain dlls to improve performance
                 string assemblyName = assembly.GetName().Name;
-                if (!XNodeRuntimeConstants.IGNORE_ASSEMBLY_PREFIXES.Any(x => assemblyName.StartsWith(x)))
-                {
+                if (!XNodeRuntimeConstants.IGNORE_ASSEMBLY_PREFIXES.Any(x => assemblyName.StartsWith(x))) {
                     IEnumerable<Type> foundNodeTypes = assembly.GetTypes()
                         .Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t));
                     nodeTypes.AddRange(foundNodeTypes);
@@ -194,8 +192,7 @@ namespace XNode {
             public void OnAfterDeserialize() {
                 this.Clear();
 
-                if (keys.Count != values.Count)
-                {
+                if (keys.Count != values.Count) {
                     var msg = string.Format(
                         XNodeRuntimeConstants.MISMATCHED_KEYS_TO_VALUES_EXCEPTION_MESSAGE,
                         keys.Count,

@@ -377,8 +377,7 @@ namespace XNode {
             public void OnAfterDeserialize() {
                 this.Clear();
 
-                if (keys.Count != values.Count)
-                {
+                if (keys.Count != values.Count) {
                     var msg = string.Format(
                         XNodeRuntimeConstants.MISMATCHED_KEYS_TO_VALUES_EXCEPTION_MESSAGE,
                         keys.Count,

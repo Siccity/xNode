@@ -37,6 +37,7 @@ namespace XNodeEditor {
                     GUI.color = new Color(1, 0.8f, 0.8f);
                     if (GUILayout.Button("Remove")) {
                         removeSafely = false;
+                        Undo.RecordObject(sceneGraph, "Removed graph");
                         sceneGraph.graph = null;
                     }
                     GUI.color = Color.white;
@@ -68,9 +69,9 @@ namespace XNodeEditor {
         }
 
         public void CreateGraph(Type type) {
-            serializedObject.Update();
+            Undo.RecordObject(sceneGraph, "Create graph");
             sceneGraph.graph = ScriptableObject.CreateInstance(type) as NodeGraph;
-            serializedObject.ApplyModifiedProperties();
+            sceneGraph.graph.name = sceneGraph.name + "-graph";
         }
     }
 }

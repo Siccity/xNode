@@ -143,7 +143,7 @@ namespace XNodeEditor {
             Undo.RegisterCreatedObjectUndo(node, "Create Node");
             node.position = position;
             if (node.name == null || node.name.Trim() == "") node.name = NodeEditorUtilities.NodeDefaultName(type);
-            AssetDatabase.AddObjectToAsset(node, target);
+            if (!string.IsNullOrEmpty(AssetDatabase.GetAssetPath(target))) AssetDatabase.AddObjectToAsset(node, target);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             NodeEditorWindow.RepaintAll();
             return node;

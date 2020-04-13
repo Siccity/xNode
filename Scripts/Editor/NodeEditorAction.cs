@@ -18,10 +18,10 @@ namespace XNodeEditor {
         public bool IsHoveringPort { get { return hoveredPort != null; } }
         public bool IsHoveringNode { get { return hoveredNode != null; } }
         public bool IsHoveringReroute { get { return hoveredReroute.port != null; } }
-        public XNode.NodePort GetDraggingPort { get { return draggedOutput; } }
-        public XNode.NodePort GetHoveringPort { get { return hoveredPort; } }
-        public XNode.Node GetHoveringNode { get { return hoveredNode; } }
-        public XNode.NodePort GetHoveringReroute { get { return hoveredReroute.port; } }
+        public XNode.NodePort DraggingPort { get { return draggedOutput; } }
+        public XNode.NodePort HoveringPort { get { return hoveredPort; } }
+        public XNode.Node HoveringNode { get { return hoveredNode; } }
+        public XNode.NodePort HoveringReroute { get { return hoveredReroute.port; } }
 
         private XNode.Node hoveredNode = null;
         [NonSerialized] public XNode.NodePort hoveredPort = null;

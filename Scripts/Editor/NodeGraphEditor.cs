@@ -41,11 +41,22 @@ namespace XNodeEditor {
                 return NodeEditorUtilities.NodeDefaultPath(type);
         }
 
+        /// <summary> The order by which the menu items are displayed. </summary>
+        public virtual int GetNodeMenuOrder(Type type) {
+            //Check if type has the CreateNodeMenuAttribute
+            XNode.Node.CreateNodeMenuAttribute attrib;
+            if (NodeEditorUtilities.GetAttrib(type, out attrib)) // Return custom path
+                return attrib.order;
+            else
+                return 0;
+        }
+
         /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>
         public virtual void AddContextMenuItems(GenericMenu menu) {
             Vector2 pos = NodeEditorWindow.current.WindowToGridPosition(Event.current.mousePosition);
-            for (int i = 0; i < NodeEditorReflection.nodeTypes.Length; i++) {
-                Type type = NodeEditorReflection.nodeTypes[i];
+            var nodeTypes = NodeEditorReflection.nodeTypes.OrderBy(type => GetNodeMenuOrder(type)).ThenBy(type => GetNodeMenuName(type)).ToArray();
+            for (int i = 0; i < nodeTypes.Length; i++) {
+                Type type = nodeTypes[i];
 
                 //Get node context menu path
                 string path = GetNodeMenuName(type);

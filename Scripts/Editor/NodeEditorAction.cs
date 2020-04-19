@@ -25,7 +25,7 @@ namespace XNodeEditor {
         [NonSerialized] private XNode.NodePort autoConnectOutput = null;
         [NonSerialized] private List<Vector2> draggedOutputReroutes = new List<Vector2>();
         private RerouteReference hoveredReroute = new RerouteReference();
-        private List<RerouteReference> selectedReroutes = new List<RerouteReference>();
+        public List<RerouteReference> selectedReroutes = new List<RerouteReference>();
         private Vector2 dragBoxStart;
         private UnityEngine.Object[] preBoxSelection;
         private RerouteReference[] preBoxSelectionReroute;

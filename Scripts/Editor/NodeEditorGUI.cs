@@ -202,6 +202,7 @@ namespace XNodeEditor {
                         Vector2 prev_point = point_a;
                         // Approximately one segment per 5 pixels
                         int segments = (int) Vector2.Distance(point_a, point_b) / 5;
+                        segments = Math.Max(segments, 1);
 
                         int draw = 0;
                         for (int j = 0; j <= segments; j++) {
@@ -285,6 +286,7 @@ namespace XNodeEditor {
                         Vector2 prev_point = point_a;
                         // Approximately one segment per 5 pixels
                         int segments = (int) Vector2.Distance(point_a, point_b) / 5;
+                        segments = Math.Max(segments, 1);
 
                         int draw = 0;
                         for (int j = 0; j <= segments; j++) {

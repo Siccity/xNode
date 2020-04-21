@@ -335,6 +335,16 @@ namespace XNode {
         }
 
         [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+        public class DisallowMultipleNodesAttribute : Attribute {
+            public int max;
+            /// <summary> Prevents Node of the same type (or subtype) to be added more than once (configurable) to a NodeGraph </summary>
+            /// <param name="max"> How many nodes to allow. Defaults to 1. </param>
+            public DisallowMultipleNodesAttribute(int max = 1) {
+                this.max = max;
+            }
+        }
+
+        [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
         public class NodeTintAttribute : Attribute {
             public Color color;
             /// <summary> Specify a color for this node type </summary>

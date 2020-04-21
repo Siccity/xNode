@@ -439,6 +439,15 @@ namespace XNodeEditor {
             for (int i = 0; i < nodes.Length; i++) {
                 XNode.Node srcNode = nodes[i];
                 if (srcNode == null) continue;
+
+                // Check if user is allowed to add more of given node type
+                XNode.Node.DisallowMultipleNodesAttribute disallowAttrib;
+                Type nodeType = srcNode.GetType();
+                if (NodeEditorUtilities.GetAttrib(nodeType, out disallowAttrib)) {
+                    int typeCount = graph.nodes.Count(x => x.GetType() == nodeType);
+                    if (typeCount >= disallowAttrib.max) continue;
+                }
+
                 XNode.Node newNode = graphEditor.CopyNode(srcNode);
                 substitutes.Add(srcNode, newNode);
                 newNode.position = srcNode.position + offset;

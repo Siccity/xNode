@@ -62,7 +62,17 @@ namespace XNodeEditor {
                 string path = GetNodeMenuName(type);
                 if (string.IsNullOrEmpty(path)) continue;
 
-                menu.AddItem(new GUIContent(path), false, () => {
+                // Check if user is allowed to add more of given node type
+                XNode.Node.DisallowMultipleNodesAttribute disallowAttrib;
+                bool disallowed = false;
+                if (NodeEditorUtilities.GetAttrib(type, out disallowAttrib)) {
+                    int typeCount = target.nodes.Count(x => x.GetType() == type);
+                    if (typeCount >= disallowAttrib.max) disallowed = true;
+                }
+
+                // Add node entry to context menu
+                if (disallowed) menu.AddItem(new GUIContent(path), false, null);
+                else menu.AddItem(new GUIContent(path), false, () => {
                     XNode.Node node = CreateNode(type, pos);
                     NodeEditorWindow.current.AutoConnect(node);
                 });

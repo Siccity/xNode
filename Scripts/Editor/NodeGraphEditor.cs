@@ -17,6 +17,12 @@ namespace XNodeEditor {
 
         /// <summary> Called when opened by NodeEditorWindow </summary>
         public virtual void OnOpen() { }
+        
+        /// <summary> Called when NodeEditorWindow gains focus </summary>
+        public virtual void OnWindowFocus() { }
+
+        /// <summary> Called when NodeEditorWindow loses focus </summary>
+        public virtual void OnWindowFocusLost() { }
 
         public virtual Texture2D GetGridTexture() {
             return NodeEditorPreferences.GetSettings().gridTexture;

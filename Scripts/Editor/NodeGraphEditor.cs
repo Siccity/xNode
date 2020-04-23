@@ -171,7 +171,7 @@ namespace XNodeEditor {
         }
 
         /// <summary> Creates a copy of the original node in the graph </summary>
-        public XNode.Node CopyNode(XNode.Node original) {
+        public virtual XNode.Node CopyNode(XNode.Node original) {
             Undo.RecordObject(target, "Duplicate Node");
             XNode.Node node = target.CopyNode(original);
             Undo.RegisterCreatedObjectUndo(node, "Duplicate Node");

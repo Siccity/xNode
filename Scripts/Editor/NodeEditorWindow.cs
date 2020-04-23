@@ -77,7 +77,15 @@ namespace XNodeEditor {
         void OnFocus() {
             current = this;
             ValidateGraphEditor();
-            if (graphEditor != null && NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+            if (graphEditor != null)
+            {
+                graphEditor.OnWindowFocus();
+                if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+            }
+        }
+        
+        void OnLostFocus() {
+            if (graphEditor != null) graphEditor.OnWindowFocusLost();
         }
 
         [InitializeOnLoadMethod]

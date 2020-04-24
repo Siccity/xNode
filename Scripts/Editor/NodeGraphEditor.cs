@@ -187,8 +187,25 @@ namespace XNodeEditor {
             return node;
         }
 
+        /// <summary> Return false for nodes that can't be removed </summary>
+        public virtual bool CanRemove(XNode.Node node) {
+            // Check graph attributes to see if this node is required
+            Type graphType = target.GetType();
+            XNode.NodeGraph.RequireNodeAttribute[] attribs = Array.ConvertAll(
+                graphType.GetCustomAttributes(typeof(XNode.NodeGraph.RequireNodeAttribute), true), x => x as XNode.NodeGraph.RequireNodeAttribute);
+            if (attribs.Any(x => x.Requires(node.GetType()))) {
+                if (target.nodes.Count(x => x.GetType() == node.GetType()) <= 1) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         /// <summary> Safely remove a node and all its connections. </summary>
         public virtual void RemoveNode(XNode.Node node) {
+            if (!CanRemove(node)) return;
+
+            // Remove the node
             Undo.RecordObject(node, "Delete Node");
             Undo.RecordObject(target, "Delete Node");
             foreach (var port in node.Ports)

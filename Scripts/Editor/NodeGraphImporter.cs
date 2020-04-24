@@ -23,19 +23,22 @@ namespace XNodeEditor {
                 NodeGraph.RequireNodeAttribute[] attribs = Array.ConvertAll(
                     graphType.GetCustomAttributes(typeof(NodeGraph.RequireNodeAttribute), true), x => x as NodeGraph.RequireNodeAttribute);
 
-
                 Vector2 position = Vector2.zero;
                 foreach (NodeGraph.RequireNodeAttribute attrib in attribs) {
-                    if (attrib.type0 != null) {
-                        if (!graph.nodes.Any(x => x.GetType() == attrib.type0)) {
-                            XNode.Node node = graph.AddNode(attrib.type0);
-                            node.position = position;
-                            position.x += 200;
-                            if (node.name == null || node.name.Trim() == "") node.name = NodeEditorUtilities.NodeDefaultName(attrib.type0);
-                            if (!string.IsNullOrEmpty(AssetDatabase.GetAssetPath(graph))) AssetDatabase.AddObjectToAsset(node, graph);
-                        }
-                    }
+                    if (attrib.type0 != null) AddRequired(graph, attrib.type0, ref position);
+                    if (attrib.type1 != null) AddRequired(graph, attrib.type1, ref position);
+                    if (attrib.type2 != null) AddRequired(graph, attrib.type2, ref position);
                 }
+            }
+        }
+
+        private static void AddRequired(NodeGraph graph, Type type, ref Vector2 position) {
+            if (!graph.nodes.Any(x => x.GetType() == type)) {
+                XNode.Node node = graph.AddNode(type);
+                node.position = position;
+                position.x += 200;
+                if (node.name == null || node.name.Trim() == "") node.name = NodeEditorUtilities.NodeDefaultName(type);
+                if (!string.IsNullOrEmpty(AssetDatabase.GetAssetPath(graph))) AssetDatabase.AddObjectToAsset(node, graph);
             }
         }
     }

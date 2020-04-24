@@ -110,6 +110,14 @@ namespace XNode {
                 this.type1 = type2;
                 this.type2 = type3;
             }
+
+            public bool Requires(Type type) {
+                if (type == null) return false;
+                if (type == type0) return true;
+                else if (type == type1) return true;
+                else if (type == type2) return true;
+                return false;
+            }
         }
 #endregion
     }

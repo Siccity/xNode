@@ -175,6 +175,11 @@ namespace XNodeEditor {
                 selection.Add(node);
                 Selection.objects = selection.ToArray();
             } else Selection.objects = new Object[] { node };
+
+            int nodeIndex = graph.nodes.IndexOf( node );
+            int indexToMove = orderedNodeIndices.IndexOf( nodeIndex );
+            orderedNodeIndices.RemoveAt( indexToMove );
+            orderedNodeIndices.Insert( orderedNodeIndices.Count, nodeIndex );
         }
 
         public void DeselectNode(XNode.Node node) {

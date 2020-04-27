@@ -11,6 +11,7 @@ namespace XNodeEditor {
         public NodeGraphEditor graphEditor;
         private List<UnityEngine.Object> selectionCache;
         private List<XNode.Node> culledNodes;
+        private List<int> orderedNodeIndices = new List<int>();
         /// <summary> 19 if docked, 22 if not </summary>
         private int topPadding { get { return isDocked() ? 19 : 22; } }
         /// <summary> Executed after all other window GUI. Useful if Zoom is ruining your day. Automatically resets after being run.</summary>
@@ -23,6 +24,14 @@ namespace XNodeEditor {
             if (graph == null) return;
             ValidateGraphEditor();
             Controls();
+
+            // Ensure we have all node indices covered
+            while (orderedNodeIndices.Count < graph.nodes.Count)
+                orderedNodeIndices.Add(orderedNodeIndices.Count);
+            while (orderedNodeIndices.Count > graph.nodes.Count) {
+                int removeIndex = orderedNodeIndices.IndexOf( orderedNodeIndices.Count - 1 );
+                orderedNodeIndices.RemoveAt( removeIndex );
+            }
 
             DrawGrid(position, zoom, panOffset);
             DrawConnections();
@@ -412,7 +421,8 @@ namespace XNodeEditor {
             List<XNode.NodePort> removeEntries = new List<XNode.NodePort>();
 
             if (e.type == EventType.Layout) culledNodes = new List<XNode.Node>();
-            for (int n = 0; n < graph.nodes.Count; n++) {
+            //for (int n = 0; n < graph.nodes.Count; n++) {
+            foreach (int n in orderedNodeIndices) {
                 // Skip null nodes. The user could be in the process of renaming scripts, so removing them at this point is not advisable.
                 if (graph.nodes[n] == null) continue;
                 if (n >= graph.nodes.Count) return;

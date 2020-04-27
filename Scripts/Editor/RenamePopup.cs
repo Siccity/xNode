@@ -19,7 +19,6 @@ namespace XNodeEditor {
             window.input = target.name;
             window.minSize = new Vector2(100, 44);
             window.position = new Rect(0, 0, width, 44);
-            GUI.FocusControl("ClearAllFocus");
             window.UpdatePositionToMouse();
             return window;
         }

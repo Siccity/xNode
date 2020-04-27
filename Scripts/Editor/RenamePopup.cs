@@ -4,6 +4,8 @@ using UnityEngine;
 namespace XNodeEditor {
     /// <summary> Utility for renaming assets </summary>
     public class RenamePopup : EditorWindow {
+        private const string inputControlName = "nameInput";
+
         public static RenamePopup current { get; private set; }
         public Object target;
         public string input;
@@ -42,7 +44,9 @@ namespace XNodeEditor {
                 UpdatePositionToMouse();
                 firstFrame = false;
             }
+            GUI.SetNextControlName(inputControlName);
             input = EditorGUILayout.TextField(input);
+            EditorGUI.FocusTextInControl(inputControlName);
             Event e = Event.current;
             // If input is empty, revert name to default instead
             if (input == null || input.Trim() == "") {

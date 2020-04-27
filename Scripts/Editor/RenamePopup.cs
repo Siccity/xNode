@@ -75,5 +75,9 @@ namespace XNodeEditor {
                 Close();
             }
         }
+
+        private void OnDestroy() {
+            EditorGUIUtility.editingTextField = false;
+        }
     }
 }

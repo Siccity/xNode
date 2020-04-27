@@ -1,4 +1,4 @@
-﻿using UnityEditor;
+using UnityEditor;
 using UnityEngine;
 
 namespace XNodeEditor {
@@ -66,6 +66,10 @@ namespace XNodeEditor {
                     Close();
                     target.TriggerOnValidate();
                 }
+            }
+
+            if (e.isKey && e.keyCode == KeyCode.Escape) {
+                Close();
             }
         }
     }

@@ -22,8 +22,6 @@ namespace XNodeEditor {
             Event e = Event.current;
             Matrix4x4 m = GUI.matrix;
             if (graph == null) return;
-            ValidateGraphEditor();
-            Controls();
 
             // Ensure we have all node indices covered
             while (orderedNodeIndices.Count < graph.nodes.Count)
@@ -32,6 +30,9 @@ namespace XNodeEditor {
                 int removeIndex = orderedNodeIndices.IndexOf( orderedNodeIndices.Count - 1 );
                 orderedNodeIndices.RemoveAt( removeIndex );
             }
+
+            ValidateGraphEditor();
+            Controls();
 
             DrawGrid(position, zoom, panOffset);
             DrawConnections();

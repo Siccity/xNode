@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.Experimental.SceneManagement;
 using UnityEngine;
 using XNodeEditor.Internal;
 
@@ -227,18 +228,18 @@ namespace XNodeEditor {
                             draggedOutput = null;
                             draggedOutputTarget = null;
                             EditorUtility.SetDirty(graph);
-                            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+                            if (NodeEditorPreferences.GetSettings().autoSave) SaveAssets();
                         } else if (currentActivity == NodeActivity.DragNode) {
                             IEnumerable<XNode.Node> nodes = Selection.objects.Where(x => x is XNode.Node).Select(x => x as XNode.Node);
                             foreach (XNode.Node node in nodes) EditorUtility.SetDirty(node);
-                            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+                            if (NodeEditorPreferences.GetSettings().autoSave) SaveAssets();
                         } else if (!IsHoveringNode) {
                             // If click outside node, release field focus
                             if (!isPanning) {
                                 EditorGUI.FocusTextInControl(null);
                                 EditorGUIUtility.editingTextField = false;
                             }
-                            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+                            if (NodeEditorPreferences.GetSettings().autoSave) SaveAssets();
                         }
 
                         // If click node header, select it.
@@ -542,6 +543,13 @@ namespace XNodeEditor {
             EditorUtility.SetDirty(graph);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             autoConnectOutput = null;
+        }
+        
+        /// <summary> Save assets normally or to prefab is contained in one </summary>
+        private void SaveAssets(){
+            PrefabStage prefabStage = PrefabStageUtility.GetCurrentPrefabStage();
+            if (prefabStage == null) AssetDatabase.SaveAssets();
+            else AssetDatabase.AddObjectToAsset(graph,prefabStage.prefabAssetPath);
         }
     }
 }

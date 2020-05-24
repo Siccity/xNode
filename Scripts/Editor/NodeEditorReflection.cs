@@ -11,6 +11,7 @@ namespace XNodeEditor {
     public static class NodeEditorReflection {
         [NonSerialized] private static Dictionary<Type, Color> nodeTint;
         [NonSerialized] private static Dictionary<Type, int> nodeWidth;
+        [NonSerialized] private static Dictionary<Type, string> nodeTooltip;
         /// <summary> All available node types </summary>
         public static Type[] nodeTypes { get { return _nodeTypes != null ? _nodeTypes : _nodeTypes = GetNodeTypes(); } }
 
@@ -42,6 +43,14 @@ namespace XNodeEditor {
                 CacheAttributes<int, XNode.Node.NodeWidthAttribute>(ref nodeWidth, x => x.width);
             }
             return nodeWidth.TryGetValue(nodeType, out width);
+        }
+
+        /// <summary> Get custom node tooltip defined with [NodeTooltip(tooltip)] </summary>
+        public static bool TryGetAttributeTooltip(this Type nodeType, out string tooltip) {
+            if (nodeTooltip == null) {
+                CacheAttributes<string, XNode.Node.NodeTooltipAttribute>(ref nodeTooltip, x => x.tooltip);
+            }
+            return nodeTooltip.TryGetValue(nodeType, out tooltip);
         }
 
         private static void CacheAttributes<V, A>(ref Dictionary<Type, V> dict, Func<A, V> getter) where A : Attribute {

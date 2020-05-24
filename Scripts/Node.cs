@@ -385,6 +385,19 @@ namespace XNode {
                 this.width = width;
             }
         }
+
+        /// <summary> Specify a tooltip for this node type </summary>
+        [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+        public class NodeTooltipAttribute : Attribute
+        {
+            public string tooltip;
+            /// <summary> Specify a tooltip for this node type </summary>
+            /// <param name="tooltip"> The tooltip text </param>
+            public NodeTooltipAttribute(string tooltip)
+            {
+                this.tooltip = tooltip;
+            }
+        }        
 #endregion
 
         [Serializable] private class NodePortDictionary : Dictionary<string, NodePort>, ISerializationCallbackReceiver {

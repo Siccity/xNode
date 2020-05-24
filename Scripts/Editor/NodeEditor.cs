@@ -25,7 +25,10 @@ namespace XNodeEditor {
 #endif
 
         public virtual void OnHeaderGUI() {
-            GUILayout.Label(target.name, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
+            Type type = target.GetType();
+            string tooltip;
+            type.TryGetAttributeTooltip(out tooltip);
+            GUILayout.Label(new GUIContent(target.name, tooltip), NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
         }
 
         /// <summary> Draws standard field editors for all public fields </summary>

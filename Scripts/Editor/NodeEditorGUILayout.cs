@@ -371,7 +371,10 @@ namespace XNodeEditor {
                 };
             list.onReorderCallback =
                 (ReorderableList rl) => {
-
+                    bool hasRect = false;
+                    bool hasNewRect = false;
+                    Rect rect = Rect.zero;
+                    Rect newRect = Rect.zero;
                     // Move up
                     if (rl.index > reorderableListIndex) {
                         for (int i = reorderableListIndex; i < rl.index; ++i) {
@@ -380,9 +383,10 @@ namespace XNodeEditor {
                             port.SwapConnections(nextPort);
 
                             // Swap cached positions to mitigate twitching
-                            Rect rect = NodeEditorWindow.current.portConnectionPoints[port];
-                            NodeEditorWindow.current.portConnectionPoints[port] = NodeEditorWindow.current.portConnectionPoints[nextPort];
-                            NodeEditorWindow.current.portConnectionPoints[nextPort] = rect;
+                            hasRect = NodeEditorWindow.current.portConnectionPoints.TryGetValue(port, out rect);
+                            hasNewRect = NodeEditorWindow.current.portConnectionPoints.TryGetValue(nextPort, out newRect);
+                            NodeEditorWindow.current.portConnectionPoints[port] = hasNewRect?newRect:rect;
+                            NodeEditorWindow.current.portConnectionPoints[nextPort] = hasRect?rect:newRect;
                         }
                     }
                     // Move down
@@ -393,9 +397,10 @@ namespace XNodeEditor {
                             port.SwapConnections(nextPort);
 
                             // Swap cached positions to mitigate twitching
-                            Rect rect = NodeEditorWindow.current.portConnectionPoints[port];
-                            NodeEditorWindow.current.portConnectionPoints[port] = NodeEditorWindow.current.portConnectionPoints[nextPort];
-                            NodeEditorWindow.current.portConnectionPoints[nextPort] = rect;
+                            hasRect = NodeEditorWindow.current.portConnectionPoints.TryGetValue(port, out rect);
+                            hasNewRect = NodeEditorWindow.current.portConnectionPoints.TryGetValue(nextPort, out newRect);
+                            NodeEditorWindow.current.portConnectionPoints[port] = hasNewRect?newRect:rect;
+                            NodeEditorWindow.current.portConnectionPoints[nextPort] = hasRect?rect:newRect;
                         }
                     }
                     // Apply changes

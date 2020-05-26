@@ -65,7 +65,7 @@ namespace XNode {
 
         [Obsolete("Use AddDynamicInput instead")]
         public NodePort AddInstanceInput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = TypeConstraint.None, string fieldName = null) {
-            return AddInstanceInput(type, connectionType, typeConstraint, fieldName);
+            return AddDynamicInput(type, connectionType, typeConstraint, fieldName);
         }
 
         [Obsolete("Use AddDynamicOutput instead")]
@@ -314,16 +314,41 @@ namespace XNode {
             public OutputAttribute(ShowBackingValue backingValue, ConnectionType connectionType, bool dynamicPortList) : this(backingValue, connectionType, TypeConstraint.None, dynamicPortList) { }
         }
 
+        /// <summary> Manually supply node class with a context menu path </summary>
         [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
         public class CreateNodeMenuAttribute : Attribute {
             public string menuName;
+            public int order;
             /// <summary> Manually supply node class with a context menu path </summary>
             /// <param name="menuName"> Path to this node in the context menu. Null or empty hides it. </param>
             public CreateNodeMenuAttribute(string menuName) {
                 this.menuName = menuName;
+                this.order = 0;
+            }
+
+            /// <summary> Manually supply node class with a context menu path </summary>
+            /// <param name="menuName"> Path to this node in the context menu. Null or empty hides it. </param>
+            /// <param name="order"> The order by which the menu items are displayed. </param>
+            public CreateNodeMenuAttribute(string menuName, int order) {
+                this.menuName = menuName;
+                this.order = order;
             }
         }
 
+        /// <summary> Prevents Node of the same type to be added more than once (configurable) to a NodeGraph </summary>
+        [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+        public class DisallowMultipleNodesAttribute : Attribute {
+            // TODO: Make inheritance work in such a way that applying [DisallowMultipleNodes(1)] to type NodeBar : Node
+            //       while type NodeFoo : NodeBar exists, will let you add *either one* of these nodes, but not both.
+            public int max;
+            /// <summary> Prevents Node of the same type to be added more than once (configurable) to a NodeGraph </summary>
+            /// <param name="max"> How many nodes to allow. Defaults to 1. </param>
+            public DisallowMultipleNodesAttribute(int max = 1) {
+                this.max = max;
+            }
+        }
+
+        /// <summary> Specify a color for this node type </summary>
         [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
         public class NodeTintAttribute : Attribute {
             public Color color;
@@ -350,6 +375,7 @@ namespace XNode {
             }
         }
 
+        /// <summary> Specify a width for this node type </summary>
         [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
         public class NodeWidthAttribute : Attribute {
             public int width;

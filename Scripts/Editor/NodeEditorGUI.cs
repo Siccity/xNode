@@ -142,6 +142,7 @@ namespace XNodeEditor {
             for (int i = 0; i < gridPoints.Count; ++i)
                 gridPoints[i] = GridToWindowPosition(gridPoints[i]);
 
+            Color originalHandlesColor = Handles.color;
             Handles.color = gradient.Evaluate(0f);
             int length = gridPoints.Count;
             switch (path) {
@@ -305,6 +306,7 @@ namespace XNodeEditor {
                     gridPoints[length - 1] = end;
                     break;
             }
+            Handles.color = originalHandlesColor;
         }
 
         /// <summary> Draws all connections </summary>

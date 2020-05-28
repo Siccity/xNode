@@ -19,9 +19,18 @@ namespace XNode {
             }
         }
 
-        public IO direction { get { return _direction; } }
-        public Node.ConnectionType connectionType { get { return _connectionType; } }
-        public Node.TypeConstraint typeConstraint { get { return _typeConstraint; } }
+        public IO direction { 
+            get { return _direction; }
+            internal set { _direction = value; }
+        }
+        public Node.ConnectionType connectionType {
+            get { return _connectionType; }
+            internal set { _connectionType = value; }
+        }
+        public Node.TypeConstraint typeConstraint {
+            get { return _typeConstraint; }
+            internal set { _typeConstraint = value; }
+        }
 
         /// <summary> Is this port connected to anytihng? </summary>
         public bool IsConnected { get { return connections.Count != 0; } }

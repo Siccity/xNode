@@ -74,8 +74,10 @@ namespace XNodeEditor {
 
             Attribute attr;
             if (!typeTypes.TryGetValue(typeof(T), out attr)) {
-                if (GetAttrib<T>(classType, fieldName, out attribOut)) typeTypes.Add(typeof(T), attribOut);
-                else typeTypes.Add(typeof(T), null);
+                if (GetAttrib<T>(classType, fieldName, out attribOut)) {
+                    typeTypes.Add(typeof(T), attribOut);
+                    return true;
+                } else typeTypes.Add(typeof(T), null);
             }
 
             if (attr == null) {

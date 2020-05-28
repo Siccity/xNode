@@ -25,5 +25,7 @@ sysinfo.txt
 .git.meta
 .gitignore.meta
 .gitattributes.meta
-
 *.meta
+
+# OS X only:
+.DS_Store

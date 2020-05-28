@@ -57,7 +57,7 @@ namespace XNodeEditor {
             // serializedObject.Update(); must go at the start of an inspector gui, and
             // serializedObject.ApplyModifiedProperties(); goes at the end.
             serializedObject.Update();
-            
+
 #if ODIN_INSPECTOR
             InspectorUtilities.BeginDrawPropertyTree(objectTree, true);
             GUIHelper.PushLabelWidth(84);
@@ -76,7 +76,7 @@ namespace XNodeEditor {
                 NodeEditorGUILayout.PropertyField(iterator, true);
                 portNames.Add(iterator.name);
             }
-            
+
             //Deal with ports that are not drawn
             foreach (var port in target.Ports)
             {
@@ -103,7 +103,7 @@ namespace XNodeEditor {
             serializedObject.ApplyModifiedProperties();
 
 #if ODIN_INSPECTOR
-            // Call repaint so that the graph window elements respond properly to layout changes coming from Odin    
+            // Call repaint so that the graph window elements respond properly to layout changes coming from Odin
             if (GUIHelper.RepaintRequested) {
                 GUIHelper.ClearRepaintRequest();
                 window.Repaint();
@@ -144,7 +144,7 @@ namespace XNodeEditor {
         public virtual GUIStyle GetBodyHighlightStyle() {
             return NodeEditorResources.styles.nodeHighlight;
         }
-        
+
         /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>
         public virtual void AddContextMenuItems(GenericMenu menu) {
             // Actions if only one node is selected
@@ -172,6 +172,9 @@ namespace XNodeEditor {
             target.name = newName;
             AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
         }
+
+        /// <summary> Called after this node's name has changed. </summary>
+        public virtual void OnRename() { }
 
         [AttributeUsage(AttributeTargets.Class)]
         public class CustomNodeEditorAttribute : Attribute,

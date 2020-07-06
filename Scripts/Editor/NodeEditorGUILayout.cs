@@ -312,6 +312,8 @@ namespace XNodeEditor {
             }).Where(x => x.port != null);
             List<XNode.NodePort> dynamicPorts = indexedPorts.OrderBy(x => x.index).Select(x => x.port).ToList();
 
+            node.UpdatePorts();
+            
             ReorderableList list = null;
             Dictionary<string, ReorderableList> rlc;
             if (reorderableListCache.TryGetValue(serializedObject.targetObject, out rlc)) {
@@ -326,6 +328,7 @@ namespace XNodeEditor {
             }
             list.list = dynamicPorts;
             list.DoLayoutList();
+            
         }
 
         private static ReorderableList CreateReorderableList(string fieldName, List<XNode.NodePort> dynamicPorts, SerializedProperty arrayData, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType, XNode.Node.TypeConstraint typeConstraint, Action<ReorderableList> onCreation) {
@@ -337,7 +340,7 @@ namespace XNodeEditor {
             list.drawElementCallback =
                 (Rect rect, int index, bool isActive, bool isFocused) => {
                     XNode.NodePort port = node.GetPort(fieldName + " " + index);
-                    if (hasArrayData) {
+                    if (hasArrayData && arrayData.propertyType != SerializedPropertyType.String) {
                         if (arrayData.arraySize <= index) {
                             EditorGUI.LabelField(rect, "Array[" + index + "] data out of range");
                             return;
@@ -368,7 +371,10 @@ namespace XNodeEditor {
                 };
             list.onReorderCallback =
                 (ReorderableList rl) => {
-
+                    bool hasRect = false;
+                    bool hasNewRect = false;
+                    Rect rect = Rect.zero;
+                    Rect newRect = Rect.zero;
                     // Move up
                     if (rl.index > reorderableListIndex) {
                         for (int i = reorderableListIndex; i < rl.index; ++i) {
@@ -377,9 +383,10 @@ namespace XNodeEditor {
                             port.SwapConnections(nextPort);
 
                             // Swap cached positions to mitigate twitching
-                            Rect rect = NodeEditorWindow.current.portConnectionPoints[port];
-                            NodeEditorWindow.current.portConnectionPoints[port] = NodeEditorWindow.current.portConnectionPoints[nextPort];
-                            NodeEditorWindow.current.portConnectionPoints[nextPort] = rect;
+                            hasRect = NodeEditorWindow.current.portConnectionPoints.TryGetValue(port, out rect);
+                            hasNewRect = NodeEditorWindow.current.portConnectionPoints.TryGetValue(nextPort, out newRect);
+                            NodeEditorWindow.current.portConnectionPoints[port] = hasNewRect?newRect:rect;
+                            NodeEditorWindow.current.portConnectionPoints[nextPort] = hasRect?rect:newRect;
                         }
                     }
                     // Move down
@@ -390,9 +397,10 @@ namespace XNodeEditor {
                             port.SwapConnections(nextPort);
 
                             // Swap cached positions to mitigate twitching
-                            Rect rect = NodeEditorWindow.current.portConnectionPoints[port];
-                            NodeEditorWindow.current.portConnectionPoints[port] = NodeEditorWindow.current.portConnectionPoints[nextPort];
-                            NodeEditorWindow.current.portConnectionPoints[nextPort] = rect;
+                            hasRect = NodeEditorWindow.current.portConnectionPoints.TryGetValue(port, out rect);
+                            hasNewRect = NodeEditorWindow.current.portConnectionPoints.TryGetValue(nextPort, out newRect);
+                            NodeEditorWindow.current.portConnectionPoints[port] = hasNewRect?newRect:rect;
+                            NodeEditorWindow.current.portConnectionPoints[nextPort] = hasRect?rect:newRect;
                         }
                     }
                     // Apply changes
@@ -465,7 +473,7 @@ namespace XNodeEditor {
                         EditorUtility.SetDirty(node);
                     }
 
-                    if (hasArrayData) {
+                    if (hasArrayData && arrayData.propertyType != SerializedPropertyType.String) {
                         if (arrayData.arraySize <= index) {
                             Debug.LogWarning("Attempted to remove array index " + index + " where only " + arrayData.arraySize + " exist - Skipped");
                             Debug.Log(rl.list[0]);

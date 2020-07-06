@@ -77,7 +77,16 @@ namespace XNodeEditor {
         void OnFocus() {
             current = this;
             ValidateGraphEditor();
-            if (graphEditor != null && NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+            if (graphEditor != null) {
+                graphEditor.OnWindowFocus();
+                if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+            }
+            
+            dragThreshold = Math.Max(1f, Screen.width / 1000f);
+        }
+        
+        void OnLostFocus() {
+            if (graphEditor != null) graphEditor.OnWindowFocusLost();
         }
 
         [InitializeOnLoadMethod]
@@ -97,7 +106,7 @@ namespace XNodeEditor {
         /// <summary> Make sure the graph editor is assigned and to the right object </summary>
         private void ValidateGraphEditor() {
             NodeGraphEditor graphEditor = NodeGraphEditor.GetEditor(graph, this);
-            if (this.graphEditor != graphEditor) {
+            if (this.graphEditor != graphEditor && graphEditor != null) {
                 this.graphEditor = graphEditor;
                 graphEditor.OnOpen();
             }
@@ -187,12 +196,13 @@ namespace XNodeEditor {
         }
 
         /// <summary>Open the provided graph in the NodeEditor</summary>
-        public static void Open(XNode.NodeGraph graph) {
-            if (!graph) return;
+        public static NodeEditorWindow Open(XNode.NodeGraph graph) {
+            if (!graph) return null;
 
             NodeEditorWindow w = GetWindow(typeof(NodeEditorWindow), false, "xNode", true) as NodeEditorWindow;
             w.wantsMouseMove = true;
             w.graph = graph;
+            return w;
         }
 
         /// <summary> Repaint all open NodeEditorWindows. </summary>

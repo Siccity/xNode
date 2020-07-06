@@ -17,7 +17,7 @@ namespace XNodeEditor {
         public event Action onLateGUI;
         private static readonly Vector3[] polyLineTempArray = new Vector3[2];
 
-        private void OnGUI() {
+        protected virtual void OnGUI() {
             Event e = Event.current;
             Matrix4x4 m = GUI.matrix;
             if (graph == null) return;
@@ -142,6 +142,7 @@ namespace XNodeEditor {
             for (int i = 0; i < gridPoints.Count; ++i)
                 gridPoints[i] = GridToWindowPosition(gridPoints[i]);
 
+            Color originalHandlesColor = Handles.color;
             Handles.color = gradient.Evaluate(0f);
             int length = gridPoints.Count;
             switch (path) {
@@ -202,6 +203,7 @@ namespace XNodeEditor {
                         Vector2 prev_point = point_a;
                         // Approximately one segment per 5 pixels
                         int segments = (int) Vector2.Distance(point_a, point_b) / 5;
+                        segments = Math.Max(segments, 1);
 
                         int draw = 0;
                         for (int j = 0; j <= segments; j++) {
@@ -267,7 +269,44 @@ namespace XNodeEditor {
                         }
                     }
                     break;
+                case NoodlePath.ShaderLab:
+                    Vector2 start = gridPoints[0];
+                    Vector2 end = gridPoints[length - 1];
+                    //Modify first and last point in array so we can loop trough them nicely.
+                    gridPoints[0] = gridPoints[0] + Vector2.right * (20 / zoom);
+                    gridPoints[length - 1] = gridPoints[length - 1] + Vector2.left * (20 / zoom);
+                    //Draw first vertical lines going out from nodes
+                    Handles.color = gradient.Evaluate(0f);
+                    DrawAAPolyLineNonAlloc(thickness, start, gridPoints[0]);
+                    Handles.color = gradient.Evaluate(1f);
+                    DrawAAPolyLineNonAlloc(thickness, end, gridPoints[length - 1]);
+                    for (int i = 0; i < length - 1; i++) {
+                        Vector2 point_a = gridPoints[i];
+                        Vector2 point_b = gridPoints[i + 1];
+                        // Draws the line with the coloring.
+                        Vector2 prev_point = point_a;
+                        // Approximately one segment per 5 pixels
+                        int segments = (int) Vector2.Distance(point_a, point_b) / 5;
+                        segments = Math.Max(segments, 1);
+
+                        int draw = 0;
+                        for (int j = 0; j <= segments; j++) {
+                            draw++;
+                            float t = j / (float) segments;
+                            Vector2 lerp = Vector2.Lerp(point_a, point_b, t);
+                            if (draw > 0) {
+                                if (i == length - 2) Handles.color = gradient.Evaluate(t);
+                                DrawAAPolyLineNonAlloc(thickness, prev_point, lerp);
+                            }
+                            prev_point = lerp;
+                            if (stroke == NoodleStroke.Dashed && draw >= 2) draw = -2;
+                        }
+                    }
+                    gridPoints[0] = start;
+                    gridPoints[length - 1] = end;
+                    break;
             }
+            Handles.color = originalHandlesColor;
         }
 
         /// <summary> Draws all connections </summary>
@@ -413,7 +452,7 @@ namespace XNodeEditor {
 
                 if (selected) {
                     GUIStyle style = new GUIStyle(nodeEditor.GetBodyStyle());
-                    GUIStyle highlightStyle = new GUIStyle(NodeEditorResources.styles.nodeHighlight);
+                    GUIStyle highlightStyle = new GUIStyle(nodeEditor.GetBodyHighlightStyle());
                     highlightStyle.padding = style.padding;
                     style.padding = new RectOffset();
                     GUI.color = nodeEditor.GetTint();

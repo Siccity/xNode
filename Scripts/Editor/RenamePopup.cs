@@ -1,9 +1,11 @@
-﻿using UnityEditor;
+using UnityEditor;
 using UnityEngine;
 
 namespace XNodeEditor {
     /// <summary> Utility for renaming assets </summary>
     public class RenamePopup : EditorWindow {
+        private const string inputControlName = "nameInput";
+
         public static RenamePopup current { get; private set; }
         public Object target;
         public string input;
@@ -19,7 +21,6 @@ namespace XNodeEditor {
             window.input = target.name;
             window.minSize = new Vector2(100, 44);
             window.position = new Rect(0, 0, width, 44);
-            GUI.FocusControl("ClearAllFocus");
             window.UpdatePositionToMouse();
             return window;
         }
@@ -43,26 +44,40 @@ namespace XNodeEditor {
                 UpdatePositionToMouse();
                 firstFrame = false;
             }
+            GUI.SetNextControlName(inputControlName);
             input = EditorGUILayout.TextField(input);
+            EditorGUI.FocusTextInControl(inputControlName);
             Event e = Event.current;
             // If input is empty, revert name to default instead
             if (input == null || input.Trim() == "") {
                 if (GUILayout.Button("Revert to default") || (e.isKey && e.keyCode == KeyCode.Return)) {
                     target.name = NodeEditorUtilities.NodeDefaultName(target.GetType());
+                    NodeEditor.GetEditor((XNode.Node)target, NodeEditorWindow.current).OnRename();
+                    AssetDatabase.SetMainObject((target as XNode.Node).graph, AssetDatabase.GetAssetPath(target));
                     AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
                     Close();
-					target.TriggerOnValidate();
+                    target.TriggerOnValidate();
                 }
             }
             // Rename asset to input text
             else {
                 if (GUILayout.Button("Apply") || (e.isKey && e.keyCode == KeyCode.Return)) {
                     target.name = input;
+                    NodeEditor.GetEditor((XNode.Node)target, NodeEditorWindow.current).OnRename();
+                    AssetDatabase.SetMainObject((target as XNode.Node).graph, AssetDatabase.GetAssetPath(target));
                     AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
                     Close();
-					target.TriggerOnValidate();
+                    target.TriggerOnValidate();
                 }
             }
+
+            if (e.isKey && e.keyCode == KeyCode.Escape) {
+                Close();
+            }
+        }
+
+        private void OnDestroy() {
+            EditorGUIUtility.editingTextField = false;
         }
     }
 }

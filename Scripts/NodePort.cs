@@ -19,7 +19,7 @@ namespace XNode {
             }
         }
 
-        public IO direction { 
+        public IO direction {
             get { return _direction; }
             internal set { _direction = value; }
         }
@@ -48,7 +48,7 @@ namespace XNode {
             valueType = null;
         }
 #endif
-        
+
         public Type ValueType {
             get {
                 if (valueType == null && !string.IsNullOrEmpty(_typeQualifiedName)) valueType = Type.GetType(_typeQualifiedName, false);
@@ -59,10 +59,11 @@ namespace XNode {
                 if (value != null) _typeQualifiedName = value.AssemblyQualifiedName;
             }
         }
-        
+
         private Type valueType;
 #if UNITY_EDITOR
         public const string FIELDNAMEEDITOR = nameof(_fieldName);
+        public const string ConnectionsEditor = nameof(connections);
 #endif
         [SerializeField] private string _fieldName;
         [SerializeField] private Node _node;

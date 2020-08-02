@@ -29,9 +29,9 @@ namespace XNodeEditor {
             DrawConnections();
             DrawNodes();
             DrawSelectionBox();
-            DrawGroupName();
-            DrawTooltip();
             graphEditor.OnGUI();
+            DrawTooltip();
+            DrawGroupName();
 
             // Run and reset onLateGUI
             if (onLateGUI != null) {
@@ -50,7 +50,7 @@ namespace XNodeEditor {
             EditorStyles.label.fontSize = 48;
             Rect size = GUILayoutUtility.GetRect(guiContent, EditorStyles.label);
             EditorStyles.label.normal.textColor = new Color(175 / 255f, 185 / 255f, 185 / 255f);
-            EditorGUI.LabelField(new Rect(new Vector2(5, 5), size.size), guiContent);
+            EditorGUI.LabelField(new Rect(new Vector2(5, 15), size.size), guiContent);
             EditorStyles.label.fontSize = fontSize;
             EditorStyles.label.normal.textColor = col;
         }
@@ -549,8 +549,8 @@ namespace XNodeEditor {
             if (e.type != EventType.Layout && currentActivity == NodeActivity.DragGrid) Selection.objects = preSelection.ToArray();
             EndZoomed(position, zoom, topPadding);
 
-            //If a change in is detected in the selected node, call OnValidate method. 
-            //This is done through reflection because OnValidate is only relevant in editor, 
+            //If a change in is detected in the selected node, call OnValidate method.
+            //This is done through reflection because OnValidate is only relevant in editor,
             //and thus, the code should not be included in build.
             if (onValidate != null && EditorGUI.EndChangeCheck()) onValidate.Invoke(Selection.activeObject, null);
         }

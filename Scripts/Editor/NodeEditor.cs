@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using XNode;
+
 #if ODIN_INSPECTOR
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
@@ -77,21 +79,7 @@ namespace XNodeEditor {
                 portNames.Add(iterator.name);
             }
 
-            //Deal with ports that are not drawn
-            foreach (var port in target.Ports)
-            {
-                //Dynamic skip
-                if (port.IsDynamic)
-                {
-                    continue;
-                }
-
-                //Not supported by unity serialization, but marked as input or output
-                if (!portNames.Contains(port.fieldName))
-                {
-                    NodeEditorGUILayout.PortField(port);
-                }
-            }
+            _drawPort(NodePort.IO.Input);
 #endif
 
             // Iterate through dynamic ports and draw them in the order in which they are serialized
@@ -100,6 +88,9 @@ namespace XNodeEditor {
                 NodeEditorGUILayout.PortField(dynamicPort);
             }
 
+#if !ODIN_INSPECTOR
+            _drawPort(NodePort.IO.Output);
+#endif
             serializedObject.ApplyModifiedProperties();
 
 #if ODIN_INSPECTOR
@@ -115,6 +106,25 @@ namespace XNodeEditor {
 #endif
         }
 
+        private void _drawPort(NodePort.IO io)
+        {
+            //Deal with ports that are not drawn
+            foreach (var port in io == NodePort.IO.Input ? target.Inputs : target.Outputs)
+            {
+                //Dynamic skip
+                if (port.IsDynamic)
+                {
+                    continue;
+                }
+
+                //Not supported by unity serialization, but marked as input or output
+                if (!portNames.Contains(port.fieldName))
+                {
+                    NodeEditorGUILayout.PortField(port);
+                }
+            }
+        }
+
         public virtual int GetWidth() {
             Type type = target.GetType();
             int width;
@@ -124,7 +134,17 @@ namespace XNodeEditor {
 
         public Vector2 GetCurrentMousePosition(float yOffset = 10)
         {
-            return new Vector2(Event.current.mousePosition.x,Event.current.mousePosition.y + yOffset);
+            Debug.LogError(Event.current.mousePosition + ":" + target.position);
+
+            var mouseGridPos = Event.current.mousePosition;//* window.zoom;
+
+            var nodeWindowPos = window.GridToWindowPosition(target.position + mouseGridPos);
+
+            var position = nodeWindowPos;//window.GridToWindowPositionNoClipped(nodeWindowPos);
+            // position += mouseGridPos;
+            // position.x = Event.current.mousePosition.x;
+            // position.y += yOffset;
+            return position;
         }
 
         /// <summary> Returns color for target node </summary>

@@ -8,9 +8,9 @@ using Object = UnityEngine.Object;
 namespace XNodeEditor {
     [InitializeOnLoad]
     public partial class NodeEditorWindow : EditorWindow,IHasCustomMenu {
-        
-        public bool Lock { get; private set; }
-        
+
+        public bool Lock { get; set; }
+
         /// <summary>
         /// Magic method which Unity detects automatically.
         /// </summary>
@@ -18,7 +18,7 @@ namespace XNodeEditor {
         void ShowButton(Rect position) {
             Lock = GUI.Toggle(position, Lock, GUIContent.none, "IN LockButton");
         }
-        
+
         public void AddItemsToMenu(GenericMenu menu)
         {
             menu.AddItem(new GUIContent("Lock"), Lock, () => {
@@ -46,7 +46,7 @@ namespace XNodeEditor {
                 }
             }
         }
-        
+
         public static NodeEditorWindow current;
 
         /// <summary> Stores node positions for all nodePorts. </summary>
@@ -121,10 +121,10 @@ namespace XNodeEditor {
                 graphEditor.OnWindowFocus();
                 if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             }
-            
+
             dragThreshold = Math.Max(1f, Screen.width / 1000f);
         }
-        
+
         void OnLostFocus() {
             if (graphEditor != null) graphEditor.OnWindowFocusLost();
         }
@@ -262,7 +262,7 @@ namespace XNodeEditor {
                 w = EditorWindow.CreateInstance<NodeEditorWindow>();
                 w.titleContent = new GUIContent("xNode");
             }
-            
+
             w.Show(true);
             w.Focus();
 

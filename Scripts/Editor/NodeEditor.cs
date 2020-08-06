@@ -134,8 +134,6 @@ namespace XNodeEditor {
 
         public Vector2 GetCurrentMousePosition(float yOffset = 10)
         {
-            Debug.LogError(Event.current.mousePosition + ":" + target.position);
-
             var mouseGridPos = Event.current.mousePosition;//* window.zoom;
 
             var nodeWindowPos = window.GridToWindowPosition(target.position + mouseGridPos);

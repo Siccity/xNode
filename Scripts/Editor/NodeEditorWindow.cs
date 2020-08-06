@@ -7,7 +7,46 @@ using Object = UnityEngine.Object;
 
 namespace XNodeEditor {
     [InitializeOnLoad]
-    public partial class NodeEditorWindow : EditorWindow {
+    public partial class NodeEditorWindow : EditorWindow,IHasCustomMenu {
+
+        public bool Lock { get; set; }
+
+        /// <summary>
+        /// Magic method which Unity detects automatically.
+        /// </summary>
+        /// <param name="position">Position of button.</param>
+        void ShowButton(Rect position) {
+            Lock = GUI.Toggle(position, Lock, GUIContent.none, "IN LockButton");
+        }
+
+        public void AddItemsToMenu(GenericMenu menu)
+        {
+            menu.AddItem(new GUIContent("Lock"), Lock, () => {
+                Lock = !Lock;
+            });
+        }
+
+        [MenuItem("xNode/Close All Editor Window")]
+        static void CloseAllNodeEditorWindow()
+        {
+            NodeEditorWindow[] windows = Resources.FindObjectsOfTypeAll<NodeEditorWindow>();
+
+            foreach (var window in windows)
+            {
+                if (window)
+                {
+                    try
+                    {
+                        window.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        DestroyImmediate(window);
+                    }
+                }
+            }
+        }
+
         public static NodeEditorWindow current;
 
         /// <summary> Stores node positions for all nodePorts. </summary>
@@ -74,17 +113,18 @@ namespace XNodeEditor {
         public float zoom { get { return _zoom; } set { _zoom = Mathf.Clamp(value, NodeEditorPreferences.GetSettings().minZoom, NodeEditorPreferences.GetSettings().maxZoom); Repaint(); } }
         private float _zoom = 1;
 
-        void OnFocus() {
+        void OnFocus()
+        {
             current = this;
             ValidateGraphEditor();
             if (graphEditor != null) {
                 graphEditor.OnWindowFocus();
                 if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             }
-            
+
             dragThreshold = Math.Max(1f, Screen.width / 1000f);
         }
-        
+
         void OnLostFocus() {
             if (graphEditor != null) graphEditor.OnWindowFocusLost();
         }
@@ -109,6 +149,7 @@ namespace XNodeEditor {
             if (this.graphEditor != graphEditor && graphEditor != null) {
                 this.graphEditor = graphEditor;
                 graphEditor.OnOpen();
+                this.graphEditor.window.minSize = new Vector2(300,300);
             }
         }
 
@@ -199,7 +240,43 @@ namespace XNodeEditor {
         public static NodeEditorWindow Open(XNode.NodeGraph graph) {
             if (!graph) return null;
 
-            NodeEditorWindow w = GetWindow(typeof(NodeEditorWindow), false, "xNode", true) as NodeEditorWindow;
+            var windows = Resources.FindObjectsOfTypeAll<NodeEditorWindow>();
+            NodeEditorWindow w = null;
+            foreach (var window in windows)
+            {
+                if (window.Lock)
+                {
+                    if (window.graph == graph)
+                    {
+                        w = window;
+                    }
+                }
+                else
+                {
+                    w = window;
+                }
+            }
+
+            if (!w)
+            {
+                w = EditorWindow.CreateInstance<NodeEditorWindow>();
+                w.titleContent = new GUIContent("xNode");
+            }
+
+            w.Show(true);
+            w.Focus();
+
+            if (w.graphEditor == null)
+            {
+                NodeGraphEditor graphEditor = NodeGraphEditor.GetEditor(graph, w);
+                w.graphEditor = graphEditor;
+            }
+            else
+            {
+                //refresh  target
+                w.graphEditor.target = graph;
+            }
+
             w.wantsMouseMove = true;
             w.graph = graph;
             return w;

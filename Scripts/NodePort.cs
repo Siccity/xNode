@@ -19,7 +19,7 @@ namespace XNode {
             }
         }
 
-        public IO direction { 
+        public IO direction {
             get { return _direction; }
             internal set { _direction = value; }
         }
@@ -41,6 +41,14 @@ namespace XNode {
         public Node node { get { return _node; } }
         public bool IsDynamic { get { return _dynamic; } }
         public bool IsStatic { get { return !_dynamic; } }
+
+#if UNITY_EDITOR
+        public void RefreshValueType()
+        {
+            valueType = null;
+        }
+#endif
+
         public Type ValueType {
             get {
                 if (valueType == null && !string.IsNullOrEmpty(_typeQualifiedName)) valueType = Type.GetType(_typeQualifiedName, false);
@@ -51,8 +59,12 @@ namespace XNode {
                 if (value != null) _typeQualifiedName = value.AssemblyQualifiedName;
             }
         }
-        private Type valueType;
 
+        private Type valueType;
+#if UNITY_EDITOR
+        public const string FIELDNAMEEDITOR = nameof(_fieldName);
+        public const string ConnectionsEditor = nameof(connections);
+#endif
         [SerializeField] private string _fieldName;
         [SerializeField] private Node _node;
         [SerializeField] private string _typeQualifiedName;
@@ -213,7 +225,17 @@ namespace XNode {
             UnityEditor.Undo.RecordObject(port.node, "Connect Port");
 #endif
             if (port.connectionType == Node.ConnectionType.Override && port.ConnectionCount != 0) { port.ClearConnections(); }
-            if (connectionType == Node.ConnectionType.Override && ConnectionCount != 0) { ClearConnections(); }
+
+            if (connectionType == Node.ConnectionType.Override && ConnectionCount != 0)
+            {
+                var conPort = GetConnection(0);
+                //Same connection, not disconnect
+                if(conPort.node != port.node || conPort != port)
+                {
+                    ClearConnections();
+                }
+                return;
+            }
             connections.Add(new PortConnection(port));
             if (port.connections == null) port.connections = new List<PortConnection>();
             if (!port.IsConnectedTo(this)) port.connections.Add(new PortConnection(this));
@@ -269,8 +291,6 @@ namespace XNode {
             else output = port;
             // If there isn't one of each, they can't connect
             if (input == null || output == null) return false;
-            // Check input type constraints
-            if (input.typeConstraint == XNode.Node.TypeConstraint.Inherited && !input.ValueType.IsAssignableFrom(output.ValueType)) return false;
             if (input.typeConstraint == XNode.Node.TypeConstraint.Strict && input.ValueType != output.ValueType) return false;
             if (input.typeConstraint == XNode.Node.TypeConstraint.InheritedInverse && !output.ValueType.IsAssignableFrom(input.ValueType)) return false;
             // Check output type constraints

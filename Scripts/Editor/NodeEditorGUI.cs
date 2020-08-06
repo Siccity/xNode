@@ -25,12 +25,13 @@ namespace XNodeEditor {
             Controls();
 
             DrawGrid(position, zoom, panOffset);
-            DrawConnections();
             DrawDraggedConnection();
+            DrawConnections();
             DrawNodes();
             DrawSelectionBox();
-            DrawTooltip();
             graphEditor.OnGUI();
+            DrawTooltip();
+            DrawGroupName();
 
             // Run and reset onLateGUI
             if (onLateGUI != null) {
@@ -39,6 +40,19 @@ namespace XNodeEditor {
             }
 
             GUI.matrix = m;
+        }
+
+        private void DrawGroupName()
+        {
+            GUIContent guiContent = new GUIContent(this.graph.name);
+            Color col = EditorStyles.label.normal.textColor;
+            var fontSize = EditorStyles.label.fontSize;
+            EditorStyles.label.fontSize = 48;
+            Rect size = GUILayoutUtility.GetRect(guiContent, EditorStyles.label);
+            EditorStyles.label.normal.textColor = new Color(175 / 255f, 185 / 255f, 185 / 255f);
+            EditorGUI.LabelField(new Rect(new Vector2(5, 15), size.size), guiContent);
+            EditorStyles.label.fontSize = fontSize;
+            EditorStyles.label.normal.textColor = col;
         }
 
         public static void BeginZoomed(Rect rect, float zoom, float topPadding) {
@@ -112,7 +126,11 @@ namespace XNodeEditor {
         /// <summary> Show right-click context menu for hovered port </summary>
         void ShowPortContextMenu(XNode.NodePort hoveredPort) {
             GenericMenu contextMenu = new GenericMenu();
-            contextMenu.AddItem(new GUIContent("Clear Connections"), false, () => hoveredPort.ClearConnections());
+            contextMenu.AddItem(new GUIContent("Clear Connections"), false, hoveredPort.ClearConnections);
+            if (hoveredPort.IsDynamic)
+            {
+                contextMenu.AddItem(new GUIContent("Remove"), false, () => hoveredPort.node.RemoveDynamicPort(hoveredPort));
+            }
             contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
@@ -531,8 +549,8 @@ namespace XNodeEditor {
             if (e.type != EventType.Layout && currentActivity == NodeActivity.DragGrid) Selection.objects = preSelection.ToArray();
             EndZoomed(position, zoom, topPadding);
 
-            //If a change in is detected in the selected node, call OnValidate method. 
-            //This is done through reflection because OnValidate is only relevant in editor, 
+            //If a change in is detected in the selected node, call OnValidate method.
+            //This is done through reflection because OnValidate is only relevant in editor,
             //and thus, the code should not be included in build.
             if (onValidate != null && EditorGUI.EndChangeCheck()) onValidate.Invoke(Selection.activeObject, null);
         }

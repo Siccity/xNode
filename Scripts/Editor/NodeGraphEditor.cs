@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -17,7 +16,7 @@ namespace XNodeEditor {
 
         /// <summary> Called when opened by NodeEditorWindow </summary>
         public virtual void OnOpen() { }
-        
+
         /// <summary> Called when NodeEditorWindow gains focus </summary>
         public virtual void OnWindowFocus() { }
 
@@ -58,7 +57,7 @@ namespace XNodeEditor {
         }
 
         /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>
-        public virtual void AddContextMenuItems(GenericMenu menu) {
+        public virtual void AddContextMenuItems(MenuPopupWindow menu) {
             Vector2 pos = NodeEditorWindow.current.WindowToGridPosition(Event.current.mousePosition);
             var nodeTypes = NodeEditorReflection.nodeTypes.OrderBy(type => GetNodeMenuOrder(type)).ToArray();
             for (int i = 0; i < nodeTypes.Length; i++) {
@@ -68,7 +67,8 @@ namespace XNodeEditor {
                 string path = GetNodeMenuName(type);
                 if (string.IsNullOrEmpty(path)) continue;
 
-                // Check if user is allowed to add more of given node type
+
+				// Check if user is allowed to add more of given node type
                 XNode.Node.DisallowMultipleNodesAttribute disallowAttrib;
                 bool disallowed = false;
                 if (NodeEditorUtilities.GetAttrib(type, out disallowAttrib)) {
@@ -76,17 +76,49 @@ namespace XNodeEditor {
                     if (typeCount >= disallowAttrib.max) disallowed = true;
                 }
 
-                // Add node entry to context menu
-                if (disallowed) menu.AddItem(new GUIContent(path), false, null);
-                else menu.AddItem(new GUIContent(path), false, () => {
+                if (!disallowed)
+                {
+                    menu.AddItem(path, () => {
+                        pos = NodeEditorWindow.current.WindowToGridPosition(menu.openBeforeMousePos);
+                        XNode.Node node = CreateNode(type, pos);
+                        NodeEditorWindow.current.AutoConnect(node);
+                    });
+                }
+            }
+            if (NodeEditorWindow.copyBuffer != null && NodeEditorWindow.copyBuffer.Length > 0)
+                menu.AddItem("Paste", () =>
+                {
+                    pos = NodeEditorWindow.current.WindowToGridPosition(menu.openBeforeMousePos);
+                    NodeEditorWindow.current.PasteNodes(pos);
+                });
+
+            menu.AddItem("Preferences", () => NodeEditorReflection.OpenPreferences());
+
+            menu.AddItem("Create All Node ---> Test use", () =>
+            {
+                if (!EditorUtility.DisplayDialog("warning","Are you sure you want to create all the nodes?","ok","no"))
+                {
+                    return;
+                }
+
+                pos = NodeEditorWindow.current.WindowToGridPosition(menu.openBeforeMousePos);
+
+                for (int i = 0; i < NodeEditorReflection.nodeTypes.Length; i++)
+                {
+                    Type type = NodeEditorReflection.nodeTypes[i];
+
+                    //Get node context menu path
+                    string path = GetNodeMenuName(type);
+                    // skip empty path
+                    if (string.IsNullOrEmpty(path))
+                    {
+                        continue;
+                    }
+
                     XNode.Node node = CreateNode(type, pos);
                     NodeEditorWindow.current.AutoConnect(node);
-                });
-            }
-            menu.AddSeparator("");
-            if (NodeEditorWindow.copyBuffer != null && NodeEditorWindow.copyBuffer.Length > 0) menu.AddItem(new GUIContent("Paste"), false, () => NodeEditorWindow.current.PasteNodes(pos));
-            else menu.AddDisabledItem(new GUIContent("Paste"));
-            menu.AddItem(new GUIContent("Preferences"), false, () => NodeEditorReflection.OpenPreferences());
+                }
+            });
             menu.AddCustomContextMenuItems(target);
         }
 

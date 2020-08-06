@@ -50,6 +50,7 @@ namespace XNodeEditor.Internal {
 				editor.serializedObject = new SerializedObject(target);
 				editor.window = window;
 				editor.OnCreate();
+				editor.OnInit();
 				editors.Add(target, editor);
 			}
 			if (editor.target == null) editor.target = target;
@@ -83,6 +84,11 @@ namespace XNodeEditor.Internal {
 
 		/// <summary> Called on creation, after references have been set </summary>
 		public virtual void OnCreate() { }
+
+		/// <summary>
+		/// node editor window OnFocus call 
+		/// </summary>
+		public virtual void OnInit() { }
 
 		public interface INodeEditorAttrib {
 			Type GetInspectedType();

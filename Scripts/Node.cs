@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace XNode {
@@ -113,6 +114,12 @@ namespace XNode {
         /// <summary> It is recommended not to modify these at hand. Instead, see <see cref="InputAttribute"/> and <see cref="OutputAttribute"/> </summary>
         [SerializeField] private NodePortDictionary ports = new NodePortDictionary();
 
+#if UNITY_EDITOR
+        public const string PortFieldName = nameof(ports);
+        public const string KeysFieldName = NodePortDictionary.KeyFieldName;
+        public const string ValuesFieldName = NodePortDictionary.ValueFieldName;
+#endif
+
         /// <summary> Used during node instantiation to fix null/misconfigured graph during OnEnable/Init. Set it before instantiating a node. Will automatically be unset during OnEnable </summary>
         public static NodeGraph graphHotfix;
 
@@ -148,7 +155,7 @@ namespace XNode {
         /// <seealso cref="AddInstancePort"/>
         /// <seealso cref="AddInstanceInput"/>
         public NodePort AddDynamicOutput(Type type, Node.ConnectionType connectionType = Node.ConnectionType.Multiple, Node.TypeConstraint typeConstraint = TypeConstraint.None, string fieldName = null) {
-            return AddDynamicPort(type, NodePort.IO.Output, connectionType, typeConstraint, fieldName);
+            return AddDynamicPort(type, NodePort.IO.Output, connectionType, typeConstraint,fieldName);
         }
 
         /// <summary> Add a dynamic, serialized port to this node. </summary>
@@ -164,7 +171,9 @@ namespace XNode {
                 return ports[fieldName];
             }
             NodePort port = new NodePort(fieldName, type, direction, connectionType, typeConstraint, this);
+
             ports.Add(fieldName, port);
+            
             return port;
         }
 
@@ -270,17 +279,20 @@ namespace XNode {
             public bool instancePortList { get { return dynamicPortList; } set { dynamicPortList = value; } }
             public bool dynamicPortList;
             public TypeConstraint typeConstraint;
+            public Type BaseType { get; }
 
             /// <summary> Mark a serializable field as an input port. You can access this through <see cref="GetInputPort(string)"/> </summary>
+            /// <param name="baseType">指定更准确的父类类型,只有当<see cref="typeConstraint"/>参数为<seealso cref="TypeConstraint.Inherited"/>才可用</param>
             /// <param name="backingValue">Should we display the backing value for this port as an editor field? </param>
             /// <param name="connectionType">Should we allow multiple connections? </param>
             /// <param name="typeConstraint">Constrains which input connections can be made to this port </param>
             /// <param name="dynamicPortList">If true, will display a reorderable list of inputs instead of a single port. Will automatically add and display values for lists and arrays </param>
-            public InputAttribute(ShowBackingValue backingValue = ShowBackingValue.Unconnected, ConnectionType connectionType = ConnectionType.Multiple, TypeConstraint typeConstraint = TypeConstraint.None, bool dynamicPortList = false) {
+            public InputAttribute(ShowBackingValue backingValue = ShowBackingValue.Unconnected, ConnectionType connectionType = ConnectionType.Multiple, TypeConstraint typeConstraint = TypeConstraint.None,Type baseType = null, bool dynamicPortList = false) {
                 this.backingValue = backingValue;
                 this.connectionType = connectionType;
                 this.dynamicPortList = dynamicPortList;
                 this.typeConstraint = typeConstraint;
+                BaseType = baseType;
             }
         }
 
@@ -385,16 +397,48 @@ namespace XNode {
                 this.width = width;
             }
         }
+
+        /// <summary> Custom Port Label </summary>
+        [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
+        public class LabelAttribute : Attribute
+        {
+            public string Label { get; }
+
+            public LabelAttribute(string label)
+            {
+                Label = label;
+            }
+        }
+
 #endregion
 
         [Serializable] private class NodePortDictionary : Dictionary<string, NodePort>, ISerializationCallbackReceiver {
             [SerializeField] private List<string> keys = new List<string>();
             [SerializeField] private List<NodePort> values = new List<NodePort>();
 
+#if UNITY_EDITOR
+            public const string KeyFieldName = nameof(keys);
+            public const string ValueFieldName = nameof(values);
+#endif
+
             public void OnBeforeSerialize() {
                 keys.Clear();
                 values.Clear();
                 foreach (KeyValuePair<string, NodePort> pair in this) {
+                   
+                    //Sorting, output port is always after input port
+                    if (pair.Value.direction == NodePort.IO.Input)
+                    {
+                        var firstOutIndex = values.FindIndex(x => x.direction == NodePort.IO.Output);
+
+                        if (firstOutIndex > -1)
+                        {
+                            keys.Insert(firstOutIndex,pair.Key);
+                            values.Insert(firstOutIndex,pair.Value);
+                            continue;
+                        }
+                    }
+
                     keys.Add(pair.Key);
                     values.Add(pair.Value);
                 }

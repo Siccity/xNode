@@ -113,7 +113,19 @@ namespace XNodeEditor {
             VerifyLoaded();
             Settings settings = NodeEditorPreferences.settings[lastKey];
 
-            if (GUILayout.Button(new GUIContent("Documentation", "https://github.com/Siccity/xNode/wiki"), GUILayout.Width(100))) Application.OpenURL("https://github.com/Siccity/xNode/wiki");
+            EditorGUILayout.BeginHorizontal();
+            {
+                EditorGUILayout.Space();
+                {
+                    if (GUILayout.Button(new GUIContent("XNode Documentation", "https://github.com/Siccity/xNode/wiki"),
+                        GUILayout.Width(180)))
+                        Application.OpenURL("https://github.com/Siccity/xNode/wiki");
+                }
+                EditorGUILayout.Space();
+            }
+            EditorGUILayout.EndHorizontal();
+            
+            
             EditorGUILayout.Space();
 
             NodeSettingsGUI(lastKey, settings);

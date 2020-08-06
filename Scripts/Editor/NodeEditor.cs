@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using XNode;
+
 #if ODIN_INSPECTOR
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
@@ -21,11 +23,30 @@ namespace XNodeEditor {
         public readonly static Dictionary<XNode.NodePort, Vector2> portPositions = new Dictionary<XNode.NodePort, Vector2>();
 
 #if ODIN_INSPECTOR
-        protected internal static bool inNodeEditor = false;
+        internal static bool inNodeEditor = false;
 #endif
+        private List<string> excludesField;
+        private List<string> portNames = new List<string>();
+
+        public override void OnCreate()
+        {
+            excludesField = new List<string> { "m_Script", "graph", "position", "ports" };
+
+            IEnumerable<string> fields = GetExcludesField();
+
+            if (fields != null)
+            {
+                excludesField.AddRange(fields);
+            }
+        }
 
         public virtual void OnHeaderGUI() {
             GUILayout.Label(target.name, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
+        }
+
+        protected virtual IEnumerable<string> GetExcludesField()
+        {
+            return null;
         }
 
         /// <summary> Draws standard field editors for all public fields </summary>
@@ -38,7 +59,6 @@ namespace XNodeEditor {
             // serializedObject.Update(); must go at the start of an inspector gui, and
             // serializedObject.ApplyModifiedProperties(); goes at the end.
             serializedObject.Update();
-            string[] excludes = { "m_Script", "graph", "position", "ports" };
 
 #if ODIN_INSPECTOR
             InspectorUtilities.BeginDrawPropertyTree(objectTree, true);
@@ -51,11 +71,15 @@ namespace XNodeEditor {
             // Iterate through serialized properties and draw them like the Inspector (But with ports)
             SerializedProperty iterator = serializedObject.GetIterator();
             bool enterChildren = true;
+            portNames.Clear();
             while (iterator.NextVisible(enterChildren)) {
                 enterChildren = false;
-                if (excludes.Contains(iterator.name)) continue;
+                if (excludesField.Contains(iterator.name)) continue;
                 NodeEditorGUILayout.PropertyField(iterator, true);
+                portNames.Add(iterator.name);
             }
+
+            _drawPort(NodePort.IO.Input);
 #endif
 
             // Iterate through dynamic ports and draw them in the order in which they are serialized
@@ -64,6 +88,9 @@ namespace XNodeEditor {
                 NodeEditorGUILayout.PortField(dynamicPort);
             }
 
+#if !ODIN_INSPECTOR
+            _drawPort(NodePort.IO.Output);
+#endif
             serializedObject.ApplyModifiedProperties();
 
 #if ODIN_INSPECTOR
@@ -79,11 +106,43 @@ namespace XNodeEditor {
 #endif
         }
 
+        private void _drawPort(NodePort.IO io)
+        {
+            //Deal with ports that are not drawn
+            foreach (var port in io == NodePort.IO.Input ? target.Inputs : target.Outputs)
+            {
+                //Dynamic skip
+                if (port.IsDynamic)
+                {
+                    continue;
+                }
+
+                //Not supported by unity serialization, but marked as input or output
+                if (!portNames.Contains(port.fieldName))
+                {
+                    NodeEditorGUILayout.PortField(port);
+                }
+            }
+        }
+
         public virtual int GetWidth() {
             Type type = target.GetType();
             int width;
             if (type.TryGetAttributeWidth(out width)) return width;
             else return 208;
+        }
+
+        public Vector2 GetCurrentMousePosition(float yOffset = 10)
+        {
+            var mouseGridPos = Event.current.mousePosition;//* window.zoom;
+
+            var nodeWindowPos = window.GridToWindowPosition(target.position + mouseGridPos);
+
+            var position = nodeWindowPos;//window.GridToWindowPositionNoClipped(nodeWindowPos);
+            // position += mouseGridPos;
+            // position.x = Event.current.mousePosition.x;
+            // position.y += yOffset;
+            return position;
         }
 
         /// <summary> Returns color for target node </summary>
@@ -106,22 +165,17 @@ namespace XNodeEditor {
 
         /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>
         public virtual void AddContextMenuItems(GenericMenu menu) {
-            bool canRemove = true;
             // Actions if only one node is selected
             if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
                 XNode.Node node = Selection.activeObject as XNode.Node;
                 menu.AddItem(new GUIContent("Move To Top"), false, () => NodeEditorWindow.current.MoveNodeToTop(node));
                 menu.AddItem(new GUIContent("Rename"), false, NodeEditorWindow.current.RenameSelectedNode);
-
-                canRemove = NodeGraphEditor.GetEditor(node.graph, NodeEditorWindow.current).CanRemove(node);
             }
 
             // Add actions to any number of selected nodes
             menu.AddItem(new GUIContent("Copy"), false, NodeEditorWindow.current.CopySelectedNodes);
             menu.AddItem(new GUIContent("Duplicate"), false, NodeEditorWindow.current.DuplicateSelectedNodes);
-
-            if (canRemove) menu.AddItem(new GUIContent("Remove"), false, NodeEditorWindow.current.RemoveSelectedNodes);
-            else menu.AddItem(new GUIContent("Remove"), false, null);
+            menu.AddItem(new GUIContent("Remove"), false, NodeEditorWindow.current.RemoveSelectedNodes);
 
             // Custom sctions if only one node is selected
             if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
@@ -134,7 +188,6 @@ namespace XNodeEditor {
         public void Rename(string newName) {
             if (newName == null || newName.Trim() == "") newName = NodeEditorUtilities.NodeDefaultName(target.GetType());
             target.name = newName;
-            OnRename();
             AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
         }
 

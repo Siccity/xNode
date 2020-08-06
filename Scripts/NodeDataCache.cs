@@ -39,7 +39,11 @@ namespace XNode {
                         if (!port.IsDynamic && port.direction == staticPort.direction) removedPorts.Add(port.fieldName, port.GetConnections());
                         port.ClearConnections();
                         ports.Remove(port.fieldName);
-                    } else port.ValueType = staticPort.ValueType;
+                    }
+                    else
+                    {
+                        port.ValueType = staticPort.ValueType;
+                    }
                 }
                 // If port doesn't exist anymore, remove it
                 else if (port.IsStatic) {
@@ -67,14 +71,14 @@ namespace XNode {
                     ports.Add(staticPort.fieldName, port);
                 }
             }
-            
+
             // Finally, make sure dynamic list port settings correspond to the settings of their "backing port"
             foreach (NodePort listPort in dynamicListPorts) {
                 // At this point we know that ports here are dynamic list ports
                 // which have passed name/"backing port" checks, ergo we can proceed more safely.
                 string backingPortName = listPort.fieldName.Split(' ')[0];
                 NodePort backingPort = staticPorts[backingPortName];
-                
+
                 // Update port constraints. Creating a new port instead will break the editor, mandating the need for setters.
                 listPort.ValueType = GetBackingValueType(backingPort.ValueType);
                 listPort.direction = backingPort.direction;
@@ -86,7 +90,7 @@ namespace XNode {
         /// <summary>
         /// Extracts the underlying types from arrays and lists, the only collections for dynamic port lists
         /// currently supported. If the given type is not applicable (i.e. if the dynamic list port was not
-        /// defined as an array or a list), returns the given type itself. 
+        /// defined as an array or a list), returns the given type itself.
         /// </summary>
         private static System.Type GetBackingValueType(System.Type portValType) {
             if (portValType.HasElementType) {
@@ -105,10 +109,10 @@ namespace XNode {
             // Thus, we need to check for attributes... (but at least we don't need to look at all fields this time)
             string[] fieldNameParts = port.fieldName.Split(' ');
             if (fieldNameParts.Length != 2) return false;
-            
+
             FieldInfo backingPortInfo = port.node.GetType().GetField(fieldNameParts[0]);
             if (backingPortInfo == null) return false;
-            
+
             object[] attribs = backingPortInfo.GetCustomAttributes(true);
             return attribs.Any(x => {
                 Node.InputAttribute inputAttribute = x as Node.InputAttribute;
@@ -117,7 +121,7 @@ namespace XNode {
                        outputAttribute != null && outputAttribute.dynamicPortList;
             });
         }
-        
+
         /// <summary> Cache node types </summary>
         private static void BuildCache() {
             portDataCache = new PortDataCache();
@@ -155,17 +159,20 @@ namespace XNode {
 
             // GetFields doesnt return inherited private fields, so walk through base types and pick those up
             System.Type tempType = nodeType;
-            while ((tempType = tempType.BaseType) != typeof(XNode.Node)) {
-                FieldInfo[] parentFields = tempType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
-                for (int i = 0; i < parentFields.Length; i++) {
-                    // Ensure that we do not already have a member with this type and name
-                    FieldInfo parentField = parentFields[i];
-                    if (fieldInfo.TrueForAll(x => x.Name != parentField.Name)) {
-                        fieldInfo.Add(parentField);
-                    }
-                }
-            }
-            return fieldInfo;
+				while ((tempType = tempType.BaseType) != typeof(XNode.Node))
+	            {
+	                // Only return private, protected, etc.
+	                var fieldInfos = tempType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Where(x=>x.IsPrivate).ToArray();
+
+					for (int i = 0; i < fieldInfos.Length; i++) {
+	                    // Ensure that we do not already have a member with this type and name
+	                    FieldInfo parentField = fieldInfos[i];
+	                    if (fieldInfo.TrueForAll(x => x.Name != parentField.Name)) {
+	                        fieldInfo.Add(parentField);
+	                    }
+	                }
+	            }
+         	return fieldInfo;
         }
 
         private static void CachePorts(System.Type nodeType) {

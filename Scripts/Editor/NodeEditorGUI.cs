@@ -112,6 +112,11 @@ namespace XNodeEditor {
         /// <summary> Show right-click context menu for hovered port </summary>
         void ShowPortContextMenu(XNode.NodePort hoveredPort) {
             GenericMenu contextMenu = new GenericMenu();
+            foreach (var port in hoveredPort.GetConnections()) {
+                var name = port.node.name;
+                var index = hoveredPort.GetConnectionIndex(port);
+                contextMenu.AddItem(new GUIContent($"Disconnect({name})"), false, () => hoveredPort.Disconnect(index));
+            }
             contextMenu.AddItem(new GUIContent("Clear Connections"), false, () => hoveredPort.ClearConnections());
             contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();

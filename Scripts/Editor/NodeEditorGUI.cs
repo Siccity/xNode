@@ -556,8 +556,20 @@ namespace XNodeEditor {
         }
 
         private void DrawTooltip() {
-            if (hoveredPort != null && NodeEditorPreferences.GetSettings().portTooltips && graphEditor != null) {
+            if (!NodeEditorPreferences.GetSettings().portTooltips && graphEditor != null)
+                return;
+            if (hoveredPort != null) {
                 string tooltip = graphEditor.GetPortTooltip(hoveredPort);
+                if (string.IsNullOrEmpty(tooltip)) return;
+                GUIContent content = new GUIContent(tooltip);
+                Vector2 size = NodeEditorResources.styles.tooltip.CalcSize(content);
+                size.x += 8;
+                Rect rect = new Rect(Event.current.mousePosition - (size), size);
+                EditorGUI.LabelField(rect, content, NodeEditorResources.styles.tooltip);
+                Repaint();
+            }
+            else if (hoveredNode != null && IsHoveringNode && IsHoveringTitle(hoveredNode)) {
+                string tooltip = graphEditor.GetNodeTooltip(hoveredNode);
                 if (string.IsNullOrEmpty(tooltip)) return;
                 GUIContent content = new GUIContent(tooltip);
                 Vector2 size = NodeEditorResources.styles.tooltip.CalcSize(content);

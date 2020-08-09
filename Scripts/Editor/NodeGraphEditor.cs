@@ -158,6 +158,10 @@ namespace XNodeEditor {
             return tooltip;
         }
 
+        public virtual string GetNodeTooltip(XNode.Node node) {
+            return null;
+        }
+
         /// <summary> Deal with objects dropped into the graph through DragAndDrop </summary>
         public virtual void OnDropObjects(UnityEngine.Object[] objects) {
             if (GetType() != typeof(NodeGraphEditor)) Debug.Log("No OnDropObjects override defined for " + GetType());

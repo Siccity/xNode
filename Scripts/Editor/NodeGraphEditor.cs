@@ -158,6 +158,7 @@ namespace XNodeEditor {
             return tooltip;
         }
 
+        /// <summary> Override to display custom node tooltips </summary>
         public virtual string GetNodeTooltip(XNode.Node node) {
             return null;
         }

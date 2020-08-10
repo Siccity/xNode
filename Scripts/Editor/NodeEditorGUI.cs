@@ -536,8 +536,8 @@ namespace XNodeEditor {
             if (e.type != EventType.Layout && currentActivity == NodeActivity.DragGrid) Selection.objects = preSelection.ToArray();
             EndZoomed(position, zoom, topPadding);
 
-            //If a change in is detected in the selected node, call OnValidate method. 
-            //This is done through reflection because OnValidate is only relevant in editor, 
+            //If a change in is detected in the selected node, call OnValidate method.
+            //This is done through reflection because OnValidate is only relevant in editor,
             //and thus, the code should not be included in build.
             if (onValidate != null && EditorGUI.EndChangeCheck()) onValidate.Invoke(Selection.activeObject, null);
         }
@@ -556,28 +556,22 @@ namespace XNodeEditor {
         }
 
         private void DrawTooltip() {
-            if (!NodeEditorPreferences.GetSettings().portTooltips && graphEditor != null)
+            if (!NodeEditorPreferences.GetSettings().portTooltips || graphEditor is null)
                 return;
+            string tooltip = null;
             if (hoveredPort != null) {
-                string tooltip = graphEditor.GetPortTooltip(hoveredPort);
-                if (string.IsNullOrEmpty(tooltip)) return;
-                GUIContent content = new GUIContent(tooltip);
-                Vector2 size = NodeEditorResources.styles.tooltip.CalcSize(content);
-                size.x += 8;
-                Rect rect = new Rect(Event.current.mousePosition - (size), size);
-                EditorGUI.LabelField(rect, content, NodeEditorResources.styles.tooltip);
-                Repaint();
+                tooltip = graphEditor.GetPortTooltip(hoveredPort);
             }
             else if (hoveredNode != null && IsHoveringNode && IsHoveringTitle(hoveredNode)) {
-                string tooltip = graphEditor.GetNodeTooltip(hoveredNode);
-                if (string.IsNullOrEmpty(tooltip)) return;
-                GUIContent content = new GUIContent(tooltip);
-                Vector2 size = NodeEditorResources.styles.tooltip.CalcSize(content);
-                size.x += 8;
-                Rect rect = new Rect(Event.current.mousePosition - (size), size);
-                EditorGUI.LabelField(rect, content, NodeEditorResources.styles.tooltip);
-                Repaint();
+                tooltip = graphEditor.GetNodeTooltip(hoveredNode);
             }
+            if (string.IsNullOrEmpty(tooltip)) return;
+            GUIContent content = new GUIContent(tooltip);
+            Vector2 size = NodeEditorResources.styles.tooltip.CalcSize(content);
+            size.x += 8;
+            Rect rect = new Rect(Event.current.mousePosition - (size), size);
+            EditorGUI.LabelField(rect, content, NodeEditorResources.styles.tooltip);
+            Repaint();
         }
     }
 }

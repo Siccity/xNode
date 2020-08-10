@@ -19,7 +19,7 @@ namespace XNode {
             }
         }
 
-        public IO direction { 
+        public IO direction {
             get { return _direction; }
             internal set { _direction = value; }
         }
@@ -202,7 +202,8 @@ namespace XNode {
 
         /// <summary> Connect this <see cref="NodePort"/> to another </summary>
         /// <param name="port">The <see cref="NodePort"/> to connect to</param>
-        public void Connect(NodePort port) {
+        /// <param name="connectionLabel">The optional label of the connection</param>
+        public void Connect(NodePort port, string connectionLabel = null) {
             if (connections == null) connections = new List<PortConnection>();
             if (port == null) { Debug.LogWarning("Cannot connect to null port"); return; }
             if (port == this) { Debug.LogWarning("Cannot connect port to self."); return; }
@@ -214,9 +215,9 @@ namespace XNode {
 #endif
             if (port.connectionType == Node.ConnectionType.Override && port.ConnectionCount != 0) { port.ClearConnections(); }
             if (connectionType == Node.ConnectionType.Override && ConnectionCount != 0) { ClearConnections(); }
-            connections.Add(new PortConnection(port));
+            connections.Add(new PortConnection(port, connectionLabel));
             if (port.connections == null) port.connections = new List<PortConnection>();
-            if (!port.IsConnectedTo(this)) port.connections.Add(new PortConnection(this));
+            if (!port.IsConnectedTo(this)) port.connections.Add(new PortConnection(this, connectionLabel));
             node.OnCreateConnection(this, port);
             port.node.OnCreateConnection(this, port);
         }
@@ -228,6 +229,11 @@ namespace XNode {
                 if (port != null) result.Add(port);
             }
             return result;
+        }
+
+        public PortConnection GetPortConnection(int index)
+        {
+            return connections[index];
         }
 
         public NodePort GetConnection(int i) {
@@ -389,29 +395,6 @@ namespace XNode {
             foreach (PortConnection connection in connections) {
                 int index = oldNodes.IndexOf(connection.node);
                 if (index >= 0) connection.node = newNodes[index];
-            }
-        }
-
-        [Serializable]
-        private class PortConnection {
-            [SerializeField] public string fieldName;
-            [SerializeField] public Node node;
-            public NodePort Port { get { return port != null ? port : port = GetPort(); } }
-
-            [NonSerialized] private NodePort port;
-            /// <summary> Extra connection path points for organization </summary>
-            [SerializeField] public List<Vector2> reroutePoints = new List<Vector2>();
-
-            public PortConnection(NodePort port) {
-                this.port = port;
-                node = port.node;
-                fieldName = port.fieldName;
-            }
-
-            /// <summary> Returns the port that this <see cref="PortConnection"/> points to </summary>
-            private NodePort GetPort() {
-                if (node == null || string.IsNullOrEmpty(fieldName)) return null;
-                return node.GetPort(fieldName);
             }
         }
     }

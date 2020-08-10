@@ -18,11 +18,15 @@ namespace XNodeEditor {
         public static Styles _styles = null;
         public static GUIStyle OutputPort { get { return new GUIStyle(EditorStyles.label) { alignment = TextAnchor.UpperRight }; } }
         public class Styles {
-            public GUIStyle inputPort, nodeHeader, nodeBody, tooltip, nodeHighlight;
+            public GUIStyle inputPort, nodeHeader, nodeBody, tooltip, nodeHighlight, connectionLabel;
 
             public Styles() {
                 GUIStyle baseStyle = new GUIStyle("Label");
                 baseStyle.fixedHeight = 18;
+
+                connectionLabel = new GUIStyle(EditorStyles.boldLabel);
+                connectionLabel.richText = true;
+                connectionLabel.alignment = TextAnchor.MiddleCenter;
 
                 inputPort = new GUIStyle(baseStyle);
                 inputPort.alignment = TextAnchor.UpperLeft;

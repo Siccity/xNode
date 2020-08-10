@@ -3,16 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using XNode;
 using XNodeEditor.Internal;
+using Object = UnityEngine.Object;
 
 namespace XNodeEditor {
     /// <summary> Contains GUI methods </summary>
     public partial class NodeEditorWindow {
         public NodeGraphEditor graphEditor;
-        private List<UnityEngine.Object> selectionCache;
-        private List<XNode.Node> culledNodes;
+        protected List<UnityEngine.Object> selectionCache;
+        protected List<XNode.Node> culledNodes;
         /// <summary> 19 if docked, 22 if not </summary>
-        private int topPadding { get { return isDocked() ? 19 : 22; } }
+        protected int topPadding { get { return isDocked() ? 19 : 22; } }
         /// <summary> Executed after all other window GUI. Useful if Zoom is ruining your day. Automatically resets after being run.</summary>
         public event Action onLateGUI;
         private static readonly Vector3[] polyLineTempArray = new Vector3[2];
@@ -32,15 +34,19 @@ namespace XNodeEditor {
             DrawTooltip();
             graphEditor.OnGUI();
 
+            RunAndResetOnLateGui();
+
+            GUI.matrix = m;
+        }
+
+        protected void RunAndResetOnLateGui()
+        {
             // Run and reset onLateGUI
             if (onLateGUI != null) {
                 onLateGUI();
                 onLateGUI = null;
             }
-
-            GUI.matrix = m;
         }
-
         public static void BeginZoomed(Rect rect, float zoom, float topPadding) {
             GUI.EndClip();
 
@@ -61,7 +67,7 @@ namespace XNodeEditor {
             GUI.matrix = Matrix4x4.TRS(offset, Quaternion.identity, Vector3.one);
         }
 
-        public void DrawGrid(Rect rect, float zoom, Vector2 panOffset) {
+        protected virtual void DrawGrid(Rect rect, float zoom, Vector2 panOffset) {
 
             rect.position = Vector2.zero;
 
@@ -86,7 +92,7 @@ namespace XNodeEditor {
             GUI.DrawTextureWithTexCoords(rect, crossTex, new Rect(tileOffset + new Vector2(0.5f, 0.5f), tileAmount));
         }
 
-        public void DrawSelectionBox() {
+        protected virtual void DrawSelectionBox() {
             if (currentActivity == NodeActivity.DragGrid) {
                 Vector2 curPos = WindowToGridPosition(Event.current.mousePosition);
                 Vector2 size = curPos - dragBoxStart;
@@ -137,22 +143,27 @@ namespace XNodeEditor {
         }
 
         /// <summary> Draw a bezier from output to input in grid coordinates </summary>
-        public void DrawNoodle(Gradient gradient, NoodlePath path, NoodleStroke stroke, float thickness, List<Vector2> gridPoints) {
+        public void DrawNoodle(Gradient gradient, NoodlePath path, NoodleStroke stroke, float thickness,
+            List<Vector2> gridPoints, string connectionLabel = null) {
             // convert grid points to window points
             for (int i = 0; i < gridPoints.Count; ++i)
                 gridPoints[i] = GridToWindowPosition(gridPoints[i]);
 
             Color originalHandlesColor = Handles.color;
             Handles.color = gradient.Evaluate(0f);
+
             int length = gridPoints.Count;
+            Vector2 point_a = Vector2.zero;
+            Vector2 point_b = Vector2.zero;
             switch (path) {
                 case NoodlePath.Curvy:
                     Vector2 outputTangent = Vector2.right;
                     for (int i = 0; i < length - 1; i++) {
                         Vector2 inputTangent;
                         // Cached most variables that repeat themselves here to avoid so many indexer calls :p
-                        Vector2 point_a = gridPoints[i];
-                        Vector2 point_b = gridPoints[i + 1];
+                        point_a = gridPoints[i];
+                        point_b = gridPoints[i + 1];
+
                         float dist_ab = Vector2.Distance(point_a, point_b);
                         if (i == 0) outputTangent = zoom * dist_ab * 0.01f * Vector2.right;
                         if (i < length - 2) {
@@ -161,6 +172,7 @@ namespace XNodeEditor {
                             Vector2 cb = (point_b - point_c).normalized;
                             Vector2 ac = (point_c - point_a).normalized;
                             Vector2 p = (ab + cb) * 0.5f;
+
                             float tangentLength = (dist_ab + Vector2.Distance(point_b, point_c)) * 0.005f * zoom;
                             float side = ((ac.x * (point_b.y - point_a.y)) - (ac.y * (point_b.x - point_a.x)));
 
@@ -187,7 +199,7 @@ namespace XNodeEditor {
                                 if (draw == 0) bezierPrevious = CalculateBezierPoint(point_a, tangent_a, tangent_b, point_b, (j - 1f) / (float) division);
                             }
                             if (i == length - 2)
-                                Handles.color = gradient.Evaluate((j + 1f) / division);
+                                Handles.color = gradient.Evaluate(Time.time + (j + 1f) / division);
                             Vector2 bezierNext = CalculateBezierPoint(point_a, tangent_a, tangent_b, point_b, j / (float) division);
                             DrawAAPolyLineNonAlloc(thickness, bezierPrevious, bezierNext);
                             bezierPrevious = bezierNext;
@@ -197,8 +209,8 @@ namespace XNodeEditor {
                     break;
                 case NoodlePath.Straight:
                     for (int i = 0; i < length - 1; i++) {
-                        Vector2 point_a = gridPoints[i];
-                        Vector2 point_b = gridPoints[i + 1];
+                        point_a = gridPoints[i];
+                        point_b = gridPoints[i + 1];
                         // Draws the line with the coloring.
                         Vector2 prev_point = point_a;
                         // Approximately one segment per 5 pixels
@@ -224,20 +236,20 @@ namespace XNodeEditor {
                         if (i == length - 1) continue; // Skip last index
                         if (gridPoints[i].x <= gridPoints[i + 1].x - (50 / zoom)) {
                             float midpoint = (gridPoints[i].x + gridPoints[i + 1].x) * 0.5f;
-                            Vector2 start_1 = gridPoints[i];
-                            Vector2 end_1 = gridPoints[i + 1];
-                            start_1.x = midpoint;
-                            end_1.x = midpoint;
+                            point_a = gridPoints[i];
+                            point_b = gridPoints[i + 1];
+                            point_a.x = midpoint;
+                            point_b.x = midpoint;
                             if (i == length - 2) {
-                                DrawAAPolyLineNonAlloc(thickness, gridPoints[i], start_1);
+                                DrawAAPolyLineNonAlloc(thickness, gridPoints[i], point_a);
                                 Handles.color = gradient.Evaluate(0.5f);
-                                DrawAAPolyLineNonAlloc(thickness, start_1, end_1);
+                                DrawAAPolyLineNonAlloc(thickness, point_a, point_b);
                                 Handles.color = gradient.Evaluate(1f);
-                                DrawAAPolyLineNonAlloc(thickness, end_1, gridPoints[i + 1]);
+                                DrawAAPolyLineNonAlloc(thickness, point_b, gridPoints[i + 1]);
                             } else {
-                                DrawAAPolyLineNonAlloc(thickness, gridPoints[i], start_1);
-                                DrawAAPolyLineNonAlloc(thickness, start_1, end_1);
-                                DrawAAPolyLineNonAlloc(thickness, end_1, gridPoints[i + 1]);
+                                DrawAAPolyLineNonAlloc(thickness, gridPoints[i], point_a);
+                                DrawAAPolyLineNonAlloc(thickness, point_a, point_b);
+                                DrawAAPolyLineNonAlloc(thickness, point_b, gridPoints[i + 1]);
                             }
                         } else {
                             float midpoint = (gridPoints[i].y + gridPoints[i + 1].y) * 0.5f;
@@ -281,8 +293,8 @@ namespace XNodeEditor {
                     Handles.color = gradient.Evaluate(1f);
                     DrawAAPolyLineNonAlloc(thickness, end, gridPoints[length - 1]);
                     for (int i = 0; i < length - 1; i++) {
-                        Vector2 point_a = gridPoints[i];
-                        Vector2 point_b = gridPoints[i + 1];
+                        point_a = gridPoints[i];
+                        point_b = gridPoints[i + 1];
                         // Draws the line with the coloring.
                         Vector2 prev_point = point_a;
                         // Approximately one segment per 5 pixels
@@ -306,79 +318,108 @@ namespace XNodeEditor {
                     gridPoints[length - 1] = end;
                     break;
             }
+
+            if (zoom < 2f)
+            {
+                NodeEditorResources.styles.connectionLabel.fontSize = (int)(12 / zoom);
+                var labelSize = (NodeEditorResources.styles.connectionLabel.CalcSize(new GUIContent(connectionLabel)) + Vector2.one * 5 )/ zoom ;
+                Vector2 noodleCenter = (point_a + point_b) * 0.5f;
+                EditorGUI.LabelField(new Rect(noodleCenter - labelSize * 0.5f, labelSize), new GUIContent(connectionLabel), NodeEditorResources.styles.connectionLabel);
+            }
+
             Handles.color = originalHandlesColor;
         }
 
         /// <summary> Draws all connections </summary>
-        public void DrawConnections() {
-            Vector2 mousePos = Event.current.mousePosition;
+        protected virtual void DrawConnections() {
             List<RerouteReference> selection = preBoxSelectionReroute != null ? new List<RerouteReference>(preBoxSelectionReroute) : new List<RerouteReference>();
             hoveredReroute = new RerouteReference();
 
-            List<Vector2> gridPoints = new List<Vector2>(2);
-
             Color col = GUI.color;
-            foreach (XNode.Node node in graph.nodes) {
-                //If a null node is found, return. This can happen if the nodes associated script is deleted. It is currently not possible in Unity to delete a null asset.
-                if (node == null) continue;
-
-                // Draw full connections and output > reroute
-                foreach (XNode.NodePort output in node.Outputs) {
-                    //Needs cleanup. Null checks are ugly
-                    Rect fromRect;
-                    if (!_portConnectionPoints.TryGetValue(output, out fromRect)) continue;
-
-                    Color portColor = graphEditor.GetPortColor(output);
-                    for (int k = 0; k < output.ConnectionCount; k++) {
-                        XNode.NodePort input = output.GetConnection(k);
-
-                        Gradient noodleGradient = graphEditor.GetNoodleGradient(output, input);
-                        float noodleThickness = graphEditor.GetNoodleThickness(output, input);
-                        NoodlePath noodlePath = graphEditor.GetNoodlePath(output, input);
-                        NoodleStroke noodleStroke = graphEditor.GetNoodleStroke(output, input);
-
-                        // Error handling
-                        if (input == null) continue; //If a script has been updated and the port doesn't exist, it is removed and null is returned. If this happens, return.
-                        if (!input.IsConnectedTo(output)) input.Connect(output);
-                        Rect toRect;
-                        if (!_portConnectionPoints.TryGetValue(input, out toRect)) continue;
-
-                        List<Vector2> reroutePoints = output.GetReroutePoints(k);
-
-                        gridPoints.Clear();
-                        gridPoints.Add(fromRect.center);
-                        gridPoints.AddRange(reroutePoints);
-                        gridPoints.Add(toRect.center);
-                        DrawNoodle(noodleGradient, noodlePath, noodleStroke, noodleThickness, gridPoints);
-
-                        // Loop through reroute points again and draw the points
-                        for (int i = 0; i < reroutePoints.Count; i++) {
-                            RerouteReference rerouteRef = new RerouteReference(output, k, i);
-                            // Draw reroute point at position
-                            Rect rect = new Rect(reroutePoints[i], new Vector2(12, 12));
-                            rect.position = new Vector2(rect.position.x - 6, rect.position.y - 6);
-                            rect = GridToWindowRect(rect);
-
-                            // Draw selected reroute points with an outline
-                            if (selectedReroutes.Contains(rerouteRef)) {
-                                GUI.color = NodeEditorPreferences.GetSettings().highlightColor;
-                                GUI.DrawTexture(rect, NodeEditorResources.dotOuter);
-                            }
-
-                            GUI.color = portColor;
-                            GUI.DrawTexture(rect, NodeEditorResources.dot);
-                            if (rect.Overlaps(selectionBox)) selection.Add(rerouteRef);
-                            if (rect.Contains(mousePos)) hoveredReroute = rerouteRef;
-
-                        }
-                    }
-                }
+            foreach (XNode.Node node in graph.nodes)
+            {
+                DrawNodeConnections(node, selection);
             }
             GUI.color = col;
             if (Event.current.type != EventType.Layout && currentActivity == NodeActivity.DragGrid) selectedReroutes = selection;
         }
 
-        private void DrawNodes() {
+        protected virtual void DrawNodeConnections(Node node, List<RerouteReference> selection)
+        {
+            //If a null node is found, return. This can happen if the nodes associated script is deleted. It is currently not possible in Unity to delete a null asset.
+            if (node == null) return;
+
+            // Draw full connections and output > reroute
+            foreach (XNode.NodePort output in node.Outputs)
+            {
+                //Needs cleanup. Null checks are ugly
+                Rect fromRect;
+                if (!_portConnectionPoints.TryGetValue(output, out fromRect)) return;
+
+                Color portColor = graphEditor.GetPortColor(output);
+                for (int k = 0; k < output.ConnectionCount; k++)
+                {
+                    XNode.NodePort input = output.GetConnection(k);
+
+                    DrawConnection( selection, output, input, k, fromRect, portColor);
+                }
+            }
+        }
+
+        protected virtual void DrawConnection(List<RerouteReference> selection, NodePort output,
+            NodePort input, int k, Rect fromRect, Color portColor)
+        {
+            Gradient noodleGradient = graphEditor.GetNoodleGradient(output, input);
+            float noodleThickness = graphEditor.GetNoodleThickness(output, input);
+            NoodlePath noodlePath = graphEditor.GetNoodlePath(output, input);
+            NoodleStroke noodleStroke = graphEditor.GetNoodleStroke(output, input);
+
+            // Error handling
+            if (input == null)
+                return;
+            if (!input.IsConnectedTo(output)) input.Connect(output);
+            Rect toRect;
+            if (!_portConnectionPoints.TryGetValue(input, out toRect)) return;
+
+            List<Vector2> reroutePoints = output.GetReroutePoints(k);
+            List<Vector2> gridPoints = new List<Vector2>(2);
+
+            gridPoints.Clear();
+            gridPoints.Add(fromRect.center);
+            gridPoints.AddRange(reroutePoints);
+            gridPoints.Add(toRect.center);
+            DrawNoodle(noodleGradient, noodlePath, noodleStroke, noodleThickness, gridPoints,
+                output.GetPortConnection(k).connectionLabel);
+            Rect r = fromRect;
+            r.width = 200;
+            Rect center = new Rect((toRect.center + fromRect.center) / 2f, new Vector2(100, 20));
+
+            // Loop through reroute points again and draw the points
+            for (int i = 0; i < reroutePoints.Count; i++)
+            {
+                RerouteReference rerouteRef = new RerouteReference(output, k, i);
+                // Draw reroute point at position
+                Rect rect = new Rect(reroutePoints[i], new Vector2(12, 12));
+                rect.position = new Vector2(rect.position.x - 6, rect.position.y - 6);
+                rect = GridToWindowRect(rect);
+
+                // Draw selected reroute points with an outline
+                if (selectedReroutes.Contains(rerouteRef))
+                {
+                    GUI.color = NodeEditorPreferences.GetSettings().highlightColor;
+                    GUI.DrawTexture(rect, NodeEditorResources.dotOuter);
+                }
+                Vector2 mousePos = Event.current.mousePosition;
+
+                GUI.color = portColor;
+                GUI.DrawTexture(rect, NodeEditorResources.dot);
+                if (rect.Overlaps(selectionBox)) selection.Add(rerouteRef);
+                if (rect.Contains(mousePos)) hoveredReroute = rerouteRef;
+
+            }
+        }
+
+        protected virtual void DrawNodes() {
             Event e = Event.current;
             if (e.type == EventType.Layout) {
                 selectionCache = new List<UnityEngine.Object>(Selection.objects);
@@ -429,115 +470,134 @@ namespace XNodeEditor {
                     }
                 } else if (culledNodes.Contains(node)) continue;
 
-                if (e.type == EventType.Repaint) {
-                    removeEntries.Clear();
-                    foreach (var kvp in _portConnectionPoints)
-                        if (kvp.Key.node == node) removeEntries.Add(kvp.Key);
-                    foreach (var k in removeEntries) _portConnectionPoints.Remove(k);
-                }
-
-                NodeEditor nodeEditor = NodeEditor.GetEditor(node, this);
-
-                NodeEditor.portPositions.Clear();
-
-                // Set default label width. This is potentially overridden in OnBodyGUI
-                EditorGUIUtility.labelWidth = 84;
-
-                //Get node position
-                Vector2 nodePos = GridToWindowPositionNoClipped(node.position);
-
-                GUILayout.BeginArea(new Rect(nodePos, new Vector2(nodeEditor.GetWidth(), 4000)));
-
-                bool selected = selectionCache.Contains(graph.nodes[n]);
-
-                if (selected) {
-                    GUIStyle style = new GUIStyle(nodeEditor.GetBodyStyle());
-                    GUIStyle highlightStyle = new GUIStyle(nodeEditor.GetBodyHighlightStyle());
-                    highlightStyle.padding = style.padding;
-                    style.padding = new RectOffset();
-                    GUI.color = nodeEditor.GetTint();
-                    GUILayout.BeginVertical(style);
-                    GUI.color = NodeEditorPreferences.GetSettings().highlightColor;
-                    GUILayout.BeginVertical(new GUIStyle(highlightStyle));
-                } else {
-                    GUIStyle style = new GUIStyle(nodeEditor.GetBodyStyle());
-                    GUI.color = nodeEditor.GetTint();
-                    GUILayout.BeginVertical(style);
-                }
-
-                GUI.color = guiColor;
-                EditorGUI.BeginChangeCheck();
-
-                //Draw node contents
-                nodeEditor.OnHeaderGUI();
-                nodeEditor.OnBodyGUI();
-
-                //If user changed a value, notify other scripts through onUpdateNode
-                if (EditorGUI.EndChangeCheck()) {
-                    if (NodeEditor.onUpdateNode != null) NodeEditor.onUpdateNode(node);
-                    EditorUtility.SetDirty(node);
-                    nodeEditor.serializedObject.ApplyModifiedProperties();
-                }
-
-                GUILayout.EndVertical();
-
-                //Cache data about the node for next frame
-                if (e.type == EventType.Repaint) {
-                    Vector2 size = GUILayoutUtility.GetLastRect().size;
-                    if (nodeSizes.ContainsKey(node)) nodeSizes[node] = size;
-                    else nodeSizes.Add(node, size);
-
-                    foreach (var kvp in NodeEditor.portPositions) {
-                        Vector2 portHandlePos = kvp.Value;
-                        portHandlePos += node.position;
-                        Rect rect = new Rect(portHandlePos.x - 8, portHandlePos.y - 8, 16, 16);
-                        portConnectionPoints[kvp.Key] = rect;
-                    }
-                }
-
-                if (selected) GUILayout.EndVertical();
-
-                if (e.type != EventType.Layout) {
-                    //Check if we are hovering this node
-                    Vector2 nodeSize = GUILayoutUtility.GetLastRect().size;
-                    Rect windowRect = new Rect(nodePos, nodeSize);
-                    if (windowRect.Contains(mousePos)) hoveredNode = node;
-
-                    //If dragging a selection box, add nodes inside to selection
-                    if (currentActivity == NodeActivity.DragGrid) {
-                        if (windowRect.Overlaps(selectionBox)) preSelection.Add(node);
-                    }
-
-                    //Check if we are hovering any of this nodes ports
-                    //Check input ports
-                    foreach (XNode.NodePort input in node.Inputs) {
-                        //Check if port rect is available
-                        if (!portConnectionPoints.ContainsKey(input)) continue;
-                        Rect r = GridToWindowRectNoClipped(portConnectionPoints[input]);
-                        if (r.Contains(mousePos)) hoveredPort = input;
-                    }
-                    //Check all output ports
-                    foreach (XNode.NodePort output in node.Outputs) {
-                        //Check if port rect is available
-                        if (!portConnectionPoints.ContainsKey(output)) continue;
-                        Rect r = GridToWindowRectNoClipped(portConnectionPoints[output]);
-                        if (r.Contains(mousePos)) hoveredPort = output;
-                    }
-                }
-
-                GUILayout.EndArea();
+                DrawNode(e, removeEntries, node, guiColor, mousePos, selectionBox, preSelection);
             }
 
             if (e.type != EventType.Layout && currentActivity == NodeActivity.DragGrid) Selection.objects = preSelection.ToArray();
             EndZoomed(position, zoom, topPadding);
 
-            //If a change in is detected in the selected node, call OnValidate method. 
-            //This is done through reflection because OnValidate is only relevant in editor, 
+            //If a change in is detected in the selected node, call OnValidate method.
+            //This is done through reflection because OnValidate is only relevant in editor,
             //and thus, the code should not be included in build.
             if (onValidate != null && EditorGUI.EndChangeCheck()) onValidate.Invoke(Selection.activeObject, null);
         }
 
-        private bool ShouldBeCulled(XNode.Node node) {
+        protected virtual void DrawNode(Event e, List<NodePort> removeEntries, Node node, Color guiColor, Vector2 mousePos,
+            Rect selectionBox, List<Object> preSelection)
+        {
+            if (e.type == EventType.Repaint)
+            {
+                removeEntries.Clear();
+                foreach (var kvp in _portConnectionPoints)
+                    if (kvp.Key.node == node)
+                        removeEntries.Add(kvp.Key);
+                foreach (var k in removeEntries) _portConnectionPoints.Remove(k);
+            }
+
+            NodeEditor nodeEditor = NodeEditor.GetEditor(node, this);
+
+            NodeEditor.portPositions.Clear();
+
+            // Set default label width. This is potentially overridden in OnBodyGUI
+            EditorGUIUtility.labelWidth = 84;
+
+            //Get node position
+            Vector2 nodePos = GridToWindowPositionNoClipped(node.position);
+
+            GUILayout.BeginArea(new Rect(nodePos, new Vector2(nodeEditor.GetWidth(), 4000)));
+
+            bool selected = selectionCache.Contains(node);
+
+            if (selected)
+            {
+                GUIStyle style = new GUIStyle(nodeEditor.GetBodyStyle());
+                GUIStyle highlightStyle = new GUIStyle(nodeEditor.GetBodyHighlightStyle());
+                highlightStyle.padding = style.padding;
+                style.padding = new RectOffset();
+                GUI.color = nodeEditor.GetTint();
+                GUILayout.BeginVertical(style);
+                GUI.color = NodeEditorPreferences.GetSettings().highlightColor;
+                GUILayout.BeginVertical(new GUIStyle(highlightStyle));
+            }
+            else
+            {
+                GUIStyle style = new GUIStyle(nodeEditor.GetBodyStyle());
+                GUI.color = nodeEditor.GetTint();
+                GUILayout.BeginVertical(style);
+            }
+
+            GUI.color = guiColor;
+            EditorGUI.BeginChangeCheck();
+
+            //Draw node contents
+            nodeEditor.OnHeaderGUI();
+            nodeEditor.OnBodyGUI();
+
+            //If user changed a value, notify other scripts through onUpdateNode
+            if (EditorGUI.EndChangeCheck())
+            {
+                if (NodeEditor.onUpdateNode != null) NodeEditor.onUpdateNode(node);
+                EditorUtility.SetDirty(node);
+                nodeEditor.serializedObject.ApplyModifiedProperties();
+            }
+
+            GUILayout.EndVertical();
+
+            //Cache data about the node for next frame
+            if (e.type == EventType.Repaint)
+            {
+                Vector2 size = GUILayoutUtility.GetLastRect().size;
+                if (nodeSizes.ContainsKey(node)) nodeSizes[node] = size;
+                else nodeSizes.Add(node, size);
+
+                foreach (var kvp in NodeEditor.portPositions)
+                {
+                    Vector2 portHandlePos = kvp.Value;
+                    portHandlePos += node.position;
+                    Rect rect = new Rect(portHandlePos.x - 8, portHandlePos.y - 8, 16, 16);
+                    portConnectionPoints[kvp.Key] = rect;
+                }
+            }
+
+            if (selected) GUILayout.EndVertical();
+
+            if (e.type != EventType.Layout)
+            {
+                //Check if we are hovering this node
+                Vector2 nodeSize = GUILayoutUtility.GetLastRect().size;
+                Rect windowRect = new Rect(nodePos, nodeSize);
+                if (windowRect.Contains(mousePos)) hoveredNode = node;
+
+                //If dragging a selection box, add nodes inside to selection
+                if (currentActivity == NodeActivity.DragGrid)
+                {
+                    if (windowRect.Overlaps(selectionBox)) preSelection.Add(node);
+                }
+
+                //Check if we are hovering any of this nodes ports
+                //Check input ports
+                foreach (XNode.NodePort input in node.Inputs)
+                {
+                    //Check if port rect is available
+                    if (!portConnectionPoints.ContainsKey(input)) continue;
+                    Rect r = GridToWindowRectNoClipped(portConnectionPoints[input]);
+                    if (r.Contains(mousePos)) hoveredPort = input;
+                }
+
+                //Check all output ports
+                foreach (XNode.NodePort output in node.Outputs)
+                {
+                    //Check if port rect is available
+                    if (!portConnectionPoints.ContainsKey(output)) continue;
+                    Rect r = GridToWindowRectNoClipped(portConnectionPoints[output]);
+                    if (r.Contains(mousePos)) hoveredPort = output;
+                }
+            }
+
+            GUILayout.EndArea();
+        }
+
+        protected virtual bool ShouldBeCulled(XNode.Node node) {
 
             Vector2 nodePos = GridToWindowPositionNoClipped(node.position);
             if (nodePos.x / _zoom > position.width) return true; // Right
@@ -550,7 +610,7 @@ namespace XNodeEditor {
             return false;
         }
 
-        private void DrawTooltip() {
+        protected virtual void DrawTooltip() {
             if (hoveredPort != null && NodeEditorPreferences.GetSettings().portTooltips && graphEditor != null) {
                 string tooltip = graphEditor.GetPortTooltip(hoveredPort);
                 if (string.IsNullOrEmpty(tooltip)) return;

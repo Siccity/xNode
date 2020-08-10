@@ -18,23 +18,23 @@ namespace XNodeEditor {
         private bool IsHoveringPort { get { return hoveredPort != null; } }
         private bool IsHoveringNode { get { return hoveredNode != null; } }
         private bool IsHoveringReroute { get { return hoveredReroute.port != null; } }
-        private XNode.Node hoveredNode = null;
+        protected XNode.Node hoveredNode = null;
         [NonSerialized] public XNode.NodePort hoveredPort = null;
         [NonSerialized] private XNode.NodePort draggedOutput = null;
         [NonSerialized] private XNode.NodePort draggedOutputTarget = null;
         [NonSerialized] private XNode.NodePort autoConnectOutput = null;
         [NonSerialized] private List<Vector2> draggedOutputReroutes = new List<Vector2>();
-        private RerouteReference hoveredReroute = new RerouteReference();
+        protected RerouteReference hoveredReroute = new RerouteReference();
         public List<RerouteReference> selectedReroutes = new List<RerouteReference>();
-        private Vector2 dragBoxStart;
-        private UnityEngine.Object[] preBoxSelection;
-        private RerouteReference[] preBoxSelectionReroute;
-        private Rect selectionBox;
+        protected Vector2 dragBoxStart;
+        protected UnityEngine.Object[] preBoxSelection;
+        protected RerouteReference[] preBoxSelectionReroute;
+        protected Rect selectionBox;
         private bool isDoubleClick = false;
         private Vector2 lastMousePosition;
         private float dragThreshold = 1f;
 
-        public void Controls() {
+        protected virtual void Controls() {
             wantsMouseMove = true;
             Event e = Event.current;
             switch (e.type) {
@@ -483,7 +483,7 @@ namespace XNodeEditor {
         }
 
         /// <summary> Draw a connection as we are dragging it </summary>
-        public void DrawDraggedConnection() {
+        protected virtual  void DrawDraggedConnection() {
             if (IsDraggingPort) {
                 Gradient gradient = graphEditor.GetNoodleGradient(draggedOutput, null);
                 float thickness = graphEditor.GetNoodleThickness(draggedOutput, null);

@@ -105,7 +105,7 @@ namespace XNodeEditor {
         }
 
         /// <summary> Override to display custom node header tooltips </summary>
-        public virtual string GetHeaderTooltip(XNode.Node node) {
+        public virtual string GetHeaderTooltip() {
             return null;
         }
 

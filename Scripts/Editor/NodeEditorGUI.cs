@@ -563,7 +563,7 @@ namespace XNodeEditor {
                 tooltip = graphEditor.GetPortTooltip(hoveredPort);
             }
             else if (hoveredNode != null && IsHoveringNode && IsHoveringTitle(hoveredNode)) {
-                tooltip = NodeEditor.GetEditor(hoveredNode, this).GetHeaderTooltip(hoveredNode);
+                tooltip = NodeEditor.GetEditor(hoveredNode, this).GetHeaderTooltip();
             }
             if (string.IsNullOrEmpty(tooltip)) return;
             GUIContent content = new GUIContent(tooltip);

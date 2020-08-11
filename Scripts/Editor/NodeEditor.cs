@@ -104,6 +104,11 @@ namespace XNodeEditor {
             return NodeEditorResources.styles.nodeHighlight;
         }
 
+        /// <summary> Override to display custom node header tooltips </summary>
+        public virtual string GetHeaderTooltip() {
+            return null;
+        }
+
         /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>
         public virtual void AddContextMenuItems(GenericMenu menu) {
             bool canRemove = true;

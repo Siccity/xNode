@@ -112,6 +112,11 @@ namespace XNodeEditor {
         /// <summary> Show right-click context menu for hovered port </summary>
         void ShowPortContextMenu(XNode.NodePort hoveredPort) {
             GenericMenu contextMenu = new GenericMenu();
+            foreach (var port in hoveredPort.GetConnections()) {
+                var name = port.node.name;
+                var index = hoveredPort.GetConnectionIndex(port);
+                contextMenu.AddItem(new GUIContent($"Disconnect({name})"), false, () => hoveredPort.Disconnect(index));
+            }
             contextMenu.AddItem(new GUIContent("Clear Connections"), false, () => hoveredPort.ClearConnections());
             contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
@@ -531,8 +536,8 @@ namespace XNodeEditor {
             if (e.type != EventType.Layout && currentActivity == NodeActivity.DragGrid) Selection.objects = preSelection.ToArray();
             EndZoomed(position, zoom, topPadding);
 
-            //If a change in is detected in the selected node, call OnValidate method. 
-            //This is done through reflection because OnValidate is only relevant in editor, 
+            //If a change in is detected in the selected node, call OnValidate method.
+            //This is done through reflection because OnValidate is only relevant in editor,
             //and thus, the code should not be included in build.
             if (onValidate != null && EditorGUI.EndChangeCheck()) onValidate.Invoke(Selection.activeObject, null);
         }
@@ -551,16 +556,22 @@ namespace XNodeEditor {
         }
 
         private void DrawTooltip() {
-            if (hoveredPort != null && NodeEditorPreferences.GetSettings().portTooltips && graphEditor != null) {
-                string tooltip = graphEditor.GetPortTooltip(hoveredPort);
-                if (string.IsNullOrEmpty(tooltip)) return;
-                GUIContent content = new GUIContent(tooltip);
-                Vector2 size = NodeEditorResources.styles.tooltip.CalcSize(content);
-                size.x += 8;
-                Rect rect = new Rect(Event.current.mousePosition - (size), size);
-                EditorGUI.LabelField(rect, content, NodeEditorResources.styles.tooltip);
-                Repaint();
+            if (!NodeEditorPreferences.GetSettings().portTooltips || graphEditor is null)
+                return;
+            string tooltip = null;
+            if (hoveredPort != null) {
+                tooltip = graphEditor.GetPortTooltip(hoveredPort);
             }
+            else if (hoveredNode != null && IsHoveringNode && IsHoveringTitle(hoveredNode)) {
+                tooltip = NodeEditor.GetEditor(hoveredNode, this).GetHeaderTooltip();
+            }
+            if (string.IsNullOrEmpty(tooltip)) return;
+            GUIContent content = new GUIContent(tooltip);
+            Vector2 size = NodeEditorResources.styles.tooltip.CalcSize(content);
+            size.x += 8;
+            Rect rect = new Rect(Event.current.mousePosition - (size), size);
+            EditorGUI.LabelField(rect, content, NodeEditorResources.styles.tooltip);
+            Repaint();
         }
     }
 }

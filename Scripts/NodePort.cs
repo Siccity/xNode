@@ -307,11 +307,7 @@ namespace XNode {
             // Remove the other ports connection to this port
             NodePort otherPort = connections[i].Port;
             if (otherPort != null) {
-                for (int k = 0; k < otherPort.connections.Count; k++) {
-                    if (otherPort.connections[k].Port == this) {
-                        otherPort.connections.RemoveAt(i);
-                    }
-                }
+                otherPort.connections.RemoveAll(it => { return it.Port == this; });
             }
             // Remove this ports connection to the other
             connections.RemoveAt(i);

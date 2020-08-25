@@ -478,6 +478,7 @@ namespace XNodeEditor {
                     }
                 }
             }
+			EditorUtility.SetDirty(graph);
             // Select the new nodes
             Selection.objects = newNodes;
         }

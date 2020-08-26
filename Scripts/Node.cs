@@ -51,6 +51,8 @@ namespace XNode {
             Strict,
             /// <summary> Allow connections where output value type is assignable from input value type (eg. Object --> ScriptableObject)</summary>
             InheritedInverse,
+            /// <summary> Allow connections where output value type is assignable from input value or input value type is assignable from output value type</summary>
+            InheritedAny
         }
 
 #region Obsolete

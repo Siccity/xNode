@@ -59,6 +59,7 @@ namespace XNodeEditor {
                         (showBacking == XNode.Node.ShowBackingValue.Unconnected && port.IsConnected);
 
                     float spacePadding = 0;
+                    string tooltip = null;
                     foreach (var attr in propertyAttributes) {
                         if (attr is SpaceAttribute) {
                             if (usePropertyAttributes) GUILayout.Space((attr as SpaceAttribute).height);
@@ -71,6 +72,8 @@ namespace XNodeEditor {
                                 position = EditorGUI.IndentedRect(position);
                                 GUI.Label(position, (attr as HeaderAttribute).header, EditorStyles.boldLabel);
                             } else spacePadding += EditorGUIUtility.singleLineHeight * 1.5f;
+                        } else if (attr is TooltipAttribute) {
+                        	tooltip = (attr as TooltipAttribute).tooltip;
                         }
                     }
 
@@ -83,13 +86,13 @@ namespace XNodeEditor {
                     switch (showBacking) {
                         case XNode.Node.ShowBackingValue.Unconnected:
                             // Display a label if port is connected
-                            if (port.IsConnected) EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName));
+                            if (port.IsConnected) EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName, tooltip));
                             // Display an editable property field if port is not connected
                             else EditorGUILayout.PropertyField(property, label, includeChildren, GUILayout.MinWidth(30));
                             break;
                         case XNode.Node.ShowBackingValue.Never:
                             // Display a label
-                            EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName));
+                            EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName, tooltip));
                             break;
                         case XNode.Node.ShowBackingValue.Always:
                             // Display an editable property field
@@ -115,6 +118,7 @@ namespace XNodeEditor {
                         (showBacking == XNode.Node.ShowBackingValue.Unconnected && port.IsConnected);
 
                     float spacePadding = 0;
+                    string tooltip = null;
                     foreach (var attr in propertyAttributes) {
                         if (attr is SpaceAttribute) {
                             if (usePropertyAttributes) GUILayout.Space((attr as SpaceAttribute).height);
@@ -127,6 +131,8 @@ namespace XNodeEditor {
                                 position = EditorGUI.IndentedRect(position);
                                 GUI.Label(position, (attr as HeaderAttribute).header, EditorStyles.boldLabel);
                             } else spacePadding += EditorGUIUtility.singleLineHeight * 1.5f;
+                        } else if (attr is TooltipAttribute) {
+                        	tooltip = (attr as TooltipAttribute).tooltip;
                         }
                     }
 
@@ -139,13 +145,13 @@ namespace XNodeEditor {
                     switch (showBacking) {
                         case XNode.Node.ShowBackingValue.Unconnected:
                             // Display a label if port is connected
-                            if (port.IsConnected) EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName), NodeEditorResources.OutputPort, GUILayout.MinWidth(30));
+                            if (port.IsConnected) EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName, tooltip), NodeEditorResources.OutputPort, GUILayout.MinWidth(30));
                             // Display an editable property field if port is not connected
                             else EditorGUILayout.PropertyField(property, label, includeChildren, GUILayout.MinWidth(30));
                             break;
                         case XNode.Node.ShowBackingValue.Never:
                             // Display a label
-                            EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName), NodeEditorResources.OutputPort, GUILayout.MinWidth(30));
+                            EditorGUILayout.LabelField(label != null ? label : new GUIContent(property.displayName, tooltip), NodeEditorResources.OutputPort, GUILayout.MinWidth(30));
                             break;
                         case XNode.Node.ShowBackingValue.Always:
                             // Display an editable property field

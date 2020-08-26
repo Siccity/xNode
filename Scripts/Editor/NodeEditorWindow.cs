@@ -99,7 +99,7 @@ namespace XNodeEditor {
         private static void OnSelectionChanged() {
             XNode.NodeGraph nodeGraph = Selection.activeObject as XNode.NodeGraph;
             if (nodeGraph && !AssetDatabase.Contains(nodeGraph)) {
-                Open(nodeGraph);
+                if (NodeEditorPreferences.GetSettings().openOnCreate) Open(nodeGraph);
             }
         }
 

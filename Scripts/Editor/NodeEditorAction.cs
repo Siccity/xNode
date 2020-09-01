@@ -14,10 +14,15 @@ namespace XNodeEditor {
 
         public static XNode.Node[] copyBuffer = null;
 
-        private bool IsDraggingPort { get { return draggedOutput != null; } }
-        private bool IsHoveringPort { get { return hoveredPort != null; } }
-        private bool IsHoveringNode { get { return hoveredNode != null; } }
-        private bool IsHoveringReroute { get { return hoveredReroute.port != null; } }
+        public bool IsDraggingPort { get { return draggedOutput != null; } }
+        public bool IsHoveringPort { get { return hoveredPort != null; } }
+        public bool IsHoveringNode { get { return hoveredNode != null; } }
+        public bool IsHoveringReroute { get { return hoveredReroute.port != null; } }
+        public XNode.NodePort DraggingPort { get { return draggedOutput; } }
+        public XNode.NodePort HoveringPort { get { return hoveredPort; } }
+        public XNode.Node HoveringNode { get { return hoveredNode; } }
+        public XNode.NodePort HoveringReroute { get { return hoveredReroute.port; } }
+
         private XNode.Node hoveredNode = null;
         [NonSerialized] public XNode.NodePort hoveredPort = null;
         [NonSerialized] private XNode.NodePort draggedOutput = null;

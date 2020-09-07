@@ -33,7 +33,10 @@ With a minimal footprint, it is ideal as a base for custom state machines, dialo
 * [Getting started](https://github.com/Siccity/xNode/wiki/Getting%20Started) - create your very first node node and graph
 * [Examples branch](https://github.com/Siccity/xNode/tree/examples) - look at other small projects
 
-### Installing with Unity Package Manager
+### Installation
+<details><summary>Instructions</summary>
+
+## Installing with Unity Package Manager
 ***Via Git URL***
 *(Requires Unity version 2018.3.0b7  or above)*
 
@@ -55,6 +58,13 @@ The package is available on the [openupm registry](https://openupm.com). It's re
 ```
 openupm add com.github.siccity.xnode
 ```
+
+## Installing with git
+***Via Git Submodule***
+To add xNode as a [submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules) in your existing git project,
+run the following git command `git submodule add git@github.com:Siccity/xNode.git Assets/Submodules/xNode`
+
+</details>
 
 ### Node example:
 ```csharp

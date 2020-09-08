@@ -22,6 +22,7 @@ namespace XNodeEditor {
             Matrix4x4 m = GUI.matrix;
             if (graph == null) return;
             ValidateGraphEditor();
+            if (e.isMouse) graphEditor.OnGUI();
             Controls();
 
             DrawGrid(position, zoom, panOffset);
@@ -30,7 +31,7 @@ namespace XNodeEditor {
             DrawNodes();
             DrawSelectionBox();
             DrawTooltip();
-            graphEditor.OnGUI();
+            if (!e.isMouse) graphEditor.OnGUI();
 
             // Run and reset onLateGUI
             if (onLateGUI != null) {

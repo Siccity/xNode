@@ -240,8 +240,8 @@ namespace XNodeEditor {
         public static NodeEditorWindow Open(XNode.NodeGraph graph) {
             if (!graph) return null;
 
-            var windows = Resources.FindObjectsOfTypeAll<NodeEditorWindow>();
-            NodeEditorWindow w = null;
+            var              windows = Resources.FindObjectsOfTypeAll<NodeEditorWindow>();
+            NodeEditorWindow w       = null;
             foreach (var window in windows)
             {
                 if (window.Lock)
@@ -249,36 +249,33 @@ namespace XNodeEditor {
                     if (window.graph == graph)
                     {
                         w = window;
+                        break;
                     }
                 }
                 else
                 {
                     w = window;
+                    break;
                 }
             }
 
             if (!w)
             {
-                w = EditorWindow.CreateInstance<NodeEditorWindow>();
+                w = CreateInstance<NodeEditorWindow>();
                 w.titleContent = new GUIContent("xNode");
+                Debug.LogError("创建");
             }
+
+            NodeGraphEditor graphEditor = NodeGraphEditor.GetEditor(graph, w);
+            w.graphEditor = graphEditor;
+            w.wantsMouseMove = true;
+            w.graph = graph;
 
             w.Show(true);
             w.Focus();
 
-            if (w.graphEditor == null)
-            {
-                NodeGraphEditor graphEditor = NodeGraphEditor.GetEditor(graph, w);
-                w.graphEditor = graphEditor;
-            }
-            else
-            {
-                //refresh  target
-                w.graphEditor.target = graph;
-            }
+            current = w;
 
-            w.wantsMouseMove = true;
-            w.graph = graph;
             return w;
         }
 

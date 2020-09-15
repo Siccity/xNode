@@ -263,7 +263,6 @@ namespace XNodeEditor {
             {
                 w = CreateInstance<NodeEditorWindow>();
                 w.titleContent = new GUIContent("xNode");
-                Debug.LogError("创建");
             }
 
             NodeGraphEditor graphEditor = NodeGraphEditor.GetEditor(graph, w);

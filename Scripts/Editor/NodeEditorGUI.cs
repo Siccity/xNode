@@ -142,10 +142,20 @@ namespace XNodeEditor {
         }
 
         /// <summary> Draw a bezier from output to input in grid coordinates </summary>
-        public void DrawNoodle(Gradient gradient, NoodlePath path, NoodleStroke stroke, float thickness, List<Vector2> gridPoints) {
+        public void DrawNoodle(Gradient gradient, NoodlePath path, NoodleStroke stroke, float thickness, List<Vector2> gridPoints, bool applyWindowCulling = false) {
             // convert grid points to window points
             for (int i = 0; i < gridPoints.Count; ++i)
                 gridPoints[i] = GridToWindowPosition(gridPoints[i]);
+
+            if (applyWindowCulling)
+            {
+                var p0 = gridPoints[0];
+                var p1 = gridPoints[1];
+
+                var windowRect = new Rect(Vector2.zero, new Vector2(position.width, position.height));
+
+                if (!windowRect.Contains(p0) && !windowRect.Contains(p1)) return;
+            }
 
             Color originalHandlesColor = Handles.color;
             Handles.color = gradient.Evaluate(0f);
@@ -354,7 +364,7 @@ namespace XNodeEditor {
                         gridPoints.Add(fromRect.center);
                         gridPoints.AddRange(reroutePoints);
                         gridPoints.Add(toRect.center);
-                        DrawNoodle(noodleGradient, noodlePath, noodleStroke, noodleThickness, gridPoints);
+                        DrawNoodle(noodleGradient, noodlePath, noodleStroke, noodleThickness, gridPoints, true);
 
                         // Loop through reroute points again and draw the points
                         for (int i = 0; i < reroutePoints.Count; i++) {

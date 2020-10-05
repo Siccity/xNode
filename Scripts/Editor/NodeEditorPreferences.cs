@@ -20,10 +20,10 @@ namespace XNodeEditor {
 
         [System.Serializable]
         public class Settings : ISerializationCallbackReceiver {
-            [SerializeField] private Color32 _gridLineColor = new Color(0.45f, 0.45f, 0.45f);
+            [SerializeField] private Color32 _gridLineColor = new Color(.23f, .23f, .23f);
             public Color32 gridLineColor { get { return _gridLineColor; } set { _gridLineColor = value; _gridTexture = null; _crossTexture = null; } }
 
-            [SerializeField] private Color32 _gridBgColor = new Color(0.18f, 0.18f, 0.18f);
+            [SerializeField] private Color32 _gridBgColor = new Color(.19f, .19f, .19f);
             public Color32 gridBgColor { get { return _gridBgColor; } set { _gridBgColor = value; _gridTexture = null; } }
 
             [Obsolete("Use maxZoom instead")]

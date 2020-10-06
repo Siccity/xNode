@@ -165,8 +165,7 @@ namespace XNodeEditor {
 
                 rect.size = new Vector2(16, 16);
 
-                NodeEditor editor = NodeEditor.GetEditor(port.node, NodeEditorWindow.current);
-                Color backgroundColor = editor.GetTint();
+                Color backgroundColor = NodeEditorWindow.current.graphEditor.GetPortBackgroundColor(port);
                 Color col = NodeEditorWindow.current.graphEditor.GetPortColor(port);
                 DrawPortHandle(rect, backgroundColor, col);
 
@@ -219,8 +218,7 @@ namespace XNodeEditor {
 
             Rect rect = new Rect(position, new Vector2(16, 16));
 
-            NodeEditor editor = NodeEditor.GetEditor(port.node, NodeEditorWindow.current);
-            Color backgroundColor = editor.GetTint();
+            Color backgroundColor = NodeEditorWindow.current.graphEditor.GetPortBackgroundColor(port);
             Color col = NodeEditorWindow.current.graphEditor.GetPortColor(port);
             DrawPortHandle(rect, backgroundColor, col);
 
@@ -246,8 +244,7 @@ namespace XNodeEditor {
 
             rect.size = new Vector2(16, 16);
 
-            NodeEditor editor = NodeEditor.GetEditor(port.node, NodeEditorWindow.current);
-            Color backgroundColor = editor.GetTint();
+            Color backgroundColor = NodeEditorWindow.current.graphEditor.GetPortBackgroundColor(port);
             Color col = NodeEditorWindow.current.graphEditor.GetPortColor(port);
             DrawPortHandle(rect, backgroundColor, col);
 

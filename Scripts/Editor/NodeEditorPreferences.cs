@@ -37,6 +37,7 @@ namespace XNodeEditor {
             public bool autoSave = true;
             public bool openOnCreate = true;
             public bool dragToCreate = true;
+            public bool dragToCreateFilter = true;
             public bool zoomToMouse = true;
             public bool portTooltips = true;
             [SerializeField] private string typeColorsData = "";
@@ -166,6 +167,16 @@ namespace XNodeEditor {
             settings.noodleStroke = (NoodleStroke) EditorGUILayout.EnumPopup("Noodle stroke", (Enum) settings.noodleStroke);
             settings.portTooltips = EditorGUILayout.Toggle("Port Tooltips", settings.portTooltips);
             settings.dragToCreate = EditorGUILayout.Toggle(new GUIContent("Drag to Create", "Drag a port connection anywhere on the grid to create and connect a node"), settings.dragToCreate);
+
+            //Drag to Create Filter
+            int oldIndent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = oldIndent + 1;
+            GUI.enabled = settings.dragToCreate;
+            settings.dragToCreateFilter = EditorGUILayout.Toggle(new GUIContent("Filter", "Only show nodes that are compatible with the dragged port"), settings.dragToCreateFilter);
+            GUI.enabled = true;
+            EditorGUI.indentLevel = oldIndent;
+
+            //END
             if (GUI.changed) {
                 SavePrefs(key, settings);
                 NodeEditorWindow.RepaintAll();

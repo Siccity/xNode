@@ -64,11 +64,24 @@ namespace XNodeEditor
                 return 0;
         }
 
-        /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>
-        public virtual void AddContextMenuItems(GenericMenu menu)
+        /// <summary>
+        /// Add items for the context menu when right-clicking this node. 
+        /// Override to add custom menu items.
+        /// </summary>
+        /// <param name="menu"></param>
+        /// <param name="compatibleType">Use it to filter only nodes with ports value type, compatible with this type</param>
+        /// <param name="direction">Direction of the compatiblity</param>
+        public virtual void AddContextMenuItems(GenericMenu menu, Type compatibleType = null, XNode.NodePort.IO direction = XNode.NodePort.IO.Input)
         {
             Vector2 pos = NodeEditorWindow.current.WindowToGridPosition(Event.current.mousePosition);
-            var nodeTypes = NodeEditorReflection.nodeTypes.OrderBy(type => GetNodeMenuOrder(type)).ToArray();
+
+            Type[] nodeTypes = NodeEditorReflection.nodeTypes.OrderBy(type => GetNodeMenuOrder(type)).ToArray();
+
+            if (compatibleType != null)
+            {
+                nodeTypes = NodeEditorUtilities.GetCompatibleNodesTypes(NodeEditorReflection.nodeTypes, compatibleType, direction).ToArray();
+            }
+
             for (int i = 0; i < nodeTypes.Length; i++)
             {
                 Type type = nodeTypes[i];
@@ -100,6 +113,7 @@ namespace XNodeEditor
             menu.AddItem(new GUIContent("Preferences"), false, () => NodeEditorReflection.OpenPreferences());
             menu.AddCustomContextMenuItems(target);
         }
+
 
         /// <summary> Returned gradient is used to color noodles </summary>
         /// <param name="output"> The output this noodle comes from. Never null. </param>

@@ -119,7 +119,7 @@ namespace XNodeEditor {
             }
             contextMenu.AddItem(new GUIContent("Clear Connections"), false, () => hoveredPort.ClearConnections());
             //Get compatible nodes with this port
-            if (NodeEditorPreferences.GetSettings().dragToCreateFilter)
+            if (NodeEditorPreferences.GetSettings().createFilter)
             {
                 contextMenu.AddSeparator("");
 

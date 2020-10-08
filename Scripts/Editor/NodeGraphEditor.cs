@@ -77,7 +77,7 @@ namespace XNodeEditor
 
             Type[] nodeTypes = NodeEditorReflection.nodeTypes.OrderBy(type => GetNodeMenuOrder(type)).ToArray();
 
-            if (compatibleType != null && NodeEditorPreferences.GetSettings().dragToCreateFilter)
+            if (compatibleType != null && NodeEditorPreferences.GetSettings().createFilter)
             {
                 nodeTypes = NodeEditorUtilities.GetCompatibleNodesTypes(NodeEditorReflection.nodeTypes, compatibleType, direction).ToArray();
             }

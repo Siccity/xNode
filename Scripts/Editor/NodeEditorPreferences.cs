@@ -43,7 +43,7 @@ namespace XNodeEditor {
             [NonSerialized] public Dictionary<string, Color> typeColors = new Dictionary<string, Color>();
             [FormerlySerializedAs("noodleType")] public NoodlePath noodlePath = NoodlePath.Curvy;
             public float noodleThickness = 2f;
-          
+
             public NoodleStroke noodleStroke = NoodleStroke.Full;
 
             private Texture2D _gridTexture;
@@ -103,7 +103,7 @@ namespace XNodeEditor {
         public static SettingsProvider CreateXNodeSettingsProvider() {
             SettingsProvider provider = new SettingsProvider("Preferences/Node Editor", SettingsScope.User) {
                 guiHandler = (searchContext) => { XNodeEditor.NodeEditorPreferences.PreferencesGUI(); },
-                keywords = new HashSet<string>(new [] { "xNode", "node", "editor", "graph", "connections", "noodles", "ports" })
+                    keywords = new HashSet<string>(new [] { "xNode", "node", "editor", "graph", "connections", "noodles", "ports" })
             };
             return provider;
         }

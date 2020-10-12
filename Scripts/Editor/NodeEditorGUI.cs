@@ -556,7 +556,7 @@ namespace XNodeEditor {
         }
 
         private void DrawTooltip() {
-            if (!NodeEditorPreferences.GetSettings().portTooltips || graphEditor is null)
+            if (!NodeEditorPreferences.GetSettings().portTooltips || graphEditor == null)
                 return;
             string tooltip = null;
             if (hoveredPort != null) {

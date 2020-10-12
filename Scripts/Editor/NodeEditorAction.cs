@@ -14,16 +14,25 @@ namespace XNodeEditor {
 
         public static XNode.Node[] copyBuffer = null;
 
-        private bool IsDraggingPort { get { return draggedOutput != null; } }
-        private bool IsHoveringPort { get { return hoveredPort != null; } }
-        private bool IsHoveringNode { get { return hoveredNode != null; } }
-        private bool IsHoveringReroute { get { return hoveredReroute.port != null; } }
+        public bool IsDraggingPort { get { return draggedOutput != null; } }
+        public bool IsHoveringPort { get { return hoveredPort != null; } }
+        public bool IsHoveringNode { get { return hoveredNode != null; } }
+        public bool IsHoveringReroute { get { return hoveredReroute.port != null; } }
+
+        /// <summary> Return the dragged port or null if not exist </summary>
+        public XNode.NodePort DraggedOutputPort { get { XNode.NodePort result = draggedOutput; return result; } }
+        /// <summary> Return the Hovered port or null if not exist </summary>
+        public XNode.NodePort HoveredPort { get { XNode.NodePort result = hoveredPort; return result; } }
+        /// <summary> Return the Hovered node or null if not exist </summary>
+        public XNode.Node HoveredNode { get { XNode.Node result = hoveredNode; return result; } }
+
         private XNode.Node hoveredNode = null;
         [NonSerialized] public XNode.NodePort hoveredPort = null;
         [NonSerialized] private XNode.NodePort draggedOutput = null;
         [NonSerialized] private XNode.NodePort draggedOutputTarget = null;
         [NonSerialized] private XNode.NodePort autoConnectOutput = null;
         [NonSerialized] private List<Vector2> draggedOutputReroutes = new List<Vector2>();
+
         private RerouteReference hoveredReroute = new RerouteReference();
         public List<RerouteReference> selectedReroutes = new List<RerouteReference>();
         private Vector2 dragBoxStart;
@@ -478,7 +487,7 @@ namespace XNodeEditor {
                     }
                 }
             }
-			EditorUtility.SetDirty(graph);
+            EditorUtility.SetDirty(graph);
             // Select the new nodes
             Selection.objects = newNodes;
         }

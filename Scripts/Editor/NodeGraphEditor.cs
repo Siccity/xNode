@@ -17,7 +17,7 @@ namespace XNodeEditor {
 
         /// <summary> Called when opened by NodeEditorWindow </summary>
         public virtual void OnOpen() { }
-        
+
         /// <summary> Called when NodeEditorWindow gains focus </summary>
         public virtual void OnWindowFocus() { }
 
@@ -125,7 +125,7 @@ namespace XNodeEditor {
         /// <param name="output"> The output this noodle comes from. Never null. </param>
         /// <param name="input"> The output this noodle comes from. Can be null if we are dragging the noodle. </param>
         public virtual float GetNoodleThickness(XNode.NodePort output, XNode.NodePort input) {
-            return 5f;
+            return NodeEditorPreferences.GetSettings().noodleThickness;
         }
 
         public virtual NoodlePath GetNoodlePath(XNode.NodePort output, XNode.NodePort input) {
@@ -139,6 +139,12 @@ namespace XNodeEditor {
         /// <summary> Returned color is used to color ports </summary>
         public virtual Color GetPortColor(XNode.NodePort port) {
             return GetTypeColor(port.ValueType);
+        }
+
+        /// <summary> The returned color is used to color the background of the door.
+        /// Usually used for outer edge effect </summary>
+        public virtual Color GetPortBackgroundColor(XNode.NodePort port) {
+            return Color.gray;
         }
 
         /// <summary> Returns generated color for a type. This color is editable in preferences </summary>

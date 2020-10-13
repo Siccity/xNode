@@ -27,10 +27,14 @@ namespace XNodeEditor {
                 inputPort = new GUIStyle(baseStyle);
                 inputPort.alignment = TextAnchor.UpperLeft;
                 inputPort.padding.left = 0;
+                inputPort.active.background = dot;
+                inputPort.normal.background = dotOuter;
 
                 outputPort = new GUIStyle(baseStyle);
                 outputPort.alignment = TextAnchor.UpperRight;
                 outputPort.padding.right = 0;
+                outputPort.active.background = dot;
+                outputPort.normal.background = dotOuter;
 
                 nodeHeader = new GUIStyle();
                 nodeHeader.alignment = TextAnchor.MiddleCenter;

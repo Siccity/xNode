@@ -344,6 +344,8 @@ namespace XNodeEditor {
                     if (!_portConnectionPoints.TryGetValue(output, out fromRect)) continue;
 
                     Color portColor = graphEditor.GetPortColor(output);
+                    GUIStyle portStyle = graphEditor.GetPortStyle(output);
+
                     for (int k = 0; k < output.ConnectionCount; k++) {
                         XNode.NodePort input = output.GetConnection(k);
 
@@ -377,11 +379,11 @@ namespace XNodeEditor {
                             // Draw selected reroute points with an outline
                             if (selectedReroutes.Contains(rerouteRef)) {
                                 GUI.color = NodeEditorPreferences.GetSettings().highlightColor;
-                                GUI.DrawTexture(rect, NodeEditorResources.dotOuter);
+                                GUI.DrawTexture(rect, portStyle.normal.background);
                             }
 
                             GUI.color = portColor;
-                            GUI.DrawTexture(rect, NodeEditorResources.dot);
+                            GUI.DrawTexture(rect, portStyle.active.background);
                             if (rect.Overlaps(selectionBox)) selection.Add(rerouteRef);
                             if (rect.Contains(mousePos)) hoveredReroute = rerouteRef;
 

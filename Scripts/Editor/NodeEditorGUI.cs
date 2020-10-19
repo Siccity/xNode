@@ -153,8 +153,9 @@ namespace XNodeEditor {
                 var p1 = gridPoints[1];
 
                 var windowRect = new Rect(Vector2.zero, new Vector2(position.width, position.height));
+                var noddleRect = new Rect(p0.x, p0.y, Mathf.Abs(p0.x - p1.x), Mathf.Abs(p0.y - p1.y));
 
-                if (!windowRect.Contains(p0) && !windowRect.Contains(p1)) return;
+                if (!windowRect.Overlaps(noddleRect)) return;
             }
 
             Color originalHandlesColor = Handles.color;

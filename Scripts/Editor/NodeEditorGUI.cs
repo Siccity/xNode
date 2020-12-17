@@ -118,6 +118,15 @@ namespace XNodeEditor {
                 contextMenu.AddItem(new GUIContent($"Disconnect({name})"), false, () => hoveredPort.Disconnect(index));
             }
             contextMenu.AddItem(new GUIContent("Clear Connections"), false, () => hoveredPort.ClearConnections());
+            //Get compatible nodes with this port
+            if (NodeEditorPreferences.GetSettings().createFilter) {
+                contextMenu.AddSeparator("");
+
+                if (hoveredPort.direction == XNode.NodePort.IO.Input)
+                    graphEditor.AddContextMenuItems(contextMenu, hoveredPort.ValueType, XNode.NodePort.IO.Output);
+                else
+                    graphEditor.AddContextMenuItems(contextMenu, hoveredPort.ValueType, XNode.NodePort.IO.Input);
+            }
             contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
         }
@@ -334,6 +343,8 @@ namespace XNodeEditor {
                     if (!_portConnectionPoints.TryGetValue(output, out fromRect)) continue;
 
                     Color portColor = graphEditor.GetPortColor(output);
+                    GUIStyle portStyle = graphEditor.GetPortStyle(output);
+
                     for (int k = 0; k < output.ConnectionCount; k++) {
                         XNode.NodePort input = output.GetConnection(k);
 
@@ -367,11 +378,11 @@ namespace XNodeEditor {
                             // Draw selected reroute points with an outline
                             if (selectedReroutes.Contains(rerouteRef)) {
                                 GUI.color = NodeEditorPreferences.GetSettings().highlightColor;
-                                GUI.DrawTexture(rect, NodeEditorResources.dotOuter);
+                                GUI.DrawTexture(rect, portStyle.normal.background);
                             }
 
                             GUI.color = portColor;
-                            GUI.DrawTexture(rect, NodeEditorResources.dot);
+                            GUI.DrawTexture(rect, portStyle.active.background);
                             if (rect.Overlaps(selectionBox)) selection.Add(rerouteRef);
                             if (rect.Contains(mousePos)) hoveredReroute = rerouteRef;
 
@@ -561,8 +572,7 @@ namespace XNodeEditor {
             string tooltip = null;
             if (hoveredPort != null) {
                 tooltip = graphEditor.GetPortTooltip(hoveredPort);
-            }
-            else if (hoveredNode != null && IsHoveringNode && IsHoveringTitle(hoveredNode)) {
+            } else if (hoveredNode != null && IsHoveringNode && IsHoveringTitle(hoveredNode)) {
                 tooltip = NodeEditor.GetEditor(hoveredNode, this).GetHeaderTooltip();
             }
             if (string.IsNullOrEmpty(tooltip)) return;

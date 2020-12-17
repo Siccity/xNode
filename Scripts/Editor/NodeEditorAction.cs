@@ -233,7 +233,7 @@ namespace XNodeEditor {
                             // Open context menu for auto-connection if there is no target node
                             else if (draggedOutputTarget == null && NodeEditorPreferences.GetSettings().dragToCreate && autoConnectOutput != null) {
                                 GenericMenu menu = new GenericMenu();
-                                graphEditor.AddContextMenuItems(menu);
+                                graphEditor.AddContextMenuItems(menu, draggedOutput.ValueType);
                                 menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
                             }
                             //Release dragged connection
@@ -512,6 +512,7 @@ namespace XNodeEditor {
 
                 DrawNoodle(gradient, path, stroke, thickness, gridPoints);
 
+                GUIStyle portStyle = NodeEditorWindow.current.graphEditor.GetPortStyle(draggedOutput);
                 Color bgcol = Color.black;
                 Color frcol = gradient.colorKeys[0].color;
                 bgcol.a = 0.6f;
@@ -524,7 +525,7 @@ namespace XNodeEditor {
                     rect.position = new Vector2(rect.position.x - 8, rect.position.y - 8);
                     rect = GridToWindowRect(rect);
 
-                    NodeEditorGUILayout.DrawPortHandle(rect, bgcol, frcol);
+                    NodeEditorGUILayout.DrawPortHandle(rect, bgcol, frcol, portStyle.normal.background, portStyle.active.background);
                 }
             }
         }

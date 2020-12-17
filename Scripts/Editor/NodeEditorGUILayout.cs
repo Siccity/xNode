@@ -16,7 +16,7 @@ namespace XNodeEditor {
 
         /// <summary> Make a field for a serialized property. Automatically displays relevant node port. </summary>
         public static void PropertyField(SerializedProperty property, bool includeChildren = true, params GUILayoutOption[] options) {
-            PropertyField(property, (GUIContent) null, includeChildren, options);
+            PropertyField(property, (GUIContent)null, includeChildren, options);
         }
 
         /// <summary> Make a field for a serialized property. Automatically displays relevant node port. </summary>
@@ -101,7 +101,7 @@ namespace XNodeEditor {
                     }
 
                     rect = GUILayoutUtility.GetLastRect();
-                    float paddingLeft = NodeEditorResources.styles.inputPort.padding.left;
+                    float paddingLeft = NodeEditorWindow.current.graphEditor.GetPortStyle(port).padding.left;
                     rect.position = rect.position - new Vector2(16 + paddingLeft, -spacePadding);
                     // If property is an output, display a text label and put a port handle on the right side
                 } else if (port.direction == XNode.NodePort.IO.Output) {
@@ -161,7 +161,7 @@ namespace XNodeEditor {
                     }
 
                     rect = GUILayoutUtility.GetLastRect();
-                    rect.width += NodeEditorResources.styles.outputPort.padding.right;
+                    rect.width += NodeEditorWindow.current.graphEditor.GetPortStyle(port).padding.right;
                     rect.position = rect.position + new Vector2(rect.width, spacePadding);
                 }
 
@@ -169,7 +169,8 @@ namespace XNodeEditor {
 
                 Color backgroundColor = NodeEditorWindow.current.graphEditor.GetPortBackgroundColor(port);
                 Color col = NodeEditorWindow.current.graphEditor.GetPortColor(port);
-                DrawPortHandle(rect, backgroundColor, col);
+                GUIStyle portStyle = NodeEditorWindow.current.graphEditor.GetPortStyle(port);
+                DrawPortHandle(rect, backgroundColor, col, portStyle.normal.background, portStyle.active.background);
 
                 // Register the handle position
                 Vector2 portPos = rect.center;
@@ -201,7 +202,7 @@ namespace XNodeEditor {
                 EditorGUILayout.LabelField(content, options);
 
                 Rect rect = GUILayoutUtility.GetLastRect();
-                float paddingLeft = NodeEditorResources.styles.inputPort.padding.left;
+                float paddingLeft = NodeEditorWindow.current.graphEditor.GetPortStyle(port).padding.left;
                 position = rect.position - new Vector2(16 + paddingLeft, 0);
             }
             // If property is an output, display a text label and put a port handle on the right side
@@ -210,7 +211,7 @@ namespace XNodeEditor {
                 EditorGUILayout.LabelField(content, NodeEditorResources.OutputPort, options);
 
                 Rect rect = GUILayoutUtility.GetLastRect();
-                rect.width += NodeEditorResources.styles.outputPort.padding.right;
+                rect.width += NodeEditorWindow.current.graphEditor.GetPortStyle(port).padding.right;
                 position = rect.position + new Vector2(rect.width, 0);
             }
             PortField(position, port);
@@ -224,7 +225,9 @@ namespace XNodeEditor {
 
             Color backgroundColor = NodeEditorWindow.current.graphEditor.GetPortBackgroundColor(port);
             Color col = NodeEditorWindow.current.graphEditor.GetPortColor(port);
-            DrawPortHandle(rect, backgroundColor, col);
+            GUIStyle portStyle = NodeEditorWindow.current.graphEditor.GetPortStyle(port);
+
+            DrawPortHandle(rect, backgroundColor, col, portStyle.normal.background, portStyle.active.background);
 
             // Register the handle position
             Vector2 portPos = rect.center;
@@ -239,12 +242,12 @@ namespace XNodeEditor {
             // If property is an input, display a regular property field and put a port handle on the left side
             if (port.direction == XNode.NodePort.IO.Input) {
                 rect = GUILayoutUtility.GetLastRect();
-                float paddingLeft = NodeEditorResources.styles.inputPort.padding.left;
+                float paddingLeft = NodeEditorWindow.current.graphEditor.GetPortStyle(port).padding.left;
                 rect.position = rect.position - new Vector2(16 + paddingLeft, 0);
                 // If property is an output, display a text label and put a port handle on the right side
             } else if (port.direction == XNode.NodePort.IO.Output) {
                 rect = GUILayoutUtility.GetLastRect();
-                rect.width += NodeEditorResources.styles.outputPort.padding.right;
+                rect.width += NodeEditorWindow.current.graphEditor.GetPortStyle(port).padding.right;
                 rect.position = rect.position + new Vector2(rect.width, 0);
             }
 
@@ -252,7 +255,9 @@ namespace XNodeEditor {
 
             Color backgroundColor = NodeEditorWindow.current.graphEditor.GetPortBackgroundColor(port);
             Color col = NodeEditorWindow.current.graphEditor.GetPortColor(port);
-            DrawPortHandle(rect, backgroundColor, col);
+            GUIStyle portStyle = NodeEditorWindow.current.graphEditor.GetPortStyle(port);
+
+            DrawPortHandle(rect, backgroundColor, col, portStyle.normal.background, portStyle.active.background);
 
             // Register the handle position
             Vector2 portPos = rect.center;
@@ -267,16 +272,25 @@ namespace XNodeEditor {
             GUILayout.EndHorizontal();
         }
 
-        public static void DrawPortHandle(Rect rect, Color backgroundColor, Color typeColor) {
+        /// <summary>
+        /// Draw the port
+        /// </summary>
+        /// <param name="rect">position and size</param>
+        /// <param name="backgroundColor">color for background texture of the port. Normaly used to Border</param>
+        /// <param name="typeColor"></param>
+        /// <param name="border">texture for border of the dot port</param>
+        /// <param name="dot">texture for the dot port</param>
+        public static void DrawPortHandle(Rect rect, Color backgroundColor, Color typeColor, Texture2D border, Texture2D dot) {
             Color col = GUI.color;
             GUI.color = backgroundColor;
-            GUI.DrawTexture(rect, NodeEditorResources.dotOuter);
+            GUI.DrawTexture(rect, border);
             GUI.color = typeColor;
-            GUI.DrawTexture(rect, NodeEditorResources.dot);
+            GUI.DrawTexture(rect, dot);
             GUI.color = col;
         }
 
-#region Obsolete
+
+        #region Obsolete
         [Obsolete("Use IsDynamicPortListPort instead")]
         public static bool IsInstancePortListPort(XNode.NodePort port) {
             return IsDynamicPortListPort(port);
@@ -286,7 +300,7 @@ namespace XNodeEditor {
         public static void InstancePortList(string fieldName, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple, XNode.Node.TypeConstraint typeConstraint = XNode.Node.TypeConstraint.None, Action<ReorderableList> onCreation = null) {
             DynamicPortList(fieldName, type, serializedObject, io, connectionType, typeConstraint, onCreation);
         }
-#endregion
+        #endregion
 
         /// <summary> Is this port part of a DynamicPortList? </summary>
         public static bool IsDynamicPortListPort(XNode.NodePort port) {
@@ -317,7 +331,7 @@ namespace XNodeEditor {
                         return new { index = i, port = x };
                     }
                 }
-                return new { index = -1, port = (XNode.NodePort) null };
+                return new { index = -1, port = (XNode.NodePort)null };
             }).Where(x => x.port != null);
             List<XNode.NodePort> dynamicPorts = indexedPorts.OrderBy(x => x.index).Select(x => x.port).ToList();
 
@@ -454,7 +468,7 @@ namespace XNodeEditor {
                                 return new { index = i, port = x };
                             }
                         }
-                        return new { index = -1, port = (XNode.NodePort) null };
+                        return new { index = -1, port = (XNode.NodePort)null };
                     }).Where(x => x.port != null);
                     dynamicPorts = indexedPorts.OrderBy(x => x.index).Select(x => x.port).ToList();
 

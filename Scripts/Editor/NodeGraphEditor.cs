@@ -4,12 +4,10 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace XNodeEditor
-{
+namespace XNodeEditor {
     /// <summary> Base class to derive custom Node Graph editors from. Use this to override how graphs are drawn in the editor. </summary>
     [CustomNodeGraphEditor(typeof(XNode.NodeGraph))]
-    public class NodeGraphEditor : XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph>
-    {
+    public class NodeGraphEditor : XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph> {
         [Obsolete("Use window.position instead")]
         public Rect position { get { return window.position; } set { window.position = value; } }
         /// <summary> Are we currently renaming a node? </summary>
@@ -26,25 +24,21 @@ namespace XNodeEditor
         /// <summary> Called when NodeEditorWindow loses focus </summary>
         public virtual void OnWindowFocusLost() { }
 
-        public virtual Texture2D GetGridTexture()
-        {
+        public virtual Texture2D GetGridTexture() {
             return NodeEditorPreferences.GetSettings().gridTexture;
         }
 
-        public virtual Texture2D GetSecondaryGridTexture()
-        {
+        public virtual Texture2D GetSecondaryGridTexture() {
             return NodeEditorPreferences.GetSettings().crossTexture;
         }
 
         /// <summary> Return default settings for this graph type. This is the settings the user will load if no previous settings have been saved. </summary>
-        public virtual NodeEditorPreferences.Settings GetDefaultPreferences()
-        {
+        public virtual NodeEditorPreferences.Settings GetDefaultPreferences() {
             return new NodeEditorPreferences.Settings();
         }
 
         /// <summary> Returns context node menu path. Null or empty strings for hidden nodes. </summary>
-        public virtual string GetNodeMenuName(Type type)
-        {
+        public virtual string GetNodeMenuName(Type type) {
             //Check if type has the CreateNodeMenuAttribute
             XNode.Node.CreateNodeMenuAttribute attrib;
             if (NodeEditorUtilities.GetAttrib(type, out attrib)) // Return custom path
@@ -54,8 +48,7 @@ namespace XNodeEditor
         }
 
         /// <summary> The order by which the menu items are displayed. </summary>
-        public virtual int GetNodeMenuOrder(Type type)
-        {
+        public virtual int GetNodeMenuOrder(Type type) {
             //Check if type has the CreateNodeMenuAttribute
             XNode.Node.CreateNodeMenuAttribute attrib;
             if (NodeEditorUtilities.GetAttrib(type, out attrib)) // Return custom path
@@ -65,25 +58,22 @@ namespace XNodeEditor
         }
 
         /// <summary>
-        /// Add items for the context menu when right-clicking this node. 
+        /// Add items for the context menu when right-clicking this node.
         /// Override to add custom menu items.
         /// </summary>
         /// <param name="menu"></param>
         /// <param name="compatibleType">Use it to filter only nodes with ports value type, compatible with this type</param>
         /// <param name="direction">Direction of the compatiblity</param>
-        public virtual void AddContextMenuItems(GenericMenu menu, Type compatibleType = null, XNode.NodePort.IO direction = XNode.NodePort.IO.Input)
-        {
+        public virtual void AddContextMenuItems(GenericMenu menu, Type compatibleType = null, XNode.NodePort.IO direction = XNode.NodePort.IO.Input) {
             Vector2 pos = NodeEditorWindow.current.WindowToGridPosition(Event.current.mousePosition);
 
             Type[] nodeTypes = NodeEditorReflection.nodeTypes.OrderBy(type => GetNodeMenuOrder(type)).ToArray();
 
-            if (compatibleType != null && NodeEditorPreferences.GetSettings().createFilter)
-            {
+            if (compatibleType != null && NodeEditorPreferences.GetSettings().createFilter) {
                 nodeTypes = NodeEditorUtilities.GetCompatibleNodesTypes(NodeEditorReflection.nodeTypes, compatibleType, direction).ToArray();
             }
 
-            for (int i = 0; i < nodeTypes.Length; i++)
-            {
+            for (int i = 0; i < nodeTypes.Length; i++) {
 
                 Type type = nodeTypes[i];
 
@@ -94,16 +84,14 @@ namespace XNodeEditor
                 // Check if user is allowed to add more of given node type
                 XNode.Node.DisallowMultipleNodesAttribute disallowAttrib;
                 bool disallowed = false;
-                if (NodeEditorUtilities.GetAttrib(type, out disallowAttrib))
-                {
+                if (NodeEditorUtilities.GetAttrib(type, out disallowAttrib)) {
                     int typeCount = target.nodes.Count(x => x.GetType() == type);
                     if (typeCount >= disallowAttrib.max) disallowed = true;
                 }
 
                 // Add node entry to context menu
                 if (disallowed) menu.AddItem(new GUIContent(path), false, null);
-                else menu.AddItem(new GUIContent(path), false, () =>
-                {
+                else menu.AddItem(new GUIContent(path), false, () => {
                     XNode.Node node = CreateNode(type, pos);
                     NodeEditorWindow.current.AutoConnect(node);
                 });
@@ -115,17 +103,14 @@ namespace XNodeEditor
             menu.AddCustomContextMenuItems(target);
         }
 
-
         /// <summary> Returned gradient is used to color noodles </summary>
         /// <param name="output"> The output this noodle comes from. Never null. </param>
         /// <param name="input"> The output this noodle comes from. Can be null if we are dragging the noodle. </param>
-        public virtual Gradient GetNoodleGradient(XNode.NodePort output, XNode.NodePort input)
-        {
+        public virtual Gradient GetNoodleGradient(XNode.NodePort output, XNode.NodePort input) {
             Gradient grad = new Gradient();
 
             // If dragging the noodle, draw solid, slightly transparent
-            if (input == null)
-            {
+            if (input == null) {
                 Color a = GetTypeColor(output.ValueType);
                 grad.SetKeys(
                     new GradientColorKey[] { new GradientColorKey(a, 0f) },
@@ -133,13 +118,11 @@ namespace XNodeEditor
                 );
             }
             // If normal, draw gradient fading from one input color to the other
-            else
-            {
+            else {
                 Color a = GetTypeColor(output.ValueType);
                 Color b = GetTypeColor(input.ValueType);
                 // If any port is hovered, tint white
-                if (window.hoveredPort == output || window.hoveredPort == input)
-                {
+                if (window.hoveredPort == output || window.hoveredPort == input) {
                     a = Color.Lerp(a, Color.white, 0.8f);
                     b = Color.Lerp(b, Color.white, 0.8f);
                 }
@@ -154,24 +137,20 @@ namespace XNodeEditor
         /// <summary> Returned float is used for noodle thickness </summary>
         /// <param name="output"> The output this noodle comes from. Never null. </param>
         /// <param name="input"> The output this noodle comes from. Can be null if we are dragging the noodle. </param>
-        public virtual float GetNoodleThickness(XNode.NodePort output, XNode.NodePort input)
-        {
+        public virtual float GetNoodleThickness(XNode.NodePort output, XNode.NodePort input) {
             return NodeEditorPreferences.GetSettings().noodleThickness;
         }
 
-        public virtual NoodlePath GetNoodlePath(XNode.NodePort output, XNode.NodePort input)
-        {
+        public virtual NoodlePath GetNoodlePath(XNode.NodePort output, XNode.NodePort input) {
             return NodeEditorPreferences.GetSettings().noodlePath;
         }
 
-        public virtual NoodleStroke GetNoodleStroke(XNode.NodePort output, XNode.NodePort input)
-        {
+        public virtual NoodleStroke GetNoodleStroke(XNode.NodePort output, XNode.NodePort input) {
             return NodeEditorPreferences.GetSettings().noodleStroke;
         }
 
         /// <summary> Returned color is used to color ports </summary>
-        public virtual Color GetPortColor(XNode.NodePort port)
-        {
+        public virtual Color GetPortColor(XNode.NodePort port) {
             return GetTypeColor(port.ValueType);
         }
 
@@ -185,8 +164,7 @@ namespace XNodeEditor
         /// </summary>
         /// <param name="port">the owner of the style</param>
         /// <returns></returns>
-        public virtual GUIStyle GetPortStyle(XNode.NodePort port)
-        {
+        public virtual GUIStyle GetPortStyle(XNode.NodePort port) {
             if (port.direction == XNode.NodePort.IO.Input)
                 return NodeEditorResources.styles.inputPort;
 
@@ -195,25 +173,21 @@ namespace XNodeEditor
 
         /// <summary> The returned color is used to color the background of the door.
         /// Usually used for outer edge effect </summary>
-        public virtual Color GetPortBackgroundColor(XNode.NodePort port)
-        {
+        public virtual Color GetPortBackgroundColor(XNode.NodePort port) {
             return Color.gray;
         }
 
         /// <summary> Returns generated color for a type. This color is editable in preferences </summary>
-        public virtual Color GetTypeColor(Type type)
-        {
+        public virtual Color GetTypeColor(Type type) {
             return NodeEditorPreferences.GetTypeColor(type);
         }
 
         /// <summary> Override to display custom tooltips </summary>
-        public virtual string GetPortTooltip(XNode.NodePort port)
-        {
+        public virtual string GetPortTooltip(XNode.NodePort port) {
             Type portType = port.ValueType;
             string tooltip = "";
             tooltip = portType.PrettyName();
-            if (port.IsOutput)
-            {
+            if (port.IsOutput) {
                 object obj = port.node.GetValue(port);
                 tooltip += " = " + (obj != null ? obj.ToString() : "null");
             }
@@ -221,14 +195,12 @@ namespace XNodeEditor
         }
 
         /// <summary> Deal with objects dropped into the graph through DragAndDrop </summary>
-        public virtual void OnDropObjects(UnityEngine.Object[] objects)
-        {
+        public virtual void OnDropObjects(UnityEngine.Object[] objects) {
             if (GetType() != typeof(NodeGraphEditor)) Debug.Log("No OnDropObjects override defined for " + GetType());
         }
 
         /// <summary> Create a node and save it in the graph asset </summary>
-        public virtual XNode.Node CreateNode(Type type, Vector2 position)
-        {
+        public virtual XNode.Node CreateNode(Type type, Vector2 position) {
             Undo.RecordObject(target, "Create Node");
             XNode.Node node = target.AddNode(type);
             Undo.RegisterCreatedObjectUndo(node, "Create Node");
@@ -241,8 +213,7 @@ namespace XNodeEditor
         }
 
         /// <summary> Creates a copy of the original node in the graph </summary>
-        public virtual XNode.Node CopyNode(XNode.Node original)
-        {
+        public virtual XNode.Node CopyNode(XNode.Node original) {
             Undo.RecordObject(target, "Duplicate Node");
             XNode.Node node = target.CopyNode(original);
             Undo.RegisterCreatedObjectUndo(node, "Duplicate Node");
@@ -253,16 +224,13 @@ namespace XNodeEditor
         }
 
         /// <summary> Return false for nodes that can't be removed </summary>
-        public virtual bool CanRemove(XNode.Node node)
-        {
+        public virtual bool CanRemove(XNode.Node node) {
             // Check graph attributes to see if this node is required
             Type graphType = target.GetType();
             XNode.NodeGraph.RequireNodeAttribute[] attribs = Array.ConvertAll(
                 graphType.GetCustomAttributes(typeof(XNode.NodeGraph.RequireNodeAttribute), true), x => x as XNode.NodeGraph.RequireNodeAttribute);
-            if (attribs.Any(x => x.Requires(node.GetType())))
-            {
-                if (target.nodes.Count(x => x.GetType() == node.GetType()) <= 1)
-                {
+            if (attribs.Any(x => x.Requires(node.GetType()))) {
+                if (target.nodes.Count(x => x.GetType() == node.GetType()) <= 1) {
                     return false;
                 }
             }
@@ -270,8 +238,7 @@ namespace XNodeEditor
         }
 
         /// <summary> Safely remove a node and all its connections. </summary>
-        public virtual void RemoveNode(XNode.Node node)
-        {
+        public virtual void RemoveNode(XNode.Node node) {
             if (!CanRemove(node)) return;
 
             // Remove the node
@@ -287,21 +254,18 @@ namespace XNodeEditor
 
         [AttributeUsage(AttributeTargets.Class)]
         public class CustomNodeGraphEditorAttribute : Attribute,
-        XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph>.INodeEditorAttrib
-        {
+        XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph>.INodeEditorAttrib {
             private Type inspectedType;
             public string editorPrefsKey;
             /// <summary> Tells a NodeGraphEditor which Graph type it is an editor for </summary>
             /// <param name="inspectedType">Type that this editor can edit</param>
             /// <param name="editorPrefsKey">Define unique key for unique layout settings instance</param>
-            public CustomNodeGraphEditorAttribute(Type inspectedType, string editorPrefsKey = "xNode.Settings")
-            {
+            public CustomNodeGraphEditorAttribute(Type inspectedType, string editorPrefsKey = "xNode.Settings") {
                 this.inspectedType = inspectedType;
                 this.editorPrefsKey = editorPrefsKey;
             }
 
-            public Type GetInspectedType()
-            {
+            public Type GetInspectedType() {
                 return inspectedType;
             }
         }

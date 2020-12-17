@@ -104,7 +104,7 @@ namespace XNodeEditor {
         public static SettingsProvider CreateXNodeSettingsProvider() {
             SettingsProvider provider = new SettingsProvider("Preferences/Node Editor", SettingsScope.User) {
                 guiHandler = (searchContext) => { XNodeEditor.NodeEditorPreferences.PreferencesGUI(); },
-                    keywords = new HashSet<string>(new [] { "xNode", "node", "editor", "graph", "connections", "noodles", "ports" })
+                keywords = new HashSet<string>(new [] { "xNode", "node", "editor", "graph", "connections", "noodles", "ports" })
             };
             return provider;
         }
@@ -166,9 +166,8 @@ namespace XNodeEditor {
             settings.noodleThickness = EditorGUILayout.FloatField(new GUIContent("Noodle thickness", "Noodle Thickness of the node connections"), settings.noodleThickness);
             settings.noodleStroke = (NoodleStroke) EditorGUILayout.EnumPopup("Noodle stroke", (Enum) settings.noodleStroke);
             settings.portTooltips = EditorGUILayout.Toggle("Port Tooltips", settings.portTooltips);
-            settings.dragToCreate = EditorGUILayout.Toggle(new GUIContent("Drag to Create", "Drag a port connection anywhere on the grid to create and connect a node"), settings.dragToCreate);        
+            settings.dragToCreate = EditorGUILayout.Toggle(new GUIContent("Drag to Create", "Drag a port connection anywhere on the grid to create and connect a node"), settings.dragToCreate);
             settings.createFilter = EditorGUILayout.Toggle(new GUIContent("Create Filter", "Only show nodes that are compatible with the selected port"), settings.createFilter);
-           
 
             //END
             if (GUI.changed) {

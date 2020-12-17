@@ -119,8 +119,7 @@ namespace XNodeEditor {
             }
             contextMenu.AddItem(new GUIContent("Clear Connections"), false, () => hoveredPort.ClearConnections());
             //Get compatible nodes with this port
-            if (NodeEditorPreferences.GetSettings().createFilter)
-            {
+            if (NodeEditorPreferences.GetSettings().createFilter) {
                 contextMenu.AddSeparator("");
 
                 if (hoveredPort.direction == XNode.NodePort.IO.Input)
@@ -573,8 +572,7 @@ namespace XNodeEditor {
             string tooltip = null;
             if (hoveredPort != null) {
                 tooltip = graphEditor.GetPortTooltip(hoveredPort);
-            }
-            else if (hoveredNode != null && IsHoveringNode && IsHoveringTitle(hoveredNode)) {
+            } else if (hoveredNode != null && IsHoveringNode && IsHoveringTitle(hoveredNode)) {
                 tooltip = NodeEditor.GetEditor(hoveredNode, this).GetHeaderTooltip();
             }
             if (string.IsNullOrEmpty(tooltip)) return;

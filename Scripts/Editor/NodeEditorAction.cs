@@ -305,7 +305,7 @@ namespace XNodeEditor {
                     isDoubleClick = false;
                     break;
                 case EventType.KeyDown:
-                    if (EditorGUIUtility.editingTextField) break;
+                    if (EditorGUIUtility.editingTextField || GUIUtility.keyboardControl != 0) break;
                     else if (e.keyCode == KeyCode.F) Home();
                     if (NodeEditorUtilities.IsMac()) {
                         if (e.keyCode == KeyCode.Return) RenameSelectedNode();

@@ -60,7 +60,7 @@ namespace XNodeEditor.Examples.LogicToy {
 		/// <summary> Controls graph type colors </summary>
 		public override Color GetTypeColor(System.Type type) {
 			if (type == typeof(bool)) return boolColor;
-			else return GetTypeColor(type);
+			else return base.GetTypeColor(type);
 		}
 
 		/// <summary> Returns the time at which an arbitrary object was last 'on' </summary>

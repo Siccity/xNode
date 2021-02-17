@@ -337,11 +337,15 @@ namespace XNodeEditor {
                         if (e.type == EventType.ExecuteCommand) DuplicateSelectedNodes();
                         e.Use();
                     } else if (e.commandName == "Copy") {
-                        if (e.type == EventType.ExecuteCommand) CopySelectedNodes();
-                        e.Use();
+                        if (!EditorGUIUtility.editingTextField) {
+                            if (e.type == EventType.ExecuteCommand) CopySelectedNodes();
+                            e.Use();
+                        }
                     } else if (e.commandName == "Paste") {
-                        if (e.type == EventType.ExecuteCommand) PasteNodes(WindowToGridPosition(lastMousePosition));
-                        e.Use();
+                        if (!EditorGUIUtility.editingTextField) {
+                            if (e.type == EventType.ExecuteCommand) PasteNodes(WindowToGridPosition(lastMousePosition));
+                            e.Use();
+                        }
                     }
                     Repaint();
                     break;

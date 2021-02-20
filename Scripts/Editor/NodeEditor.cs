@@ -49,7 +49,11 @@ namespace XNodeEditor {
             }
             catch ( ArgumentNullException )
             {
+#if ODIN_INSPECTOR_3
                 objectTree.EndDraw();
+#else
+                InspectorUtilities.EndDrawPropertyTree(objectTree);
+#endif
                 NodeEditor.DestroyEditor(this.target);
                 return;
             }

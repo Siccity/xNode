@@ -14,6 +14,7 @@ namespace XNode {
             if (!Initialized) BuildCache();
 
             Dictionary<string, NodePort> staticPorts = new Dictionary<string, NodePort>();
+            Dictionary<string, string> formerlySerializedAs = new Dictionary<string, string>();
             Dictionary<string, List<NodePort>> removedPorts = new Dictionary<string, List<NodePort>>();
             System.Type nodeType = node.GetType();
 
@@ -23,6 +24,11 @@ namespace XNode {
             if (portDataCache.TryGetValue(nodeType, out typePortCache)) {
                 for (int i = 0; i < typePortCache.Count; i++) {
                     staticPorts.Add(typePortCache[i].fieldName, portDataCache[nodeType][i]);
+                }
+                for (int i = 0; i < typePortCache.Count; i++) {
+                    var fieldInfo = nodeType.GetField(typePortCache[i].fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                    var attribute = fieldInfo.GetCustomAttributes(true).FirstOrDefault(x => x is UnityEngine.Serialization.FormerlySerializedAsAttribute) as UnityEngine.Serialization.FormerlySerializedAsAttribute;
+                    if (attribute != null) formerlySerializedAs.Add(attribute.oldName, typePortCache[i].fieldName);
                 }
             }
 
@@ -43,6 +49,11 @@ namespace XNode {
                 }
                 // If port doesn't exist anymore, remove it
                 else if (port.IsStatic) {
+                    //See if the field is tagged with FormerlySerializedAs, if so add the port with its new field name to removedPorts
+                    // so it can be reconnected in missing ports stage.
+                    string newName = null;
+                    if (formerlySerializedAs.TryGetValue(port.fieldName, out newName)) removedPorts.Add(newName, port.GetConnections());
+
                     port.ClearConnections();
                     ports.Remove(port.fieldName);
                 }

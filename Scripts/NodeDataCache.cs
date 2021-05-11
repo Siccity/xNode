@@ -7,6 +7,7 @@ namespace XNode {
     /// <summary> Precaches reflection data in editor so we won't have to do it runtime </summary>
     public static class NodeDataCache {
         private static PortDataCache portDataCache;
+        private static Dictionary<System.Type, Dictionary<string, string>> formerlySerializedAsCache;
         private static bool Initialized { get { return portDataCache != null; } }
 
         /// <summary> Update static ports and dynamic ports managed by DynamicPortLists to reflect class fields. </summary>
@@ -16,6 +17,9 @@ namespace XNode {
             Dictionary<string, NodePort> staticPorts = new Dictionary<string, NodePort>();
             Dictionary<string, List<NodePort>> removedPorts = new Dictionary<string, List<NodePort>>();
             System.Type nodeType = node.GetType();
+
+            Dictionary<string, string> formerlySerializedAs = null;
+            if (formerlySerializedAsCache != null) formerlySerializedAsCache.TryGetValue(nodeType, out formerlySerializedAs);
 
             List<NodePort> dynamicListPorts = new List<NodePort>();
 
@@ -43,6 +47,11 @@ namespace XNode {
                 }
                 // If port doesn't exist anymore, remove it
                 else if (port.IsStatic) {
+                    //See if the field is tagged with FormerlySerializedAs, if so add the port with its new field name to removedPorts
+                    // so it can be reconnected in missing ports stage.
+                    string newName = null;
+                    if (formerlySerializedAs != null && formerlySerializedAs.TryGetValue(port.fieldName, out newName)) removedPorts.Add(newName, port.GetConnections());
+
                     port.ClearConnections();
                     ports.Remove(port.fieldName);
                 }
@@ -177,6 +186,7 @@ namespace XNode {
                 object[] attribs = fieldInfo[i].GetCustomAttributes(true);
                 Node.InputAttribute inputAttrib = attribs.FirstOrDefault(x => x is Node.InputAttribute) as Node.InputAttribute;
                 Node.OutputAttribute outputAttrib = attribs.FirstOrDefault(x => x is Node.OutputAttribute) as Node.OutputAttribute;
+                UnityEngine.Serialization.FormerlySerializedAsAttribute formerlySerializedAsAttribute = attribs.FirstOrDefault(x => x is UnityEngine.Serialization.FormerlySerializedAsAttribute) as UnityEngine.Serialization.FormerlySerializedAsAttribute;
 
                 if (inputAttrib == null && outputAttrib == null) continue;
 
@@ -184,6 +194,14 @@ namespace XNode {
                 else {
                     if (!portDataCache.ContainsKey(nodeType)) portDataCache.Add(nodeType, new List<NodePort>());
                     portDataCache[nodeType].Add(new NodePort(fieldInfo[i]));
+                }
+
+                if(formerlySerializedAsAttribute != null) {
+                    if (formerlySerializedAsCache == null) formerlySerializedAsCache = new Dictionary<System.Type, Dictionary<string, string>>();
+                    if (!formerlySerializedAsCache.ContainsKey(nodeType)) formerlySerializedAsCache.Add(nodeType, new Dictionary<string, string>());
+                    
+                    if (formerlySerializedAsCache[nodeType].ContainsKey(formerlySerializedAsAttribute.oldName)) Debug.LogError("Another FormerlySerializedAs with value '" + formerlySerializedAsAttribute.oldName + "' already exist on this node.");
+                    else formerlySerializedAsCache[nodeType].Add(formerlySerializedAsAttribute.oldName, fieldInfo[i].Name);
                 }
             }
         }

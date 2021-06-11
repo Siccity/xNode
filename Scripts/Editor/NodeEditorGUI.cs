@@ -115,7 +115,7 @@ namespace XNodeEditor {
             foreach (var port in hoveredPort.GetConnections()) {
                 var name = port.node.name;
                 var index = hoveredPort.GetConnectionIndex(port);
-                contextMenu.AddItem(new GUIContent($"Disconnect({name})"), false, () => hoveredPort.Disconnect(index));
+                contextMenu.AddItem(new GUIContent(string.Format("Disconnect({0})", name)), false, () => hoveredPort.Disconnect(index));
             }
             contextMenu.AddItem(new GUIContent("Clear Connections"), false, () => hoveredPort.ClearConnections());
             //Get compatible nodes with this port

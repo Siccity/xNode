@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using XNode;
 
 namespace XNodeEditor {
     /// <summary> Base class to derive custom Node Graph editors from. Use this to override how graphs are drawn in the editor. </summary>
@@ -184,11 +186,29 @@ namespace XNodeEditor {
 
         /// <summary> Override to display custom tooltips </summary>
         public virtual string GetPortTooltip(XNode.NodePort port) {
-            Type portType = port.ValueType;
-            string tooltip = "";
-            tooltip = portType.PrettyName();
-            if (port.IsOutput) {
-                object obj = port.node.GetValue(port);
+            // Allow tooltips to be overridden or to have their values hidden based on attribute usage
+            // First, a port managed by a DynamicPortList will have a fieldName of "realName X", so we won't find it directly.
+            FieldInfo portFieldInfo = null;
+            string[] fieldNameParts = port.fieldName.Split(' ');
+            if (port.IsDynamic && fieldNameParts.Length == 2) {
+                portFieldInfo = port.node.GetType().GetField(fieldNameParts[0]);
+            }
+            // If a port isn't dynamic, doesn't match the format, or we didn't find its field, try getting it directly
+            if (portFieldInfo == null) {
+                portFieldInfo = port.node.GetType().GetField(port.fieldName);
+            }
+            
+            // If the fieldInfo is still null, abort mission; otherwise, look for our attribute.
+            OverrideTooltipAttribute attr = null;
+            if (portFieldInfo != null) {
+                attr = ((OverrideTooltipAttribute[])portFieldInfo
+                    .GetCustomAttributes(typeof(OverrideTooltipAttribute), false)).SingleOrDefault();
+            }
+            string tooltip = attr != null && attr.overrideTooltip ? attr.tooltip : port.ValueType.PrettyName();
+            bool hideValue = attr != null && attr.hideValue;
+            // ReSharper disable once InvertIf
+            if (!hideValue && port.IsOutput) {
+                var obj = port.node.GetValue(port);
                 tooltip += " = " + (obj != null ? obj.ToString() : "null");
             }
             return tooltip;

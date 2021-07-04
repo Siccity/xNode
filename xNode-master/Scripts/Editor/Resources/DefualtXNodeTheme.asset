@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64467354e9a472d49b23559c7a85c9fb, type: 3}
+  m_Name: DefualtXNodeTheme
+  m_EditorClassIdentifier: 
+  tint: {r: 0.3529412, g: 0.3803922, b: 0.41176474, a: 255}
+  selection: {r: 255, g: 255, b: 255, a: 255}
+  noodlePath: 0
+  noodleThickness: 2
+  noodleStroke: 0
+  makeTheDotOuterInfrontOfFill: 0
+  gridLinesColor: {r: 0.23137257, g: 0.23137257, b: 0.23137257, a: 255}
+  backgroundColor: {r: 0.18823531, g: 0.18823531, b: 0.18823531, a: 255}
+  xNodeDot: {fileID: 2800000, guid: 75a1fe0b102226a418486ed823c9a7fb, type: 3}
+  xNodeDotOuter: {fileID: 2800000, guid: 434ca8b4bdfa5574abb0002bbc9b65ad, type: 3}
+  xNodeNode: {fileID: 2800000, guid: 2fea1dcb24935ef4ca514d534eb6aa3d, type: 3}
+  xNodeNodeHighlight: {fileID: 2800000, guid: 2ab2b92d7e1771b47bba0a46a6f0f6d5, type: 3}
+  headerFont: {fileID: 0}
+  headerFontStyle: 1
+  headerColor: {r: 1, g: 1, b: 1, a: 1}
+  headerFontSize: 13
+  padding:
+    m_Left: 16
+    m_Right: 16
+    m_Top: 4
+    m_Bottom: 16

@@ -10,6 +10,15 @@ namespace XNode {
         /// <summary> All nodes in the graph. <para/>
         /// See: <see cref="AddNode{T}"/> </summary>
         [SerializeField] public List<Node> nodes = new List<Node>();
+        
+        private void Awake() {
+            List<Node> newNodes = new List<Node>(nodes.Count);
+			foreach (var node in nodes) {
+                newNodes.Add(Instantiate(node));
+			}
+            nodes.Clear();
+            nodes = newNodes;
+        }
 
         /// <summary> Add a node to the graph by type (convenience method - will call the System.Type version) </summary>
         public T AddNode<T>() where T : Node {
@@ -47,7 +56,8 @@ namespace XNode {
         public virtual void Clear() {
             if (Application.isPlaying) {
                 for (int i = 0; i < nodes.Count; i++) {
-                    Destroy(nodes[i]);
+                    if(nodes[i])     //Graph destroy nodes only here, but this check prevent nullref when node was destroyed outside
+                        Destroy(nodes[i]);
                 }
             }
             nodes.Clear();

@@ -16,6 +16,8 @@ namespace XNodeEditor {
         [SerializeField] private NodePortReference[] _references = new NodePortReference[0];
         [SerializeField] private Rect[] _rects = new Rect[0];
 
+        private static bool drewAllNodesOnLoad = false;
+
         private Func<bool> isDocked {
             get {
                 if (_isDocked == null) _isDocked = this.GetIsDockedDelegate();
@@ -198,6 +200,8 @@ namespace XNodeEditor {
         /// <summary>Open the provided graph in the NodeEditor</summary>
         public static NodeEditorWindow Open(XNode.NodeGraph graph) {
             if (!graph) return null;
+
+            drewAllNodesOnLoad = false;
 
             NodeEditorWindow w = GetWindow(typeof(NodeEditorWindow), false, "xNode", true) as NodeEditorWindow;
             w.wantsMouseMove = true;

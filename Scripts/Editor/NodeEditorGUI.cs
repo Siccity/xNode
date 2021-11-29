@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -439,7 +439,8 @@ namespace XNodeEditor {
                 // Culling
                 if (e.type == EventType.Layout) {
                     // Cull unselected nodes outside view
-                    if (!Selection.Contains(node) && ShouldBeCulled(node)) {
+                    if (drewAllNodesOnLoad && !Selection.Contains(node) && ShouldBeCulled(node))
+                    {
                         culledNodes.Add(node);
                         continue;
                     }
@@ -551,6 +552,8 @@ namespace XNodeEditor {
             //This is done through reflection because OnValidate is only relevant in editor,
             //and thus, the code should not be included in build.
             if (onValidate != null && EditorGUI.EndChangeCheck()) onValidate.Invoke(Selection.activeObject, null);
+
+            drewAllNodesOnLoad = true;
         }
 
         private bool ShouldBeCulled(XNode.Node node) {

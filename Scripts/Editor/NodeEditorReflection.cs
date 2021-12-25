@@ -5,6 +5,9 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+#if USE_ADVANCED_GENERIC_MENU
+using GenericMenu = XNodeEditor.AdvancedGenericMenu;
+#endif
 
 namespace XNodeEditor {
     /// <summary> Contains reflection-related extensions built for xNode </summary>

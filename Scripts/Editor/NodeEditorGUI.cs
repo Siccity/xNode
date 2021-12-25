@@ -4,6 +4,9 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using XNodeEditor.Internal;
+#if USE_ADVANCED_GENERIC_MENU
+using GenericMenu = XNodeEditor.AdvancedGenericMenu;
+#endif
 
 namespace XNodeEditor {
     /// <summary> Contains GUI methods </summary>

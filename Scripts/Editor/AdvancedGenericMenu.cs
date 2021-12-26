@@ -8,6 +8,9 @@ namespace XNodeEditor
 {
     public class AdvancedGenericMenu : AdvancedDropdown
     {
+        public static float? DefaultMinWidth = 200f;
+        public static float? DefaultMaxWidth = 300f;
+
         private class AdvancedGenericMenuItem : AdvancedDropdownItem
         {
             private MenuFunction func;
@@ -67,13 +70,13 @@ namespace XNodeEditor
             {
                 item = items.FirstOrDefault( x => x != null && x.name == paths[0] );
                 if ( item == null )
-                    items.Add( item = new AdvancedGenericMenuItem( name ) );
+                    items.Add( item = new AdvancedGenericMenuItem( paths[0] ) );
             }
             else
             {
                 item = currentRoot.children.OfType<AdvancedGenericMenuItem>().FirstOrDefault( x => x.name == paths[0] );
                 if ( item == null )
-                    currentRoot.AddChild( item = new AdvancedGenericMenuItem( name ) );
+                    currentRoot.AddChild( item = new AdvancedGenericMenuItem( paths[0] ) );
             }
 
             if ( paths.Length > 1 )
@@ -179,6 +182,8 @@ namespace XNodeEditor
         //     The position at which to show the menu.
         public void DropDown( Rect position )
         {
+            position.width = Mathf.Clamp( position.width, DefaultMinWidth.HasValue ? DefaultMinWidth.Value : 1f, DefaultMaxWidth.HasValue ? DefaultMaxWidth.Value : Screen.width );
+
             Show( position );
         }
 

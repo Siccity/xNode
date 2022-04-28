@@ -296,12 +296,13 @@ namespace XNode {
                 for (int i = 0; i < port.connections.Count; i++) {
                     if (port.connections[i].Port == this) {
                         port.connections.RemoveAt(i);
+                        // Trigger OnRemoveConnection from this side port
+                        port.node.OnRemoveConnection(port);
                     }
                 }
             }
             // Trigger OnRemoveConnection
             node.OnRemoveConnection(this);
-            if (port != null && port.IsConnectedTo(this)) port.node.OnRemoveConnection(port);
         }
 
         /// <summary> Disconnect this port from another port </summary>

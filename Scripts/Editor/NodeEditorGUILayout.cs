@@ -394,6 +394,7 @@ namespace XNodeEditor {
                 };
             list.onReorderCallback =
                 (ReorderableList rl) => {
+                    serializedObject.Update();
                     bool hasRect = false;
                     bool hasNewRect = false;
                     Rect rect = Rect.zero;

@@ -24,7 +24,7 @@ namespace XNodeEditor.Internal {
 		private PropertyTree _objectTree;
 		public PropertyTree objectTree {
 			get {
-				if (this._objectTree == null) {
+                if (this._objectTree == null){
 					try {
 						bool wasInEditor = NodeEditor.inNodeEditor;
 						NodeEditor.inNodeEditor = true;
@@ -57,6 +57,16 @@ namespace XNodeEditor.Internal {
 			if (editor.serializedObject == null) editor.serializedObject = new SerializedObject(target);
 			return editor;
 		}
+
+        public static void DestroyEditor( K target )
+        {
+            if ( target == null ) return;
+            T editor;
+            if ( editors.TryGetValue( target, out editor ) )
+            {
+                editors.Remove( target );
+            }
+        }
 
 		private static Type GetEditorType(Type type) {
 			if (type == null) return null;

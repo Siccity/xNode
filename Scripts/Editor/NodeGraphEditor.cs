@@ -1,8 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+#if UNITY_2019_1_OR_NEWER && USE_ADVANCED_GENERIC_MENU
+using GenericMenu = XNodeEditor.AdvancedGenericMenu;
+#endif
 
 namespace XNodeEditor {
     /// <summary> Base class to derive custom Node Graph editors from. Use this to override how graphs are drawn in the editor. </summary>
@@ -17,7 +19,7 @@ namespace XNodeEditor {
 
         /// <summary> Called when opened by NodeEditorWindow </summary>
         public virtual void OnOpen() { }
-        
+
         /// <summary> Called when NodeEditorWindow gains focus </summary>
         public virtual void OnWindowFocus() { }
 
@@ -57,10 +59,24 @@ namespace XNodeEditor {
                 return 0;
         }
 
-        /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>
-        public virtual void AddContextMenuItems(GenericMenu menu) {
+        /// <summary>
+        /// Add items for the context menu when right-clicking this node.
+        /// Override to add custom menu items.
+        /// </summary>
+        /// <param name="menu"></param>
+        /// <param name="compatibleType">Use it to filter only nodes with ports value type, compatible with this type</param>
+        /// <param name="direction">Direction of the compatiblity</param>
+        public virtual void AddContextMenuItems(GenericMenu menu, Type compatibleType = null, XNode.NodePort.IO direction = XNode.NodePort.IO.Input) {
             Vector2 pos = NodeEditorWindow.current.WindowToGridPosition(Event.current.mousePosition);
-            var nodeTypes = NodeEditorReflection.nodeTypes.OrderBy(type => GetNodeMenuOrder(type)).ToArray();
+
+            Type[] nodeTypes;
+
+            if (compatibleType != null && NodeEditorPreferences.GetSettings().createFilter) {
+                nodeTypes = NodeEditorUtilities.GetCompatibleNodesTypes(NodeEditorReflection.nodeTypes, compatibleType, direction).OrderBy(GetNodeMenuOrder).ToArray();
+            } else {
+                nodeTypes = NodeEditorReflection.nodeTypes.OrderBy(GetNodeMenuOrder).ToArray();
+            }
+
             for (int i = 0; i < nodeTypes.Length; i++) {
                 Type type = nodeTypes[i];
 
@@ -125,7 +141,7 @@ namespace XNodeEditor {
         /// <param name="output"> The output this noodle comes from. Never null. </param>
         /// <param name="input"> The output this noodle comes from. Can be null if we are dragging the noodle. </param>
         public virtual float GetNoodleThickness(XNode.NodePort output, XNode.NodePort input) {
-            return 5f;
+            return NodeEditorPreferences.GetSettings().noodleThickness;
         }
 
         public virtual NoodlePath GetNoodlePath(XNode.NodePort output, XNode.NodePort input) {
@@ -139,6 +155,29 @@ namespace XNodeEditor {
         /// <summary> Returned color is used to color ports </summary>
         public virtual Color GetPortColor(XNode.NodePort port) {
             return GetTypeColor(port.ValueType);
+        }
+
+        /// <summary>
+        /// The returned Style is used to configure the paddings and icon texture of the ports.
+        /// Use these properties to customize your port style.
+        ///
+        /// The properties used is:
+        /// <see cref="GUIStyle.padding"/>[Left and Right], <see cref="GUIStyle.normal"/> [Background] = border texture,
+        /// and <seealso cref="GUIStyle.active"/> [Background] = dot texture;
+        /// </summary>
+        /// <param name="port">the owner of the style</param>
+        /// <returns></returns>
+        public virtual GUIStyle GetPortStyle(XNode.NodePort port) {
+            if (port.direction == XNode.NodePort.IO.Input)
+                return NodeEditorResources.styles.inputPort;
+
+            return NodeEditorResources.styles.outputPort;
+        }
+
+        /// <summary> The returned color is used to color the background of the door.
+        /// Usually used for outer edge effect </summary>
+        public virtual Color GetPortBackgroundColor(XNode.NodePort port) {
+            return Color.gray;
         }
 
         /// <summary> Returns generated color for a type. This color is editable in preferences </summary>

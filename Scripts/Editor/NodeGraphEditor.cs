@@ -221,7 +221,7 @@ namespace XNodeEditor {
             XNode.Node node = target.CopyNode(original);
             Undo.RegisterCreatedObjectUndo(node, "Duplicate Node");
             node.name = original.name;
-            AssetDatabase.AddObjectToAsset(node, target);
+            if (!string.IsNullOrEmpty(AssetDatabase.GetAssetPath(target))) AssetDatabase.AddObjectToAsset(node, target);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             return node;
         }

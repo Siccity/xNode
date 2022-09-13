@@ -3,6 +3,7 @@ using System.Reflection;
 
 public static class TypeExtensions
 {
+    /// <summary> Determines whether an instance of a specified type can be assigned to a variable of the current type. </summary>
     public static bool IsCastableFrom(this Type to, Type from)
     {
         if ( to.IsAssignableFrom ( from ) )

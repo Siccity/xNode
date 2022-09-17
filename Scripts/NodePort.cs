@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -147,9 +147,18 @@ namespace XNode {
 
         /// <summary> Return the output value of the first connected port. Returns null if none found or invalid. </summary>
         /// <returns> <see cref="NodePort.GetOutputValue"/> </returns>
-        public T GetInputValue<T>() {
-            object obj = GetInputValue();
-            return obj is T ? (T) obj : default(T);
+        public T GetInputValue<T> ()
+        {
+            object obj = GetInputValue ();
+
+
+            if ( obj.GetType () == typeof ( T ) )
+                return (T) obj;
+
+            if ( typeof ( T ).IsCastableFrom ( obj.GetType () ) && obj.TryCast<T> ( out object t ) )
+                return (T) t;
+
+            return default;
         }
 
         /// <summary> Return the output values of all connected ports. </summary>

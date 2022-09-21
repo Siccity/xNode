@@ -52,13 +52,7 @@ namespace XNode {
             /// <summary> Allow connections where output value type is assignable from input value type (eg. Object --> ScriptableObject)</summary>
             InheritedInverse,
             /// <summary> Allow connections where output value type is assignable from input value or input value type is assignable from output value type</summary>
-            InheritedAny,
-            /// <summary> Allow connections where input value type is castable from output value type. </summary>
-            Castable,
-            /// <summary> Allow connections where output value type is castable from input value type. </summary>
-            CastableInverse,
-            /// <summary> Allow connections where input value type is castable from output value type or output value type is castable from input value type. </summary>
-            CastableAny
+            InheritedAny
         }
 
 #region Obsolete

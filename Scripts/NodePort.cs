@@ -279,9 +279,6 @@ namespace XNode {
             if (output.typeConstraint == XNode.Node.TypeConstraint.Strict && input.ValueType != output.ValueType) return false;
             if (output.typeConstraint == XNode.Node.TypeConstraint.InheritedInverse && !output.ValueType.IsAssignableFrom(input.ValueType)) return false;
             if (output.typeConstraint == XNode.Node.TypeConstraint.InheritedAny && !input.ValueType.IsAssignableFrom(output.ValueType) && !output.ValueType.IsAssignableFrom(input.ValueType)) return false;
-            if (output.typeConstraint == XNode.Node.TypeConstraint.Castable && !input.ValueType.IsCastableFrom(output.ValueType)) return false;
-            if (output.typeConstraint == XNode.Node.TypeConstraint.CastableInverse && !output.ValueType.IsCastableFrom(input.ValueType)) return false;
-            if (output.typeConstraint == XNode.Node.TypeConstraint.CastableAny && !input.ValueType.IsCastableFrom(output.ValueType) && !output.ValueType.IsCastableFrom(input.ValueType)) return false;
             // Success
             return true;
         }

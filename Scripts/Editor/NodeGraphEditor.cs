@@ -60,6 +60,13 @@ namespace XNodeEditor {
         }
 
         /// <summary>
+        /// Called before connecting two ports in the graph view to see if the output port is compatible with the input port
+        /// </summary>
+        public virtual bool CanConnect(XNode.NodePort output, XNode.NodePort input) {
+            return output.CanConnectTo(input);
+        }
+
+        /// <summary>
         /// Add items for the context menu when right-clicking this node.
         /// Override to add custom menu items.
         /// </summary>

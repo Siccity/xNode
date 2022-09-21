@@ -70,20 +70,23 @@ namespace XNode {
                         for (int i = 0; i < reconnectConnections.Count; i++) {
                             NodePort connection = reconnectConnections[i];
                             if (connection == null) continue;
+                            // CAVEAT: Ports connected under special conditions defined in graphEditor.CanConnect overrides will not auto-connect.
+                            // To fix this, this code would need to be moved to an editor script and call graphEditor.CanConnect instead of port.CanConnectTo.
+                            // This is only a problem in the rare edge case where user is using non-standard CanConnect overrides and changes port type of an already connected port
                             if (port.CanConnectTo(connection)) port.Connect(connection);
                         }
                     }
                     ports.Add(staticPort.fieldName, port);
                 }
             }
-            
+
             // Finally, make sure dynamic list port settings correspond to the settings of their "backing port"
             foreach (NodePort listPort in dynamicListPorts) {
                 // At this point we know that ports here are dynamic list ports
                 // which have passed name/"backing port" checks, ergo we can proceed more safely.
                 string backingPortName = listPort.fieldName.Split(' ')[0];
                 NodePort backingPort = staticPorts[backingPortName];
-                
+
                 // Update port constraints. Creating a new port instead will break the editor, mandating the need for setters.
                 listPort.ValueType = GetBackingValueType(backingPort.ValueType);
                 listPort.direction = backingPort.direction;
@@ -95,7 +98,7 @@ namespace XNode {
         /// <summary>
         /// Extracts the underlying types from arrays and lists, the only collections for dynamic port lists
         /// currently supported. If the given type is not applicable (i.e. if the dynamic list port was not
-        /// defined as an array or a list), returns the given type itself. 
+        /// defined as an array or a list), returns the given type itself.
         /// </summary>
         private static System.Type GetBackingValueType(System.Type portValType) {
             if (portValType.HasElementType) {
@@ -114,10 +117,10 @@ namespace XNode {
             // Thus, we need to check for attributes... (but at least we don't need to look at all fields this time)
             string[] fieldNameParts = port.fieldName.Split(' ');
             if (fieldNameParts.Length != 2) return false;
-            
+
             FieldInfo backingPortInfo = port.node.GetType().GetField(fieldNameParts[0]);
             if (backingPortInfo == null) return false;
-            
+
             object[] attribs = backingPortInfo.GetCustomAttributes(true);
             return attribs.Any(x => {
                 Node.InputAttribute inputAttribute = x as Node.InputAttribute;
@@ -126,7 +129,7 @@ namespace XNode {
                        outputAttribute != null && outputAttribute.dynamicPortList;
             });
         }
-        
+
         /// <summary> Cache node types </summary>
         private static void BuildCache() {
             portDataCache = new PortDataCache();
@@ -196,10 +199,10 @@ namespace XNode {
                     portDataCache[nodeType].Add(new NodePort(fieldInfo[i]));
                 }
 
-                if(formerlySerializedAsAttribute != null) {
+                if (formerlySerializedAsAttribute != null) {
                     if (formerlySerializedAsCache == null) formerlySerializedAsCache = new Dictionary<System.Type, Dictionary<string, string>>();
                     if (!formerlySerializedAsCache.ContainsKey(nodeType)) formerlySerializedAsCache.Add(nodeType, new Dictionary<string, string>());
-                    
+
                     if (formerlySerializedAsCache[nodeType].ContainsKey(formerlySerializedAsAttribute.oldName)) Debug.LogError("Another FormerlySerializedAs with value '" + formerlySerializedAsAttribute.oldName + "' already exist on this node.");
                     else formerlySerializedAsCache[nodeType].Add(formerlySerializedAsAttribute.oldName, fieldInfo[i].Name);
                 }

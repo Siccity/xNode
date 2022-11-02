@@ -46,7 +46,7 @@ namespace XNode {
             // Cleanup port dict - Remove nonexisting static ports - update static port types
             // AND update dynamic ports (albeit only those in lists) too, in order to enforce proper serialisation.
             // Loop through current node ports
-            foreach (NodePort port in ports.Values.ToList()) {
+            foreach (NodePort port in ports.Values.ToArray()) {
                 // If port still exists, check it it has been changed
                 NodePort staticPort;
                 if (staticPorts.TryGetValue(port.fieldName, out staticPort)) {

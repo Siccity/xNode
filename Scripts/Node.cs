@@ -396,6 +396,8 @@ namespace XNode {
             public void OnBeforeSerialize() {
                 keys.Clear();
                 values.Clear();
+                keys.Capacity = this.Count;
+                values.Capacity = this.Count;
                 foreach (KeyValuePair<string, NodePort> pair in this) {
                     keys.Add(pair.Key);
                     values.Add(pair.Value);
@@ -404,6 +406,7 @@ namespace XNode {
 
             public void OnAfterDeserialize() {
                 this.Clear();
+                this.EnsureCapacity(keys.Count);
 
                 if (keys.Count != values.Count)
                     throw new System.Exception("there are " + keys.Count + " keys and " + values.Count + " values after deserialization. Make sure that both key and value types are serializable.");

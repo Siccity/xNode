@@ -9,6 +9,7 @@ namespace XNode {
         private static PortDataCache portDataCache;
         private static Dictionary<System.Type, Dictionary<string, string>> formerlySerializedAsCache;
         private static Dictionary<System.Type, string> typeQualifiedNameCache;
+        private static Dictionary<string, NodePort> staticPorts;
         private static bool Initialized { get { return portDataCache != null; } }
 
         public static string GetTypeQualifiedName(System.Type type) {
@@ -26,7 +27,6 @@ namespace XNode {
         public static void UpdatePorts(Node node, Dictionary<string, NodePort> ports) {
             if (!Initialized) BuildCache();
 
-            Dictionary<string, NodePort> staticPorts = new Dictionary<string, NodePort>();
             Dictionary<string, List<NodePort>> removedPorts = new Dictionary<string, List<NodePort>>();
             System.Type nodeType = node.GetType();
 
@@ -37,6 +37,7 @@ namespace XNode {
 
             List<NodePort> typePortCache;
             if (portDataCache.TryGetValue(nodeType, out typePortCache)) {
+                staticPorts.EnsureCapacity(typePortCache.Count);
                 for (int i = 0; i < typePortCache.Count; i++) {
                     staticPorts.Add(typePortCache[i].fieldName, portDataCache[nodeType][i]);
                 }
@@ -105,6 +106,8 @@ namespace XNode {
                 listPort.connectionType = backingPort.connectionType;
                 listPort.typeConstraint = backingPort.typeConstraint;
             }
+
+            staticPorts.Clear();
         }
 
         /// <summary>
@@ -145,6 +148,7 @@ namespace XNode {
         /// <summary> Cache node types </summary>
         private static void BuildCache() {
             portDataCache = new PortDataCache();
+            staticPorts = new Dictionary<string, NodePort>();
             System.Type baseType = typeof(Node);
             List<System.Type> nodeTypes = new List<System.Type>();
             System.Reflection.Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();

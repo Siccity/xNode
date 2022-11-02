@@ -39,7 +39,7 @@ namespace XNode {
             if (portDataCache.TryGetValue(nodeType, out typePortCache)) {
                 staticPorts.EnsureCapacity(typePortCache.Count);
                 for (int i = 0; i < typePortCache.Count; i++) {
-                    staticPorts.Add(typePortCache[i].fieldName, portDataCache[nodeType][i]);
+                    staticPorts.Add(typePortCache[i].fieldName, typePortCache[i]);
                 }
             }
 

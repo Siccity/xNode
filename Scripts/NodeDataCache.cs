@@ -8,7 +8,19 @@ namespace XNode {
     public static class NodeDataCache {
         private static PortDataCache portDataCache;
         private static Dictionary<System.Type, Dictionary<string, string>> formerlySerializedAsCache;
+        private static Dictionary<System.Type, string> typeQualifiedNameCache;
         private static bool Initialized { get { return portDataCache != null; } }
+
+        public static string GetTypeQualifiedName(System.Type type) {
+            if(typeQualifiedNameCache == null) typeQualifiedNameCache = new Dictionary<System.Type, string>();
+            
+            string name;
+            if (!typeQualifiedNameCache.TryGetValue(type, out name)) {
+                name = type.AssemblyQualifiedName;
+                typeQualifiedNameCache.Add(type, name);
+            }
+            return name;
+        }
 
         /// <summary> Update static ports and dynamic ports managed by DynamicPortLists to reflect class fields. </summary>
         public static void UpdatePorts(Node node, Dictionary<string, NodePort> ports) {

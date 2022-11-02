@@ -48,7 +48,7 @@ namespace XNode {
             }
             set {
                 valueType = value;
-                if (value != null) _typeQualifiedName = value.AssemblyQualifiedName;
+                if (value != null) _typeQualifiedName = NodeDataCache.GetTypeQualifiedName(value);
             }
         }
         private Type valueType;

@@ -97,7 +97,7 @@ namespace XNode {
             foreach (NodePort listPort in dynamicListPorts) {
                 // At this point we know that ports here are dynamic list ports
                 // which have passed name/"backing port" checks, ergo we can proceed more safely.
-                string backingPortName = listPort.fieldName.Split(' ')[0];
+                string backingPortName = listPort.fieldName.Substring(0, listPort.fieldName.IndexOf(' '));
                 NodePort backingPort = staticPorts[backingPortName];
 
                 // Update port constraints. Creating a new port instead will break the editor, mandating the need for setters.

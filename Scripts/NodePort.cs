@@ -47,6 +47,7 @@ namespace XNode {
                 return valueType;
             }
             set {
+                if (valueType == value) return;
                 valueType = value;
                 if (value != null) _typeQualifiedName = NodeDataCache.GetTypeQualifiedName(value);
             }

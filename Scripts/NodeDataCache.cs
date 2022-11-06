@@ -163,6 +163,7 @@ namespace XNode {
                     // The following assemblies, and sub-assemblies (eg. UnityEngine.UI) are skipped
                     case "UnityEditor":
                     case "UnityEngine":
+                    case "Unity":
                     case "System":
                     case "mscorlib":
                     case "Microsoft":

@@ -47,7 +47,7 @@ namespace XNode {
         public virtual void Clear() {
             if (Application.isPlaying) {
                 for (int i = 0; i < nodes.Count; i++) {
-                    Destroy(nodes[i]);
+                    if (nodes[i] != null) Destroy(nodes[i]);
                 }
             }
             nodes.Clear();

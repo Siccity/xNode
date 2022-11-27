@@ -37,7 +37,9 @@ namespace XNode {
 
             List<NodePort> typePortCache;
             if (portDataCache.TryGetValue(nodeType, out typePortCache)) {
+#if UNITY_2021_3_OR_NEWER
                 staticPorts.EnsureCapacity(typePortCache.Count);
+#endif
                 for (int i = 0; i < typePortCache.Count; i++) {
                     staticPorts.Add(typePortCache[i].fieldName, typePortCache[i]);
                 }

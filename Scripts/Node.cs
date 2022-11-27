@@ -406,7 +406,9 @@ namespace XNode {
 
             public void OnAfterDeserialize() {
                 this.Clear();
+#if UNITY_2021_3_OR_NEWER                
                 this.EnsureCapacity(keys.Count);
+#endif
 
                 if (keys.Count != values.Count)
                     throw new System.Exception("there are " + keys.Count + " keys and " + values.Count + " values after deserialization. Make sure that both key and value types are serializable.");

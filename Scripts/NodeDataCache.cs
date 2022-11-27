@@ -9,7 +9,6 @@ namespace XNode {
         private static PortDataCache portDataCache;
         private static Dictionary<System.Type, Dictionary<string, string>> formerlySerializedAsCache;
         private static Dictionary<System.Type, string> typeQualifiedNameCache;
-        private static Dictionary<string, NodePort> staticPorts;
         private static bool Initialized { get { return portDataCache != null; } }
 
         public static string GetTypeQualifiedName(System.Type type) {
@@ -35,15 +34,10 @@ namespace XNode {
 
             List<NodePort> dynamicListPorts = new List<NodePort>();
 
-            List<NodePort> typePortCache;
-            if (portDataCache.TryGetValue(nodeType, out typePortCache)) {
-#if UNITY_2021_3_OR_NEWER
-                staticPorts.EnsureCapacity(typePortCache.Count);
-#endif
-                for (int i = 0; i < typePortCache.Count; i++) {
-                    staticPorts.Add(typePortCache[i].fieldName, typePortCache[i]);
-                }
-            }
+            Dictionary<string, NodePort> staticPorts;
+            if (!portDataCache.TryGetValue(nodeType, out staticPorts)) {
+                 staticPorts = new Dictionary<string, NodePort>();
+            }            
 
             // Cleanup port dict - Remove nonexisting static ports - update static port types
             // AND update dynamic ports (albeit only those in lists) too, in order to enforce proper serialisation.
@@ -108,8 +102,6 @@ namespace XNode {
                 listPort.connectionType = backingPort.connectionType;
                 listPort.typeConstraint = backingPort.typeConstraint;
             }
-
-            staticPorts.Clear();
         }
 
         /// <summary>
@@ -150,7 +142,6 @@ namespace XNode {
         /// <summary> Cache node types </summary>
         private static void BuildCache() {
             portDataCache = new PortDataCache();
-            staticPorts = new Dictionary<string, NodePort>();
             System.Type baseType = typeof(Node);
             List<System.Type> nodeTypes = new List<System.Type>();
             System.Reflection.Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
@@ -214,8 +205,9 @@ namespace XNode {
 
                 if (inputAttrib != null && outputAttrib != null) Debug.LogError("Field " + fieldInfo[i].Name + " of type " + nodeType.FullName + " cannot be both input and output.");
                 else {
-                    if (!portDataCache.ContainsKey(nodeType)) portDataCache.Add(nodeType, new List<NodePort>());
-                    portDataCache[nodeType].Add(new NodePort(fieldInfo[i]));
+                    if (!portDataCache.ContainsKey(nodeType)) portDataCache.Add(nodeType, new Dictionary<string, NodePort>());
+                     NodePort port = new NodePort(fieldInfo[i]);
+                     portDataCache[nodeType].Add(port.fieldName, port);
                 }
 
                 if (formerlySerializedAsAttribute != null) {
@@ -229,30 +221,6 @@ namespace XNode {
         }
 
         [System.Serializable]
-        private class PortDataCache : Dictionary<System.Type, List<NodePort>>, ISerializationCallbackReceiver {
-            [SerializeField] private List<System.Type> keys = new List<System.Type>();
-            [SerializeField] private List<List<NodePort>> values = new List<List<NodePort>>();
-
-            // save the dictionary to lists
-            public void OnBeforeSerialize() {
-                keys.Clear();
-                values.Clear();
-                foreach (var pair in this) {
-                    keys.Add(pair.Key);
-                    values.Add(pair.Value);
-                }
-            }
-
-            // load dictionary from lists
-            public void OnAfterDeserialize() {
-                this.Clear();
-
-                if (keys.Count != values.Count)
-                    throw new System.Exception(string.Format("there are {0} keys and {1} values after deserialization. Make sure that both key and value types are serializable."));
-
-                for (int i = 0; i < keys.Count; i++)
-                    this.Add(keys[i], values[i]);
-            }
-        }
+        private class PortDataCache : Dictionary<System.Type, Dictionary<string, NodePort>> { }
     }
 }

@@ -36,8 +36,8 @@ namespace XNode {
 
             Dictionary<string, NodePort> staticPorts;
             if (!portDataCache.TryGetValue(nodeType, out staticPorts)) {
-                 staticPorts = new Dictionary<string, NodePort>();
-            }            
+                staticPorts = new Dictionary<string, NodePort>();
+            }
 
             // Cleanup port dict - Remove nonexisting static ports - update static port types
             // AND update dynamic ports (albeit only those in lists) too, in order to enforce proper serialisation.
@@ -69,6 +69,7 @@ namespace XNode {
                     dynamicListPorts.Add(port);
                 }
             }
+
             // Add missing ports
             foreach (NodePort staticPort in staticPorts.Values) {
                 if (!ports.ContainsKey(staticPort.fieldName)) {
@@ -206,8 +207,8 @@ namespace XNode {
                 if (inputAttrib != null && outputAttrib != null) Debug.LogError("Field " + fieldInfo[i].Name + " of type " + nodeType.FullName + " cannot be both input and output.");
                 else {
                     if (!portDataCache.ContainsKey(nodeType)) portDataCache.Add(nodeType, new Dictionary<string, NodePort>());
-                     NodePort port = new NodePort(fieldInfo[i]);
-                     portDataCache[nodeType].Add(port.fieldName, port);
+                    NodePort port = new NodePort(fieldInfo[i]);
+                    portDataCache[nodeType].Add(port.fieldName, port);
                 }
 
                 if (formerlySerializedAsAttribute != null) {

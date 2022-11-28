@@ -220,7 +220,6 @@ namespace XNode {
             }
         }
 
-        [System.Serializable]
         private class PortDataCache : Dictionary<System.Type, Dictionary<string, NodePort>> { }
     }
 }

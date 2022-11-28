@@ -9,6 +9,7 @@ namespace XNode {
         private static PortDataCache portDataCache;
         private static Dictionary<System.Type, Dictionary<string, string>> formerlySerializedAsCache;
         private static Dictionary<System.Type, string> typeQualifiedNameCache;
+        private static List<NodePort> dynamicListPorts;
         private static bool Initialized { get { return portDataCache != null; } }
 
         public static string GetTypeQualifiedName(System.Type type) {
@@ -32,7 +33,6 @@ namespace XNode {
             Dictionary<string, string> formerlySerializedAs = null;
             if (formerlySerializedAsCache != null) formerlySerializedAsCache.TryGetValue(nodeType, out formerlySerializedAs);
 
-            List<NodePort> dynamicListPorts = new List<NodePort>();
 
             Dictionary<string, NodePort> staticPorts;
             if (!portDataCache.TryGetValue(nodeType, out staticPorts)) {
@@ -103,6 +103,8 @@ namespace XNode {
                 listPort.connectionType = backingPort.connectionType;
                 listPort.typeConstraint = backingPort.typeConstraint;
             }
+
+            dynamicListPorts.Clear();
         }
 
         /// <summary>
@@ -144,6 +146,7 @@ namespace XNode {
         /// <summary> Cache node types </summary>
         private static void BuildCache() {
             portDataCache = new PortDataCache();
+            dynamicListPorts = new List<NodePort>();
             System.Type baseType = typeof(Node);
             List<System.Type> nodeTypes = new List<System.Type>();
             System.Reflection.Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();

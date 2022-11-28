@@ -125,10 +125,11 @@ namespace XNode {
             // Ports flagged as "dynamicPortList = true" end up having a "backing port" and a name with an index, but we have
             // no guarantee that a dynamic port called "output 0" is an element in a list backed by a static "output" port.
             // Thus, we need to check for attributes... (but at least we don't need to look at all fields this time)
-            string[] fieldNameParts = port.fieldName.Split(' ');
-            if (fieldNameParts.Length != 2) return false;
+            int fieldNameSpaceIndex = port.fieldName.IndexOf(' ');
+            if (fieldNameSpaceIndex < 0) return false;
+            string fieldNamePart = port.fieldName.Substring(0, fieldNameSpaceIndex);
 
-            FieldInfo backingPortInfo = port.node.GetType().GetField(fieldNameParts[0]);
+            FieldInfo backingPortInfo = port.node.GetType().GetField(fieldNamePart);
             if (backingPortInfo == null) return false;
 
             object[] attribs = backingPortInfo.GetCustomAttributes(true);

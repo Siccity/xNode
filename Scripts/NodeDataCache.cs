@@ -27,8 +27,8 @@ namespace XNode {
         public static void UpdatePorts(Node node, Dictionary<string, NodePort> ports) {
             if (!Initialized) BuildCache();
 
-            Dictionary<string, List<NodePort>> removedPorts = new Dictionary<string, List<NodePort>>();
             System.Type nodeType = node.GetType();
+            Dictionary<string, List<NodePort>> removedPorts = null;
 
             Dictionary<string, string> formerlySerializedAs = null;
             if (formerlySerializedAsCache != null) formerlySerializedAsCache.TryGetValue(nodeType, out formerlySerializedAs);
@@ -49,7 +49,10 @@ namespace XNode {
                     // If port exists but with wrong settings, remove it. Re-add it later.
                     if (port.IsDynamic || port.direction != staticPort.direction || port.connectionType != staticPort.connectionType || port.typeConstraint != staticPort.typeConstraint) {
                         // If port is not dynamic and direction hasn't changed, add it to the list so we can try reconnecting the ports connections.
-                        if (!port.IsDynamic && port.direction == staticPort.direction) removedPorts.Add(port.fieldName, port.GetConnections());
+                        if (!port.IsDynamic && port.direction == staticPort.direction) {
+                            if (removedPorts == null) removedPorts = new Dictionary<string, List<NodePort>>();
+                            removedPorts.Add(port.fieldName, port.GetConnections());
+                        }
                         port.ClearConnections();
                         ports.Remove(port.fieldName);
                     } else port.ValueType = staticPort.ValueType;
@@ -59,7 +62,10 @@ namespace XNode {
                     //See if the field is tagged with FormerlySerializedAs, if so add the port with its new field name to removedPorts
                     // so it can be reconnected in missing ports stage.
                     string newName = null;
-                    if (formerlySerializedAs != null && formerlySerializedAs.TryGetValue(port.fieldName, out newName)) removedPorts.Add(newName, port.GetConnections());
+                    if (formerlySerializedAs != null && formerlySerializedAs.TryGetValue(port.fieldName, out newName)) {
+                        if (removedPorts == null) removedPorts = new Dictionary<string, List<NodePort>>();
+                        removedPorts.Add(newName, port.GetConnections());
+                    }
 
                     port.ClearConnections();
                     ports.Remove(port.fieldName);
@@ -76,7 +82,7 @@ namespace XNode {
                     NodePort port = new NodePort(staticPort, node);
                     //If we just removed the port, try re-adding the connections
                     List<NodePort> reconnectConnections;
-                    if (removedPorts.TryGetValue(staticPort.fieldName, out reconnectConnections)) {
+                    if (removedPorts != null && removedPorts.TryGetValue(staticPort.fieldName, out reconnectConnections)) {
                         for (int i = 0; i < reconnectConnections.Count; i++) {
                             NodePort connection = reconnectConnections[i];
                             if (connection == null) continue;

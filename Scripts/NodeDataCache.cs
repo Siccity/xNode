@@ -153,6 +153,10 @@ namespace XNode {
         private static void BuildCache() {
             portDataCache = new PortDataCache();
             dynamicListPorts = new List<NodePort>();
+
+#if UNITY_2019_2_OR_NEWER && UNITY_EDITOR
+            List<System.Type> nodeTypes = UnityEditor.TypeCache.GetTypesDerivedFrom<Node>().Where(type => !type.IsAbstract).ToList();
+#else
             System.Type baseType = typeof(Node);
             List<System.Type> nodeTypes = new List<System.Type>();
             System.Reflection.Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
@@ -177,6 +181,7 @@ namespace XNode {
                         break;
                 }
             }
+#endif
 
             for (int i = 0; i < nodeTypes.Count; i++) {
                 CachePorts(nodeTypes[i]);

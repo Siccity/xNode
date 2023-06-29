@@ -79,6 +79,10 @@ namespace XNode {
                     _connectionType = (attribs[i] as Node.OutputAttribute).connectionType;
                     _typeConstraint = (attribs[i] as Node.OutputAttribute).typeConstraint;
                 }
+                // Override ValueType of the Port
+                if(attribs[i] is PortTypeOverrideAttribute) {
+                    ValueType = (attribs[i] as PortTypeOverrideAttribute).type;
+                }
             }
         }
 

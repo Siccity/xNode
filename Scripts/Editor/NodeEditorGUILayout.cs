@@ -47,11 +47,15 @@ namespace XNodeEditor {
                 if (port.direction == XNode.NodePort.IO.Input) {
                     // Get data from [Input] attribute
                     XNode.Node.ShowBackingValue showBacking = XNode.Node.ShowBackingValue.Unconnected;
+                    XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple;
+                    XNode.Node.TypeConstraint typeConstraint = XNode.Node.TypeConstraint.None;
                     XNode.Node.InputAttribute inputAttribute;
                     bool dynamicPortList = false;
                     if (NodeEditorUtilities.GetCachedAttrib(port.node.GetType(), property.name, out inputAttribute)) {
                         dynamicPortList = inputAttribute.dynamicPortList;
                         showBacking = inputAttribute.backingValue;
+                        connectionType = inputAttribute.connectionType;
+                        typeConstraint = inputAttribute.typeConstraint;
                     }
 
                     bool usePropertyAttributes = dynamicPortList ||
@@ -79,8 +83,7 @@ namespace XNodeEditor {
 
                     if (dynamicPortList) {
                         Type type = GetType(property);
-                        XNode.Node.ConnectionType connectionType = inputAttribute != null ? inputAttribute.connectionType : XNode.Node.ConnectionType.Multiple;
-                        DynamicPortList(property.name, type, property.serializedObject, port.direction, connectionType);
+                        DynamicPortList(property.name, type, property.serializedObject, port.direction, connectionType, typeConstraint, showBacking);
                         return;
                     }
                     switch (showBacking) {
@@ -107,11 +110,15 @@ namespace XNodeEditor {
                 } else if (port.direction == XNode.NodePort.IO.Output) {
                     // Get data from [Output] attribute
                     XNode.Node.ShowBackingValue showBacking = XNode.Node.ShowBackingValue.Unconnected;
+                    XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple;
+                    XNode.Node.TypeConstraint typeConstraint = XNode.Node.TypeConstraint.None;
                     XNode.Node.OutputAttribute outputAttribute;
                     bool dynamicPortList = false;
                     if (NodeEditorUtilities.GetCachedAttrib(port.node.GetType(), property.name, out outputAttribute)) {
                         dynamicPortList = outputAttribute.dynamicPortList;
                         showBacking = outputAttribute.backingValue;
+                        connectionType = outputAttribute.connectionType;
+                        typeConstraint = outputAttribute.typeConstraint;                        
                     }
 
                     bool usePropertyAttributes = dynamicPortList ||
@@ -139,8 +146,7 @@ namespace XNodeEditor {
 
                     if (dynamicPortList) {
                         Type type = GetType(property);
-                        XNode.Node.ConnectionType connectionType = outputAttribute != null ? outputAttribute.connectionType : XNode.Node.ConnectionType.Multiple;
-                        DynamicPortList(property.name, type, property.serializedObject, port.direction, connectionType);
+                        DynamicPortList(property.name, type, property.serializedObject, port.direction, connectionType, typeConstraint, showBacking);
                         return;
                     }
                     switch (showBacking) {
@@ -297,8 +303,8 @@ namespace XNodeEditor {
         }
 
         [Obsolete("Use DynamicPortList instead")]
-        public static void InstancePortList(string fieldName, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple, XNode.Node.TypeConstraint typeConstraint = XNode.Node.TypeConstraint.None, Action<ReorderableList> onCreation = null) {
-            DynamicPortList(fieldName, type, serializedObject, io, connectionType, typeConstraint, onCreation);
+        public static void InstancePortList(string fieldName, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple, XNode.Node.TypeConstraint typeConstraint = XNode.Node.TypeConstraint.None, XNode.Node.ShowBackingValue showBackingValue = XNode.Node.ShowBackingValue.Never, Action<ReorderableList> onCreation = null) {
+            DynamicPortList(fieldName, type, serializedObject, io, connectionType, typeConstraint, showBackingValue, onCreation);
         }
         #endregion
 
@@ -320,7 +326,7 @@ namespace XNodeEditor {
         /// <param name="serializedObject">The serializedObject of the node</param>
         /// <param name="connectionType">Connection type of added dynamic ports</param>
         /// <param name="onCreation">Called on the list on creation. Use this if you want to customize the created ReorderableList</param>
-        public static void DynamicPortList(string fieldName, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple, XNode.Node.TypeConstraint typeConstraint = XNode.Node.TypeConstraint.None, Action<ReorderableList> onCreation = null) {
+        public static void DynamicPortList(string fieldName, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType = XNode.Node.ConnectionType.Multiple, XNode.Node.TypeConstraint typeConstraint = XNode.Node.TypeConstraint.None, XNode.Node.ShowBackingValue showBackingValue = XNode.Node.ShowBackingValue.Never, Action<ReorderableList> onCreation = null) {
             XNode.Node node = serializedObject.targetObject as XNode.Node;
 
             var indexedPorts = node.DynamicPorts.Select(x => {
@@ -345,7 +351,7 @@ namespace XNodeEditor {
             // If a ReorderableList isn't cached for this array, do so.
             if (list == null) {
                 SerializedProperty arrayData = serializedObject.FindProperty(fieldName);
-                list = CreateReorderableList(fieldName, dynamicPorts, arrayData, type, serializedObject, io, connectionType, typeConstraint, onCreation);
+                list = CreateReorderableList(fieldName, dynamicPorts, arrayData, type, serializedObject, io, connectionType, typeConstraint, showBackingValue, onCreation);
                 if (reorderableListCache.TryGetValue(serializedObject.targetObject, out rlc)) rlc.Add(fieldName, list);
                 else reorderableListCache.Add(serializedObject.targetObject, new Dictionary<string, ReorderableList>() { { fieldName, list } });
             }
@@ -354,7 +360,7 @@ namespace XNodeEditor {
 
         }
 
-        private static ReorderableList CreateReorderableList(string fieldName, List<XNode.NodePort> dynamicPorts, SerializedProperty arrayData, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType, XNode.Node.TypeConstraint typeConstraint, Action<ReorderableList> onCreation) {
+        private static ReorderableList CreateReorderableList(string fieldName, List<XNode.NodePort> dynamicPorts, SerializedProperty arrayData, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.Node.ConnectionType connectionType, XNode.Node.TypeConstraint typeConstraint, XNode.Node.ShowBackingValue showBackingValue, Action<ReorderableList> onCreation) {
             bool hasArrayData = arrayData != null && arrayData.isArray;
             XNode.Node node = serializedObject.targetObject as XNode.Node;
             ReorderableList list = new ReorderableList(dynamicPorts, null, true, true, true, true);
@@ -369,7 +375,22 @@ namespace XNodeEditor {
                             return;
                         }
                         SerializedProperty itemData = arrayData.GetArrayElementAtIndex(index);
-                        EditorGUI.PropertyField(rect, itemData, true);
+                        switch (showBackingValue) {
+                            case XNode.Node.ShowBackingValue.Unconnected:
+                                // Display a label if port is connected
+                                if (port.IsConnected) EditorGUI.LabelField(rect, new GUIContent(itemData.displayName));
+                                // Display an editable property field if port is not connected
+                                else EditorGUI.PropertyField(rect, itemData, true);
+                                break;
+                            case XNode.Node.ShowBackingValue.Never:
+                                // Display a label
+                                EditorGUI.LabelField(rect, new GUIContent(itemData.displayName));
+                                break;
+                            case XNode.Node.ShowBackingValue.Always:
+                                // Display an editable property field
+                                EditorGUI.PropertyField(rect, itemData, true);
+                                break;
+                        }
                     } else EditorGUI.LabelField(rect, port != null ? port.fieldName : "");
                     if (port != null) {
                         Vector2 pos = rect.position + (port.IsOutput ? new Vector2(rect.width + 6, 0) : new Vector2(-36, 0));

@@ -1,0 +1,35 @@
+name: upm-subtree-split
+
+on:
+  push:
+    branches:
+    - main
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  upm-subtree-split:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.CI_TOKEN }}
+        fetch-depth: 0
+
+    - name: upm subtree split
+      run: |
+        # upm subtree split
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git fetch --all --tags
+        $packageDir = Get-Item -Path "**/Packages/com.*" | Select-Object -ExpandProperty FullName
+        $packageDir = $packageDir.replace('${{ github.workspace }}/','')
+        Write-Host $packageDir
+        git subtree split --prefix="$packageDir" -b upm
+        git checkout upm
+        git fetch origin upm
+        git rebase origin/upm --reapply-cherry-picks
+        git push origin upm --force-with-lease --tags --set-upstream --verbose
+      working-directory: ${{ github.workspace }}
+      shell: pwsh

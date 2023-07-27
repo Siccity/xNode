@@ -1,0 +1,75 @@
+# https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/code-style-rule-options
+
+# Remove the line below if you want to inherit .editorconfig settings from higher directories
+root = true
+
+[*.cs]
+
+#### Core EditorConfig Options ####
+
+# Indentation and spacing
+indent_size = 4
+indent_style = space
+tab_width = 4
+
+# New line preferences
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_else = true
+csharp_new_line_before_finally = true
+csharp_new_line_before_open_brace = all
+
+# Modifier preferences
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:error
+
+# Code-block preferences
+csharp_prefer_braces = true:error
+
+# Use language keywords for types
+dotnet_style_predefined_type_for_member_access = true
+dotnet_style_predefined_type_for_locals_parameters_members = true
+
+# Code Style
+csharp_style_var_when_type_is_apparent = true
+
+#### Resharper/Rider Rules ####
+# https://www.jetbrains.com/help/resharper/EditorConfig_Properties.html
+
+resharper_csharp_force_attribute_style=separate
+csharp_place_field_attribute_on_same_line=false
+csharp_place_accessorholder_attribute_on_same_line=false
+csharp_trailing_comma_in_multiline_lists=false
+csharp_trailing_comma_in_singleline_lists=false
+csharp_keep_existing_attribute_arrangement=false
+csharp_blank_lines_around_region=1
+csharp_blank_lines_inside_region=1
+csharp_keep_blank_lines_in_code=false
+csharp_remove_blank_lines_near_braces_in_code=true
+csharp_blank_lines_before_control_transfer_statements=1
+csharp_blank_lines_after_control_transfer_statements=1
+csharp_blank_lines_before_block_statements=1
+csharp_blank_lines_after_block_statements=1
+csharp_blank_lines_before_multiline_statements=1
+csharp_blank_lines_after_multiline_statements=1
+csharp_blank_lines_around_block_case_section=0
+csharp_blank_lines_around_multiline_case_section=0
+csharp_blank_lines_before_case=0
+csharp_blank_lines_after_case=0
+resharper_unity_duplicate_event_function_highlighting=error
+resharper_unity_duplicate_shortcut_highlighting=error
+resharper_unity_expected_component_highlighting=error
+resharper_unity_explicit_tag_comparison_highlighting=error
+resharper_unity_incorrect_mono_behaviour_instantiation_highlighting=error
+resharper_unity_incorrect_scriptable_object_instantiation_highlighting=error
+resharper_unity_no_null_coalescing_highlighting=error
+resharper_unity_performance_critical_code_camera_main_highlighting=error
+resharper_unity_performance_critical_code_invocation_highlighting=warning
+resharper_unity_performance_critical_code_null_comparison_highlighting=warning
+resharper_unity_possible_misapplication_of_attribute_to_multiple_fields_highlighting=error
+resharper_unity_redundant_attribute_on_target_highlighting=error
+resharper_unity_redundant_formerly_serialized_as_attribute_highlighting=error
+resharper_unity_unresolved_component_or_scriptable_object_highlighting=error
+resharper_use_name_of_instead_of_type_of_highlighting=error
+resharper_wrong_public_modifier_specification_highlighting=error

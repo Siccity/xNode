@@ -1,0 +1,38 @@
+name: build
+
+on:
+  pull_request:
+    branches:
+      - '*'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows
+            build-target: Android
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          clean: false
+          lfs: true
+
+        # Installs the Unity Editor based on your project version text file
+        # sets -> env.UNITY_EDITOR_PATH
+        # sets -> env.UNITY_PROJECT_PATH
+        # https://github.com/XRTK/unity-setup
+      - uses: xrtk/unity-setup@v7.2
+        with:
+          build-targets: ${{ matrix.build-target }}
+
+      - name: Unity Build (${{ matrix.build-target }})
+        uses: RageAgainstThePixel/unity-build@v5
+        with:
+          build-target: ${{ matrix.build-target }}
+          publish-artifacts: false

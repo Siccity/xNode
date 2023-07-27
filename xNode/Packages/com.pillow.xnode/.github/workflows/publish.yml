@@ -1,0 +1,31 @@
+name: publish
+
+on:
+  push:
+    branches:
+    - upm
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.CI_TOKEN }}
+        ref: upm
+        clean: true
+        lfs: true
+
+    - uses: xrtk/upm-release@development
+      with:
+        upm-username: 'pillow-build-bot'
+        upm-email: 'hello@pillow.social'
+        upm-server-address: 'http://upm.pillow.social:4873'
+        upm-auth-token: '${{ secrets.UPM_AUTH_TOKEN }}'
+        github-username: 'TogetherXR'
+        github-pat: '${{ secrets.CI_TOKEN }}'
+        github-token: '${{ secrets.GITHUB_TOKEN }}'
+        package-root: '${{ github.workspace }}'

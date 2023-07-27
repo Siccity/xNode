@@ -1,0 +1,20 @@
+{
+  "name": "com.pillow.xnode",
+  "displayName": "xNode",
+  "description": "xNode provides a set of APIs and an editor interface for creating and editing custom node graphs.",
+  "keywords": [],
+  "version": "1.8.0",
+  "unity": "2021.3",
+  "repository": {
+    "type": "git",
+    "repository": "https://github.com/TogetherXR/com.pillow.xnode.git"
+  },
+  "author": {
+    "name": "Pillow Inc.",
+    "url": "https://github.com/TogetherXR"
+  },
+  "publishConfig": {
+    "registry": "http://upm.pillow.social:4873"
+  },
+  "hideInEditor": false
+}

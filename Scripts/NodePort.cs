@@ -381,7 +381,7 @@ namespace XNode {
 
             // Add connections to target port
             for (int i = 0; i < connectionCount; i++) {
-                PortConnection connection = targetPort.connections[i];
+                PortConnection connection = connections[i];
                 NodePort otherPort = connection.Port;
                 targetPort.Connect(otherPort);
             }

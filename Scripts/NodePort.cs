@@ -383,7 +383,7 @@ namespace XNode {
             for (int i = 0; i < connectionCount; i++) {
                 PortConnection connection = targetPort.connections[i];
                 NodePort otherPort = connection.Port;
-                Connect(otherPort);
+                targetPort.Connect(otherPort);
             }
             ClearConnections();
         }

@@ -20,7 +20,8 @@ namespace XNodeEditor
             HoldNode,
             DragNode,
             HoldGrid,
-            DragGrid
+            DragGrid,
+            Renaming
         }
         public static NodeActivity currentActivity = NodeActivity.Idle;
         public static bool isPanning { get; private set; }
@@ -32,6 +33,8 @@ namespace XNodeEditor
         public bool IsHoveringPort => hoveredPort != null;
         public bool IsHoveringNode => hoveredNode != null;
         public bool IsHoveringReroute => hoveredReroute.port != null;
+        public bool IsSelectingRenamingObject =>
+            currentActivity == NodeActivity.Renaming && IsHoveringNode && Selection.Contains(hoveredNode);
 
         /// <summary> Return the dragged port or null if not exist </summary>
         public NodePort DraggedOutputPort
@@ -135,6 +138,7 @@ namespace XNodeEditor
                         else if (currentActivity == NodeActivity.HoldNode)
                         {
                             RecalculateDragOffsets(e);
+                            isDoubleClick = false;
                             currentActivity = NodeActivity.DragNode;
                             Repaint();
                         }
@@ -277,8 +281,14 @@ namespace XNodeEditor
                                     }
                                 }
                             }
+
+                            if (currentActivity == NodeActivity.Renaming)
+                            {
+                                currentActivity = NodeActivity.Idle;
+                            }
                         }
-                        else if (IsHoveringNode && IsHoveringTitle(hoveredNode))
+                        else if (IsHoveringNode && IsHoveringTitle(hoveredNode) &&
+                                 (currentActivity != NodeActivity.Renaming || !IsSelectingRenamingObject))
                         {
                             // If mousedown on node header, select or deselect
                             if (!Selection.Contains(hoveredNode))
@@ -415,19 +425,30 @@ namespace XNodeEditor
                         }
 
                         // If click node header, select it.
-                        if (currentActivity == NodeActivity.HoldNode && !(e.control || e.shift))
+                        if ((currentActivity == NodeActivity.HoldNode || !IsSelectingRenamingObject) &&
+                            !(e.control || e.shift))
                         {
                             selectedReroutes.Clear();
                             SelectNode(hoveredNode, false);
 
-                            // Double click to center node
+                            // Double click to rename node
                             if (isDoubleClick)
                             {
-                                Vector2 nodeDimension = nodeSizes.ContainsKey(hoveredNode)
-                                    ? nodeSizes[hoveredNode] / 2
-                                    : Vector2.zero;
-                                panOffset = -hoveredNode.position - nodeDimension;
+                                RenameSelectedNodeTextField();
+                                currentActivity = NodeActivity.Renaming;
+                                // Vector2 nodeDimension = nodeSizes.ContainsKey(hoveredNode)
+                                //     ? nodeSizes[hoveredNode] / 2
+                                //     : Vector2.zero;
+                                // panOffset = -hoveredNode.position - nodeDimension;
                             }
+                            else
+                            {
+                                currentActivity = NodeActivity.HoldNode;
+                            }
+                        }
+                        else if (currentActivity != NodeActivity.Renaming)
+                        {
+                            currentActivity = NodeActivity.Idle;
                         }
 
                         // If click reroute, select it.
@@ -438,7 +459,6 @@ namespace XNodeEditor
                         }
 
                         Repaint();
-                        currentActivity = NodeActivity.Idle;
                     }
                     else if (e.button == 1 || e.button == 2)
                     {
@@ -482,6 +502,11 @@ namespace XNodeEditor
                                 GenericMenu menu = new GenericMenu();
                                 graphEditor.AddContextMenuItems(menu);
                                 menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
+                            }
+
+                            if (currentActivity == NodeActivity.Renaming)
+                            {
+                                currentActivity = NodeActivity.Idle;
                             }
                         }
 
@@ -604,6 +629,11 @@ namespace XNodeEditor
 
                     break;
             }
+
+            if (currentActivity != NodeActivity.Renaming && RenameTextField.IsActive)
+            {
+                RenameTextField.current.SaveAndClose();
+            }
         }
 
         private void RecalculateDragOffsets(Event current)
@@ -682,6 +712,24 @@ namespace XNodeEditor
                 else
                 {
                     RenamePopup.Show(Selection.activeObject);
+                }
+            }
+        }
+
+
+        public void RenameSelectedNodeTextField()
+        {
+            if (Selection.objects.Length == 1 && Selection.activeObject is Node)
+            {
+                Node node = Selection.activeObject as Node;
+                Vector2 size;
+                if (nodeSizes.TryGetValue(node, out size))
+                {
+                    RenameTextField.Show(Selection.activeObject, size.x);
+                }
+                else
+                {
+                    RenameTextField.Show(Selection.activeObject);
                 }
             }
         }

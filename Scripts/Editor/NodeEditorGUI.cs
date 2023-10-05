@@ -156,7 +156,7 @@ namespace XNodeEditor
                 }
                 else
                 {
-                    graphEditor.AddContextMenuItems(contextMenu, hoveredPort.ValueType, NodePort.IO.Input);
+                    graphEditor.AddContextMenuItems(contextMenu, hoveredPort.ValueType);
                 }
             }
 
@@ -681,7 +681,15 @@ namespace XNodeEditor
                 EditorGUI.BeginChangeCheck();
 
                 //Draw node contents
-                nodeEditor.OnHeaderGUI();
+                if (currentActivity == NodeActivity.Renaming && Selection.activeObject == node)
+                {
+                    RenameTextField.current.DrawRenameTextField();
+                }
+                else
+                {
+                    nodeEditor.OnHeaderGUI();
+                }
+
                 nodeEditor.OnBodyGUI();
 
                 //If user changed a value, notify other scripts through onUpdateNode

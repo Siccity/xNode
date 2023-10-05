@@ -25,7 +25,7 @@ namespace XNodeEditor
         public static GUIStyle OutputPort => new GUIStyle(EditorStyles.label) { alignment = TextAnchor.UpperRight };
         public class Styles
         {
-            public GUIStyle inputPort, outputPort, nodeHeader, nodeBody, tooltip, nodeHighlight;
+            public GUIStyle inputPort, outputPort, nodeHeader, nodeHeaderRename, nodeBody, tooltip, nodeHighlight;
 
             public Styles()
             {
@@ -49,6 +49,13 @@ namespace XNodeEditor
                 nodeHeader.fontStyle = FontStyle.Bold;
                 nodeHeader.normal.textColor = Color.white;
 
+                nodeHeaderRename = new GUIStyle(GUI.skin.textField);
+                nodeHeaderRename.alignment = TextAnchor.MiddleCenter;
+                nodeHeaderRename.fontStyle = FontStyle.Bold;
+                nodeHeaderRename.normal.textColor = Color.white;
+                nodeHeaderRename.fixedHeight = 18;
+                nodeHeaderRename.margin = new RectOffset(5, 5, 10, 8);
+
                 nodeBody = new GUIStyle();
                 nodeBody.normal.background = NodeEditorResources.nodeBody;
                 nodeBody.border = new RectOffset(32, 32, 32, 32);
@@ -61,6 +68,20 @@ namespace XNodeEditor
                 tooltip = new GUIStyle("helpBox");
                 tooltip.alignment = TextAnchor.MiddleCenter;
             }
+        }
+
+        public static Texture2D GenerateSolidColorTexture(int width, int height, Color col)
+        {
+            var pix = new Color[width * height];
+            for (int i = 0; i < pix.Length; ++i)
+            {
+                pix[i] = col;
+            }
+
+            Texture2D result = new Texture2D(width, height);
+            result.SetPixels(pix);
+            result.Apply();
+            return result;
         }
 
         public static Texture2D GenerateGridTexture(Color line, Color bg)

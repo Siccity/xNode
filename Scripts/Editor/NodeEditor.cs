@@ -24,7 +24,6 @@ namespace XNodeEditor
         /// <summary> Fires every whenever a node was modified through the editor </summary>
         public static Action<Node> onUpdateNode;
         public static readonly Dictionary<NodePort, Vector2> portPositions = new Dictionary<NodePort, Vector2>();
-        private Vector2 _lastClickPos;
 
 #if ODIN_INSPECTOR
         protected internal static bool inNodeEditor = false;
@@ -32,18 +31,6 @@ namespace XNodeEditor
 
         public virtual void OnHeaderGUI()
         {
-            Event e = Event.current;
-            if (e.type == EventType.MouseDown)
-            {
-                if ((_lastClickPos - e.mousePosition).sqrMagnitude <= 5 * 5 && e.clickCount > 1)
-                {
-                    Debug.Log("Renaming time!");
-                    return;
-                }
-
-                _lastClickPos = e.mousePosition;
-            }
-
             GUILayout.Label(target.name, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
         }
 

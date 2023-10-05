@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using XNode;
 using XNodeEditor.Internal;
 
 namespace XNodeEditor.NodeGroups
@@ -10,8 +11,13 @@ namespace XNodeEditor.NodeGroups
     {
         private NodeGroup group => _group != null ? _group : _group = target as NodeGroup;
         private NodeGroup _group;
-        private bool isDragging;
-        private Vector2 size;
+        private bool _isDragging;
+        private Vector2 _size;
+
+        public override void OnHeaderGUI()
+        {
+            GUILayout.Label(target.name, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
+        }
 
         public override void OnBodyGUI()
         {
@@ -19,7 +25,7 @@ namespace XNodeEditor.NodeGroups
             switch (e.type)
             {
                 case EventType.MouseDrag:
-                    if (isDragging)
+                    if (_isDragging)
                     {
                         group.width = Mathf.Max(200, (int)e.mousePosition.x + 16);
                         group.height = Mathf.Max(100, (int)e.mousePosition.y - 34);
@@ -34,19 +40,19 @@ namespace XNodeEditor.NodeGroups
                         return;
                     }
 
-                    if (NodeEditorWindow.current.nodeSizes.TryGetValue(target, out size))
+                    if (NodeEditorWindow.current.nodeSizes.TryGetValue(target, out _size))
                     {
                         // Mouse position checking is in node local space
-                        Rect lowerRight = new Rect(size.x - 34, size.y - 34, 30, 30);
+                        Rect lowerRight = new Rect(_size.x - 34, _size.y - 34, 30, 30);
                         if (lowerRight.Contains(e.mousePosition))
                         {
-                            isDragging = true;
+                            _isDragging = true;
                         }
                     }
 
                     break;
                 case EventType.MouseUp:
-                    isDragging = false;
+                    _isDragging = false;
                     // Select nodes inside the group
                     if (Selection.Contains(target))
                     {
@@ -114,11 +120,11 @@ namespace XNodeEditor.NodeGroups
                     }
 
                     // Add scale cursors
-                    if (NodeEditorWindow.current.nodeSizes.TryGetValue(target, out size))
+                    if (NodeEditorWindow.current.nodeSizes.TryGetValue(target, out _size))
                     {
                         Rect lowerRight = new Rect(target.position, new Vector2(30, 30));
-                        lowerRight.y += size.y - 34;
-                        lowerRight.x += size.x - 34;
+                        lowerRight.y += _size.y - 34;
+                        lowerRight.x += _size.x - 34;
                         lowerRight = NodeEditorWindow.current.GridToWindowRect(lowerRight);
                         NodeEditorWindow.current.onLateGUI += () => AddMouseRect(lowerRight);
                     }

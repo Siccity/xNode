@@ -1,30 +1,39 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using XNode;
 #if ODIN_INSPECTOR
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
 #endif
 
-namespace XNodeEditor {
+namespace XNodeEditor
+{
     /// <summary> Override graph inspector to show an 'Open Graph' button at the top </summary>
     [CustomEditor(typeof(NodeGraph), true)]
 #if ODIN_INSPECTOR
-    public class GlobalGraphEditor : OdinEditor {
-        public override void OnInspectorGUI() {
-            if (GUILayout.Button("Edit graph", GUILayout.Height(40))) {
+    public class GlobalGraphEditor : OdinEditor
+    {
+        public override void OnInspectorGUI()
+        {
+            if (GUILayout.Button("Edit graph", GUILayout.Height(40)))
+            {
                 NodeEditorWindow.Open(serializedObject.targetObject as XNode.NodeGraph);
             }
+
             base.OnInspectorGUI();
         }
     }
 #else
     [CanEditMultipleObjects]
-    public class GlobalGraphEditor : Editor {
-        public override void OnInspectorGUI() {
+    public class GlobalGraphEditor : Editor
+    {
+        public override void OnInspectorGUI()
+        {
             serializedObject.Update();
 
-            if (GUILayout.Button("Edit graph", GUILayout.Height(40))) {
+            if (GUILayout.Button("Edit graph", GUILayout.Height(40)))
+            {
                 NodeEditorWindow.Open(serializedObject.targetObject as NodeGraph);
             }
 
@@ -40,23 +49,30 @@ namespace XNodeEditor {
 
     [CustomEditor(typeof(Node), true)]
 #if ODIN_INSPECTOR
-    public class GlobalNodeEditor : OdinEditor {
-        public override void OnInspectorGUI() {
-            if (GUILayout.Button("Edit graph", GUILayout.Height(40))) {
+    public class GlobalNodeEditor : OdinEditor
+    {
+        public override void OnInspectorGUI()
+        {
+            if (GUILayout.Button("Edit graph", GUILayout.Height(40)))
+            {
                 SerializedProperty graphProp = serializedObject.FindProperty("graph");
                 NodeEditorWindow w = NodeEditorWindow.Open(graphProp.objectReferenceValue as XNode.NodeGraph);
                 w.Home(); // Focus selected node
             }
+
             base.OnInspectorGUI();
         }
     }
 #else
     [CanEditMultipleObjects]
-    public class GlobalNodeEditor : Editor {
-        public override void OnInspectorGUI() {
+    public class GlobalNodeEditor : Editor
+    {
+        public override void OnInspectorGUI()
+        {
             serializedObject.Update();
 
-            if (GUILayout.Button("Edit graph", GUILayout.Height(40))) {
+            if (GUILayout.Button("Edit graph", GUILayout.Height(40)))
+            {
                 SerializedProperty graphProp = serializedObject.FindProperty("graph");
                 NodeEditorWindow w = NodeEditorWindow.Open(graphProp.objectReferenceValue as NodeGraph);
                 w.Home(); // Focus selected node

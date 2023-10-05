@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using XNode;
 #if ODIN_INSPECTOR
 using Sirenix.OdinInspector.Editor;
 #endif

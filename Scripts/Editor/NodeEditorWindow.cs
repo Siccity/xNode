@@ -54,23 +54,10 @@ namespace XNodeEditor
             }
         }
 
-        private void OnDisable()
-        {
-            // Cache portConnectionPoints before serialization starts
-            int count = portConnectionPoints.Count;
-            _references = new NodePortReference[count];
-            _rects = new Rect[count];
-            int index = 0;
-            foreach (var portConnectionPoint in portConnectionPoints)
-            {
-                _references[index] = new NodePortReference(portConnectionPoint.Key);
-                _rects[index] = portConnectionPoint.Value;
-                index++;
-            }
-        }
-
         private void OnEnable()
         {
+            Undo.undoRedoPerformed += OnUndoRedoPerformed;
+
             // Reload portConnectionPoints if there are any
             int length = _references.Length;
             if (length == _rects.Length)
@@ -83,6 +70,23 @@ namespace XNodeEditor
                         portConnectionPoints.Add(nodePort, _rects[i]);
                     }
                 }
+            }
+        }
+
+        private void OnDisable()
+        {
+            Undo.undoRedoPerformed -= OnUndoRedoPerformed;
+
+            // Cache portConnectionPoints before serialization starts
+            int count = portConnectionPoints.Count;
+            _references = new NodePortReference[count];
+            _rects = new Rect[count];
+            int index = 0;
+            foreach (var portConnectionPoint in portConnectionPoints)
+            {
+                _references[index] = new NodePortReference(portConnectionPoint.Key);
+                _rects[index] = portConnectionPoint.Value;
+                index++;
             }
         }
 
@@ -152,6 +156,11 @@ namespace XNodeEditor
                     Open(nodeGraph);
                 }
             }
+        }
+
+        private void OnUndoRedoPerformed()
+        {
+            Repaint();
         }
 
         /// <summary> Make sure the graph editor is assigned and to the right object </summary>

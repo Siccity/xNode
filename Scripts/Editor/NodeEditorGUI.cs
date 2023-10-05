@@ -13,7 +13,7 @@ namespace XNodeEditor {
     public partial class NodeEditorWindow {
         public NodeGraphEditor graphEditor;
         private List<UnityEngine.Object> selectionCache;
-        private List<XNode.Node> culledNodes;
+        private List<Node> culledNodes;
         /// <summary> 19 if docked, 22 if not </summary>
         private int topPadding { get { return isDocked() ? 19 : 22; } }
         /// <summary> Executed after all other window GUI. Useful if Zoom is ruining your day. Automatically resets after being run.</summary>
@@ -113,7 +113,7 @@ namespace XNodeEditor {
         }
 
         /// <summary> Show right-click context menu for hovered port </summary>
-        void ShowPortContextMenu(XNode.NodePort hoveredPort) {
+        void ShowPortContextMenu(NodePort hoveredPort) {
             GenericMenu contextMenu = new GenericMenu();
             foreach (var port in hoveredPort.GetConnections()) {
                 var name = port.node.name;
@@ -125,10 +125,10 @@ namespace XNodeEditor {
             if (NodeEditorPreferences.GetSettings().createFilter) {
                 contextMenu.AddSeparator("");
 
-                if (hoveredPort.direction == XNode.NodePort.IO.Input)
-                    graphEditor.AddContextMenuItems(contextMenu, hoveredPort.ValueType, XNode.NodePort.IO.Output);
+                if (hoveredPort.direction == NodePort.IO.Input)
+                    graphEditor.AddContextMenuItems(contextMenu, hoveredPort.ValueType, NodePort.IO.Output);
                 else
-                    graphEditor.AddContextMenuItems(contextMenu, hoveredPort.ValueType, XNode.NodePort.IO.Input);
+                    graphEditor.AddContextMenuItems(contextMenu, hoveredPort.ValueType, NodePort.IO.Input);
             }
             contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
@@ -335,12 +335,12 @@ namespace XNodeEditor {
             List<Vector2> gridPoints = new List<Vector2>(2);
 
             Color col = GUI.color;
-            foreach (XNode.Node node in graph.nodes) {
+            foreach (Node node in graph.nodes) {
                 //If a null node is found, return. This can happen if the nodes associated script is deleted. It is currently not possible in Unity to delete a null asset.
                 if (node == null) continue;
 
                 // Draw full connections and output > reroute
-                foreach (XNode.NodePort output in node.Outputs) {
+                foreach (NodePort output in node.Outputs) {
                     //Needs cleanup. Null checks are ugly
                     Rect fromRect;
                     if (!_portConnectionPoints.TryGetValue(output, out fromRect)) continue;
@@ -349,7 +349,7 @@ namespace XNodeEditor {
                     GUIStyle portStyle = graphEditor.GetPortStyle(output);
 
                     for (int k = 0; k < output.ConnectionCount; k++) {
-                        XNode.NodePort input = output.GetConnection(k);
+                        NodePort input = output.GetConnection(k);
 
                         Gradient noodleGradient = graphEditor.GetNoodleGradient(output, input);
                         float noodleThickness = graphEditor.GetNoodleThickness(output, input);
@@ -404,7 +404,7 @@ namespace XNodeEditor {
             }
 
             System.Reflection.MethodInfo onValidate = null;
-            if (Selection.activeObject != null && Selection.activeObject is XNode.Node) {
+            if (Selection.activeObject != null && Selection.activeObject is Node) {
                 onValidate = Selection.activeObject.GetType().GetMethod("OnValidate");
                 if (onValidate != null) EditorGUI.BeginChangeCheck();
             }
@@ -430,14 +430,14 @@ namespace XNodeEditor {
             //Save guiColor so we can revert it
             Color guiColor = GUI.color;
 
-            List<XNode.NodePort> removeEntries = new List<XNode.NodePort>();
+            List<NodePort> removeEntries = new List<NodePort>();
 
-            if (e.type == EventType.Layout) culledNodes = new List<XNode.Node>();
+            if (e.type == EventType.Layout) culledNodes = new List<Node>();
             for (int n = 0; n < graph.nodes.Count; n++) {
                 // Skip null nodes. The user could be in the process of renaming scripts, so removing them at this point is not advisable.
                 if (graph.nodes[n] == null) continue;
                 if (n >= graph.nodes.Count) return;
-                XNode.Node node = graph.nodes[n];
+                Node node = graph.nodes[n];
 
                 // Culling
                 if (e.type == EventType.Layout) {
@@ -529,14 +529,14 @@ namespace XNodeEditor {
 
                     //Check if we are hovering any of this nodes ports
                     //Check input ports
-                    foreach (XNode.NodePort input in node.Inputs) {
+                    foreach (NodePort input in node.Inputs) {
                         //Check if port rect is available
                         if (!portConnectionPoints.ContainsKey(input)) continue;
                         Rect r = GridToWindowRectNoClipped(portConnectionPoints[input]);
                         if (r.Contains(mousePos)) hoveredPort = input;
                     }
                     //Check all output ports
-                    foreach (XNode.NodePort output in node.Outputs) {
+                    foreach (NodePort output in node.Outputs) {
                         //Check if port rect is available
                         if (!portConnectionPoints.ContainsKey(output)) continue;
                         Rect r = GridToWindowRectNoClipped(portConnectionPoints[output]);
@@ -556,7 +556,7 @@ namespace XNodeEditor {
             if (onValidate != null && EditorGUI.EndChangeCheck()) onValidate.Invoke(Selection.activeObject, null);
         }
 
-        private bool ShouldBeCulled(XNode.Node node) {
+        private bool ShouldBeCulled(Node node) {
 
             Vector2 nodePos = GridToWindowPositionNoClipped(node.position);
             if (nodePos.x / _zoom > position.width) return true; // Right

@@ -4,7 +4,6 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.Experimental.AssetImporters;
 using UnityEngine;
-using XNode;
 
 namespace XNodeEditor {
     /// <summary> Deals with modified assets </summary>
@@ -34,7 +33,7 @@ namespace XNodeEditor {
 
         private static void AddRequired(NodeGraph graph, Type type, ref Vector2 position) {
             if (!graph.nodes.Any(x => x.GetType() == type)) {
-                XNode.Node node = graph.AddNode(type);
+                Node node = graph.AddNode(type);
                 node.position = position;
                 position.x += 200;
                 if (node.name == null || node.name.Trim() == "") node.name = NodeEditorUtilities.NodeDefaultName(type);

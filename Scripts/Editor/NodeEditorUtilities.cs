@@ -134,14 +134,14 @@ namespace XNodeEditor {
         /// <param name="compatibleType">Type to find compatiblities</param>
         /// <param name="direction"></param>
         /// <returns>True if NodeType has some port with value type compatible</returns>
-        public static bool HasCompatiblePortType(Type nodeType, Type compatibleType, XNode.NodePort.IO direction = XNode.NodePort.IO.Input) {
-            Type findType = typeof(XNode.Node.InputAttribute);
-            if (direction == XNode.NodePort.IO.Output)
-                findType = typeof(XNode.Node.OutputAttribute);
+        public static bool HasCompatiblePortType(Type nodeType, Type compatibleType, NodePort.IO direction = NodePort.IO.Input) {
+            Type findType = typeof(Node.InputAttribute);
+            if (direction == NodePort.IO.Output)
+                findType = typeof(Node.OutputAttribute);
 
             //Get All fields from node type and we go filter only field with portAttribute.
             //This way is possible to know the values of the all ports and if have some with compatible value tue
-            foreach (FieldInfo f in XNode.NodeDataCache.GetNodeFields(nodeType)) {
+            foreach (FieldInfo f in NodeDataCache.GetNodeFields(nodeType)) {
                 var portAttribute = f.GetCustomAttributes(findType, false).FirstOrDefault();
                 if (portAttribute != null) {
                     if (IsCastableTo(f.FieldType, compatibleType)) {
@@ -159,7 +159,7 @@ namespace XNodeEditor {
         /// <param name="nodeTypes">List with all nodes type to filter</param>
         /// <param name="compatibleType">Compatible Type to Filter</param>
         /// <returns>Return Only Node Types with ports compatible, or an empty list</returns>
-        public static List<Type> GetCompatibleNodesTypes(Type[] nodeTypes, Type compatibleType, XNode.NodePort.IO direction = XNode.NodePort.IO.Input) {
+        public static List<Type> GetCompatibleNodesTypes(Type[] nodeTypes, Type compatibleType, NodePort.IO direction = NodePort.IO.Input) {
             //Result List
             List<Type> filteredTypes = new List<Type>();
 

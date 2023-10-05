@@ -22,7 +22,7 @@ namespace XNodeEditor {
             // Check script type. Return if deleting a non-node script
             UnityEditor.MonoScript script = obj as UnityEditor.MonoScript;
             System.Type scriptType = script.GetClass ();
-            if (scriptType == null || (scriptType != typeof (XNode.Node) && !scriptType.IsSubclassOf (typeof (XNode.Node)))) return AssetDeleteResult.DidNotDelete;
+            if (scriptType == null || (scriptType != typeof (Node) && !scriptType.IsSubclassOf (typeof (Node)))) return AssetDeleteResult.DidNotDelete;
 
             // Find all ScriptableObjects using this script
             string[] guids = AssetDatabase.FindAssets ("t:" + scriptType);
@@ -30,7 +30,7 @@ namespace XNodeEditor {
                 string assetpath = AssetDatabase.GUIDToAssetPath (guids[i]);
                 Object[] objs = AssetDatabase.LoadAllAssetRepresentationsAtPath (assetpath);
                 for (int k = 0; k < objs.Length; k++) {
-                    XNode.Node node = objs[k] as XNode.Node;
+                    Node node = objs[k] as Node;
                     if (node.GetType () == scriptType) {
                         if (node != null && node.graph != null) {
                             // Delete the node and notify the user
@@ -48,17 +48,17 @@ namespace XNodeEditor {
         [InitializeOnLoadMethod]
         private static void OnReloadEditor () {
             // Find all NodeGraph assets
-            string[] guids = AssetDatabase.FindAssets ("t:" + typeof (XNode.NodeGraph));
+            string[] guids = AssetDatabase.FindAssets ("t:" + typeof (NodeGraph));
             for (int i = 0; i < guids.Length; i++) {
                 string assetpath = AssetDatabase.GUIDToAssetPath (guids[i]);
-                XNode.NodeGraph graph = AssetDatabase.LoadAssetAtPath (assetpath, typeof (XNode.NodeGraph)) as XNode.NodeGraph;
+                NodeGraph graph = AssetDatabase.LoadAssetAtPath (assetpath, typeof (NodeGraph)) as NodeGraph;
                 graph.nodes.RemoveAll(x => x == null); //Remove null items
                 Object[] objs = AssetDatabase.LoadAllAssetRepresentationsAtPath (assetpath);
                 // Ensure that all sub node assets are present in the graph node list
                 for (int u = 0; u < objs.Length; u++) {
                     // Ignore null sub assets
                     if (objs[u] == null) continue;
-                    if (!graph.nodes.Contains (objs[u] as XNode.Node)) graph.nodes.Add(objs[u] as XNode.Node);
+                    if (!graph.nodes.Contains (objs[u] as Node)) graph.nodes.Add(objs[u] as Node);
                 }
             }
         }

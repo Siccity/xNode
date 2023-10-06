@@ -435,7 +435,6 @@ namespace XNodeEditor
                             if (isDoubleClick)
                             {
                                 RenameSelectedNodeTextField();
-                                currentActivity = NodeActivity.Renaming;
                                 // Vector2 nodeDimension = nodeSizes.ContainsKey(hoveredNode)
                                 //     ? nodeSizes[hoveredNode] / 2
                                 //     : Vector2.zero;
@@ -517,7 +516,7 @@ namespace XNodeEditor
                     isDoubleClick = false;
                     break;
                 case EventType.KeyDown:
-                    if (EditorGUIUtility.editingTextField || GUIUtility.keyboardControl != 0)
+                    if (EditorGUIUtility.editingTextField)
                     {
                         break;
                     }
@@ -531,14 +530,14 @@ namespace XNodeEditor
                     {
                         if (e.keyCode == KeyCode.Return)
                         {
-                            RenameSelectedNode();
+                            RenameSelectedNodeTextField();
                         }
                     }
                     else
                     {
                         if (e.keyCode == KeyCode.F2)
                         {
-                            RenameSelectedNode();
+                            RenameSelectedNodeTextField();
                         }
                     }
 
@@ -721,16 +720,8 @@ namespace XNodeEditor
         {
             if (Selection.objects.Length == 1 && Selection.activeObject is Node)
             {
-                Node node = Selection.activeObject as Node;
-                Vector2 size;
-                if (nodeSizes.TryGetValue(node, out size))
-                {
-                    RenameTextField.Show(Selection.activeObject, size.x);
-                }
-                else
-                {
-                    RenameTextField.Show(Selection.activeObject);
-                }
+                currentActivity = NodeActivity.Renaming;
+                RenameTextField.Show(Selection.activeObject);
             }
         }
 

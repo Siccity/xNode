@@ -17,7 +17,7 @@ namespace XNodeEditor
         private bool firstFrame = true;
 
         /// <summary> Show a rename text field for an asset in the node header. Will trigger reimport of the asset on apply.
-        public static RenameTextField Show(Object target, float width = 200)
+        public static RenameTextField Show(Object target)
         {
             RenameTextField textField = new RenameTextField();
             if (current != null)
@@ -38,6 +38,7 @@ namespace XNodeEditor
             input = GUILayout.TextField(input, NodeEditorResources.styles.nodeHeaderRename);
             EditorGUI.FocusTextInControl(inputControlName);
 
+            // Fixes textfield not being fully selected on multiple consecutive rename activates.
             if (firstFrame)
             {
                 TextEditor textEditor =
@@ -72,6 +73,9 @@ namespace XNodeEditor
 
         public void SaveAndClose()
         {
+            // Enabled undoing of renaming.
+            Undo.RecordObject(target, $"Renamed Node: [{target.name}] -> [{input}]");
+
             target.name = input;
             NodeEditor.GetEditor((Node)target, NodeEditorWindow.current).OnRename();
             if (!string.IsNullOrEmpty(AssetDatabase.GetAssetPath(target)))
@@ -88,7 +92,12 @@ namespace XNodeEditor
         {
             firstFrame = true;
             current = null;
+
+            EditorGUIUtility.editingTextField = false;
             NodeEditorWindow.current.Repaint();
+
+            // If another action has not taken precedence, then just return to an idle state.
+            // E.g Would not run if another action was taken such as clicking another node or clicking the empty graph.
             if (NodeEditorWindow.currentActivity == NodeEditorWindow.NodeActivity.Renaming)
             {
                 NodeEditorWindow.currentActivity = NodeEditorWindow.NodeActivity.Idle;

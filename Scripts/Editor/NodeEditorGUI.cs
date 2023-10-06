@@ -23,23 +23,44 @@ namespace XNodeEditor
         /// <summary> Executed after all other window GUI. Useful if Zoom is ruining your day. Automatically resets after being run.</summary>
         public event Action onLateGUI;
         private static readonly Vector3[] polyLineTempArray = new Vector3[2];
+        private bool graphFindAttempted;
+        private bool editModeEntered;
 
         protected virtual void OnGUI()
         {
             Event e = Event.current;
             Matrix4x4 m = GUI.matrix;
-            if (graph == null)
+            if (graph == null && !graphFindAttempted)
             {
-                return;
+                graphFindAttempted = true;
+                if (!OnOpen(graphInstanceID, 0))
+                {
+                    return;
+                }
+            }
+            else
+            {
+                graphFindAttempted = false;
             }
 
             ValidateGraphEditor();
             Controls();
 
             DrawGrid(position, zoom, panOffset);
-            DrawConnections();
-            DrawDraggedConnection();
-            DrawNodes();
+            // Hack used to prevent connections flickering when exiting play mode.
+            if (!editModeEntered)
+            {
+                DrawNodes();
+                DrawConnections();
+                DrawDraggedConnection();
+            }
+            else
+            {
+                DrawConnections();
+                DrawDraggedConnection();
+                DrawNodes();
+            }
+
             DrawSelectionBox();
             DrawTooltip();
             graphEditor.OnGUI();
@@ -99,7 +120,8 @@ namespace XNodeEditor
 
             // Draw tiled background
             GUI.DrawTextureWithTexCoords(rect, gridTex, new Rect(tileOffset, tileAmount));
-            GUI.DrawTextureWithTexCoords(rect, crossTex, new Rect(tileOffset + new Vector2(0.5f, 0.5f), tileAmount));
+            GUI.DrawTextureWithTexCoords(rect, crossTex,
+                new Rect(tileOffset + new Vector2(0.5f, 0.5f), tileAmount));
         }
 
         public void DrawSelectionBox()

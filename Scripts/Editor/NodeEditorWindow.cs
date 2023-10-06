@@ -57,6 +57,7 @@ namespace XNodeEditor
         private void OnEnable()
         {
             Undo.undoRedoPerformed += OnUndoRedoPerformed;
+            EditorApplication.playModeStateChanged += PlaymodeStateChanged;
 
             // Reload portConnectionPoints if there are any
             int length = _references.Length;
@@ -76,6 +77,7 @@ namespace XNodeEditor
         private void OnDisable()
         {
             Undo.undoRedoPerformed -= OnUndoRedoPerformed;
+            EditorApplication.playModeStateChanged -= PlaymodeStateChanged;
 
             // Cache portConnectionPoints before serialization starts
             int count = portConnectionPoints.Count;
@@ -90,8 +92,32 @@ namespace XNodeEditor
             }
         }
 
+        private void PlaymodeStateChanged(PlayModeStateChange playModeStateChange)
+        {
+            if (playModeStateChange == PlayModeStateChange.EnteredEditMode)
+            {
+                // graph = EditorUtility.InstanceIDToObject(graphInstanceID) as NodeGraph;
+                // OnOpen(graphInstanceID, 0);
+                // Repaint();
+                editModeEntered = true;
+            }
+            else if (playModeStateChange == PlayModeStateChange.ExitingPlayMode)
+            {
+                // OnOpen(graphInstanceID, 0);
+                // Repaint();
+                editModeEntered = false;
+            }
+
+            // if (!EditorApplication.isPlaying)
+            // {
+            //     OnOpen(graphInstanceID, 0);
+            //     Repaint();
+            // }
+        }
+
         public Dictionary<Node, Vector2> nodeSizes { get; } = new Dictionary<Node, Vector2>();
         public NodeGraph graph;
+        public int graphInstanceID;
         public Vector2 panOffset
         {
             get => _panOffset;
@@ -304,6 +330,8 @@ namespace XNodeEditor
             NodeEditorWindow w = GetWindow(typeof(NodeEditorWindow), false, "xNode", true) as NodeEditorWindow;
             w.wantsMouseMove = true;
             w.graph = graph;
+            w.graphInstanceID = graph.GetInstanceID();
+
             return w;
         }
 

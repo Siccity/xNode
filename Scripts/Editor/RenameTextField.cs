@@ -38,12 +38,15 @@ namespace XNodeEditor
             input = GUILayout.TextField(input, NodeEditorResources.styles.nodeHeaderRename);
             EditorGUI.FocusTextInControl(inputControlName);
 
-            // Fixes textfield not being fully selected on multiple consecutive rename activates.
             if (firstFrame)
             {
+                // Fixes textfield not being fully selected on multiple consecutive rename activates.
                 TextEditor textEditor =
                     (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
                 textEditor.SelectAll();
+
+                NodeEditor.GetEditor((Node)target, NodeEditorWindow.current).OnRenameActive();
+
                 firstFrame = false;
             }
 

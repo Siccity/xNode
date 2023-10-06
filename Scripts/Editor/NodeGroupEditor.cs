@@ -13,6 +13,12 @@ namespace XNodeEditor.NodeGroups
         private NodeGroup _group;
         private bool _isDragging;
         private Vector2 _size;
+        private float _currentHeight;
+
+        public override void OnCreate()
+        {
+            _currentHeight = group.height;
+        }
 
         public override void OnHeaderGUI()
         {
@@ -29,6 +35,7 @@ namespace XNodeEditor.NodeGroups
                     {
                         group.width = Mathf.Max(200, (int)e.mousePosition.x + 16);
                         group.height = Mathf.Max(100, (int)e.mousePosition.y - 34);
+                        _currentHeight = group.height;
                         NodeEditorWindow.current.Repaint();
                     }
 
@@ -132,8 +139,20 @@ namespace XNodeEditor.NodeGroups
                     break;
             }
 
-            // Control height of node
-            GUILayout.Space(group.height);
+            GUILayout.Space(_currentHeight);
+        }
+
+        public override void OnRenameActive()
+        {
+            _currentHeight += 30 - NodeEditorResources.styles.nodeHeaderRename.fixedHeight -
+                             NodeEditorResources.styles.nodeHeaderRename.margin.top +
+                             NodeEditorResources.styles.nodeHeaderRename.margin.bottom / 2;
+        }
+
+
+        public override void OnRename()
+        {
+            _currentHeight = group.height;
         }
 
         public override int GetWidth()

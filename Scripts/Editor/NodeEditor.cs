@@ -210,6 +210,9 @@ namespace XNodeEditor
             AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
         }
 
+        /// <summary> Called when entering into rename mode for this node. </summary>
+        public virtual void OnRenameActive() {}
+
         /// <summary> Called after this node's name has changed. </summary>
         public virtual void OnRename() {}
 

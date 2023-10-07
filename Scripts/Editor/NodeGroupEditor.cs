@@ -11,18 +11,29 @@ namespace XNodeEditor.NodeGroups
     {
         private NodeGroup group => _group != null ? _group : _group = target as NodeGroup;
         private NodeGroup _group;
+        public static Texture2D corner =>
+            _corner != null ? _corner : _corner = Resources.Load<Texture2D>("xnode_corner");
+        private static Texture2D _corner;
         private bool _isDragging;
         private Vector2 _size;
         private float _currentHeight;
+        private Vector2 _draggingOffset;
+
+        private const int mouseRectPadding = 4;
+        private const int mouseRectMargin = 30;
+
+        private GUIStyle headerStyle;
 
         public override void OnCreate()
         {
             _currentHeight = group.height;
+            headerStyle = new GUIStyle(NodeEditorResources.styles.nodeHeader);
+            headerStyle.fontSize = 18;
         }
 
         public override void OnHeaderGUI()
         {
-            GUILayout.Label(target.name, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
+            GUILayout.Label(target.name, headerStyle, GUILayout.Height(30));
         }
 
         public override void OnBodyGUI()
@@ -33,8 +44,8 @@ namespace XNodeEditor.NodeGroups
                 case EventType.MouseDrag:
                     if (_isDragging)
                     {
-                        group.width = Mathf.Max(200, (int)e.mousePosition.x + 16);
-                        group.height = Mathf.Max(100, (int)e.mousePosition.y - 34);
+                        group.width = Mathf.Max(200, (int)e.mousePosition.x + (int)_draggingOffset.x + 16);
+                        group.height = Mathf.Max(100, (int)e.mousePosition.y + (int)_draggingOffset.y - 34);
                         _currentHeight = group.height;
                         NodeEditorWindow.current.Repaint();
                     }
@@ -50,10 +61,13 @@ namespace XNodeEditor.NodeGroups
                     if (NodeEditorWindow.current.nodeSizes.TryGetValue(target, out _size))
                     {
                         // Mouse position checking is in node local space
-                        Rect lowerRight = new Rect(_size.x - 34, _size.y - 34, 30, 30);
+                        Rect lowerRight = new Rect(_size.x - (mouseRectMargin + mouseRectPadding),
+                            _size.y - (mouseRectMargin + mouseRectPadding), mouseRectMargin, mouseRectMargin);
                         if (lowerRight.Contains(e.mousePosition))
                         {
                             _isDragging = true;
+                            _draggingOffset = _size - e.mousePosition - new Vector2(GetBodyStyle().padding.right,
+                                GetBodyStyle().padding.bottom);
                         }
                     }
 
@@ -129,28 +143,29 @@ namespace XNodeEditor.NodeGroups
                     // Add scale cursors
                     if (NodeEditorWindow.current.nodeSizes.TryGetValue(target, out _size))
                     {
-                        Rect lowerRight = new Rect(target.position, new Vector2(30, 30));
-                        lowerRight.y += _size.y - 34;
-                        lowerRight.x += _size.x - 34;
+                        Rect lowerRight = new Rect(target.position, new Vector2(mouseRectMargin, mouseRectMargin));
+                        lowerRight.y += _size.y - (mouseRectMargin + mouseRectPadding);
+                        lowerRight.x += _size.x - (mouseRectMargin + mouseRectPadding);
                         lowerRight = NodeEditorWindow.current.GridToWindowRect(lowerRight);
-                        NodeEditorWindow.current.onLateGUI += () => AddMouseRect(lowerRight);
+                        NodeEditorWindow.current.onLateGUI += () => AddMouseRect(lowerRight, MouseCursor.ResizeUpLeft);
                     }
 
                     break;
             }
 
             GUILayout.Space(_currentHeight);
+            GUI.DrawTexture(new Rect(group.width - 34, group.height + 16, 24, 24), corner);
         }
 
         public override void OnRenameActive()
         {
             _currentHeight += 30 - NodeEditorResources.styles.nodeHeaderRename.fixedHeight -
-                             NodeEditorResources.styles.nodeHeaderRename.margin.top +
-                             NodeEditorResources.styles.nodeHeaderRename.margin.bottom / 2;
+                              NodeEditorResources.styles.nodeHeaderRename.margin.top +
+                              NodeEditorResources.styles.nodeHeaderRename.margin.bottom / 2;
         }
 
 
-        public override void OnRename()
+        public override void OnRenameDeactive()
         {
             _currentHeight = group.height;
         }
@@ -165,9 +180,14 @@ namespace XNodeEditor.NodeGroups
             return group.color;
         }
 
-        public static void AddMouseRect(Rect rect)
+        public override GUIStyle GetHeaderStyle()
         {
-            EditorGUIUtility.AddCursorRect(rect, MouseCursor.ResizeUpLeft);
+            return headerStyle;
+        }
+
+        public static void AddMouseRect(Rect rect, MouseCursor mouseCursor)
+        {
+            EditorGUIUtility.AddCursorRect(rect, mouseCursor);
         }
 
         public override void AddContextMenuItems(GenericMenu menu)

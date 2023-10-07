@@ -151,6 +151,11 @@ namespace XNodeEditor
             return NodeEditorResources.styles.nodeBody;
         }
 
+        public virtual GUIStyle GetHeaderStyle()
+        {
+            return NodeEditorResources.styles.nodeHeader;
+        }
+
         public virtual GUIStyle GetBodyHighlightStyle()
         {
             return NodeEditorResources.styles.nodeHighlight;
@@ -215,6 +220,9 @@ namespace XNodeEditor
 
         /// <summary> Called after this node's name has changed. </summary>
         public virtual void OnRename() {}
+
+        /// <summary> Called when exiting rename mode for this node. </summary>
+        public virtual void OnRenameDeactive() {}
 
         [AttributeUsage(AttributeTargets.Class)]
         public class CustomNodeEditorAttribute : Attribute,

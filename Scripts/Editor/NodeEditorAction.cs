@@ -429,7 +429,7 @@ namespace XNodeEditor
                             !(e.control || e.shift))
                         {
                             selectedReroutes.Clear();
-                            SelectNode(hoveredNode, false);
+                            // SelectNode(hoveredNode, false);
 
                             // Double click to rename node
                             if (isDoubleClick)
@@ -718,7 +718,7 @@ namespace XNodeEditor
 
         public void RenameSelectedNodeTextField()
         {
-            if (Selection.objects.Length == 1 && Selection.activeObject is Node)
+            if (Selection.activeObject is Node)
             {
                 currentActivity = NodeActivity.Renaming;
                 RenameTextField.Show(Selection.activeObject);

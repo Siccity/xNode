@@ -35,7 +35,10 @@ namespace XNodeEditor
         public void DrawRenameTextField()
         {
             GUI.SetNextControlName(inputControlName);
-            input = GUILayout.TextField(input, NodeEditorResources.styles.nodeHeaderRename);
+            GUIStyle stylesNodeHeaderRename = NodeEditorResources.styles.nodeHeaderRename;
+            stylesNodeHeaderRename.fontSize =
+                NodeEditor.GetEditor((Node)target, NodeEditorWindow.current).GetHeaderStyle().fontSize;
+            input = GUILayout.TextField(input, stylesNodeHeaderRename);
             EditorGUI.FocusTextInControl(inputControlName);
 
             if (firstFrame)
@@ -80,7 +83,6 @@ namespace XNodeEditor
             Undo.RecordObject(target, $"Renamed Node: [{target.name}] -> [{input}]");
 
             target.name = input;
-            NodeEditor.GetEditor((Node)target, NodeEditorWindow.current).OnRename();
             if (!string.IsNullOrEmpty(AssetDatabase.GetAssetPath(target)))
             {
                 AssetDatabase.SetMainObject((target as Node).graph, AssetDatabase.GetAssetPath(target));
@@ -97,6 +99,7 @@ namespace XNodeEditor
             current = null;
 
             EditorGUIUtility.editingTextField = false;
+            NodeEditor.GetEditor((Node)target, NodeEditorWindow.current).OnRenameDeactive();
             NodeEditorWindow.current.Repaint();
 
             // If another action has not taken precedence, then just return to an idle state.

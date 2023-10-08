@@ -46,7 +46,8 @@ namespace XNode
                     continue;
                 }
 
-                if (node.position.y > position.y + height + 30)
+                // Number at the end must match the fixedHeight for the group's header style.
+                if (node.position.y > position.y + height + 46)
                 {
                     continue;
                 }

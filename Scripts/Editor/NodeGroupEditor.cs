@@ -123,7 +123,7 @@ namespace XNodeEditor.NodeGroups
                 case EventType.MouseUp:
                     _isResizing = false;
                     // Select nodes inside the group
-                    if (false && Selection.Contains(target))
+                    if (Selection.Contains(target))
                     {
                         var selection = Selection.objects.ToList();
                         // Select Nodes
@@ -156,7 +156,7 @@ namespace XNodeEditor.NodeGroups
                                                 continue;
                                             }
 
-                                            if (p.y > group.position.y + group.height + 30)
+                                            if (p.y > group.position.y + group.height + headerStyle.fixedHeight)
                                             {
                                                 continue;
                                             }

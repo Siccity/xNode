@@ -40,7 +40,7 @@ namespace XNodeEditor
                 nodeHeader,
                 nodePorts,
                 nodeBody,
-                nodePadding,
+                nodeBodyPadding,
                 tooltip,
                 nodeHighlight;
 
@@ -74,8 +74,8 @@ namespace XNodeEditor
                 nodeHeaderLabelRename.normal.textColor = Color.white;
                 nodeHeaderLabelRename.margin = new RectOffset(24, 24, 8, 2);
 
-                nodePadding = new GUIStyle();
-                nodePadding.padding = new RectOffset(16, 16, 3, 16);
+                nodeBodyPadding = new GUIStyle();
+                nodeBodyPadding.padding = new RectOffset(16, 16, 3, 16);
 
                 nodeHeader = new GUIStyle();
                 nodeHeader.normal.background = NodeEditorResources.nodeHeader;

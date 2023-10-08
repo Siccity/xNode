@@ -196,6 +196,11 @@ namespace XNodeEditor
             return NodeEditorResources.styles.nodeBody;
         }
 
+        public virtual RectOffset GetBodyPadding()
+        {
+            return NodeEditorResources.styles.nodeBodyPadding.padding;
+        }
+
         public virtual GUIStyle GetHeaderLabelStyle()
         {
             return NodeEditorResources.styles.nodeHeaderLabel;

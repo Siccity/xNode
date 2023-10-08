@@ -51,10 +51,12 @@ namespace XNodeEditor.NodeGroups
         {
             NodeEditorWindow.current.wantsMouseMove = true;
             Event e = Event.current;
+
+            bool sizeAvailable = NodeEditorWindow.current.nodeSizes.TryGetValue(target, out _size);
             switch (e.type)
             {
                 case EventType.MouseMove:
-                    if (NodeEditorWindow.current.nodeSizes.TryGetValue(target, out _size))
+                    if (sizeAvailable)
                     {
                         bool initHovering = _isResizeHovering;
                         // Mouse position checking is in node local space
@@ -83,7 +85,8 @@ namespace XNodeEditor.NodeGroups
                             e.mousePosition.x + _draggingOffset.x + (mouseRectMargin + mouseRectPadding));
                         // magic numbers - otherwise resizing will jump vertically.
                         group.height = (int)Mathf.Max(100,
-                            e.mousePosition.y + _draggingOffset.y - (31 + (30 - mouseRectMargin)));
+                            e.mousePosition.y + _draggingOffset.y -
+                            (headerStyle.fixedHeight - mouseRectMargin - mouseRectPadding));
                         _currentHeight = group.height;
                         NodeEditorWindow.current.Repaint();
                     }
@@ -104,7 +107,7 @@ namespace XNodeEditor.NodeGroups
                                                        e.mousePosition));
                     }
 
-                    if (NodeEditorWindow.current.nodeSizes.TryGetValue(target, out _size))
+                    if (sizeAvailable)
                     {
                         // Mouse position checking is in node local space
                         Rect lowerRight = new Rect(_size.x - (mouseRectMargin + mouseRectPadding),
@@ -186,7 +189,7 @@ namespace XNodeEditor.NodeGroups
                     }
 
                     // Add scale cursors
-                    if (NodeEditorWindow.current.nodeSizes.TryGetValue(target, out _size))
+                    if (sizeAvailable)
                     {
                         Rect lowerRight = new Rect(target.position, new Vector2(mouseRectMargin, mouseRectMargin));
                         lowerRight.y += _size.y - (mouseRectMargin + mouseRectPadding);
@@ -200,7 +203,7 @@ namespace XNodeEditor.NodeGroups
 
             GUILayout.Space(_currentHeight);
 
-            if (NodeEditorWindow.current.nodeSizes.TryGetValue(target, out _size))
+            if (sizeAvailable)
             {
                 Color initColor = GUI.color;
                 GUI.color = _isResizeHovering
@@ -234,6 +237,11 @@ namespace XNodeEditor.NodeGroups
         public override GUIStyle GetHeaderLabelStyle()
         {
             return headerLabelStyle;
+        }
+
+        public override RectOffset GetBodyPadding()
+        {
+            return new RectOffset();
         }
 
         public static void AddMouseRect(Rect rect, MouseCursor mouseCursor)

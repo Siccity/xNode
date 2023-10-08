@@ -723,13 +723,11 @@ namespace XNodeEditor
 
                 GUI.color = nodeEditor.GetBodyColor();
                 GUIStyle bodyStyle = new GUIStyle(nodeEditor.GetBodyStyle());
+                bodyStyle.padding = nodeEditor.GetBodyPadding();
                 GUILayout.BeginVertical(bodyStyle);
 
                 GUI.color = guiColor;
-                GUIStyle bodyPaddingStyle = NodeEditorResources.styles.nodePadding;
-                GUILayout.BeginVertical(bodyPaddingStyle);
                 nodeEditor.OnBodyGUI();
-                GUILayout.EndVertical();
 
                 GUILayout.EndVertical();
 

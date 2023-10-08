@@ -35,9 +35,9 @@ namespace XNodeEditor
         public void DrawRenameTextField()
         {
             GUI.SetNextControlName(inputControlName);
-            GUIStyle stylesNodeHeaderRename = NodeEditorResources.styles.nodeHeaderRename;
+            GUIStyle stylesNodeHeaderRename = NodeEditorResources.styles.nodeHeaderLabelRename;
             stylesNodeHeaderRename.fontSize =
-                NodeEditor.GetEditor((Node)target, NodeEditorWindow.current).GetHeaderStyle().fontSize;
+                NodeEditor.GetEditor((Node)target, NodeEditorWindow.current).GetHeaderLabelStyle().fontSize;
             input = GUILayout.TextField(input, stylesNodeHeaderRename);
             EditorGUI.FocusTextInControl(inputControlName);
 

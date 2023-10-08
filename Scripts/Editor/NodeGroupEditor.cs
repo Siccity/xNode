@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using XNode;
@@ -14,10 +15,12 @@ namespace XNodeEditor.NodeGroups
         public static Texture2D corner =>
             _corner != null ? _corner : _corner = Resources.Load<Texture2D>("xnode_corner");
         private static Texture2D _corner;
-        private bool _isDragging;
+        private bool _isResizing;
         private Vector2 _size;
         private float _currentHeight;
         private Vector2 _draggingOffset;
+
+        private List<Vector2> _childNodesDragOffsets;
 
         private const int mouseRectPadding = 4;
         private const int mouseRectMargin = 30;
@@ -27,7 +30,7 @@ namespace XNodeEditor.NodeGroups
         public override void OnCreate()
         {
             _currentHeight = group.height;
-            headerStyle = new GUIStyle(NodeEditorResources.styles.nodeHeader);
+            headerStyle = new GUIStyle(NodeEditorResources.styles.nodeHeaderLabel);
             headerStyle.fontSize = 18;
         }
 
@@ -38,11 +41,12 @@ namespace XNodeEditor.NodeGroups
 
         public override void OnBodyGUI()
         {
+            NodeEditorWindow.current.wantsMouseMove = true;
             Event e = Event.current;
             switch (e.type)
             {
                 case EventType.MouseDrag:
-                    if (_isDragging)
+                    if (_isResizing)
                     {
                         group.width = Mathf.Max(200, (int)e.mousePosition.x + (int)_draggingOffset.x + 16);
                         group.height = Mathf.Max(100, (int)e.mousePosition.y + (int)_draggingOffset.y - 34);
@@ -58,6 +62,14 @@ namespace XNodeEditor.NodeGroups
                         return;
                     }
 
+                    _childNodesDragOffsets = new List<Vector2>(group.GetNodes().Count);
+                    foreach (Node node in group.GetNodes())
+                    {
+                        _childNodesDragOffsets.Add(node.position -
+                                                   NodeEditorWindow.current.WindowToGridPosition(
+                                                       e.mousePosition));
+                    }
+
                     if (NodeEditorWindow.current.nodeSizes.TryGetValue(target, out _size))
                     {
                         // Mouse position checking is in node local space
@@ -65,7 +77,7 @@ namespace XNodeEditor.NodeGroups
                             _size.y - (mouseRectMargin + mouseRectPadding), mouseRectMargin, mouseRectMargin);
                         if (lowerRight.Contains(e.mousePosition))
                         {
-                            _isDragging = true;
+                            _isResizing = true;
                             _draggingOffset = _size - e.mousePosition - new Vector2(GetBodyStyle().padding.right,
                                 GetBodyStyle().padding.bottom);
                         }
@@ -73,9 +85,9 @@ namespace XNodeEditor.NodeGroups
 
                     break;
                 case EventType.MouseUp:
-                    _isDragging = false;
+                    _isResizing = false;
                     // Select nodes inside the group
-                    if (Selection.Contains(target))
+                    if (false && Selection.Contains(target))
                     {
                         var selection = Selection.objects.ToList();
                         // Select Nodes
@@ -159,9 +171,9 @@ namespace XNodeEditor.NodeGroups
 
         public override void OnRenameActive()
         {
-            _currentHeight += 30 - NodeEditorResources.styles.nodeHeaderRename.fixedHeight -
-                              NodeEditorResources.styles.nodeHeaderRename.margin.top +
-                              NodeEditorResources.styles.nodeHeaderRename.margin.bottom / 2;
+            _currentHeight += 30 - NodeEditorResources.styles.nodeHeaderLabelRename.fixedHeight -
+                              NodeEditorResources.styles.nodeHeaderLabelRename.margin.top +
+                              NodeEditorResources.styles.nodeHeaderLabelRename.margin.bottom / 2;
         }
 
 
@@ -175,12 +187,7 @@ namespace XNodeEditor.NodeGroups
             return group.width;
         }
 
-        public override Color GetTint()
-        {
-            return group.color;
-        }
-
-        public override GUIStyle GetHeaderStyle()
+        public override GUIStyle GetHeaderLabelStyle()
         {
             return headerStyle;
         }

@@ -16,6 +16,8 @@ namespace XNodeEditor
     public static class NodeEditorReflection
     {
         [NonSerialized] private static Dictionary<Type, Color> nodeTint;
+        [NonSerialized] private static Dictionary<Type, Color> nodeHeaderColor;
+        [NonSerialized] private static Dictionary<Type, Color> nodeBodyColor;
         [NonSerialized] private static Dictionary<Type, int> nodeWidth;
         /// <summary> All available node types </summary>
         public static Type[] nodeTypes => _nodeTypes != null ? _nodeTypes : _nodeTypes = GetNodeTypes();
@@ -37,7 +39,7 @@ namespace XNodeEditor
             return GetDerivedTypes(typeof(Node));
         }
 
-        /// <summary> Custom node tint colors defined with [NodeColor(r, g, b)] </summary>
+        /// <summary> Custom node tint colors defined with [NodeTint(r, g, b)] </summary>
         public static bool TryGetAttributeTint(this Type nodeType, out Color tint)
         {
             if (nodeTint == null)
@@ -46,6 +48,29 @@ namespace XNodeEditor
             }
 
             return nodeTint.TryGetValue(nodeType, out tint);
+        }
+
+        /// <summary> Custom node header colors defined with [NodeColorHeader(r, g, b)] </summary>
+        public static bool TryGetAttributeHeader(this Type nodeType, out Color headerColor)
+        {
+            if (nodeHeaderColor == null)
+            {
+                CacheAttributes<Color, Node.NodeColorHeaderAttribute>(ref nodeHeaderColor, x => x.color);
+            }
+
+            return nodeHeaderColor.TryGetValue(nodeType, out headerColor);
+        }
+
+
+        /// <summary> Custom node body colors defined with [NodeColorBody(r, g, b)] </summary>
+        public static bool TryGetAttributeBody(this Type nodeType, out Color bodyColor)
+        {
+            if (nodeBodyColor == null)
+            {
+                CacheAttributes<Color, Node.NodeColorBodyAttribute>(ref nodeBodyColor, x => x.color);
+            }
+
+            return nodeBodyColor.TryGetValue(nodeType, out bodyColor);
         }
 
         /// <summary> Get custom node widths defined with [NodeWidth(width)] </summary>

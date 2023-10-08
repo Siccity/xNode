@@ -135,7 +135,9 @@ namespace XNodeEditor
 
                             Repaint();
                         }
-                        else if (currentActivity == NodeActivity.HoldNode)
+                        else if (IsHoveringNode && IsHoveringTitle(hoveredNode) &&
+                                 currentActivity == NodeActivity.HoldNode)
+
                         {
                             RecalculateDragOffsets(e);
                             isDoubleClick = false;
@@ -241,11 +243,11 @@ namespace XNodeEditor
                     else if (e.button == 1 || e.button == 2)
                     {
                         //check drag threshold for larger screens
-                        if (e.delta.magnitude > dragThreshold)
-                        {
-                            panOffset += e.delta * zoom;
-                            isPanning = true;
-                        }
+                        // if (e.delta.magnitude > dragThreshold)
+                        // {
+                        // }
+                        isPanning = true;
+                        panOffset += e.delta * zoom;
                     }
 
                     break;
@@ -425,7 +427,8 @@ namespace XNodeEditor
                         }
 
                         // If click node header, select it.
-                        if ((currentActivity == NodeActivity.HoldNode || !IsSelectingRenamingObject) &&
+                        if (IsHoveringNode && IsHoveringTitle(hoveredNode) &&
+                            (currentActivity == NodeActivity.HoldNode || !IsSelectingRenamingObject) &&
                             !(e.control || e.shift))
                         {
                             selectedReroutes.Clear();
@@ -459,7 +462,7 @@ namespace XNodeEditor
 
                         Repaint();
                     }
-                    else if (e.button == 1 || e.button == 2)
+                    else if (e.button == 1)
                     {
                         if (!isPanning)
                         {
@@ -896,7 +899,7 @@ namespace XNodeEditor
             }
         }
 
-        private bool IsHoveringTitle(Node node)
+        public bool IsHoveringTitle(Node node)
         {
             Vector2 mousePos = Event.current.mousePosition;
             //Get node position

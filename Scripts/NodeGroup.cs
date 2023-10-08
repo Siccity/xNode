@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
 
 namespace XNode
 {
+    [NodeColorHeader(0.2f, 0.2f, 0.2f, 0.5f)]
+    [NodeColorBody(0.25f, 0.25f, 0.25f, 0.35f)]
     [CreateNodeMenu("Group")]
     public class NodeGroup : Node
     {
         public int width = 400;
         public int height = 400;
-        public Color color = new Color(1f, 1f, 1f, 0.1f);
 
         public override object GetValue(NodePort port)
         {

@@ -557,7 +557,7 @@ namespace XNode
             }
         }
 
-        /// <summary> Specify a color for this node type </summary>
+        /// <summary> Specify a color tint for this node type </summary>
         [AttributeUsage(AttributeTargets.Class)]
         public class NodeTintAttribute : Attribute
         {
@@ -586,6 +586,76 @@ namespace XNode
             public NodeTintAttribute(byte r, byte g, byte b)
             {
                 color = new Color32(r, g, b, byte.MaxValue);
+            }
+        }
+
+
+        /// <summary> Specify a header color for this node type </summary>
+        [AttributeUsage(AttributeTargets.Class)]
+        public class NodeColorHeaderAttribute : Attribute
+        {
+            public Color color;
+
+            /// <summary> Specify a color for this node type </summary>
+            /// <param name="r"> Red [0.0f .. 1.0f] </param>
+            /// <param name="g"> Green [0.0f .. 1.0f] </param>
+            /// <param name="b"> Blue [0.0f .. 1.0f] </param>
+            /// <param name="a"> Alpha [0.0f .. 1.0f] </param>
+            public NodeColorHeaderAttribute(float r, float g, float b, float a = 1.0f)
+            {
+                color = new Color(r, g, b, a);
+            }
+
+            /// <summary> Specify a color for this node type </summary>
+            /// <param name="hex"> HEX color value </param>
+            public NodeColorHeaderAttribute(string hex)
+            {
+                ColorUtility.TryParseHtmlString(hex, out color);
+            }
+
+            /// <summary> Specify a color for this node type </summary>
+            /// <param name="r"> Red [0 .. 255] </param>
+            /// <param name="g"> Green [0 .. 255] </param>
+            /// <param name="b"> Blue [0 .. 255] </param>
+            /// <param name="a"> Alpha [0 .. 255] </param>
+            public NodeColorHeaderAttribute(byte r, byte g, byte b, byte a = byte.MaxValue)
+            {
+                color = new Color32(r, g, b, a);
+            }
+        }
+
+
+        /// <summary> Specify a body color for this node type </summary>
+        [AttributeUsage(AttributeTargets.Class)]
+        public class NodeColorBodyAttribute : Attribute
+        {
+            public Color color;
+
+            /// <summary> Specify a color for this node type </summary>
+            /// <param name="r"> Red [0.0f .. 1.0f] </param>
+            /// <param name="g"> Green [0.0f .. 1.0f] </param>
+            /// <param name="b"> Blue [0.0f .. 1.0f] </param>
+            /// <param name="a"> Alpha [0.0f .. 1.0f] </param>
+            public NodeColorBodyAttribute(float r, float g, float b, float a = 1.0f)
+            {
+                color = new Color(r, g, b, a);
+            }
+
+            /// <summary> Specify a color for this node type </summary>
+            /// <param name="hex"> HEX color value </param>
+            public NodeColorBodyAttribute(string hex)
+            {
+                ColorUtility.TryParseHtmlString(hex, out color);
+            }
+
+            /// <summary> Specify a color for this node type </summary>
+            /// <param name="r"> Red [0 .. 255] </param>
+            /// <param name="g"> Green [0 .. 255] </param>
+            /// <param name="b"> Blue [0 .. 255] </param>
+            /// <param name="a"> Alpha [0 .. 255] </param>
+            public NodeColorBodyAttribute(byte r, byte g, byte b, byte a = byte.MaxValue)
+            {
+                color = new Color32(r, g, b, a);
             }
         }
 

@@ -113,8 +113,8 @@ namespace XNodeEditor
             Vector2 tileOffset = new Vector2(xOffset, yOffset);
 
             // Amount of tiles
-            float tileAmountX = Mathf.Round(rect.size.x * zoom) / gridTex.width;
-            float tileAmountY = Mathf.Round(rect.size.y * zoom) / gridTex.height;
+            float tileAmountX = rect.size.x * zoom / gridTex.width;
+            float tileAmountY = rect.size.y * zoom / gridTex.height;
 
             Vector2 tileAmount = new Vector2(tileAmountX, tileAmountY);
 
@@ -694,9 +694,7 @@ namespace XNodeEditor
                 }
                 else
                 {
-                    GUIStyle style = new GUIStyle(nodeEditor.GetBodyStyle());
-                    GUI.color = nodeEditor.GetTint();
-                    GUILayout.BeginVertical(style);
+                    GUILayout.BeginVertical();
                 }
 
                 GUI.color = guiColor;
@@ -709,10 +707,27 @@ namespace XNodeEditor
                 }
                 else
                 {
+                    GUI.color = nodeEditor.GetHeaderColor();
+                    GUIStyle style = new GUIStyle(nodeEditor.GetHeaderStyle());
+                    GUILayout.BeginVertical(style);
+
+                    GUI.color = guiColor;
                     nodeEditor.OnHeaderGUI();
+
+                    GUILayout.EndVertical();
                 }
 
+                GUI.color = nodeEditor.GetBodyColor();
+                GUIStyle bodyStyle = new GUIStyle(nodeEditor.GetBodyStyle());
+                GUILayout.BeginVertical(bodyStyle);
+
+                GUI.color = guiColor;
+                GUIStyle bodyPaddingStyle = NodeEditorResources.styles.nodePadding;
+                GUILayout.BeginVertical(bodyPaddingStyle);
                 nodeEditor.OnBodyGUI();
+                GUILayout.EndVertical();
+
+                GUILayout.EndVertical();
 
                 //If user changed a value, notify other scripts through onUpdateNode
                 if (EditorGUI.EndChangeCheck())
@@ -809,6 +824,7 @@ namespace XNodeEditor
                 }
 
                 GUILayout.EndArea();
+                nodeEditor.OnControlsGUI();
             }
 
             if (e.type != EventType.Layout && currentActivity == NodeActivity.DragGrid)

@@ -96,23 +96,12 @@ namespace XNodeEditor
         {
             if (playModeStateChange == PlayModeStateChange.EnteredEditMode)
             {
-                // graph = EditorUtility.InstanceIDToObject(graphInstanceID) as NodeGraph;
-                // OnOpen(graphInstanceID, 0);
-                // Repaint();
                 editModeEntered = true;
             }
             else if (playModeStateChange == PlayModeStateChange.ExitingPlayMode)
             {
-                // OnOpen(graphInstanceID, 0);
-                // Repaint();
                 editModeEntered = false;
             }
-
-            // if (!EditorApplication.isPlaying)
-            // {
-            //     OnOpen(graphInstanceID, 0);
-            //     Repaint();
-            // }
         }
 
         public Dictionary<Node, Vector2> nodeSizes { get; } = new Dictionary<Node, Vector2>();
@@ -279,9 +268,8 @@ namespace XNodeEditor
         public Vector2 GridToWindowPositionNoClipped(Vector2 gridPosition)
         {
             Vector2 center = position.size * 0.5f;
-            // UI Sharpness complete fix - Round final offset not panOffset
-            float xOffset = Mathf.Round(center.x * zoom + (panOffset.x + gridPosition.x));
-            float yOffset = Mathf.Round(center.y * zoom + (panOffset.y + gridPosition.y));
+            float xOffset = center.x * zoom + (panOffset.x + gridPosition.x);
+            float yOffset = center.y * zoom + (panOffset.y + gridPosition.y);
             return new Vector2(xOffset, yOffset);
         }
 

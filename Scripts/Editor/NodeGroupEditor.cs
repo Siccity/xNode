@@ -16,6 +16,7 @@ namespace XNodeEditor.NodeGroups
             _corner != null ? _corner : _corner = Resources.Load<Texture2D>("xnode_corner");
         private static Texture2D _corner;
         private bool _isResizing;
+        private bool _isResizeHovering;
         private Vector2 _size;
         private float _currentHeight;
         private Vector2 _draggingOffset;
@@ -26,17 +27,24 @@ namespace XNodeEditor.NodeGroups
         private const int mouseRectMargin = 30;
 
         private GUIStyle headerStyle;
+        private GUIStyle headerLabelStyle;
 
         public override void OnCreate()
         {
             _currentHeight = group.height;
-            headerStyle = new GUIStyle(NodeEditorResources.styles.nodeHeaderLabel);
-            headerStyle.fontSize = 18;
+            headerLabelStyle = new GUIStyle(NodeEditorResources.styles.nodeHeaderLabel);
+            headerLabelStyle.fontSize = 24;
+
+            headerStyle = new GUIStyle(NodeEditorResources.styles.nodeHeader);
+            headerStyle.fixedHeight += 18;
         }
 
         public override void OnHeaderGUI()
         {
-            GUILayout.Label(target.name, headerStyle, GUILayout.Height(30));
+            Color initColor = GUI.contentColor;
+            GUI.contentColor = new Color(0.6f, 0.6f, 0.6f, 1.0f);
+            GUILayout.Label(target.name, headerLabelStyle);
+            GUI.contentColor = initColor;
         }
 
         public override void OnBodyGUI()
@@ -45,11 +53,37 @@ namespace XNodeEditor.NodeGroups
             Event e = Event.current;
             switch (e.type)
             {
+                case EventType.MouseMove:
+                    if (NodeEditorWindow.current.nodeSizes.TryGetValue(target, out _size))
+                    {
+                        bool initHovering = _isResizeHovering;
+                        // Mouse position checking is in node local space
+                        Rect lowerRight = new Rect(_size.x - (mouseRectMargin + mouseRectPadding),
+                            _size.y - (mouseRectMargin + mouseRectPadding), mouseRectMargin, mouseRectMargin);
+                        if (lowerRight.Contains(e.mousePosition))
+                        {
+                            _isResizeHovering = true;
+                        }
+                        else
+                        {
+                            _isResizeHovering = false;
+                        }
+
+                        if (initHovering != _isResizeHovering)
+                        {
+                            NodeEditorWindow.current.Repaint();
+                        }
+                    }
+
+                    break;
                 case EventType.MouseDrag:
                     if (_isResizing)
                     {
-                        group.width = Mathf.Max(200, (int)e.mousePosition.x + (int)_draggingOffset.x + 16);
-                        group.height = Mathf.Max(100, (int)e.mousePosition.y + (int)_draggingOffset.y - 34);
+                        group.width = (int)Mathf.Max(200,
+                            e.mousePosition.x + _draggingOffset.x + (mouseRectMargin + mouseRectPadding));
+                        // magic numbers - otherwise resizing will jump vertically.
+                        group.height = (int)Mathf.Max(100,
+                            e.mousePosition.y + _draggingOffset.y - (31 + (30 - mouseRectMargin)));
                         _currentHeight = group.height;
                         NodeEditorWindow.current.Repaint();
                     }
@@ -78,8 +112,7 @@ namespace XNodeEditor.NodeGroups
                         if (lowerRight.Contains(e.mousePosition))
                         {
                             _isResizing = true;
-                            _draggingOffset = _size - e.mousePosition - new Vector2(GetBodyStyle().padding.right,
-                                GetBodyStyle().padding.bottom);
+                            _draggingOffset = lowerRight.position - e.mousePosition;
                         }
                     }
 
@@ -166,16 +199,22 @@ namespace XNodeEditor.NodeGroups
             }
 
             GUILayout.Space(_currentHeight);
-            GUI.DrawTexture(new Rect(group.width - 34, group.height + 16, 24, 24), corner);
-        }
 
-        public override void OnRenameActive()
-        {
-            _currentHeight += 30 - NodeEditorResources.styles.nodeHeaderLabelRename.fixedHeight -
-                              NodeEditorResources.styles.nodeHeaderLabelRename.margin.top +
-                              NodeEditorResources.styles.nodeHeaderLabelRename.margin.bottom / 2;
+            if (NodeEditorWindow.current.nodeSizes.TryGetValue(target, out _size))
+            {
+                Color initColor = GUI.color;
+                GUI.color = _isResizeHovering
+                    ? NodeEditorPreferences.GetSettings().resizeIconHoverColor
+                    : NodeEditorPreferences.GetSettings().resizeIconColor;
+                GUI.DrawTexture(
+                    new Rect(_size.x - (mouseRectMargin + mouseRectPadding),
+                        _size.y - (mouseRectMargin + mouseRectPadding),
+                        24,
+                        24),
+                    corner);
+                GUI.color = initColor;
+            }
         }
-
 
         public override void OnRenameDeactive()
         {
@@ -187,9 +226,14 @@ namespace XNodeEditor.NodeGroups
             return group.width;
         }
 
-        public override GUIStyle GetHeaderLabelStyle()
+        public override GUIStyle GetHeaderStyle()
         {
             return headerStyle;
+        }
+
+        public override GUIStyle GetHeaderLabelStyle()
+        {
+            return headerLabelStyle;
         }
 
         public static void AddMouseRect(Rect rect, MouseCursor mouseCursor)

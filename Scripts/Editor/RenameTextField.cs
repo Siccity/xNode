@@ -38,6 +38,10 @@ namespace XNodeEditor
             GUIStyle stylesNodeHeaderRename = NodeEditorResources.styles.nodeHeaderLabelRename;
             stylesNodeHeaderRename.fontSize =
                 NodeEditor.GetEditor((Node)target, NodeEditorWindow.current).GetHeaderLabelStyle().fontSize;
+            stylesNodeHeaderRename.fixedHeight = NodeEditor.GetEditor((Node)target, NodeEditorWindow.current)
+                .GetHeaderLabelStyle().fixedHeight;
+            stylesNodeHeaderRename.padding = NodeEditor.GetEditor((Node)target, NodeEditorWindow.current)
+                .GetHeaderLabelStyle().padding;
             input = GUILayout.TextField(input, stylesNodeHeaderRename);
             EditorGUI.FocusTextInControl(inputControlName);
 

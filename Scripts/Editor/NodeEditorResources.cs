@@ -64,14 +64,15 @@ namespace XNodeEditor
                 nodeHeaderLabel = new GUIStyle();
                 nodeHeaderLabel.alignment = TextAnchor.MiddleCenter;
                 nodeHeaderLabel.fontStyle = FontStyle.Bold;
+                nodeHeaderLabel.stretchHeight = true;
                 nodeHeaderLabel.normal.textColor = Color.white;
 
                 nodeHeaderLabelRename = new GUIStyle(GUI.skin.textField);
                 nodeHeaderLabelRename.alignment = TextAnchor.MiddleCenter;
                 nodeHeaderLabelRename.fontStyle = FontStyle.Bold;
+                nodeHeaderLabelRename.stretchHeight = true;
                 nodeHeaderLabelRename.normal.textColor = Color.white;
-                nodeHeaderLabelRename.fixedHeight = 18;
-                nodeHeaderLabelRename.margin = new RectOffset(5, 5, 10, 8);
+                nodeHeaderLabelRename.margin = new RectOffset(24, 24, 8, 2);
 
                 nodePadding = new GUIStyle();
                 nodePadding.padding = new RectOffset(16, 16, 3, 16);
@@ -79,8 +80,8 @@ namespace XNodeEditor
                 nodeHeader = new GUIStyle();
                 nodeHeader.normal.background = NodeEditorResources.nodeHeader;
                 nodeHeader.border = new RectOffset(32, 32, 16, 0);
-                // nodeHeader.fixedHeight = 27;
-                nodeHeader.padding = new RectOffset(0, 0, 1, 0);
+                nodeHeader.fixedHeight = 28;
+                nodeHeader.padding = new RectOffset(0, 0, 6, 0);
                 // nodeHeader.padding = new RectOffset(16, 16, 3, 16);
 
                 nodePorts = new GUIStyle();

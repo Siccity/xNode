@@ -71,6 +71,8 @@ namespace XNodeEditor
             public Color32 bgPortsColor = new Color32(65, 67, 70, 255);
             public Color32 bgBodyColor = new Color32(65, 67, 70, 255);
             public Color32 highlightColor = new Color32(255, 255, 255, 255);
+            public Color32 resizeIconColor = new Color32(255, 255, 255, 26);
+            public Color32 resizeIconHoverColor = new Color32(255, 255, 255, 100);
             public bool gridSnap = true;
             public bool autoSave = true;
             public bool openOnCreate = true;
@@ -276,6 +278,9 @@ namespace XNodeEditor
             settings.bgHeaderColor = EditorGUILayout.ColorField("Header Background", settings.bgHeaderColor);
             settings.bgPortsColor = EditorGUILayout.ColorField("Ports Background", settings.bgPortsColor);
             settings.bgBodyColor = EditorGUILayout.ColorField("Body Background", settings.bgBodyColor);
+            settings.resizeIconColor = EditorGUILayout.ColorField("Resize Icon Color", settings.resizeIconColor);
+            settings.resizeIconHoverColor =
+                EditorGUILayout.ColorField("Resize Icon Hover Color", settings.resizeIconHoverColor);
             settings.highlightColor = EditorGUILayout.ColorField("Selection", settings.highlightColor);
             EditorGUILayout.Space();
             settings.noodlePath = (NoodlePath)EditorGUILayout.EnumPopup("Noodle path", settings.noodlePath);

@@ -918,7 +918,8 @@ namespace XNodeEditor
                 width = 200;
             }
 
-            Rect windowRect = new Rect(nodePos, new Vector2(width / zoom, 30 / zoom));
+            Rect windowRect = new Rect(nodePos, new Vector2(width / zoom, NodeEditor.GetEditor(node, current)
+                .GetHeaderStyle().fixedHeight / zoom));
             return windowRect.Contains(mousePos);
         }
 

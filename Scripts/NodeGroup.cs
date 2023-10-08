@@ -2,8 +2,8 @@
 
 namespace XNode
 {
-    [NodeColorHeader(0.2f, 0.2f, 0.2f, 0.5f)]
-    [NodeColorBody(0.25f, 0.25f, 0.25f, 0.35f)]
+    [NodeColorHeader(0.1f, 0.1f, 0.1f, 0.35f)]
+    [NodeColorBody(0.1f, 0.1f, 0.1f, 0.35f)]
     [CreateNodeMenu("Group")]
     public class NodeGroup : Node
     {

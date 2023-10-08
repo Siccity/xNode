@@ -688,12 +688,12 @@ namespace XNodeEditor
 
                 if (selected)
                 {
-                    GUIStyle style = new GUIStyle(nodeEditor.GetBodyStyle());
+                    GUIStyle styleBody = new GUIStyle(nodeEditor.GetBodyStyle());
                     GUIStyle highlightStyle = new GUIStyle(nodeEditor.GetBodyHighlightStyle());
-                    highlightStyle.padding = style.padding;
-                    style.padding = new RectOffset();
+                    highlightStyle.padding = styleBody.padding;
+                    styleBody.padding = new RectOffset();
                     GUI.color = nodeEditor.GetTint();
-                    GUILayout.BeginVertical(style);
+                    GUILayout.BeginVertical(styleBody);
                     GUI.color = NodeEditorPreferences.GetSettings().highlightColor;
                     GUILayout.BeginVertical(new GUIStyle(highlightStyle));
                 }
@@ -706,21 +706,20 @@ namespace XNodeEditor
                 EditorGUI.BeginChangeCheck();
 
                 //Draw node contents
+                GUI.color = nodeEditor.GetHeaderColor();
+                GUIStyle styleHeader = new GUIStyle(nodeEditor.GetHeaderStyle());
+                GUILayout.BeginVertical(styleHeader);
+                GUI.color = guiColor;
                 if (currentActivity == NodeActivity.Renaming && Selection.activeObject == node)
                 {
                     RenameTextField.current.DrawRenameTextField();
                 }
                 else
                 {
-                    GUI.color = nodeEditor.GetHeaderColor();
-                    GUIStyle style = new GUIStyle(nodeEditor.GetHeaderStyle());
-                    GUILayout.BeginVertical(style);
-
-                    GUI.color = guiColor;
                     nodeEditor.OnHeaderGUI();
-
-                    GUILayout.EndVertical();
                 }
+
+                GUILayout.EndVertical();
 
                 GUI.color = nodeEditor.GetBodyColor();
                 GUIStyle bodyStyle = new GUIStyle(nodeEditor.GetBodyStyle());

@@ -31,7 +31,7 @@ namespace XNodeEditor
 
         public virtual void OnHeaderGUI()
         {
-            GUILayout.Label(target.name, NodeEditorResources.styles.nodeHeaderLabel, GUILayout.Height(30));
+            GUILayout.Label(target.name, NodeEditorResources.styles.nodeHeaderLabel);
         }
 
         /// <summary> Draws standard field editors for all public fields </summary>

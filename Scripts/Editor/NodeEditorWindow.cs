@@ -142,7 +142,7 @@ namespace XNodeEditor
                 }
             }
 
-            dragThreshold = Math.Max(1f, Screen.width / 1000f);
+            // dragThreshold = Math.Max(1f, Screen.width / 1000f);
         }
 
         private void OnLostFocus()

@@ -79,7 +79,8 @@ namespace XNodeEditor
         private Rect selectionBox;
         private bool isDoubleClick;
         private Vector2 lastMousePosition;
-        private float dragThreshold = 1f;
+        private Vector2 lastMouseDownPosition;
+        private readonly float dragThreshold = 5f;
 
         public void Controls()
         {
@@ -242,17 +243,19 @@ namespace XNodeEditor
                     }
                     else if (e.button == 1 || e.button == 2)
                     {
-                        //check drag threshold for larger screens
-                        // if (e.delta.magnitude > dragThreshold)
-                        // {
-                        // }
-                        isPanning = true;
-                        panOffset += e.delta * zoom;
+                        // Check drag threshold for larger screens
+                        if (isPanning || (lastMouseDownPosition - e.mousePosition).sqrMagnitude >
+                            dragThreshold * dragThreshold)
+                        {
+                            isPanning = true;
+                            panOffset += e.delta * zoom;
+                        }
                     }
 
                     break;
                 case EventType.MouseDown:
                     Repaint();
+                    lastMouseDownPosition = e.mousePosition;
                     if (e.button == 0)
                     {
                         draggedOutputReroutes.Clear();

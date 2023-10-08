@@ -30,10 +30,15 @@ namespace XNodeEditor
         {
             Event e = Event.current;
             Matrix4x4 m = GUI.matrix;
-            if (graph == null && !graphFindAttempted)
+            if (graph == null)
             {
-                graphFindAttempted = true;
-                if (!OnOpen(graphInstanceID, 0))
+                if (!graphFindAttempted && !OnOpen(graphInstanceID, 0))
+                {
+                    graphFindAttempted = true;
+                    return;
+                }
+
+                if (graphFindAttempted)
                 {
                     return;
                 }

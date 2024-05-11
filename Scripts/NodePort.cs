@@ -231,6 +231,7 @@ namespace XNode {
             for (int i = 0; i < connections.Count; i++) {
                 NodePort port = GetConnection(i);
                 if (port != null) result.Add(port);
+                else i--;
             }
             return result;
         }

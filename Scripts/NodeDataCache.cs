@@ -9,6 +9,7 @@ namespace XNode {
         private static PortDataCache portDataCache;
         private static Dictionary<System.Type, Dictionary<string, string>> formerlySerializedAsCache;
         private static Dictionary<System.Type, string> typeQualifiedNameCache;
+        private static List<NodePort> dynamicListPorts;
         private static bool Initialized { get { return portDataCache != null; } }
 
         public static string GetTypeQualifiedName(System.Type type) {
@@ -26,18 +27,17 @@ namespace XNode {
         public static void UpdatePorts(Node node, Dictionary<string, NodePort> ports) {
             if (!Initialized) BuildCache();
 
-            Dictionary<string, List<NodePort>> removedPorts = new Dictionary<string, List<NodePort>>();
             System.Type nodeType = node.GetType();
+            Dictionary<string, List<NodePort>> removedPorts = null;
 
             Dictionary<string, string> formerlySerializedAs = null;
             if (formerlySerializedAsCache != null) formerlySerializedAsCache.TryGetValue(nodeType, out formerlySerializedAs);
 
-            List<NodePort> dynamicListPorts = new List<NodePort>();
 
             Dictionary<string, NodePort> staticPorts;
             if (!portDataCache.TryGetValue(nodeType, out staticPorts)) {
-                 staticPorts = new Dictionary<string, NodePort>();
-            }            
+                staticPorts = new Dictionary<string, NodePort>();
+            }
 
             // Cleanup port dict - Remove nonexisting static ports - update static port types
             // AND update dynamic ports (albeit only those in lists) too, in order to enforce proper serialisation.
@@ -49,7 +49,10 @@ namespace XNode {
                     // If port exists but with wrong settings, remove it. Re-add it later.
                     if (port.IsDynamic || port.direction != staticPort.direction || port.connectionType != staticPort.connectionType || port.typeConstraint != staticPort.typeConstraint) {
                         // If port is not dynamic and direction hasn't changed, add it to the list so we can try reconnecting the ports connections.
-                        if (!port.IsDynamic && port.direction == staticPort.direction) removedPorts.Add(port.fieldName, port.GetConnections());
+                        if (!port.IsDynamic && port.direction == staticPort.direction) {
+                            if (removedPorts == null) removedPorts = new Dictionary<string, List<NodePort>>();
+                            removedPorts.Add(port.fieldName, port.GetConnections());
+                        }
                         port.ClearConnections();
                         ports.Remove(port.fieldName);
                     } else port.ValueType = staticPort.ValueType;
@@ -59,7 +62,10 @@ namespace XNode {
                     //See if the field is tagged with FormerlySerializedAs, if so add the port with its new field name to removedPorts
                     // so it can be reconnected in missing ports stage.
                     string newName = null;
-                    if (formerlySerializedAs != null && formerlySerializedAs.TryGetValue(port.fieldName, out newName)) removedPorts.Add(newName, port.GetConnections());
+                    if (formerlySerializedAs != null && formerlySerializedAs.TryGetValue(port.fieldName, out newName)) {
+                        if (removedPorts == null) removedPorts = new Dictionary<string, List<NodePort>>();
+                        removedPorts.Add(newName, port.GetConnections());
+                    }
 
                     port.ClearConnections();
                     ports.Remove(port.fieldName);
@@ -69,13 +75,14 @@ namespace XNode {
                     dynamicListPorts.Add(port);
                 }
             }
+
             // Add missing ports
             foreach (NodePort staticPort in staticPorts.Values) {
                 if (!ports.ContainsKey(staticPort.fieldName)) {
                     NodePort port = new NodePort(staticPort, node);
                     //If we just removed the port, try re-adding the connections
                     List<NodePort> reconnectConnections;
-                    if (removedPorts.TryGetValue(staticPort.fieldName, out reconnectConnections)) {
+                    if (removedPorts != null && removedPorts.TryGetValue(staticPort.fieldName, out reconnectConnections)) {
                         for (int i = 0; i < reconnectConnections.Count; i++) {
                             NodePort connection = reconnectConnections[i];
                             if (connection == null) continue;
@@ -102,6 +109,8 @@ namespace XNode {
                 listPort.connectionType = backingPort.connectionType;
                 listPort.typeConstraint = backingPort.typeConstraint;
             }
+
+            dynamicListPorts.Clear();
         }
 
         /// <summary>
@@ -124,10 +133,11 @@ namespace XNode {
             // Ports flagged as "dynamicPortList = true" end up having a "backing port" and a name with an index, but we have
             // no guarantee that a dynamic port called "output 0" is an element in a list backed by a static "output" port.
             // Thus, we need to check for attributes... (but at least we don't need to look at all fields this time)
-            string[] fieldNameParts = port.fieldName.Split(' ');
-            if (fieldNameParts.Length != 2) return false;
+            int fieldNameSpaceIndex = port.fieldName.IndexOf(' ');
+            if (fieldNameSpaceIndex < 0) return false;
+            string fieldNamePart = port.fieldName.Substring(0, fieldNameSpaceIndex);
 
-            FieldInfo backingPortInfo = port.node.GetType().GetField(fieldNameParts[0]);
+            FieldInfo backingPortInfo = port.node.GetType().GetField(fieldNamePart);
             if (backingPortInfo == null) return false;
 
             object[] attribs = backingPortInfo.GetCustomAttributes(true);
@@ -142,6 +152,11 @@ namespace XNode {
         /// <summary> Cache node types </summary>
         private static void BuildCache() {
             portDataCache = new PortDataCache();
+            dynamicListPorts = new List<NodePort>();
+
+#if UNITY_2019_2_OR_NEWER && UNITY_EDITOR
+            List<System.Type> nodeTypes = UnityEditor.TypeCache.GetTypesDerivedFrom<Node>().Where(type => !type.IsAbstract).ToList();
+#else
             System.Type baseType = typeof(Node);
             List<System.Type> nodeTypes = new List<System.Type>();
             System.Reflection.Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
@@ -166,6 +181,7 @@ namespace XNode {
                         break;
                 }
             }
+#endif
 
             for (int i = 0; i < nodeTypes.Count; i++) {
                 CachePorts(nodeTypes[i]);
@@ -206,8 +222,8 @@ namespace XNode {
                 if (inputAttrib != null && outputAttrib != null) Debug.LogError("Field " + fieldInfo[i].Name + " of type " + nodeType.FullName + " cannot be both input and output.");
                 else {
                     if (!portDataCache.ContainsKey(nodeType)) portDataCache.Add(nodeType, new Dictionary<string, NodePort>());
-                     NodePort port = new NodePort(fieldInfo[i]);
-                     portDataCache[nodeType].Add(port.fieldName, port);
+                    NodePort port = new NodePort(fieldInfo[i]);
+                    portDataCache[nodeType].Add(port.fieldName, port);
                 }
 
                 if (formerlySerializedAsAttribute != null) {
@@ -220,7 +236,6 @@ namespace XNode {
             }
         }
 
-        [System.Serializable]
         private class PortDataCache : Dictionary<System.Type, Dictionary<string, NodePort>> { }
     }
 }

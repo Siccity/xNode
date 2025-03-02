@@ -250,12 +250,15 @@ namespace XNode {
 #endregion
 
         /// <summary> Called after a connection between two <see cref="NodePort"/>s is created </summary>
-        /// <param name="from">Output</param> <param name="to">Input</param>
-        public virtual void OnCreateConnection(NodePort from, NodePort to) { }
+        /// <param name="from">Output</param>
+        /// <param name="to">Input</param>
+        /// <param name="swapping">Creating while swapping or not?</param>
+        public virtual void OnCreateConnection(NodePort from, NodePort to, bool swapping) { }
 
         /// <summary> Called after a connection is removed from this port </summary>
         /// <param name="port">Output or Input</param>
-        public virtual void OnRemoveConnection(NodePort port) { }
+        /// <param name="swapping">Removing while swapping or not?</param>
+        public virtual void OnRemoveConnection(NodePort port, bool swapping) { }
 
         /// <summary> Disconnect everything from this node </summary>
         public void ClearConnections() {

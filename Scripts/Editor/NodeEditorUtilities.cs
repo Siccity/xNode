@@ -128,7 +128,7 @@ namespace XNodeEditor {
         }
 
         /// <summary>
-        /// Looking for ports with value Type compatible with a given type. 
+        /// Looking for ports with value Type compatible with a given type.
         /// </summary>
         /// <param name="nodeType">Node to search</param>
         /// <param name="compatibleType">Type to find compatiblities</param>
@@ -274,8 +274,8 @@ namespace XNodeEditor {
         }
 
         /// Inherits from EndNameAction, must override EndNameAction.Action
-        public class DoCreateCodeFile : UnityEditor.ProjectWindowCallback.EndNameEditAction {
-            public override void Action(int instanceId, string pathName, string resourceFile) {
+        public class DoCreateCodeFile : UnityEditor.ProjectWindowCallback.AssetCreationEndAction {
+            public override void Action(EntityId entityId, string pathName, string resourceFile) {
                 Object o = CreateScript(pathName, resourceFile);
                 ProjectWindowUtil.ShowCreatedAsset(o);
             }

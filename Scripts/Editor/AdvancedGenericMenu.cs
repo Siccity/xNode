@@ -75,7 +75,7 @@ namespace XNodeEditor
             }
             else
             {
-                item = currentRoot.children.OfType<AdvancedGenericMenuItem>().FirstOrDefault( x => x.name == paths[0] );
+                item = currentRoot.childList.OfType<AdvancedGenericMenuItem>().FirstOrDefault( x => x.name == paths[0] );
                 if ( item == null )
                     currentRoot.AddChild( item = new AdvancedGenericMenuItem( paths[0] ) );
             }

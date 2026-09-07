@@ -265,7 +265,7 @@ namespace XNodeEditor {
 
         public static void CreateFromTemplate(string initialName, string templatePath) {
             ProjectWindowUtil.StartNameEditingIfProjectWindowExists(
-                0,
+                EntityId.None,
                 ScriptableObject.CreateInstance<DoCreateCodeFile>(),
                 initialName,
                 scriptIcon,

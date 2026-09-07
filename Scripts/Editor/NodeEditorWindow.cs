@@ -81,10 +81,10 @@ namespace XNodeEditor {
                 graphEditor.OnWindowFocus();
                 if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             }
-            
+
             dragThreshold = Math.Max(1f, Screen.width / 1000f);
         }
-        
+
         void OnLostFocus() {
             if (graphEditor != null) graphEditor.OnWindowFocusLost();
         }
@@ -186,8 +186,8 @@ namespace XNodeEditor {
         }
 
         [OnOpenAsset(0)]
-        public static bool OnOpen(int instanceID, int line) {
-            XNode.NodeGraph nodeGraph = EditorUtility.InstanceIDToObject(instanceID) as XNode.NodeGraph;
+        public static bool OnOpen(EntityId id, int line) {
+            XNode.NodeGraph nodeGraph = EditorUtility.EntityIdToObject(id) as XNode.NodeGraph;
             if (nodeGraph != null) {
                 Open(nodeGraph);
                 return true;
